@@ -1,0 +1,2290 @@
+from io import BytesIO
+from lightgbm import LGBMClassifier
+from PIL import Image
+from scipy.stats import chi2_contingency, mannwhitneyu
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from xgboost import XGBClassifier
+import base64
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import pandas as pd
+import pickle
+import plotly.express as px
+import plotly.graph_objects as go
+import prince
+import requests
+import seaborn as sns
+import streamlit as st
+
+
+def get_img_with_href(img_url, target_url, as_banner=False):
+    # Extraire l'ID du fichier de l'URL Google Drive
+    if "drive.google.com" in img_url and "/d/" in img_url:
+        file_id = img_url.split("/d/")[1].split("/")[0]
+        img_url = f"https://drive.google.com/uc?export=view&id={file_id}"
+
+    try:
+        # Télécharger l'image avec un timeout explicite
+        response = requests.get(img_url, timeout=10)
+        response.raise_for_status()
+
+        # Vérifier la taille du contenu
+        if len(response.content) == 0:
+            raise Exception("Contenu vide téléchargé")
+
+        # Tenter d'ouvrir l'image avec différents formats
+        img = Image.open(BytesIO(response.content))
+
+        # Convertir l'image en base64
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        # AMÉLIORATION: Style pour que l'image s'adapte correctement au conteneur
+        if as_banner:
+            style = 'style="width:100%;height:auto;display:block;object-fit:cover;border-radius:10px;"'
+        else:
+            style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;"'
+
+
+        # Créer le HTML avec un div conteneur à dimensionnement fixe
+        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
+
+        # HTML amélioré avec div conteneur pour mieux contrôler les dimensions
+        html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/png;base64,{img_str}" {style}></a></div>'
+        return html_code
+    except Exception as e:
+        st.error(f"Erreur lors du chargement de l'image: {str(e)}")
+        # Image de remplacement
+        st.markdown('<div style="text-align: center; margin: 30px; padding: 50px; background-color: #f0f2f6; border-radius: 10px;"><p style="font-size: 1.2rem;">Image non disponible - Veuillez vérifier l\'URL</p></div>', unsafe_allow_html=True)
+        return ""
+
+
+
+    except Exception as e:
+        st.error(f"Erreur lors du chargement de l'image: {str(e)}")
+        # Image de remplacement
+        st.markdown("""
+        <div style="text-align: center; margin: 30px; padding: 50px; background-color: #f0f2f6; border-radius: 10px;">
+            <p style="font-size: 1.2rem;">Image non disponible - Veuillez vérifier l'URL</p>
+        </div>
+        """, unsafe_allow_html=True)
+        return ""
+
+def get_question_text(question_number):
+    questions_text = {
+        1: "Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+        2: "Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+        3: "Je trouve facile de faire plusieurs choses en même temps.",
+        4: "S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+        5: "Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+        6: "Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+        7: "Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+        8: "J'aime collecter des informations sur des catégories de choses.",
+        9: "Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+        10: "J'ai du mal à comprendre les intentions des gens."
+    }
+    return questions_text.get(question_number, "Question non définie")
+
+# Configuration de la page
+st.set_page_config(
+    page_title="Dépistage Autisme",
+    page_icon="🧩",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+def set_custom_theme():
+    custom_theme = """
+    <style>
+    /* Variables globales */
+    :root {
+        --primary: #3498db;
+        --secondary: #2ecc71;
+        --background: #f0f2f6;
+        --card-bg: white;
+        --text: #2c3e50;
+    }
+
+    /* Styles généraux du conteneur */
+    [data-testid="stAppViewContainer"] {
+        background-color: var(--background);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--text);
+        font-weight: 600;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Correction de la navigation - SOLUTION PRINCIPALE */
+    [data-testid="stSidebar"] {
+        background-color: #f5f7fa;
+        border-right: 2px solid var(--primary);
+        padding-top: 2rem;
+        width: 250px !important; /* Largeur augmentée */
+    }
+    [data-testid="stSidebar"] label {
+    margin-bottom: 14px !important;
+    padding: 8px 12px !important;
+    border-radius: 8px;
+    transition: background 0.2s;
+    }
+    [data-testid="stSidebar"] label:hover {
+        background: #eaf2f8 !important;
+    }
+    .sidebar-title {
+        margin-bottom: 2rem !important;
+    }
+
+
+    /* Assurer que le contenu est correctement dimensionné */
+    [data-testid="stSidebarContent"] {
+        width: 100%;
+        overflow: auto;
+        background-color: #f5f7fa !important;
+    }
+
+    /* Amélioration du texte dans la sidebar */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+    }
+
+    /* Amélioration spécifique pour les expanders */
+    [data-testid="stSidebar"] .streamlit-expanderHeader {
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        hyphens: auto !important;
+        padding-right: 10px !important;
+    }
+
+    /* Titre de la sidebar plus visible */
+    .sidebar-title {
+        font-size: 1.5rem;
+        color: #3498db;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Amélioration pour le menu de radiobuttons */
+    [data-testid="stSidebar"] div[role="radiogroup"] label {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 5px !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.4 !important;
+        padding: 5px 10px !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .sidebar .sidebar-content {
+        background-color: #f5f7fa !important;
+        border-right: 2px solid #3498db !important;
+    }
+
+    .sidebar .sidebar-content .streamlit-expanderHeader,
+    .sidebar .sidebar-content label,
+    .sidebar .sidebar-content div,
+    .sidebar .sidebar-content p,
+    .sidebar .sidebar-content span {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+    }
+
+    .sidebar .sidebar-content label {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+    }
+
+    /* Styles des cartes et conteneurs */
+    .header-container {
+        display: flex;
+        align-items: center;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        padding: 1.5rem;
+        border-radius: 10px;
+        color: white;
+        margin-bottom: 1.5rem;
+    }
+
+    .app-title {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-left: 1rem;
+    }
+
+    .puzzle-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 2.2rem;
+        color: var(--primary);
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .puzzle-icon {
+        font-size: 2.2rem;
+    }
+
+    .main .block-container {
+        padding-top: 0.7rem !important;
+        padding-bottom: 0.7rem !important;
+    }
+
+    [data-testid="stVerticalBlock"] {
+        gap: 0.5rem !important;
+    }
+
+    .element-container {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .css-1544g2n.e1fqkh3o4 {
+        padding-top: 2rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+
+    /* Styles des info-cards */
+    .info-card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 1rem !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-top: 5px solid var(--primary);
+        margin-bottom: 10px !important;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-title {
+        color: var(--primary);
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 0.5rem;
+    }
+
+    /* Styles des questions et formulaires */
+    .question-container {
+        background-color: white;
+        padding: 12px 15px !important;
+        border-radius: 12px;
+        margin-bottom: 12px !important;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        border-left: 4px solid var(--primary);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .question-container:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+
+    .questionnaire-title {
+        color: var(--primary);
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    /* Styles des radiobuttons */
+    div[role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px !important;
+        margin-top: 10px;
+        margin-bottom: 15px !important;
+    }
+
+    div[role="radiogroup"] label {
+    color: #2c3e50 !important;  /* Texte foncé */
+    padding-right: 15px !important;
+    margin-bottom: 5px !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.4 !important;
+    padding: 5px 10px !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+
+    div[role="radiogroup"] label > div:first-child {
+        display: none !important;
+    }
+
+    input[type="radio"] + div {
+        background: #f5f7fa !important;
+        color: var(--text);
+        border-radius: 38px !important;
+        padding: 10px 20px !important;
+        border: 1px solid #dfe4ea;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+
+    input[type="radio"] + div:hover {
+        background: #e9f0ff !important;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+
+    /* Styles des boutons et CTA */
+    .cta-button {
+        background: linear-gradient(135deg, var(--primary), #2980b9);
+        color: white;
+        padding: 0.9rem 1.5rem;
+        border-radius: 30px;
+        font-weight: bold;
+        text-align: center;
+        display: inline-block;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        width: 80%;
+    }
+
+    .cta-button:hover {
+        background: linear-gradient(135deg, #2980b9, var(--primary));
+        box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .stButton > button {
+        width: 100%;
+        padding: 0.8rem 1rem !important;
+        font-size: 1.1rem !important;
+        margin-top: 1rem;
+    }
+
+    /* Styles des expanders et tabs */
+    .streamlit-expanderHeader {
+        background-color: #f5f7fa;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 15px !important;
+        border-left: 4px solid var(--primary);
+        transition: all 0.2s ease;
+    }
+
+    .streamlit-expanderHeader:hover {
+        background-color: #eef1f5;
+        transform: translateX(2px);
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 40px;
+        white-space: pre-wrap;
+        background-color: #f5f7fa;
+        border-radius: 5px 5px 0 0;
+        gap: 1px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: var(--primary) !important;
+        color: white !important;
+    }
+
+    /* Styles divers */
+    [data-testid="stDataFrame"] {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    [data-testid="stMetricValue"] {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    [data-testid="stMetricDelta"] {
+        font-size: 0.9rem;
+    }
+
+    div[data-baseweb="select"] > div {
+        border-radius: 8px;
+        background-color: white;
+        transition: all 0.2s ease;
+    }
+
+    div[data-baseweb="select"] > div:hover {
+        border-color: var(--primary);
+    }
+
+    pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        overflow-x: auto;
+        max-width: 100%;
+        font-size: 0.9rem;
+        color: #2c3e50;
+    }
+
+    .structure-donnees pre {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        border: 1px solid #d0d0d0;
+        line-height: 1.6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .footer {
+        background-color: #f0f2f6;
+        padding: 1rem;
+        text-align: center;
+        border-top: 2px solid #3498db;
+        margin-top: 2rem;
+        border-radius: 10px;
+    }
+
+    .sidebar .sidebar-content .streamlit-expanderHeader {
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        word-wrap: break-word !important;
+        hyphens: auto !important;
+        padding-right: 10px !important;
+    }
+
+    .sidebar .sidebar-content label {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+    }
+
+    .sidebar .sidebar-content div[role="radiogroup"] label {
+        padding-right: 15px !important;
+        margin-bottom: 5px !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
+        width: 320px;
+        min-width: 320px;
+    }
+    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
+        width: 320px;
+        min-width: 320px;
+    }
+
+
+    [data-testid="stSidebar"] .css-1wvake5,
+    [data-testid="stSidebar"] .css-1v0mbdj,
+    [data-testid="stSidebar"] label {
+        white-space: normal !important;
+        word-break: break-word !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
+        padding: 8px 14px !important;
+        margin-bottom: 10px !important;
+        border-radius: 8px;
+        color: #2c3e50 !important;
+        background: none !important;
+        transition: background 0.2s;
+        display: block;
+    }
+
+
+    [data-testid="stSidebar"] .css-1wvake5[aria-checked="true"],
+    [data-testid="stSidebar"] .css-1v0mbdj[aria-checked="true"],
+    [data-testid="stSidebar"] label[data-selected="true"] {
+        background: linear-gradient(90deg, #eaf6fb 60%, #e0f7fa 100%) !important;
+        color: #0077b6 !important;
+    }
+
+
+    [data-testid="stSidebar"] svg {
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    </style>
+    """
+    st.markdown(custom_theme, unsafe_allow_html=True)
+
+
+
+set_custom_theme()
+
+# Chargement du dataset
+@st.cache_data(ttl=3600)
+def load_dataset():
+    try:
+        # Nouveaux IDs des datasets
+        ds1_id = '1ai1QlLzn0uo-enw4IzC53jJ8qoPc845G'  # dataset 1
+        ds2_id = '1MOEhPxMNZH8LvXahvYAKiVFb9t8vAxaE'  # dataset 2
+        ds3_id = '12B-scaR0TF7TuJzelIqmlxXDjnew67-K'  # dataset 3
+        ds4_id = '1U9buLTKR_XuLWu9l3SOgvF6d9cS_YTFO'  # dataset 4
+        ds5_id = '1NdXYppnmiheLFtvrdRHDk-W-zHKO0wYp'  # dataset 5
+
+        final_id = '1mm6sRacDmoL941POmydQgzdVAi9lFPit'  # Dataset final
+
+        # Chargement du dataset principal (dataset final)
+        url_final = f'https://drive.google.com/uc?export=download&id={final_id}'
+        df = pd.read_csv(url_final)
+
+
+        # Nettoyage et préparation des données
+        if 'Unnamed: 0' in df.columns:
+            df = df.drop(columns=['Unnamed: 0'])
+        if 'TSA' in df.columns:
+            df['TSA'] = df['TSA'].str.title()
+        elif 'tsa' in df.columns:
+            df.rename(columns={'tsa': 'TSA'}, inplace=True)
+            df['TSA'] = df['TSA'].str.title()
+        if 'Genre' in df.columns:
+            df['Genre'] = df['Genre'].str.capitalize()
+        elif 'gender' in df.columns:
+            df.rename(columns={'gender': 'Genre'}, inplace=True)
+            df['Genre'] = df['Genre'].str.capitalize()
+
+        # Calcul du score AQ-10
+        aq_columns = [col for col in df.columns if col.startswith('A') and col[1:].isdigit()]
+        if aq_columns:
+            df['Score_A10'] = df[aq_columns].sum(axis=1)
+
+
+        if 'Statut_testeur' in df.columns:
+            df['Statut_testeur'].fillna('Famille', inplace=True)
+        else:
+            df['Statut_testeur'] = 'Famille'
+
+
+        df_stats = {
+            'mean_by_tsa': df.groupby('TSA').mean(numeric_only=True) if 'TSA' in df.columns else pd.DataFrame(),
+            'count_by_tsa': df.groupby('TSA').count() if 'TSA' in df.columns else pd.DataFrame(),
+            'categorical_cols': df.select_dtypes(include=['object']).columns.tolist(),
+            'numeric_cols': df.select_dtypes(exclude=['object']).columns.tolist()
+        }
+
+        # Chargement des datasets individuels
+        url_ds1 = f'https://drive.google.com/uc?export=download&id={ds1_id}'
+        url_ds2 = f'https://drive.google.com/uc?export=download&id={ds2_id}'
+        url_ds3 = f'https://drive.google.com/uc?export=download&id={ds3_id}'
+        url_ds4 = f'https://drive.google.com/uc?export=download&id={ds4_id}'
+        url_ds5 = f'https://drive.google.com/uc?export=download&id={ds5_id}'
+
+        df_ds1 = pd.read_csv(url_ds1)
+        df_ds2 = pd.read_csv(url_ds2)
+        df_ds3 = pd.read_csv(url_ds3)
+        df_ds4 = pd.read_csv(url_ds4)
+        df_ds5 = pd.read_csv(url_ds5)
+
+        return df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats
+    except Exception as e:
+        st.error(f"Erreur lors du chargement: {str(e)}")
+
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), {}
+
+
+# Fonction de cache pour les visualisations
+@st.cache_data
+def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histogram', title=None):
+    """Crée une visualisation Plotly avec mise en cache"""
+
+    if color and color not in df.columns:
+        color = None
+
+
+    is_categorical_aq = x and isinstance(x, str) and x.startswith('A') and x[1:].isdigit() and len(x) <= 3
+
+    categorical_palette = {0: "#3498db", 1: "#2ecc71"}
+
+    try:
+        if is_categorical_aq and kind in ['histogram', 'bar']:
+
+            counts = df[x].value_counts().reset_index()
+            counts.columns = [x, 'count']
+            fig = px.bar(counts, x=x, y='count',
+                      color=x,
+                      color_discrete_map=categorical_palette,
+                      title=f"Distribution de {x} (catégorielle)")
+            fig.update_layout(xaxis_title=f"Valeur de {x}", yaxis_title="Nombre d'occurrences")
+        elif kind == 'histogram':
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette,
+                            marginal="box", nbins=20)
+        elif kind == 'box':
+            fig = px.box(df, x=x, y=y, color=color, color_discrete_map=palette,
+                       points="all", notched=True)
+        elif kind == 'bar':
+            fig = px.bar(df, x=x, y=y, color=color, color_discrete_map=palette)
+        elif kind == 'scatter':
+            fig = px.scatter(df, x=x, y=y, color=color, color_discrete_map=palette)
+        elif kind == 'pie':
+
+            if names and isinstance(names, str) and names.startswith('A') and names[1:].isdigit() and len(names) <= 3:
+
+                values_counts = df[names].value_counts().reset_index()
+                values_counts.columns = [names, 'count']
+                fig = px.pie(values_counts, values='count', names=names,
+                          color=names,
+                          color_discrete_map=categorical_palette,
+                          title=f"Répartition {names}")
+            else:
+                fig = px.pie(df, names=names, color=color, color_discrete_map=palette)
+        elif kind == 'violin':
+            fig = px.violin(df, x=x, y=y, color=color, color_discrete_map=palette, box=True)
+        elif kind == 'count':
+
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette,
+                            title=f"Comptage de {x}")
+            fig.update_layout(yaxis_title="Nombre d'occurrences")
+
+        fig.update_layout(
+            title=title,
+            height=500,
+            margin=dict(l=20, r=20, t=40, b=20),
+            template="simple_white"
+        )
+
+        return fig
+    except Exception as e:
+        st.error(f"Erreur lors de la création du graphique: {str(e)}")
+        return None
+
+
+if 'df' not in st.session_state:
+    st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
+
+df = st.session_state.df
+df_ds1 = st.session_state.df_ds1
+df_ds2 = st.session_state.df_ds2
+df_ds3 = st.session_state.df_ds3
+df_ds4 = st.session_state.df_ds4
+df_ds5 = st.session_state.df_ds5
+df_stats = st.session_state.df_stats
+
+
+if "aq10_total" not in st.session_state:
+    st.session_state.aq10_total = 0
+
+# Titre de la sidebar amélioré
+st.sidebar.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
+
+with st.sidebar:
+
+  # Navigation avec emojis
+    pages = [
+        "🏠 Accueil",
+        "🔍 Exploration des Données",
+        "🧠 Analyse ML",
+        "📝 Test AQ-10",
+        "🤖 Prédiction par IA",
+        "📚 Documentation",
+        "ℹ️ À propos"
+    ]
+    selection = st.sidebar.radio("Choisissez un outil :", pages)
+
+# Palette de couleurs cohérente pour toutes les visualisations
+palette = {
+    "Yes": "#3498db",
+    "No": "#2ecc71",
+    "Unknown": "#95a5a6"
+}
+
+if "🏠 Accueil" in selection:
+    current_page = "Accueil"
+
+    # En-tête principal avec l'image cliquable
+    st.markdown("""
+    <div class="header-container" style="margin-bottom: 30px;">
+        <span style="font-size: 3rem;">🧩</span>
+        <h1 class="app-title">Dépistage et Prédiction de l'Autisme</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Image Ghibli - URL corrigée
+    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+
+    st.markdown("""
+
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
+        <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
+        <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
+            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre Autistique.
+        </h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 3 cartes d'information avec colonnes Streamlit
+    col1, col2, col3 = st.columns(3, gap="large")
+
+    with col1:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">📝 Test AQ-10</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
+                <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=📝 Test AQ-10" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">🤖 Prédiction IA</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
+                <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Découvrir l'IA</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">🔍 Analyses</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
+                <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=🔍 Exploration des Données" class="cta-button" style="display: block; margin: 0 auto;">Explorer les données</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Section d'avertissement
+    st.markdown("""
+    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
+        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
+        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle.
+        Consultez toujours un spécialiste pour une évaluation complète.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Section Contexte du projet
+    st.markdown("""
+    <h2 style="border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 40px;">
+        <span style="font-size: 1.5rem;">🔬</span> Contexte du projet
+    </h2>
+
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA),
+    représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie.
+    Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
+    </p>
+
+    <h3 style="color: #3498db; margin-top: 25px;">
+        <span style="font-size: 1.2rem;">🧠</span> Caractéristiques des TSA
+    </h3>
+
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les manifestations des TSA sont extrêmement variables d'une personne à l'autre, créant un véritable "spectre" de présentations cliniques.
+    Chaque personne autiste présente une combinaison unique de forces et de difficultés. Les particularités sensorielles
+    (hypersensibilité ou hyposensibilité aux stimuli) font désormais partie intégrante des critères diagnostiques.
+    </p>
+
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    La reconnaissance des TSA s'est améliorée ces dernières années mais le diagnostic peut parfois être posé tardivement,
+    notamment chez les personnes sans déficience intellectuelle ou chez celles qui ont développé des stratégies de compensation.
+    Un accompagnement adapté, tenant compte des spécificités de chaque personne est essentiel pour favoriser l'inclusion sociale et
+    l'épanouissement de la personne.
+    </p>
+    """, unsafe_allow_html=True)
+
+    # Section "À qui s'adresse ce projet?"
+    st.markdown("""
+    ### À qui s'adresse ce projet?
+    """)
+
+    # Section Contexte Clinique des TSA - Titre et introduction
+    st.markdown("""
+    <h2 style="border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 40px;">
+        <span style="font-size: 1.5rem;">🏥</span> Contexte Clinique des TSA
+    </h2>
+
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Selon les classifications récentes comme le DSM-5, les TSA sont désormais définis selon une dyade autistique,
+    remplaçant l'ancienne triade. Cette dyade comprend deux catégories de critères diagnostiques:
+    </p>
+    """, unsafe_allow_html=True)
+
+    # Section des deux catégories - Utilisation de colonnes Streamlit au lieu de div avec grid
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🗣️</span> Déficits de communication</h4>
+            <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔄</span> Comportements restreints et répétitifs</h4>
+            <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Texte entre les deux sections
+    st.markdown("""
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner)
+    au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire:
+    </p>
+    """, unsafe_allow_html=True)
+
+    # Section des trois niveaux - Utilisation de colonnes Streamlit
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("""
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2ecc71;">
+            <h4 style="color: #2ecc71; margin-top: 0;">Niveau 1</h4>
+            <p>Nécessite un soutien</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+        <div style="background-color: #eaf2f8; padding: 15px; border-radius: 10px; border-left: 4px solid #3498db;">
+            <h4 style="color: #3498db; margin-top: 0;">Niveau 2</h4>
+            <p>Nécessite un soutien important</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("""
+        <div style="background-color: #f5eef8; padding: 15px; border-radius: 10px; border-left: 4px solid #9b59b6;">
+            <h4 style="color: #9b59b6; margin-top: 0;">Niveau 3</h4>
+            <p>Nécessite un soutien très important</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Section prévalence
+    st.markdown("""
+    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
+        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">📊</span> Prévalence</h4>
+        <p style="font-size: 1.05rem; line-height: 1.6;">
+        La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette
+        entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion
+        plus importante chez les garçons, avec un ratio d'environ 4:1.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+
+
+elif "🔍 Exploration des Données" in selection:
+    # Initialisation des états d'expanders
+    if 'expanders_initialized' not in st.session_state:
+        st.session_state.expanders_initialized = {
+            'structure': True,
+            'valeurs_manquantes': True,
+            'pipeline': True,
+            'variables_cles': True,
+            'questionnaire': True,
+            'composite': True,
+            'statistiques': True,
+            'correlation': True,
+            'famd': True
+        }
+
+    # En-tête modernisé
+    st.markdown("""
+    <div class="header-container">
+        <span style="font-size:2.5rem">🔍</span>
+        <h1 class="app-title">Exploration des Données TSA</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 1. Structure des données
+    with st.expander("📂 Structure des Données", expanded=st.session_state.expanders_initialized['structure']):
+        st.markdown("""
+        <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #3498db;">
+            <h4 style="color: #2c3e50; margin-top: 0;">Description des jeux de données utilisés</h4>
+            <ul style="margin-top: 10px;">
+                <li><strong>Dataset Final :</strong> 5049 sujets consolidés</li>
+                <li><strong>Variables :</strong> 21 variables dont 10 questions AQ-10</li>
+                <li><strong>Période :</strong> Données collectées entre 2018 et 2023</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        tab_main, tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "Dataset Final", "Dataset 1", "Dataset 2", "Dataset 3", "Dataset 4", "Dataset 5"
+        ])
+        with tab_main:
+            st.caption("Dataset Final")
+            st.dataframe(df.head(5), use_container_width=True)
+        with tab1:
+            st.caption("Dataset 1")
+            st.dataframe(df_ds1.head(5), use_container_width=True)
+        with tab2:
+            st.caption("Dataset 2")
+            st.dataframe(df_ds2.head(5), use_container_width=True)
+        with tab3:
+            st.caption("Dataset 3")
+            st.dataframe(df_ds3.head(5), use_container_width=True)
+        with tab4:
+            st.caption("Dataset 4")
+            st.dataframe(df_ds4.head(5), use_container_width=True)
+        with tab5:
+            st.caption("Dataset 5")
+            st.dataframe(df_ds5.head(5), use_container_width=True)
+
+    # 2. Analyse des valeurs manquantes
+    with st.expander("📉 Analyse des Valeurs Manquantes", expanded=st.session_state.expanders_initialized['valeurs_manquantes']):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse des Valeurs Manquantes</h3>
+            <p style="color: #7f8c8d;">Visualisation et quantification des données manquantes dans le jeu de données.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        missing_percent = (df.isnull().sum() / len(df)) * 100
+        missing_info = pd.DataFrame({
+            'Colonne': missing_percent.index,
+            'Pourcentage': missing_percent.values
+        })
+        missing_info = missing_info[missing_info['Pourcentage'] > 0].sort_values('Pourcentage', ascending=False)
+        if not missing_info.empty:
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                fig = px.bar(
+                    missing_info,
+                    x='Pourcentage',
+                    y='Colonne',
+                    orientation='h',
+                    title="Pourcentage de valeurs manquantes par colonne",
+                    color='Pourcentage',
+                    color_continuous_scale=px.colors.sequential.Blues,
+                    text='Pourcentage'
+                )
+                fig.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+                fig.update_layout(
+                    height=400,
+                    xaxis_title="Pourcentage (%)",
+                    yaxis_title="",
+                    coloraxis_showscale=False,
+                    margin=dict(l=20, r=20, t=40, b=20),
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            with col2:
+                st.metric(
+                    "Nombre de colonnes avec valeurs manquantes",
+                    missing_info.shape[0],
+                    delta=f"{missing_info.shape[0]/df.shape[1]:.1%} des colonnes"
+                )
+                st.markdown("### Détail des valeurs manquantes")
+                st.dataframe(missing_info, use_container_width=True)
+                total_missing = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
+                st.info(f"Taux global de données manquantes : {total_missing:.2f}%")
+        else:
+            st.success("✅ Aucune valeur manquante détectée dans le jeu de données.")
+
+    # 3. Pipeline de nettoyage
+    with st.expander("🧼 Pipeline de Nettoyage", expanded=st.session_state.expanders_initialized['pipeline']):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
+            <p style="color: #7f8c8d;">Processus automatisé pour préparer les données à l'analyse.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown("""
+            <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color: #3498db; margin-top: 0;">Étapes de Transformation</h4>
+                <ol style="padding-left: 20px; color: #2c3e50;">
+                    <li><b>Uniformisation</b> des colonnes</li>
+                    <li><b>Typage</b> des variables</li>
+                    <li><b>Gestion</b> des valeurs manquantes</li>
+                    <li><b>Encodage</b> catégoriel</li>
+                    <li><b>Normalisation</b> des échelles</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            avant_tab, apres_tab = st.tabs(["Avant Nettoyage", "Après Nettoyage"])
+            with avant_tab:
+                raw_data_sample = pd.DataFrame({
+                    'A10_Score': [7, 5, None, 3],
+                    'Age_Years': [29, None, 'unknown', 383],
+                    'asd_traits': ['yes', 'no', 'no', 'yes']
+                })
+                st.dataframe(raw_data_sample.style.highlight_null(color='#ffcdd2'), use_container_width=True)
+            with apres_tab:
+                clean_data_sample = pd.DataFrame({
+                    'A10': [7, 5, 4, 3],
+                    'Age': [29, 35, 42, 38],
+                    'TSA': ['Yes', 'No', 'No', 'Yes'],
+                    'Statut_testeur': ['Famille', 'Famille', 'Famille', 'Famille']
+                })
+                st.dataframe(clean_data_sample, use_container_width=True)
+                metrics_col1, metrics_col2 = st.columns(2)
+                with metrics_col1:
+                    st.metric("Réduction des valeurs manquantes", "92%", "10% → 0.8%")
+                with metrics_col2:
+                    st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
+
+    # 4. Distribution des variables clés
+    with st.expander("📊 Distribution des Variables Clés", expanded=st.session_state.expanders_initialized['variables_cles']):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Distribution des Variables Clés</h3>
+            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable et diagnostic TSA.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        all_columns = [col for col in df.columns if col != 'TSA']
+        analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
+        col1, col2 = st.columns(2)
+        with col1:
+            color_var = 'TSA' if 'TSA' in df.columns else None
+            # Correction spécifique pour la variable Jaunisse (catégorielle)
+            if analysis_var == 'Jaunisse':
+                fig = px.histogram(df, x='Jaunisse', color='TSA',
+                                   color_discrete_map=palette,
+                                   barnorm='percent',
+                                   title="Prévalence de la jaunisse par statut TSA")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                is_categorical_aq = analysis_var.startswith('A') and analysis_var[1:].isdigit() and len(analysis_var) <= 3
+                if is_categorical_aq:
+                    fig = create_plotly_figure(df, x=analysis_var, color=color_var, kind='bar', title=f"Distribution de {analysis_var} (catégorielle)")
+                else:
+                    fig = create_plotly_figure(df, x=analysis_var, color=color_var, kind='histogram', title=f"Distribution de {analysis_var}")
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            if 'TSA' in df.columns:
+                stats = df.groupby('TSA')[analysis_var].describe()
+            else:
+                stats = df[analysis_var].describe().to_frame().T
+            st.dataframe(stats, use_container_width=True)
+
+    # 5. Analyse des réponses au questionnaire A10
+    with st.expander("📝 Analyse des Réponses au Questionnaire AQ-10", expanded=st.session_state.expanders_initialized['questionnaire']):
+        st.subheader("Analyse des Réponses au Questionnaire AQ-10")
+        question_tabs = st.tabs([f"Q{i+1}" for i in range(10)])
+        for i, tab in enumerate(question_tabs):
+            with tab:
+                col1, col2 = st.columns([2,3])
+                with col1:
+                    st.write(f"**Question A{i+1} :**")
+                    st.markdown("> " + get_question_text(i+1))
+                with col2:
+                    try:
+                        values_counts = df[f'A{i+1}'].value_counts().reset_index()
+                        values_counts.columns = [f'A{i+1}', 'count']
+                        color_discrete_map = {0: "#2ecc71", 1: "#3498db"}
+                        fig = px.pie(
+                            values_counts,
+                            values='count',
+                            names=f'A{i+1}',
+                            color=f'A{i+1}',
+                            color_discrete_map=color_discrete_map,
+                            title=f"Répartition des réponses A{i+1}"
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    except Exception as e:
+                        st.error(f"Erreur lors de la création du graphique: {str(e)}")
+
+    # 6. Création de variable composite
+    with st.expander("⚙️ Création de Variables Composites", expanded=st.session_state.expanders_initialized['composite']):
+        st.subheader("Création de Variables Composites")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("**Score A10 :**")
+            st.markdown("""
+            $$
+            \\text{Score\\_A10} = \\sum_{i=1}^{10} A_i
+            $$
+            """)
+            if 'TSA' in df.columns:
+                yes_mean = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                no_mean = df[df['TSA'] == 'No']['Score_A10'].mean()
+                st.metric("Score Moyen (TSA)", f"{yes_mean:.1f} ± {df[df['TSA'] == 'Yes']['Score_A10'].std():.1f}")
+                st.metric("Score Moyen (Non-TSA)", f"{no_mean:.1f} ± {df[df['TSA'] == 'No']['Score_A10'].std():.1f}")
+            else:
+                overall_mean = df['Score_A10'].mean()
+                st.metric("Score Moyen", f"{overall_mean:.1f} ± {df['Score_A10'].std():.1f}")
+        with col2:
+            color_var = 'TSA' if 'TSA' in df.columns else None
+            fig = create_plotly_figure(df, y='Score_A10', color=color_var, kind='violin', title="Distribution des Scores")
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+
+    # 7. Statistiques du dataset final
+    with st.expander("📈 Statistiques du Dataset Final", expanded=st.session_state.expanders_initialized['statistiques']):
+        st.subheader("Statistiques Descriptives")
+        tab1, tab2 = st.tabs(["Numériques", "Catégorielles"])
+        with tab1:
+            st.write(df.describe())
+        with tab2:
+            categorical_stats = df.select_dtypes(include=['object']).describe().T
+            st.dataframe(categorical_stats)
+
+    # 8. Matrice de corrélation
+    with st.expander("🔗 Matrice de Corrélation", expanded=st.session_state.expanders_initialized['correlation']):
+        try:
+            df_corr = df.copy()
+            if 'Jaunisse' in df_corr.columns:
+                df_corr = df_corr.drop(columns=['Jaunisse'])
+            if 'TSA' in df_corr.columns:
+                df_corr['TSA_num'] = df_corr['TSA'].map({'Yes': 1, 'No': 0})
+            categorical_cols = df_corr.select_dtypes(include=['object']).columns
+            if not categorical_cols.empty:
+                ohe = OneHotEncoder(sparse_output=False, drop='first')
+                encoded_data = ohe.fit_transform(df_corr[categorical_cols])
+                feature_names = ohe.get_feature_names_out(categorical_cols)
+                encoded_df = pd.DataFrame(encoded_data, columns=feature_names)
+                numeric_df = df_corr.select_dtypes(exclude=['object']).reset_index(drop=True)
+                df_corr_processed = pd.concat([numeric_df, encoded_df], axis=1)
+            else:
+                df_corr_processed = df_corr.select_dtypes(exclude=['object'])
+            corr_matrix = df_corr_processed.corr(numeric_only=True)
+            mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+            fig, ax = plt.subplots(figsize=(14, 12))
+            cmap = sns.diverging_palette(200, 120, as_cmap=True)
+            sns.heatmap(
+                corr_matrix,
+                mask=mask,
+                cmap=cmap,
+                vmax=1.0,
+                vmin=-1.0,
+                center=0,
+                square=True,
+                linewidths=0.8,
+                fmt='.2f',
+                annot=True,
+                annot_kws={"size": 9, "weight": "bold"},
+                cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
+            )
+            plt.title("Matrice de corrélation des variables", fontsize=16, pad=20)
+            plt.xticks(rotation=45, ha='right', fontsize=9)
+            plt.yticks(fontsize=9)
+            plt.tight_layout()
+            st.pyplot(fig)
+        except Exception as e:
+            st.error(f"Erreur lors du calcul de la matrice de corrélation: {str(e)}")
+
+    # 9. Tests statistiques (menu déroulant séparé)
+    with st.expander("🧪 Tests Statistiques", expanded=False):
+        test_type = st.radio(
+            "Choisir le type de test:",
+            ["Chi-carré (variables catégorielles)", "Mann-Whitney (variables numériques)"],
+            key="stat_test_type"
+        )
+        if test_type == "Chi-carré (variables catégorielles)":
+                st.markdown("""
+                <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #3498db; margin-top: 0;">Test d'indépendance du Chi-carré</h4>
+                    <p>Ce test évalue si deux variables catégorielles sont indépendantes. Un p-value < 0.05 suggère une relation significative entre les variables.</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Définir categorical_cols
+                df = df.copy()
+                categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+
+                # Ajouter les variables A1-A10 aux variables catégorielles
+                aq_columns = [col for col in df.columns if col.startswith('A') and col[1:].isdigit()]
+                categorical_cols.extend([col for col in aq_columns if col not in categorical_cols])
+
+                if 'TSA' in categorical_cols:
+                    categorical_cols.remove('TSA')
+
+                # Sélection de la variable catégorielle à tester
+                if categorical_cols:
+                    cat_var = st.selectbox(
+                        "Sélectionner une variable catégorielle:",
+                        categorical_cols,
+                        key="chi2_var_selector"
+                    )
+
+                    # Réalisation du test
+                    try:
+                        # Création d'une table de contingence
+                        contingency_table = pd.crosstab(df[cat_var], df['TSA'])
+
+                        # Calcul du chi2
+                        chi2_stat, p_val, dof, expected = chi2_contingency(contingency_table)
+
+                        # Affichage des résultats
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown("### Table de contingence")
+                            st.dataframe(contingency_table.style.set_properties(**{'background-color': 'white'}), use_container_width=True)
+                            # Afficher les fréquences relatives (%)
+                            st.markdown("### Fréquences relatives (%)")
+                            contingency_percent = contingency_table.div(contingency_table.sum(axis=1), axis=0) * 100
+                            st.dataframe(
+                                contingency_percent.style.format("{:.1f}%"),
+                                use_container_width=True
+                            )
+
+                        with col2:
+                            st.markdown("### Résultats du test")
+                            st.metric("Statistique χ²", f"{chi2_stat:.3f}")
+                            st.metric("p-value", f"{p_val:.5f}")
+                            st.metric("Degrés de liberté", dof)
+
+                            # Interprétation
+                            if p_val < 0.05:
+                                st.success(f"**Significatif** (p < 0.05) : Il existe une relation significative entre '{cat_var}' et le diagnostic TSA.")
+                            else:
+                                st.info(f"**Non significatif** (p > 0.05) : Pas de relation significative détectée entre '{cat_var}' et le diagnostic TSA.")
+
+                        # Visualisation
+                        st.markdown("### Visualisation de la relation")
+                        fig = px.bar(
+                            contingency_percent.reset_index().melt(id_vars=cat_var),
+                            x=cat_var, y='value', color='TSA',
+                            barmode='group',
+                            color_discrete_map=palette,
+                            labels={'value': 'Pourcentage (%)'},
+                            title=f"Distribution de '{cat_var}' par diagnostic TSA"
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"Erreur lors du test Chi-carré: {str(e)}")
+                        st.info("Assurez-vous que la variable sélectionnée contient suffisamment de données non-nulles.")
+                else:
+                    st.warning("Aucune variable catégorielle trouvée dans le dataset (en excluant TSA).")
+
+        else:  # Mann-Whitney
+            st.markdown("""
+                <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #3498db; margin-top: 0;">Test de Mann-Whitney U</h4>
+                    <p>Ce test non-paramétrique compare les distributions de deux groupes indépendants. Un p-value < 0.05 suggère une différence significative entre les groupes.</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+
+            numeric_cols = df.select_dtypes(include=['float', 'int']).columns.tolist()
+                # Retirer A1-A10 de l'analyse Mann-Whitney
+            numeric_cols = [col for col in numeric_cols if not (col.startswith('A') and col[1:].isdigit() and len(col) <= 3)]
+
+            if 'Score_A10' in numeric_cols:
+                    # Mettre Score_A10 en tête de liste car souvent analysé
+                numeric_cols.remove('Score_A10')
+                numeric_cols = ['Score_A10'] + numeric_cols
+
+            if numeric_cols:
+                num_var = st.selectbox(
+                    "Sélectionner une variable numérique:",
+                    numeric_cols,
+                    key="mw_var_selector"
+                    )
+
+
+                    # Réalisation du test
+                try:
+                    if 'TSA' in df.columns and df['TSA'].nunique() >= 2:
+                            # Préparation des groupes
+                        yes_group = df[df['TSA'] == 'Yes'][num_var].dropna()
+                        no_group = df[df['TSA'] == 'No'][num_var].dropna()
+
+                        if len(yes_group) > 0 and len(no_group) > 0:
+                                # Réalisation du test Mann-Whitney
+                            stat, p_val = mannwhitneyu(yes_group, no_group, alternative='two-sided')
+
+                                # Affichage des résultats
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.markdown("### Statistiques descriptives")
+                                group_stats = df.groupby('TSA')[num_var].agg(['count', 'mean', 'std', 'min', 'median', 'max'])
+                                st.dataframe(
+                                    group_stats.style.format("{:.2f}", subset=['mean', 'std', 'min', 'median', 'max']),
+                                    use_container_width=True
+                                    )
+
+                                    # Différence des moyennes
+                                mean_diff = yes_group.mean() - no_group.mean()
+                                st.metric(
+                                        "Différence des moyennes (TSA - Non TSA)",
+                                    f"{mean_diff:.2f}",
+                                    delta=f"{(mean_diff / no_group.mean()) * 100:.1f}%"
+                                    )
+
+                            with col2:
+                                st.markdown("### Résultats du test")
+                                st.metric("Statistique U", f"{stat:.1f}")
+                                st.metric("p-value", f"{p_val:.5f}")
+                                    # Taille de l'échantillon
+                                st.metric("Taille échantillon (TSA / Non TSA)", f"{len(yes_group)} / {len(no_group)}")
+
+                                    # Interprétation
+                                if p_val < 0.05:
+                                    st.success(f"**Significatif** (p < 0.05) : Il existe une différence significative de '{num_var}' entre les groupes TSA et non-TSA.")
+                                else:
+                                    st.info(f"**Non significatif** (p > 0.05) : Pas de différence significative de '{num_var}' détectée entre les groupes TSA et non-TSA.")
+
+                                # Visualisation
+                            st.markdown("### Visualisation de la comparaison")
+                            fig = px.box(
+                                df.dropna(subset=[num_var]), x='TSA', y=num_var,
+                                color='TSA', color_discrete_map=palette,
+                                points='all', notched=True,
+                                title=f"Comparaison de '{num_var}' entre les groupes TSA et non-TSA"
+                                )
+                            fig.add_annotation(
+                                x=0.5, y=df[num_var].max() * 0.95,
+                                text=f"p-value = {p_val:.5f}" + (" (significatif)" if p_val < 0.05 else ""),
+                                showarrow=False,
+                                font=dict(size=14, color='red' if p_val < 0.05 else 'gray')
+                                )
+                            st.plotly_chart(fig, use_container_width=True)
+                        else:
+                            st.warning(f"Impossible de réaliser le test: données insuffisantes pour '{num_var}' dans un ou les deux groupes.")
+                    else:
+                        st.warning("Pour effectuer ce test, le dataset doit contenir une colonne 'TSA' avec au moins deux groupes distincts.")
+                except Exception as e:
+                    st.error(f"Erreur lors du test de Mann-Whitney: {str(e)}")
+                    st.info("Assurez-vous que la variable sélectionnée contient suffisamment de données numériques non-nulles.")
+            else:
+                st.warning("Aucune variable numérique trouvée dans le dataset.")
+
+    # 10. FAMD
+    with st.expander("📐 Analyse Factorielle (FAMD)", expanded=st.session_state.expanders_initialized['famd']):
+        st.header("Analyse Factorielle Mixte (FAMD)")
+        try:
+            df_famd = df.copy()
+            n_components = 5
+            X_famd = df_famd.copy()
+            famd = prince.FAMD(n_components=n_components, n_iter=10, random_state=42)
+            famd = famd.fit(X_famd)
+            eigenvalues = famd.eigenvalues_
+            explained_variance = eigenvalues / sum(eigenvalues)
+            st.subheader("Projection des individus")
+            if hasattr(famd, 'row_coordinates'):
+                coordinates = famd.row_coordinates(X_famd)
+                fig, ax = plt.subplots(figsize=(10, 8))
+                if 'TSA' in df_famd.columns:
+                    for category in df_famd['TSA'].unique():
+                        mask = df_famd['TSA'] == category
+                        subset_indices = df_famd[mask].index
+                        ax.scatter(
+                            coordinates.iloc[subset_indices, 0],
+                            coordinates.iloc[subset_indices, 1],
+                            label=category,
+                            alpha=0.7
+                        )
+                    ax.legend()
+                else:
+                    ax.scatter(coordinates.iloc[:, 0], coordinates.iloc[:, 1], alpha=0.7)
+                ax.set_xlabel('Composante 1')
+                ax.set_ylabel('Composante 2')
+                ax.set_title('Projection des individus sur les deux premières composantes')
+                ax.grid(True, linestyle='--', alpha=0.7)
+                st.pyplot(fig)
+            st.subheader("Importance des composantes")
+            inertia_df = pd.DataFrame({
+                'Composante': [f'Composante {i+1}' for i in range(len(explained_variance))],
+                'Inertie expliquée': explained_variance,
+                'Inertie cumulée': np.cumsum(explained_variance)
+            })
+            st.table(inertia_df.head(5))
+            st.markdown("""
+                ## Interprétation des composantes principales
+                L'Analyse Factorielle de Données Mixtes (FAMD) fonctionne comme une **ACP pour les variables quantitatives** et comme une **ACM pour les variables qualitatives**. Cette méthode permet d'analyser simultanément des variables des deux types tout en équilibrant leur influence.
+                - Les premières composantes révèlent les **dimensions les plus structurantes** dans les données
+                - Les projections permettent de visualiser comment les individus se regroupent selon ces dimensions
+            """)
+        except Exception as e:
+            st.error(f"Erreur lors de l'analyse FAMD: {str(e)}")
+
+
+elif "🧠 Analyse ML" in selection:
+    current_page = "Analyse ML"
+    # En-tête modernisé
+    st.markdown("""
+    <div class="header-container">
+        <span style="font-size:2.5rem">🧠</span>
+        <h1 class="app-title">Analyse par Machine Learning</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Modélisation directe sans utiliser FAMD pour transformation
+    st.header("Modélisation par Random Forest")
+    with st.spinner("🌳 Entraînement du modèle..."):
+        try:
+            if 'TSA' not in df.columns:
+                st.error("La colonne 'TSA' n'est pas présente dans le DataFrame.")
+                st.info("Assurez-vous que votre jeu de données contient bien une colonne 'TSA'.")
+            else:
+                # Préparer les données sans utiliser FAMD
+                # Séparer les variables numériques et catégorielles
+                categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+                if 'TSA' in categorical_cols:
+                    categorical_cols.remove('TSA')
+                numerical_cols = df.select_dtypes(exclude=['object']).columns.tolist()
+
+                # Explication des pipelines de prétraitement
+                st.subheader("Explication détaillée du pipeline de prétraitement")
+                st.markdown("""
+                ### Pipeline de préprocessing pour les données mixtes
+
+                Notre pipeline de prétraitement gère à la fois les variables numériques et catégorielles de manière appropriée:
+
+                #### 1. Standardisation des variables numériques
+                ```
+                ('num', StandardScaler(), numerical_cols)
+                ```
+                - Applique une standardisation (moyenne=0, écart-type=1) aux variables numériques
+                - Essentiel pour les algorithmes sensibles à l'échelle comme les SVM ou les régressions régularisées
+                - Permet de comparer l'importance des variables malgré leurs échelles d'origine différentes
+
+                #### 2. Encodage des variables catégorielles
+                ```
+                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+                ```
+                - Transforme les variables catégorielles en variables binaires (one-hot encoding)
+                - Paramètre `handle_unknown='ignore'` gère les catégories inconnues (non présentes lors de l'entraînement)
+                - Crée une colonne distincte pour chaque modalité, sauf une pour éviter la multicolinéarité
+
+                #### 3. Conservation des colonnes non spécifiées
+                ```
+                remainder='passthrough'
+                ```
+                - Conserve les colonnes qui ne sont ni numériques ni catégorielles
+                - Assure qu'aucune information n'est perdue lors du prétraitement
+
+                #### Avantages de cette approche
+                - **Reproductibilité**: Le même prétraitement est appliqué à l'entraînement et à la prédiction
+                - **Évitement des fuites de données**: Les paramètres de scaling sont calculés uniquement sur l'ensemble d'entraînement
+                - **Flexibilité**: Facilement adaptable à différents types de données et d'algorithmes
+                """)
+
+                # Préprocesseur pour les données mixtes avec remainder='passthrough'
+                # pour conserver toutes les colonnes, y compris Statut_testeur
+                preprocessor = ColumnTransformer(
+                    transformers=[
+                        ('num', StandardScaler(), numerical_cols),
+                        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+                    ],
+                    remainder='passthrough',  # Conserver les colonnes non spécifiées
+                    verbose_feature_names_out=False
+                )
+
+                X = df.drop(columns=['TSA'])
+                y = df['TSA'].map({'Yes': 1, 'No': 0})
+
+                # Pipeline avec préprocesseur et Random Forest optimisé pour Google Colab
+                pipeline = Pipeline([
+                    ('preprocessor', preprocessor),
+                    ('classifier', RandomForestClassifier(
+                        n_estimators=50,  # Réduit de 100 à 50 pour accélérer
+                        max_depth=8,
+                        min_samples_split=10,
+                        min_samples_leaf=2,
+                        max_features='sqrt',  # Pour accélérer
+                        random_state=42,
+                        n_jobs=-1  # Utiliser tous les cœurs disponibles
+                    ))
+                ])
+
+                # Division train/test et entraînement
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+                pipeline.fit(X_train, y_train)
+                y_pred = pipeline.predict(X_test)
+                y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+                # Analyse de l'importance des variables
+                st.subheader("Importance des variables")
+
+                # Récupérer le Random Forest du pipeline
+                rf = pipeline.named_steps['classifier']
+                # Récupérer les noms des features après transformation
+                feature_names = []
+
+                # Obtenir les noms des caractéristiques pour les variables numériques
+                if numerical_cols:
+                    feature_names.extend(numerical_cols)
+
+                st.subheader("Facteurs les plus influents")
+
+                rf = pipeline.named_steps['classifier']
+
+                # Définir categorical_cols avant de l'utiliser
+                categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+                if 'TSA' in categorical_cols:
+                    categorical_cols.remove('TSA')
+                numerical_cols = df.select_dtypes(exclude=['object']).columns.tolist()
+
+                # Récupérer les noms des caractéristiques après transformation
+                preprocessor = pipeline.named_steps['preprocessor']
+                cat_features = []
+                if hasattr(preprocessor.transformers_[1][1], 'get_feature_names_out'):
+                    cat_features = preprocessor.transformers_[1][1].get_feature_names_out(categorical_cols).tolist()
+                else:
+                    # Fallback si get_feature_names_out n'est pas disponible
+                    for col in categorical_cols:
+                        unique_vals = df[col].unique()
+                        cat_features.extend([f"{col}_{val}" for val in unique_vals[1:]])
+
+                all_features = numerical_cols + cat_features
+                # Si la longueur des noms de caractéristiques ne correspond pas à l'importance
+                if len(all_features) != len(rf.feature_importances_):
+                    all_features = [f"Feature {i}" for i in range(len(rf.feature_importances_))]
+
+                feature_importance = rf.feature_importances_
+
+                # Créer DataFrame pour l'importance des variables
+                importances = rf.feature_importances_
+                fi_df = pd.DataFrame({
+                    'Feature': all_features,
+                    'Importance': importances
+                }).sort_values('Importance', ascending=False)
+
+                # Afficher l'importance des variables
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.barplot(
+                    x='Importance',
+                    y='Feature',
+                    data=fi_df.head(15),
+                    orient='h',
+                    palette='viridis'
+                )
+                ax.set_title("Contribution des variables à la prédiction")
+                st.pyplot(fig)
+
+                # Évaluation des performances
+                st.subheader("Évaluation complète des performances")
+                accuracy = accuracy_score(y_test, y_pred)
+                precision = precision_score(y_test, y_pred)
+                recall = recall_score(y_test, y_pred)
+                f1 = f1_score(y_test, y_pred)
+                auc = roc_auc_score(y_test, y_prob)
+
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
+                    st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
+                with col2:
+                    st.metric("Spécificité (Precision)", f"{precision:.2%}")
+                    st.metric("Score F1", f"{f1:.2%}")
+                with col3:
+                    st.metric("AUC-ROC", f"{auc:.2%}")
+                    st.metric("Erreur", f"{1-accuracy:.2%}")
+
+                st.subheader("Matrice de confusion")
+                cm = confusion_matrix(y_test, y_pred)
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+                plt.xlabel('Prédiction')
+                plt.ylabel('Réalité')
+                plt.title('Matrice de confusion')
+                ax.set_xticklabels(['Non-TSA', 'TSA'])
+                ax.set_yticklabels(['Non-TSA', 'TSA'])
+                st.pyplot(fig)
+
+                st.subheader("Rapport de classification détaillé")
+                report = classification_report(y_test, y_pred, output_dict=True)
+                report_df = pd.DataFrame(report).transpose()
+                st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
+
+                st.header("Comparaison avec d'autres algorithmes")
+                models = {
+                    "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
+                    "XGBoost": XGBClassifier(random_state=42),
+                    "LightGBM": LGBMClassifier(random_state=42),
+                    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
+                }
+
+                results = []
+                for name, model in models.items():
+                    # Créer un pipeline pour chaque modèle
+                    curr_pipe = Pipeline([
+                        ('preprocessor', preprocessor),
+                        ('classifier', model)
+                    ])
+                    curr_pipe.fit(X_train, y_train)
+                    y_pred_model = curr_pipe.predict(X_test)
+                    acc = accuracy_score(y_test, y_pred_model)
+                    f1score = f1_score(y_test, y_pred_model)
+                    results.append({
+                        'Modèle': name,
+                        'Accuracy': acc,
+                        'F1-Score': f1score
+                    })
+                results_df = pd.DataFrame(results)
+                st.dataframe(results_df.style.highlight_max(subset=['Accuracy']))
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+                x = np.arange(len(results_df))
+                width = 0.35
+                ax.bar(x - width/2, results_df['Accuracy'], width, label='Accuracy')
+                ax.bar(x + width/2, results_df['F1-Score'], width, label='F1-Score')
+                ax.set_xticks(x)
+                ax.set_xticklabels(results_df['Modèle'])
+                ax.legend()
+                ax.set_ylabel('Score')
+                ax.set_title('Comparaison des performances des modèles')
+                st.pyplot(fig)
+
+                st.markdown("""
+                    ### Analyse comparative des modèles
+                    Les différents algorithmes testés présentent des performances variables:
+                    1. **Random Forest** offre généralement le meilleur équilibre entre précision et robustesse, ce qui explique notre choix pour le modèle principal.
+                    2. **XGBoost** montre d'excellentes performances et une grande précision de classification.
+
+                    3. **LightGBM** offre un bon compromis entre rapidité et précision, avec des résultats très proches de XGBoost.
+                    4. **Régression Logistique**, malgré sa simplicité, offre une baseline solide et une meilleure interprétabilité.
+
+                    Le choix final du Random Forest est motivé par sa robustesse, sa capacité à gérer efficacement les données mixtes après transformation par le préprocesseur, et sa résistance au surapprentissage.
+                """)
+        except Exception as e:
+            st.error(f"Erreur lors de la modélisation : {str(e)}")
+            st.info("Vérifiez que la préparation des données a été effectuée correctement.")
+
+elif "📝 Test AQ-10" in selection:
+    st.markdown(
+    f"""<div class="header-container">
+        <span style="font-size:2.5rem">📝</span>
+        <h1 class="app-title">Test AQ-10</h1>
+    </div>""", unsafe_allow_html=True
+)
+
+# Ajout du bandeau large juste sous le titre
+    image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+
+
+    st.markdown('<p class="questionnaire-title">Questionnaire AQ-10</p>', unsafe_allow_html=True)
+
+    st.markdown("""
+    Ce questionnaire aide à évaluer les traits autistiques potentiels. Répondez de manière aussi honnête que possible.
+    Les réponses ne sont pas stockées et servent uniquement à l'analyse.
+    """)
+
+    # Ajout d'emojis pour les questions
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    responses = []
+    for i, q in enumerate(questions):
+        st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
+        response = st.radio("", list(q["scoring"].keys()), key=f"q{i}", label_visibility="collapsed")
+        st.markdown('</div>', unsafe_allow_html=True)
+        responses.append(q["scoring"][response])
+
+
+    # Button styling
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        calculate_button = st.button("Calculer mon score", use_container_width=True)
+
+    if calculate_button:
+        total = sum(responses)
+        st.session_state.aq10_total = total
+        st.session_state.aq10_responses = responses
+
+        result_col1, result_col2, result_col3 = st.columns([1, 3, 1])
+        with result_col2:
+            st.markdown(f"""
+            <div style="background-color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; margin-top: 20px;">
+                <h2 style="margin-bottom: 15px; color: #3498db;">Résultat : {total}/10</h2>
+                <div style="height: 5px; background: linear-gradient(90deg, #3498db {total*10}%, #e0e0e0 {total*10}%); border-radius: 10px; margin-bottom: 20px;"></div>
+                {"<p style='color: #e74c3c; font-size: 1.1rem;'><strong>Il serait recommandé de consulter un professionnel</strong><br>Un score de 6 ou plus indique qu'une évaluation approfondie par un spécialiste de l'autisme pourrait être bénéfique.</p>" if total >= 6 else "<p style='color: #2ecc71; font-size: 1.1rem;'><strong>Aucun signe évident de traits autistiques</strong><br>Ce score suggère qu'une évaluation complémentaire n'est pas nécessaire selon ce test.</p>"}
+                <p style="font-size: 0.9rem; color: #7f8c8d; margin-top: 15px;"><em>Ce questionnaire est un outil de dépistage rapide basé sur l'AQ-10 développé par l'Université de Cambridge.</em></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+elif "🤖 Prédiction par IA" in selection:
+    current_page = "Prédiction par IA"
+    st.markdown(
+        f"""<div class="header-container">
+            <span style="font-size:2.5rem">🤖</span>
+            <h1 class="app-title">Prédire et expliquer le risque de TSA</h1>
+        </div>""", unsafe_allow_html=True
+    )
+
+    # Import de plotly pour des visualisations robustes
+    import plotly.graph_objects as go
+    import plotly.express as px
+
+    @st.cache_resource
+    def train_advanced_model():
+        if df.empty:
+            return None, None, None
+
+        df_model = df.copy()
+        if 'Jaunisse' in df_model.columns:
+            df_model = df_model.drop(columns=['Jaunisse'])
+        # Séparer les variables numériques et catégorielles
+        categorical_cols = df_model.select_dtypes(include=['object']).columns.tolist()
+        if 'TSA' in categorical_cols:
+            categorical_cols.remove('TSA')
+        numerical_cols = df_model.select_dtypes(exclude=['object']).columns.tolist()
+        # Définir le préprocesseur pour les données mixtes avec remainder='passthrough'
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', StandardScaler(), numerical_cols),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+            ],
+            remainder='passthrough',  # Conserver les colonnes non spécifiées
+            verbose_feature_names_out=False
+        )
+
+        X = df_model.drop(columns=['TSA'])
+        y = df_model['TSA'].map({'Yes': 1, 'No': 0})
+
+        try:
+            # Random Forest avec moins d'estimateurs pour accélérer le traitement
+            rf_model = RandomForestClassifier(
+                n_estimators=50,  # Réduit pour Google Colab
+                max_depth=8,
+                min_samples_split=10,
+                min_samples_leaf=2,
+                max_features='sqrt',  # Pour accélérer
+                random_state=42,
+                n_jobs=-1  # Utiliser tous les cœurs disponibles
+            )
+
+            # Prétraiter X pour obtenir les noms de features transformés
+            X_processed = preprocessor.fit_transform(X)
+
+            # Entraîner le modèle séparément
+            rf_model.fit(X_processed, y)
+
+            # Retourner les composants
+            return rf_model, preprocessor, X.columns.tolist()
+        except Exception as e:
+            st.error(f"Erreur lors de l'entraînement du modèle: {str(e)}")
+            return None, None, None
+
+    # Fonction pour créer la visualisation horizontale avec le risque
+    def create_risk_visualization(risk_percentage):
+        # Créer la figure
+        fig = go.Figure()
+
+        # Ajouter une barre horizontale de 0 à 100%
+        fig.add_trace(go.Bar(
+            y=["Risque de TSA"],
+            x=[100],  # La barre couvre tout (0-100%)
+            marker=dict(
+                color='green',
+                line=dict(color='green', width=1)
+            ),
+            orientation='h',
+            showlegend=False,
+            hoverinfo='none'
+        ))
+
+        # Ajouter une ligne verticale à la position du risque
+        fig.add_shape(
+            type="line",
+            x0=risk_percentage,
+            y0=-0.4,  # Positionnement vertical pour centrer sur la barre
+            x1=risk_percentage,
+            y1=0.4,   # Positionnement vertical pour centrer sur la barre
+            line=dict(
+                color="red",
+                width=3,
+                dash="solid",
+            )
+        )
+
+        # Ajouter l'annotation pour le risque
+        fig.add_annotation(
+            x=risk_percentage,
+            y=0,
+            text=f"{risk_percentage:.2f}%",
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=2,
+            arrowcolor="red",
+            ax=0,
+            ay=-30
+        )
+
+        # Configurer la mise en page
+        fig.update_layout(
+            xaxis=dict(
+                title="Pourcentage",
+                range=[0, 100],  # Échelle de 0 à 100%
+                tickvals=[0, 25, 50, 75, 100],
+                ticktext=["0%", "25%", "50%", "75%", "100%"]
+            ),
+            yaxis=dict(
+                showticklabels=False
+            ),
+            height=150,
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)'
+        )
+
+        return fig
+
+    if not df.empty:
+        with st.spinner("Préparation du modèle..."):
+            model, preprocessor, feature_names = train_advanced_model()
+
+        st.subheader("Informations personnelles pour la prédiction")
+        col1, col2 = st.columns(2)
+        with col1:
+            age = st.number_input("Âge", min_value=1, max_value=100, value=30)
+            genres = df['Genre'].unique().tolist()
+            genre = st.selectbox("Genre", options=genres)
+            has_family_asd = st.selectbox("Cas d'autisme dans la famille", options=["Yes", "No"], index=1)
+
+            # Ajout de la variable statut_testeur
+            statut_options = ["Individu", "Parent", "Famille", "Professionnel", "Autre"]
+            statut_testeur = st.selectbox("Qui complète le questionnaire?", options=statut_options, index=0,
+                                        help="Indique la personne qui remplit le questionnaire (vous-même, un parent, etc.)")
+
+            if 'Ethnie' in df.columns:
+                ethnies = df['Ethnie'].dropna().unique().tolist()
+                ethnie = st.selectbox("Ethnie", options=ethnies)
+        with col2:
+            if st.session_state.aq10_total > 0:
+                st.info(f"Votre score AQ-10 : {st.session_state.aq10_total}/10")
+                st.info("Vos réponses du test AQ-10 seront utilisées pour la prédiction")
+                use_aq10_responses = True
+            else:
+                st.warning("Vous n'avez pas complété le questionnaire AQ-10")
+                st.info("Vous pouvez saisir manuellement vos réponses ci-dessous")
+                use_aq10_responses = False
+                aq_responses = {}
+                for i in range(1, 11):
+                    aq_responses[f'A{i}'] = st.selectbox(
+                        f"Question A{i}", options=[0, 1], index=0, help="0 = Non, 1 = Oui"
+                    )
+
+        if st.button("Prédire et expliquer le risque de TSA", key="predict_button"):
+            if model and preprocessor:
+                try:
+                    # Créer un dataframe pour la prédiction
+                    test_data = {
+                        'Age': [int(age)],
+                        'Genre': [genre],
+                        'Autisme_familial': [has_family_asd],
+                        'Statut_testeur': [statut_testeur]  # Ajout du statut_testeur
+                    }
+
+                    # Ajouter l'ethnie si présente
+                    if 'Ethnie' in df.columns:
+                        test_data['Ethnie'] = [ethnie]
+
+                    # Ajouter les réponses aux questions A1-A10
+                    if use_aq10_responses:
+                        aq_responses = st.session_state.get("aq10_responses", None)
+                        if aq_responses is not None:
+                            for i, response in enumerate(aq_responses):
+                                test_data[f'A{i+1}'] = [response]
+                            test_data['Score_A10'] = [sum(aq_responses)]
+                        else:
+                            st.error("Les réponses AQ-10 ne sont pas disponibles. Merci de compléter le test AQ-10 avant la prédiction.")
+                            st.stop()
+
+                    else:
+                        # Utiliser les réponses saisies manuellement
+                        for i in range(1, 11):
+                            test_data[f'A{i}'] = [aq_responses[f'A{i}']]
+
+                        # Calculer le Score_A10 comme somme des réponses
+                        test_data['Score_A10'] = [sum(aq_responses.values())]
+
+                    # Créer le dataframe de test
+                    test_df = pd.DataFrame(test_data)
+
+                    # Prétraiter les données
+                    X_test_processed = preprocessor.transform(test_df)
+
+                    # Prédiction de probabilité
+                    y_prob = model.predict_proba(X_test_processed)[0, 1]
+
+                    # Convertir en pourcentage
+                    risk_percentage = y_prob * 100
+
+                    # Afficher le résultat
+                    st.header("Résultat de la prédiction")
+
+
+                    st.markdown(f"### Probabilité de TSA: {risk_percentage:.2f}%")
+
+
+                    risk_fig = create_risk_visualization(risk_percentage)
+                    st.plotly_chart(risk_fig, use_container_width=True)
+
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("#### Probabilité de TSA")
+
+                        risk_color = "red" if risk_percentage > 50 else "green"
+
+
+                        st.markdown(f"<h2 style='color: {risk_color};'>{risk_percentage:.2f}%</h2>", unsafe_allow_html=True)
+
+                    with col2:
+                        st.markdown("#### Score AQ-10")
+                        score_value = test_data['Score_A10'][0]
+                        st.metric(
+                            "Score",
+                            f"{score_value}/10",
+                            delta=f"{score_value - 5}" if score_value != 5 else "Seuil critique",
+                            delta_color="inverse" if score_value > 5 else "normal"
+                        )
+
+                    # Explication des résultats
+                    st.subheader("Explication du résultat")
+                    st.markdown(f"""
+                    Le modèle Random Forest a analysé vos réponses et vos informations personnelles pour
+                    évaluer le risque de Trouble du Spectre Autistique (TSA). Cette évaluation est basée
+                    sur un modèle entraîné avec des données de plus de 5000 personnes.
+
+                    {'**Risque élevé détecté** : Le score de probabilité de {risk_percentage:.2f}% indique un risque significatif. Une consultation avec un spécialiste est recommandée.' if risk_percentage > 60 else ''}
+                    {'**Risque modéré détecté** : Le score de probabilité de {risk_percentage:.2f}% indique un risque modéré. Un suivi pourrait être bénéfique.' if 40 <= risk_percentage <= 60 else ''}
+                    {'**Risque faible détecté** : Le score de probabilité de {risk_percentage:.2f}% indique un risque faible. Aucune action immédiate''est nécessaire.' if risk_percentage < 40 else ''}
+                    **Rappel important :** Cette prédiction est un outil d'aide et ne remplace pas un diagnostic médical professionnel.
+                    """)
+
+                    # MODIFICATION 2: Ajouter des visuels pertinents des variables les plus importantes
+                    st.subheader("Facteurs les plus influents")
+
+                    # Récupérer les importances des variables
+                    feature_importances = model.feature_importances_
+
+                    # Obtenir les noms des features après transformation
+                    if hasattr(preprocessor, 'get_feature_names_out'):
+                        feature_names = preprocessor.get_feature_names_out()
+                    else:
+                        # Alternative si get_feature_names_out n'est pas disponible
+                        feature_names = test_df.columns.tolist()
+                        # Assurer que la longueur correspond
+                        if len(feature_names) != len(feature_importances):
+                            feature_names = [f"Feature {i}" for i in range(len(feature_importances))]
+
+                    # Créer un DataFrame pour l'importance des variables
+                    importance_df = pd.DataFrame({
+                        'Variable': feature_names,
+                        'Importance': feature_importances
+                    }).sort_values('Importance', ascending=False).head(10)
+
+                    # Créer la visualisation
+                    fig = px.bar(
+                        importance_df,
+                        x='Importance',
+                        y='Variable',
+                        orientation='h',
+                        color='Importance',
+                        color_continuous_scale='Blues',
+                        title="Contribution des variables à la prédiction du TSA"
+                    )
+                    fig.update_layout(
+                        xaxis_title="Importance relative",
+                        yaxis_title="Variables",
+                        height=500,
+                        margin=dict(l=20, r=20, t=40, b=20)
+                    )
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    # Ajouter une explication détaillée des variables
+                    st.markdown("""
+                    ### Explication détaillée des variables importantes
+
+                    #### Score AQ-10
+                    Le score total au questionnaire est l'indicateur le plus puissant. Ce score synthétise l'ensemble des réponses
+                    et représente un indicateur validé cliniquement pour le dépistage des TSA.
+
+                    #### Questions individuelles (A1-A10)
+                    - **Questions A5, A6, A9**: Ces questions évaluent spécifiquement la compréhension sociale et la capacité à
+                      interpréter les émotions d'autrui, domaine particulièrement affecté dans les TSA.
+                    - **Questions A1, A8**: Ces questions mesurent l'attention aux détails et les intérêts restreints,
+                      caractéristiques fréquentes des profils autistiques.
+
+                    #### Facteurs démographiques
+                    - **Âge**: L'âge influence la manifestation des traits autistiques et leur impact sur la vie quotidienne.
+                      Les stratégies compensatoires peuvent se développer avec l'âge.
+                    - **Genre**: Le ratio masculin/féminin observé dans l'autisme est d'environ 3:1, ce qui explique
+                      l'importance modérée de cette variable.
+
+                    #### Facteurs contextuels
+                    - **Antécédents familiaux**: La composante génétique des TSA est significative, avec un risque plus
+                      élevé lorsqu'un membre de la famille proche est concerné.
+                    - **Statut du testeur**: La personne qui remplit le questionnaire peut influencer les réponses et donc
+                      le résultat final.
+
+                    Cette analyse est basée uniquement sur le modèle Random Forest sans recourir à des bibliothèques
+                    d'explicabilité comme SHAP ou LIME.
+                    """)
+
+                except Exception as e:
+                    st.error(f"Erreur lors de la prédiction: {str(e)}")
+                    st.info("Veuillez vérifier que toutes les informations ont été correctement saisies.")
+            else:
+                st.error("Le modèle n'a pas pu être chargé. Veuillez rafraîchir la page et réessayer.")
+
+elif "📚 Documentation" in selection:
+    current_page = "Documentation"
+    st.markdown("""
+    <div class="header-container">
+        <span style="font-size:2.5rem">📚</span>
+        <h1 class="app-title">Documentation</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ## Documentation du projet TSA
+
+    Cette documentation détaille les composants techniques et scientifiques de notre application d'analyse des Troubles du Spectre Autistique (TSA).
+
+    ### 1. Sources de données
+
+    Nos données proviennent de cinq sources différentes:
+    - L'université de l'Arkansas (données nord-américaines)
+    - Deux études du Manukau Institute of Technology (Nouvelle-Zélande) sur enfants et adultes
+    - Un jeu de données d'Arabie Saoudite (506 sujets)
+    - Un jeu mondial de 800 sujets
+
+    Au total, 5049 sujets composent notre dataset final après concaténation et uniformisation.
+
+    ### 2. Prétraitement des données
+
+    Le processus de nettoyage inclut:
+    - Standardisation des noms de colonnes
+    - Encodage des variables catégorielles
+    - Traitement des valeurs manquantes
+    - Création de la variable Score_A10 (somme des réponses aux questions A1-A10)
+
+    ### 3. Modélisation
+    Notre approche de modélisation s'est déroulée en plusieurs étapes:
+
+    1. **Analyse exploratoire** : FAMD pour visualiser les données et comprendre les relations
+    2. **Modèle sélectionné** : Random Forest Classifier
+    3. **Optimisation** : GridSearchCV pour l'ajustement des hyperparamètres:
+       - max_depth: 10
+       - max_features: None
+       - min_samples_leaf: 1
+       - min_samples_split: 10
+       - n_estimators: 100
+    4. **Métriques de performance**:
+       - Accuracy: 96.03%
+       - Precision: 95.39%
+       - Recall: 95.71%
+       - F1 Score: 95.71%
+
+    ### 4. Variables importantes
+
+    D'après l'analyse du modèle, les variables les plus prédictives sont:
+    1. **Score_A10** : Score total au questionnaire (impact majeur)
+    2. **Statut_testeur_Individu** : Si la personne évaluée remplit elle-même le questionnaire
+    3. **Age** : Âge de la personne évaluée
+    4. **Ethnie_WHITE_EUROPEAN** : Appartenance à ce groupe ethnique
+    5. **Antécédents familiaux** : Présence d'autisme dans la famille
+
+    ### 5. Utilisation de l'application
+
+    1. **Test AQ-10** : Questionnaire standardisé de 10 questions
+    2. **Prédiction IA** : Utilisation du modèle Random Forest pour prédire le risque de TSA
+    3. **Exploration des données** : Visualisations interactives pour explorer les relations
+
+    ### 6. Ressources techniques
+
+    L'application est développée avec:
+    - **Streamlit** : Pour l'interface utilisateur
+    - **Scikit-learn** : Pour les modèles de machine learning
+    - **Plotly** : Pour les visualisations interactives
+    - **Pandas & NumPy** : Pour la manipulation de données
+
+    ### 7. Considérations éthiques
+    Notre application est un **outil d'aide à la décision** et non un dispositif de diagnostic médical. Les résultats doivent toujours être interprétés par des professionnels de santé qualifiés.
+    """)
+
+
+    st.markdown("---")
+    st.header("Ressources sur les Troubles du Spectre Autistique (TSA)")
+
+    tab1, tab2, tab3 = st.tabs(["Livres récents", "Sites web et articles", "Vidéos éducatives"])
+
+    with tab1:
+        st.markdown("""
+        ### Ouvrages récents (2024-2025)
+
+        | Titre | Auteur(s) | Date de publication | Description |
+        |-------|-----------|---------------------|-------------|
+        | **Vivre avec un TSA, Les troubles du spectre autistique** | Elise Couval, Corinne Fréville | Juin 2024 | Guide pratique sur la vie quotidienne avec TSA |
+        | **Comment pense une personne autiste ?** | | Avril 2025 | Exploration des mécanismes cognitifs spécifiques aux personnes autistes |
+        | **Des pierres, ils ont fait des étoiles** | | Septembre 2024 | Approche poétique et humaine de l'autisme |
+        | **L'autisme expliqué aux non autistes** | Brigitte Harrison, Lise St-Charles | Janvier 2020 | 50 questions pour mieux comprendre et accompagner |
+        | **100 idées pour accompagner un enfant avec autisme** | René Pry | | Aborde la réalité des 120 000 enfants et adultes autistes en France |
+        """)
+
+        st.info("Ces livres sont disponibles dans la plupart des librairies spécialisées ou en ligne.")
+
+    with tab2:
+        st.markdown("""
+        ### Sites web de référence
+
+        - [Autisme Info Service](https://www.autismeinfoservice.fr/informer/autisme/tsa) - Portail d'information officiel sur les TSA
+        - [Bibliosante - Cahier TSA 2024](https://bibliosante.ca/cahiers/cahier_spectre_autisme_2024.pdf) - Guide complet sur les TSA (édition 2024)
+        - [Sensibilisation TSA - Mise à jour 2024](https://www.calameo.com/books/0050508852a91c25d23a3) - Bibliographie actualisée
+
+        ### Articles scientifiques récents
+
+        - **Avancées en neuroimagerie des TSA** (2024) - Revue des dernières découvertes sur les biomarqueurs cérébraux
+        - **Interventions précoces et plasticité cérébrale** (2025) - Impact des prises en charge avant 3 ans
+        - **Outils numériques d'aide au diagnostic** (2025) - État de l'art des applications d'IA pour le dépistage
+        """)
+
+        st.warning("""
+        **Attention aux fausses informations**: L'idée selon laquelle l'autisme serait causé par les vaccins est
+        régulièrement démentie par la communauté scientifique. Des films comme "Vaxxed" propagent des théories
+        conspirationnistes basées sur une étude frauduleuse et retirée.
+        """)
+
+    with tab3:
+        st.markdown("""
+        ### Vidéos éducatives
+
+        1. **[Comprendre l'autisme en 10 minutes](https://www.youtube.com/)**
+           Une vidéo claire et concise expliquant les bases du TSA.
+
+        2. **[Témoignages: Vivre avec l'autisme](https://www.youtube.com/)**
+           Des personnes autistes partagent leurs expériences quotidiennes.
+
+        3. **[Les avancées de la recherche sur l'autisme en 2025](https://www.youtube.com/)**
+           Un résumé des dernières découvertes scientifiques.
+
+        4. **[Inclusion scolaire des enfants TSA](https://www.youtube.com/)**
+           Stratégies pédagogiques adaptées et témoignages d'enseignants.
+
+        > *Remplacez les liens fictifs par des liens réels vers des vidéos pertinentes.*
+        """)
+
+elif "ℹ️ À propos" in selection:
+    current_page = "À propos"
+    st.markdown("""
+    <div class="header-container">
+        <span style="font-size:2.5rem">ℹ️</span>
+        <h1 class="app-title">À propos</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ## À propos du projet
+
+    Ce projet a été réalisé dans le cadre d'une étude sur les méthodes de dépistage des Troubles du Spectre Autistique (TSA).
+
+    ### Équipe de Projet
+
+    **Auteurs :**
+    - Alexandre Bernard
+    - Rémi Chenouri
+    - Ahmed Ibnabasse
+    - Laurence Souppayaraza
+
+    ### Objectifs du Projet
+
+    1. Identifier les facteurs associés à la présence d'un TSA
+    2. Explorer les données pour déceler des tendances et biais
+    3. Construire des modèles prédictifs pour l'évaluation du TSA
+    ### Remerciements
+
+    Nous remercions toutes les personnes ayant contribué à ce projet, en particulier notre mentor Yohan Cohen pour son soutien et ses conseils précieux.
+
+    ### Contact
+
+    Pour toute question concernant ce projet, veuillez nous contacter à l'adresse suivante:
+    [contact@projet-autisme.org](mailto:contact@projet-autisme.org)""")
+
+    st.markdown("""
+    ### Licence
+    Cette application est mise à disposition sous licence open-source. Le code et les données anonymisées sont disponibles pour des fins de recherche uniquement.""")
+
+    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
+
+
+    st.markdown("""
+    &copy; 2025 - Projet Autisme - Tous droits réservés
+    """)
