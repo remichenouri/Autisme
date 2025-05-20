@@ -1080,53 +1080,23 @@ def show_home_page():
             Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre Autistique.
         </h3>
     </div>
+    
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre
+    de l'Autisme (TSA), un ensemble de troubles neuro-développementaux affectant la communication, le
+    comportement et les interactions sociales de la personne avec son environnement.
+    </p>
+    
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    L'autisme fait partie du spectre plus large des TSA, qui inclut notamment le syndrome d'Asperger.
+    Ce dernier est une forme d'autisme sans retard mental, souvent associée à une intelligence
+    exceptionnelle et à des talents spécifiques, bien que ces compétences puissent se développer au
+    détriment d'autres aptitudes. Environ un tiers des personnes atteintes de TSA présentent également
+    un retard mental. D'autres manifestations possibles incluent des crises d'épilepsie, de l'anxiété, des
+    troubles obsessionnels compulsifs (TOC), de l'hyperactivité, ainsi que des troubles sensoriels,
+    moteurs, alimentaires et du sommeil.
+    </p>
     """, unsafe_allow_html=True)
-
-    st.markdown("## Accès rapide aux outils")
-    col1, col2, col3 = st.columns(3, gap="large")
-
-    with col1:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">📝 Test AQ-10</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-    with col2:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🤖 Prédiction IA</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Découvrir l'IA</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🔍 Analyses</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
-                <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🔍 Exploration des Données" class="cta-button" style="display: block; margin: 0 auto;">Explorer les données</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
     st.markdown("""
     ---
@@ -1142,21 +1112,19 @@ def show_home_page():
     ---
     ## Contexte du projet
     <p style="font-size: 1.05rem; line-height: 1.6;">
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
     </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## À qui s'adresse ce projet ?
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Personnes concernées par les TSA</strong> : Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.</li>
-            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.</li>
-            <li><strong>Professionnels de santé</strong> : Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.</li>
-            <li><strong>Chercheurs et étudiants</strong> : Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.</li>
-        </ul>
-    </div>
+    
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les TSA regroupent des situations cliniques diverses, entraînant des situations de handicap et des
+    trajectoires développementales hétérogènes. La prévalence des TSA est estimée à environ 1% de la
+    population mondiale, bien que cette estimation varie selon les études et les critères diagnostiques.
+    </p>
+    
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les données utilisées dans ce projet proviennent de bases de données publiques, telles que celles
+    disponibles sur Kaggle, permettant une analyse approfondie et rigoureuse.
+    </p>
     """, unsafe_allow_html=True)
 
     st.markdown("""
@@ -1217,6 +1185,32 @@ def show_home_page():
         <p style="font-size: 1.05rem; line-height: 1.6;">
         La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.
         </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    ---
+    ## À qui s'adresse ce projet ?
+    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+        <ul style="font-size: 1.05rem; line-height: 1.6;">
+            <li><strong>Personnes concernées par les TSA</strong> : Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.</li>
+            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.</li>
+            <li><strong>Professionnels de santé</strong> : Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.</li>
+            <li><strong>Chercheurs et étudiants</strong> : Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
+        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🎯</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
+        <ul style="font-size: 1.05rem; line-height: 1.6;">
+            <li><strong>Chercheurs en santé et psychologie</strong> : une analyse détaillée permet d'étayer leurs hypothèses ou confirmer des tendances cliniques.</li>
+            <li><strong>Professionnels de santé et du médico-social</strong> : des résultats exploitables permettent d'améliorer le dépistage et la prise en charge.</li>
+            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : auto évaluation ou recherche d'un pré-diagnostic afin d'être orienté ou de répondre à de possibles suspicions de TSA.</li>
+            <li><strong>Politiques et décideurs</strong> : Les données et analyses peuvent informer les politiques publiques et les décisions de financement pour améliorer les services et les ressources disponibles pour les personnes avec TSA.</li>
+            <li><strong>Entreprises et employeurs</strong> : Les recommandations sur l'inclusion et l'adaptation des environnements de travail pour les employés avec TSA favorisent la diversité et l'inclusion en milieu professionnel.</li>
+        </ul>
     </div>
     """, unsafe_allow_html=True)
     pass
