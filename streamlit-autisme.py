@@ -1160,7 +1160,7 @@ Un accompagnement adapté, tenant compte des spécificités de chaque personne, 
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
         <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#128202;</span> Prévalence</h4>
         <p style="font-size: 1.05rem; line-height: 1.6;">
-        La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.
+        '''La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.'''
         </p>
     </div>
     """, unsafe_allow_html=True)
