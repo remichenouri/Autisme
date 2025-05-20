@@ -1287,6 +1287,51 @@ def show_data_exploration():
             st.caption("Dataset 5")
             st.dataframe(df_ds5.head(5), use_container_width=True)
 
+    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
+            <p style="color: #7f8c8d;">Processus automatisé pour préparer les données à l'analyse.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown("""
+            <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color: #3498db; margin-top: 0;">Étapes de Transformation</h4>
+                <ol style="padding-left: 20px; color: #2c3e50;">
+                    <li><b>Uniformisation</b> des colonnes</li>
+                    <li><b>Typage</b> des variables</li>
+                    <li><b>Gestion</b> des valeurs manquantes</li>
+                    <li><b>Encodage</b> catégoriel</li>
+                    <li><b>Normalisation</b> des échelles</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            avant_tab, apres_tab = st.tabs(["Avant Nettoyage", "Après Nettoyage"])
+            with avant_tab:
+                raw_data_sample = pd.DataFrame({
+                    'A10_Score': [7, 5, None, 3],
+                    'Age_Years': [29, None, 'unknown', 383],
+                    'asd_traits': ['yes', 'no', 'no', 'yes']
+                })
+                st.dataframe(raw_data_sample.style.highlight_null(color='#ffcdd2'), use_container_width=True)
+            with apres_tab:
+                clean_data_sample = pd.DataFrame({
+                    'A10': [7, 5, 4, 3],
+                    'Age': [29, 35, 42, 38],
+                    'TSA': ['Yes', 'No', 'No', 'Yes'],
+                    'Statut_testeur': ['Famille', 'Famille', 'Famille', 'Famille']
+                })
+                st.dataframe(clean_data_sample, use_container_width=True)
+                metrics_col1, metrics_col2 = st.columns(2)
+                with metrics_col1:
+                    st.metric("Réduction des valeurs manquantes", "92%", "10% → 0.8%")
+                with metrics_col2:
+                    st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
+                pass
+
     with st.expander("📉 Analyse des Valeurs Manquantes", expanded=True):
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -1335,51 +1380,15 @@ def show_data_exploration():
         else:
             st.success("✅ Aucune valeur manquante détectée dans le jeu de données.")
 
-    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
-            <p style="color: #7f8c8d;">Processus automatisé pour préparer les données à l'analyse.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            st.markdown("""
-            <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h4 style="color: #3498db; margin-top: 0;">Étapes de Transformation</h4>
-                <ol style="padding-left: 20px; color: #2c3e50;">
-                    <li><b>Uniformisation</b> des colonnes</li>
-                    <li><b>Typage</b> des variables</li>
-                    <li><b>Gestion</b> des valeurs manquantes</li>
-                    <li><b>Encodage</b> catégoriel</li>
-                    <li><b>Normalisation</b> des échelles</li>
-                </ol>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            avant_tab, apres_tab = st.tabs(["Avant Nettoyage", "Après Nettoyage"])
-            with avant_tab:
-                raw_data_sample = pd.DataFrame({
-                    'A10_Score': [7, 5, None, 3],
-                    'Age_Years': [29, None, 'unknown', 383],
-                    'asd_traits': ['yes', 'no', 'no', 'yes']
-                })
-                st.dataframe(raw_data_sample.style.highlight_null(color='#ffcdd2'), use_container_width=True)
-            with apres_tab:
-                clean_data_sample = pd.DataFrame({
-                    'A10': [7, 5, 4, 3],
-                    'Age': [29, 35, 42, 38],
-                    'TSA': ['Yes', 'No', 'No', 'Yes'],
-                    'Statut_testeur': ['Famille', 'Famille', 'Famille', 'Famille']
-                })
-                st.dataframe(clean_data_sample, use_container_width=True)
-                metrics_col1, metrics_col2 = st.columns(2)
-                with metrics_col1:
-                    st.metric("Réduction des valeurs manquantes", "92%", "10% → 0.8%")
-                with metrics_col2:
-                    st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
-                pass
-                
+    
+    with st.expander("📈 Statistiques du Dataset Final", expanded=True):
+        st.subheader("Statistiques Descriptives")
+        tab1, tab2 = st.tabs(["Numériques", "Catégorielles"])
+        with tab1:
+            st.write(df.describe())
+        with tab2:
+            categorical_stats = df.select_dtypes(include=['object']).describe().T
+            st.dataframe(categorical_stats)           
 
     with st.expander("📊 Distribution des Variables Clés", expanded=True):
         st.markdown("""
@@ -1463,15 +1472,6 @@ def show_data_exploration():
             fig = create_plotly_figure(df, y='Score_A10', color=color_var, kind='violin', title="Distribution des Scores")
             if fig:
                 st.plotly_chart(fig, use_container_width=True)
-
-    with st.expander("📈 Statistiques du Dataset Final", expanded=True):
-        st.subheader("Statistiques Descriptives")
-        tab1, tab2 = st.tabs(["Numériques", "Catégorielles"])
-        with tab1:
-            st.write(df.describe())
-        with tab2:
-            categorical_stats = df.select_dtypes(include=['object']).describe().T
-            st.dataframe(categorical_stats)
 
     with st.expander("🔗 Matrice de Corrélation", expanded=True):
         try:
