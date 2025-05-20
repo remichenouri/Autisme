@@ -1081,17 +1081,25 @@ def show_home_page():
         </h3>
     </div>
     <p style="font-size: 1.05rem; line-height: 1.6;">
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l’Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
-    </p>
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Selon les classifications récentes comme le DSM-5, les TSA sont désormais définis selon une dyade autistique, remplaçant l'ancienne triade. Cette dyade comprend deux catégories de critères diagnostiques : 
-    <ul>
-        <li>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations).</li>
-        <li>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles).</li>
-    </ul>
-    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner) au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire :
-    </p>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+    ---
+    ## Critères et niveaux de sévérité
+    """)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🗣️</span> Déficits de communication</h4>
+            <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔄</span> Comportements restreints et répétitifs</h4>
+            <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
     with col1:
