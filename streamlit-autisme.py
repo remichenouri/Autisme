@@ -1228,11 +1228,11 @@ def show_data_exploration():
             <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
                 <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
                 <ul style="padding-left:20px">
-                    <li>📁 <strong>Dataset 1:</strong> <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
-                    <li>📁 <strong>Dataset 2:</strong> <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
-                    <li>📁 <strong>Dataset 3:</strong> <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
-                    <li>📁 <strong>Dataset 4:</strong> <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
-                    <li>📁 <strong>Dataset 5:</strong> <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
+                    <li>'📁' <strong>Dataset 1:</strong> <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
+                    <li>'📁' <strong>Dataset 2:</strong> <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
+                    <li>'📁' <strong>Dataset 3:</strong> <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
+                    <li>'📁' <strong>Dataset 4:</strong> <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
+                    <li>'📁' <strong>Dataset 5:</strong> <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
@@ -2008,7 +2008,7 @@ def show_ml_analysis():
 
     st.markdown("""
     <div class="header-container">
-        <span style="font-size:2.5rem">🧠</span>
+        <span style="font-size:2.5rem">'🧠'</span>
         <h1 class="app-title">Analyse par Machine Learning</h1>
     </div>
     """, unsafe_allow_html=True)
@@ -2611,7 +2611,7 @@ def show_aq10_and_prediction():
 
     st.markdown(
         f"""<div class="header-container" style="text-align: center;">
-            <span style="font-size:2.5rem">📝</span>
+            <span style="font-size:2.5rem">''📝''</span>
             <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
         </div>""", unsafe_allow_html=True
     )
@@ -3175,7 +3175,7 @@ def show_aq10_and_prediction():
 def show_documentation():
     st.markdown("""
     <div class="header-container">
-        <span style="font-size:2.5rem">📚</span>
+        <span style="font-size:2.5rem">''📚''</span>
         <h1 class="app-title">Documentation</h1>
     </div>
     """, unsafe_allow_html=True)
@@ -3543,7 +3543,7 @@ def show_documentation():
             st.markdown("""
             <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
                 <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
-                    <span style="font-size:1.2rem; margin-right:5px">📚</span> Bibliothèques Principales
+                    <span style="font-size:1.2rem; margin-right:5px">'📚'</span> Bibliothèques Principales
                 </h4>
                 <ul style="padding-left:20px; margin-top:10px">
                     <li><strong>Scikit-learn 1.3.2</strong> - Modèles et prétraitement</li>
