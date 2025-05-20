@@ -1063,202 +1063,463 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 def show_home_page():
     df, _, _, _, _, _, _ = load_dataset()
 
-    # Bannière principale avec image de fond et appel à l'action
+    # Bannière principale avec image de fond
     st.markdown("""
-    <div style="background: linear-gradient(rgba(52, 152, 219, 0.7), rgba(52, 152, 219, 0.9)), url('https://drive.google.com/uc?export=view&id=1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW'); 
-         background-size: cover; 
-         background-position: center; 
-         color: white; 
-         padding: 3rem 2rem; 
-         border-radius: 15px; 
-         text-align: center; 
-         margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">Plateforme de Dépistage et Prédiction de l'Autisme</h1>
-        <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto 1.5rem auto;">
-            Une approche innovante combinant l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre de l'Autisme (TSA).
+    <div style="
+        background: linear-gradient(rgba(52, 152, 219, 0.7), rgba(52, 152, 219, 0.9)), 
+        url('https://drive.google.com/uc?export=view&id=1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    ">
+        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            Plateforme de Dépistage et Prédiction de l'Autisme
+        </h1>
+        <p style="font-size: 1.3rem; max-width: 800px; margin: 0 auto 2rem auto; line-height: 1.6;">
+            Une approche innovante combinant intelligence artificielle et connaissances cliniques<br>pour un dépistage précis des TSA
         </p>
-        <a href="/?selection=📝%20Test%20AQ-10" style="background-color: white; color: #3498db; padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s ease;">
+        <a href="/?selection=📝%20Test%20AQ-10" style="
+            background-color: white;
+            color: #3498db;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        ">
             Commencer le dépistage
         </a>
     </div>
     """, unsafe_allow_html=True)
 
-    # À propos de la plateforme - Résumé avec icônes visuelles
+    # Section À propos
     st.markdown("""
-    <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">À propos de notre plateforme</h2>
+    <div style="
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    ">
+        <h2 style="
+            color: #3498db;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f2f6;
+            padding-bottom: 1rem;
+            font-size: 2rem;
+        ">
+            À propos de notre plateforme
+        </h2>
         
-        <p style="font-size: 1.05rem; line-height: 1.6; color: #333;">
-            Notre plateforme utilise des algorithmes avancés de machine learning pour aider au dépistage précoce des Troubles du Spectre de l'Autisme (TSA), 
-            en combinant le questionnaire validé AQ-10 avec des analyses statistiques poussées pour une meilleure précision.
+        <p style="font-size: 1.1rem; line-height: 1.7; color: #444; margin-bottom: 2rem;">
+            Notre solution utilise une combinaison unique de technologies avancées pour offrir une évaluation complète des Troubles du Spectre Autistique.
         </p>
         
-        <div style="display: flex; flex-wrap: wrap; margin-top: 1.5rem; gap: 1rem;">
-            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <span style="font-size: 2.5rem; color: #3498db;">🧩</span>
-                <h4 style="margin: 0.7rem 0;">Questionnaire AQ-10</h4>
-                <p style="color: #555;">Outil de dépistage validé scientifiquement</p>
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        ">
+            <div style="
+                background: #f8f9fa;
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">🧩</div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Questionnaire AQ-10</h3>
+                <p style="color: #7f8c8d; margin: 0;">Outil validé scientifiquement pour le dépistage initial</p>
             </div>
             
-            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <span style="font-size: 2.5rem; color: #3498db;">🤖</span>
-                <h4 style="margin: 0.7rem 0;">IA prédictive</h4>
-                <p style="color: #555;">Algorithmes entraînés sur des milliers de cas</p>
+            <div style="
+                background: #f8f9fa;
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">🤖</div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">IA Prédictive</h3>
+                <p style="color: #7f8c8d; margin: 0;">Algorithmes entraînés sur des milliers de cas réels</p>
             </div>
             
-            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <span style="font-size: 2.5rem; color: #3498db;">📊</span>
-                <h4 style="margin: 0.7rem 0;">Analyses détaillées</h4>
-                <p style="color: #555;">Visualisation et interprétation des résultats</p>
+            <div style="
+                background: #f8f9fa;
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">📊</div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Analyses Avancées</h3>
+                <p style="color: #7f8c8d; margin: 0;">Visualisations interactives et interprétations détaillées</p>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Critères et niveaux de sévérité
+
+    # Section Critères de diagnostic
     st.markdown("""
-    <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Critères et niveaux de sévérité des TSA</h2>
+    <div style="
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    ">
+        <h2 style="
+            color: #3498db;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f2f6;
+            padding-bottom: 1rem;
+            font-size: 2rem;
+        ">
+            Critères diagnostiques des TSA
+        </h2>
         
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="flex: 1; min-width: 300px; background-color: #eaf2f8; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #3498db;">
-                <h3 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.4rem;">🗣️</span> Déficits de communication</h3>
-                <p style="color: #445; line-height: 1.6;">Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
-            </div>
-            
-            <div style="flex: 1; min-width: 300px; background-color: #eaf2f8; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #3498db;">
-                <h3 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.4rem;">🔄</span> Comportements restreints et répétitifs</h3>
-                <p style="color: #445; line-height: 1.6;">Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
-            </div>
-        </div>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 1.5rem;">
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <h4 style="color: #2e7d32; margin-top: 0; font-size: 1.3rem;">Niveau 1</h4>
-                <div style="width: 70px; height: 8px; background-color: #4caf50; border-radius: 4px; margin: 0.8rem auto;"></div>
-                <p style="color: #1b5e20; font-weight: 500;">Nécessite un soutien</p>
-            </div>
-            
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <h4 style="color: #1565c0; margin-top: 0; font-size: 1.3rem;">Niveau 2</h4>
-                <div style="width: 70px; height: 8px; background-color: #2196f3; border-radius: 4px; margin: 0.8rem auto;"></div>
-                <p style="color: #0d47a1; font-weight: 500;">Nécessite un soutien important</p>
-            </div>
-            
-            <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f3e5f5, #e1bee7); padding: 1.2rem; border-radius: 10px; text-align: center;">
-                <h4 style="color: #6a1b9a; margin-top: 0; font-size: 1.3rem;">Niveau 3</h4>
-                <div style="width: 70px; height: 8px; background-color: #9c27b0; border-radius: 4px; margin: 0.8rem auto;"></div>
-                <p style="color: #4a148c; font-weight: 500;">Nécessite un soutien très important</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Avertissement important
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #fff8e1, #fffde7); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #ffc107; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-        <h3 style="color: #f57c00; display: flex; align-items: center; margin-top: 0;">
-            <span style="font-size: 1.6rem; margin-right: 0.7rem;">⚠️</span> Avertissement important
-        </h3>
-        <p style="font-size: 1.05rem; line-height: 1.6; color: #5d4037;">
-            Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle. 
-            Les résultats doivent être interprétés avec précaution et confirmés par un spécialiste.
-        </p>
-        <p style="font-weight: 600; color: #e65100; margin-top: 0.8rem;">
-            Consultez toujours un professionnel de santé qualifié pour une évaluation complète.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Prévalence et données statistiques
-    st.markdown("""
-    <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Prévalence et données statistiques</h2>
-        
-        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: stretch;">
-            <div style="flex: 1.5; min-width: 300px;">
-                <p style="font-size: 1.05rem; line-height: 1.7; color: #333;">
-                    La prévalence des TSA est estimée à environ <strong>1%</strong> de la population mondiale, avec des études récentes suggérant une fourchette entre <strong>1% et 2%</strong> dans les pays à revenu élevé. En France, environ <strong>700 000 personnes</strong> sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ <strong>4:1</strong>.
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        ">
+            <div style="
+                background: #eaf2f8;
+                padding: 1.5rem;
+                border-radius: 12px;
+                border-left: 5px solid #3498db;
+            ">
+                <h3 style="color: #3498db; margin-top: 0; font-size: 1.3rem;">🗣️ Déficits de communication</h3>
+                <p style="color: #444; line-height: 1.6;">
+                    Difficultés persistantes dans la communication sociale, y compris la réciprocité émotionnelle et les comportements non verbaux.
                 </p>
             </div>
             
-            <div style="flex: 1; min-width: 250px; background-color: #f8f9fa; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-around;">
-                <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">1-2%</span>
-                    <p style="color: #555; margin-top: 0.5rem;">de la population mondiale</p>
-                </div>
-                
-                <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">4:1</span>
-                    <p style="color: #555; margin-top: 0.5rem;">ratio garçons/filles</p>
-                </div>
-                
-                <div style="text-align: center;">
-                    <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">700k</span>
-                    <p style="color: #555; margin-top: 0.5rem;">personnes en France</p>
+            <div style="
+                background: #eaf2f8;
+                padding: 1.5rem;
+                border-radius: 12px;
+                border-left: 5px solid #3498db;
+            ">
+                <h3 style="color: #3498db; margin-top: 0; font-size: 1.3rem;">🔄 Comportements répétitifs</h3>
+                <p style="color: #444; line-height: 1.6;">
+                    Caractère restreint et répétitif des comportements, intérêts ou activités, avec particularités sensorielles.
+                </p>
+            </div>
+        </div>
+        
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+            ">
+                <h4 style="color: #2e7d32; margin: 0 0 0.5rem 0;">Niveau 1</h4>
+                <div style="
+                    width: 60px;
+                    height: 4px;
+                    background: #4caf50;
+                    margin: 0 auto 1rem auto;
+                    border-radius: 2px;
+                "></div>
+                <p style="color: #1b5e20; margin: 0; font-weight: 500;">Soutien nécessaire</p>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+            ">
+                <h4 style="color: #1565c0; margin: 0 0 0.5rem 0;">Niveau 2</h4>
+                <div style="
+                    width: 60px;
+                    height: 4px;
+                    background: #2196f3;
+                    margin: 0 auto 1rem auto;
+                    border-radius: 2px;
+                "></div>
+                <p style="color: #0d47a1; margin: 0; font-weight: 500;">Soutien important</p>
+            </div>
+            
+            <div style="
+                background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+            ">
+                <h4 style="color: #6a1b9a; margin: 0 0 0.5rem 0;">Niveau 3</h4>
+                <div style="
+                    width: 60px;
+                    height: 4px;
+                    background: #9c27b0;
+                    margin: 0 auto 1rem auto;
+                    border-radius: 2px;
+                "></div>
+                <p style="color: #4a148c; margin: 0; font-weight: 500;">Soutien très important</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Avertissement
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #fff3e0, #fff8e1);
+        padding: 2rem;
+        border-radius: 15px;
+        border-left: 5px solid #ffa726;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    ">
+        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+            <div style="font-size: 2rem; margin-right: 1rem;">⚠️</div>
+            <h3 style="color: #ef6c00; margin: 0; font-size: 1.5rem;">Avertissement important</h3>
+        </div>
+        <p style="color: #5d4037; line-height: 1.6; margin-bottom: 0;">
+            Cet outil ne remplace pas un diagnostic médical professionnel. Les résultats doivent être interprétés 
+            par un spécialiste qualifié. Consultez toujours un professionnel de santé pour une évaluation complète.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Section Prévalence
+    st.markdown("""
+    <div style="
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    ">
+        <h2 style="
+            color: #3498db;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f2f6;
+            padding-bottom: 1rem;
+            font-size: 2rem;
+        ">
+            Données épidémiologiques
+        </h2>
+        
+        <div style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        ">
+            <div>
+                <p style="font-size: 1.1rem; line-height: 1.7; color: #444;">
+                    Selon les dernières études, la prévalence des TSA est estimée à :
+                    <ul style="color: #444; padding-left: 1.5rem;">
+                        <li>1 cas sur 54 enfants aux États-Unis (CDC, 2023)</li>
+                        <li>700 000 personnes en France</li>
+                        <li>Ratio de 4 garçons pour 1 fille</li>
+                    </ul>
+                </p>
+            </div>
+            
+            <div style="
+                background: #f8f9fa;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+            ">
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1.5rem;
+                ">
+                    <div>
+                        <div style="font-size: 2.5rem; color: #3498db; font-weight: 700;">1-2%</div>
+                        <div style="color: #7f8c8d;">Population mondiale</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; color: #3498db; font-weight: 700;">4:1</div>
+                        <div style="color: #7f8c8d;">Ratio garçons/filles</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; color: #3498db; font-weight: 700;">700k</div>
+                        <div style="color: #7f8c8d;">Cas en France</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; color: #3498db; font-weight: 700;">+178%</div>
+                        <div style="color: #7f8c8d;">Augmentation depuis 2000</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # À qui s'adresse ce projet
+
+    # Section Public cible
     st.markdown("""
-    <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">À qui s'adresse ce projet ?</h2>
+    <div style="
+        background-color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    ">
+        <h2 style="
+            color: #3498db;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f2f6;
+            padding-bottom: 1rem;
+            font-size: 2rem;
+        ">
+            À qui s'adresse ce service ?
+        </h2>
         
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-around;">
-            <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e3f2fd; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
-                    <span style="font-size: 2rem; color: #1976d2;">👤</span>
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        ">
+            <div style="
+                background: #f8f9fa;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    background: #e3f2fd;
+                    border-radius: 50%;
+                    margin: 0 auto 1rem auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    color: #1976d2;
+                ">
+                    👤
                 </div>
-                <h4 style="color: #3498db; margin: 0.7rem 0;">Personnes concernées</h4>
-                <p style="color: #445; line-height: 1.5;">Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble.</p>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Particuliers</h3>
+                <p style="color: #7f8c8d; margin: 0;">
+                    Personnes souhaitant évaluer leurs traits autistiques
+                </p>
             </div>
             
-            <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
-                    <span style="font-size: 2rem; color: #388e3c;">👨‍👩‍👧</span>
+            <div style="
+                background: #f8f9fa;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    background: #e8f5e9;
+                    border-radius: 50%;
+                    margin: 0 auto 1rem auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    color: #388e3c;
+                ">
+                    👨👩👧
                 </div>
-                <h4 style="color: #3498db; margin: 0.7rem 0;">Familles et proches</h4>
-                <p style="color: #445; line-height: 1.5;">Parents et entourage cherchant à mieux comprendre les TSA et identifier d'éventuels signes.</p>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Familles</h3>
+                <p style="color: #7f8c8d; margin: 0;">
+                    Parents et proches recherchant des informations
+                </p>
             </div>
             
-            <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
-                <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e0f7fa; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
-                    <span style="font-size: 2rem; color: #0097a7;">👩‍⚕️</span>
+            <div style="
+                background: #f8f9fa;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease;
+            ">
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    background: #e0f7fa;
+                    border-radius: 50%;
+                    margin: 0 auto 1rem auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    color: #0097a7;
+                ">
+                    👩⚕️
                 </div>
-                <h4 style="color: #3498db; margin: 0.7rem 0;">Professionnels</h4>
-                <p style="color: #445; line-height: 1.5;">Médecins et thérapeutes souhaitant utiliser un outil d'aide au dépistage.</p>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">Professionnels</h3>
+                <p style="color: #7f8c8d; margin: 0;">
+                    Médecins et thérapeutes souhaitant un outil d'aide
+                </p>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Boutons d'appel à l'action finaux
+
+    # Appels à l'action
     st.markdown("""
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem; margin-bottom: 3rem;">
-        <a href="/?selection=📝%20Test%20AQ-10" style="text-decoration: none; flex: 1; max-width: 280px;">
-            <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
-                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📝</span>
-                <h3 style="margin: 0.5rem 0; font-size: 1.3rem;">Commencer le test AQ-10</h3>
-                <p style="margin-top: 0.5rem; opacity: 0.9;">Évaluez les traits autistiques en quelques minutes</p>
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    ">
+        <a href="/?selection=📝%20Test%20AQ-10" style="text-decoration: none;">
+            <div style="
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                text-align: center;
+                transition: transform 0.3s ease;
+                box-shadow: 0 8px 16px rgba(52,152,219,0.3);
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">Test AQ-10</h3>
+                <p style="margin: 0; opacity: 0.9;">Évaluation rapide en 10 questions</p>
             </div>
         </a>
         
-        <a href="/?selection=🔍%20Exploration%20des%20Données" style="text-decoration: none; flex: 1; max-width: 280px;">
-            <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);">
-                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🔍</span>
-                <h3 style="margin: 0.5rem 0; font-size: 1.3rem;">Explorer les données</h3>
-                <p style="margin-top: 0.5rem; opacity: 0.9;">Découvrez les statistiques et analyses sur l'autisme</p>
+        <a href="/?selection=🔍%20Exploration%20des%20Données" style="text-decoration: none;">
+            <div style="
+                background: linear-gradient(135deg, #2ecc71, #27ae60);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                text-align: center;
+                transition: transform 0.3s ease;
+                box-shadow: 0 8px 16px rgba(46,204,113,0.3);
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">Exploration des données</h3>
+                <p style="margin: 0; opacity: 0.9;">Analyses statistiques avancées</p>
             </div>
         </a>
     </div>
     """, unsafe_allow_html=True)
-
-
-
-
 
 def show_data_exploration():
     import plotly.express as px
