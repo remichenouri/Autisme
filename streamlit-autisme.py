@@ -1170,10 +1170,10 @@ Un accompagnement adapté, tenant compte des spécificités de chaque personne, 
     ## À qui s'adresse ce projet ?
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
         <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Personnes concernées par les TSA</strong> : Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.</li>
-            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.</li>
-            <li><strong>Professionnels de santé</strong> : Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.</li>
-            <li><strong>Chercheurs et étudiants</strong> : Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.</li>
+            <li><strong>Personnes concernées par les TSA</strong> : '''Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.'''</li>
+            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.'''</li>
+            <li><strong>Professionnels de santé</strong> :''' Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.'''</li>
+            <li><strong>Chercheurs et étudiants</strong> : '''Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.'''</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -1182,11 +1182,11 @@ Un accompagnement adapté, tenant compte des spécificités de chaque personne, 
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
         <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#127919;</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
         <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Chercheurs en santé et psychologie</strong> : une analyse détaillée permet d’étayer leurs hypothèses ou confirmer des tendances cliniques.</li>
-            <li><strong>Professionnels de santé et du médico-social</strong> : des résultats exploitables permettent d’améliorer le dépistage et la prise en charge.</li>
-            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : auto-évaluation ou recherche d’un pré-diagnostic afin d’être orienté ou de répondre à de possibles suspicions de TSA.</li>
-            <li><strong>Politiques et décideurs</strong> : Les données et analyses peuvent informer les politiques publiques et les décisions de financement pour améliorer les services et les ressources disponibles pour les personnes avec TSA.</li>
-            <li><strong>Entreprises et employeurs</strong> : Les recommandations sur l'inclusion et l'adaptation des environnements de travail pour les employés avec TSA favorisent la diversité et l'inclusion en milieu professionnel.</li>
+            <li><strong>Chercheurs en santé et psychologie</strong> : '''une analyse détaillée permet d’étayer leurs hypothèses ou confirmer des tendances cliniques.'''</li>
+            <li><strong>Professionnels de santé et du médico-social</strong> :''' des résultats exploitables permettent d’améliorer le dépistage et la prise en charge.'''</li>
+            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : '''auto-évaluation ou recherche d’un pré-diagnostic afin d’être orienté ou de répondre à de possibles suspicions de TSA.'''</li>
+            <li><strong>Politiques et décideurs</strong> : '''Les données et analyses peuvent informer les politiques publiques et les décisions de financement pour améliorer les services et les ressources disponibles pour les personnes avec TSA.'''</li>
+            <li><strong>Entreprises et employeurs</strong> : '''Les recommandations sur l'inclusion et l'adaptation des environnements de travail pour les employés avec TSA favorisent la diversité et l'inclusion en milieu professionnel.'''</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
