@@ -1385,105 +1385,34 @@ def show_data_exploration():
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #2c3e50; margin-top: 0;">Distribution des Variables Clés</h3>
-            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable.</p>
+            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable et diagnostic TSA.</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Filtrer les colonnes pour exclure 'TSA'
         all_columns = [col for col in df.columns if col != 'TSA']
-        
-        # Sélection de la variable à analyser
         analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
-        
-        # Afficher l'explication de la variable sélectionnée
-        if analysis_var in variable_explanations:
-            st.markdown(f"**{analysis_var}**: {variable_explanations[analysis_var]}")
-        
         col1, col2 = st.columns(2)
         with col1:
+            color_var = 'TSA' if 'TSA' in df.columns else None
             if analysis_var == 'Jaunisse':
-                fig = px.histogram(df, x='Jaunisse',
+                fig = px.histogram(df, x='Jaunisse', color='TSA',
+                                   color_discrete_map=palette,
                                    barnorm='percent',
-                                   title="Prévalence de la jaunisse")
+                                   title="Prévalence de la jaunisse par statut TSA")
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                # Vérifier si c'est une variable catégorielle A1-A10
                 is_categorical_aq = analysis_var.startswith('A') and analysis_var[1:].isdigit() and len(analysis_var) <= 3
                 if is_categorical_aq:
-                    # Pour les variables A1-A10, créer un graphique en barres
-                    counts = df[analysis_var].value_counts().reset_index()
-                    counts.columns = [analysis_var, 'count']
-                    fig = px.bar(
-                        counts, 
-                        x=analysis_var, 
-                        y='count',
-                        color=analysis_var,  # Utiliser la valeur elle-même pour la coloration
-                        color_discrete_map={0: "#3498db", 1: "#2ecc71"},  # Palette de couleurs personnalisée
-                        title=f"Distribution de {analysis_var} (catégorielle)"
-                    )
-                    fig.update_layout(
-                        xaxis_title=f"Valeur de {analysis_var}",
-                        yaxis_title="Nombre d'occurrences"
-                    )
+                    fig = create_plotly_figure(df, x=analysis_var, color=color_var, kind='bar', title=f"Distribution de {analysis_var} (catégorielle)")
                 else:
-                    # Pour les autres variables, créer un histogramme
-                    fig = px.histogram(
-                        df, 
-                        x=analysis_var,
-                        color_discrete_sequence=["#3498db"],  # Couleur unique
-                        title=f"Distribution de {analysis_var}"
-                    )
-                    fig.update_layout(
-                        xaxis_title=analysis_var,
-                        yaxis_title="Fréquence"
-                    )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Ajouter des informations sur l'équilibre des distributions pour certaines variables
-                if analysis_var in ['A1', 'A10']:
-                    st.info("Cette variable présente une distribution relativement équilibrée entre les valeurs 0 et 1, comme mentionné dans le rapport du 12/05.")
-                elif analysis_var in ['A3', 'A9']:
-                    st.info("Cette variable présente plus de valeurs 0 que de valeurs 1, comme mentionné dans le rapport du 12/05.")
-    
-    with col2:
-        # Afficher les statistiques descriptives
-        stats = df[analysis_var].describe().to_frame().T
-        st.subheader("Statistiques descriptives")
-        st.dataframe(stats, use_container_width=True)
-        
-        # Ajouter des métriques visuelles
-        st.metric("Moyenne", f"{df[analysis_var].mean():.2f}")
-        st.metric("Écart-type", f"{df[analysis_var].std():.2f}")
-        
-        # Ajouter un texte explicatif supplémentaire pour les variables catégorielles
-        if is_categorical_aq:
-            zeros_count = (df[analysis_var] == 0).sum()
-            ones_count = (df[analysis_var] == 1).sum()
-            zeros_percent = zeros_count / len(df) * 100
-            ones_percent = ones_count / len(df) * 100
-            
-            st.markdown(f"""
-            **Distribution de la variable {analysis_var}**:
-            - Valeur 0: {zeros_count} observations ({zeros_percent:.1f}%)
-            - Valeur 1: {ones_count} observations ({ones_percent:.1f}%)
-            
-            Sur un échantillon total de {len(df)} personnes.
-            """)
-            
-            # Ajouter des interprétations spécifiques pour certaines variables
-            if analysis_var == 'A1':
-                st.markdown("""
-                **Interprétation pour le contact visuel (A1):**
-                
-                L'histogramme montre la distribution du contact visuel dans l'échantillon. Cette compétence est essentielle pour les interactions sociales.
-                """)
-            elif analysis_var == 'A6':
-                st.markdown("""
-                **Interprétation pour l'intérêt pour les pairs (A6):**
-                
-                La distribution montre comment se répartit l'intérêt pour les pairs dans l'échantillon. Cette variable est un indicateur important du développement social.
-                """)
+                    fig = create_plotly_figure(df, x=analysis_var, color=color_var, kind='histogram', title=f"Distribution de {analysis_var}")
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            if 'TSA' in df.columns:
+                stats = df.groupby('TSA')[analysis_var].describe()
+            else:
+                stats = df[analysis_var].describe().to_frame().T
+            st.dataframe(stats, use_container_width=True)
 
     with st.expander("📝 Analyse des Réponses au Questionnaire AQ-10", expanded=True):
         st.subheader("Analyse des Réponses au Questionnaire AQ-10")
