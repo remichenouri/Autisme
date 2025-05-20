@@ -1080,7 +1080,7 @@ def show_home_page():
             Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre de l’Autisme.
         </h3>
     </div>
-    <p style="font-size: 1.05rem; line-height: 1.6;">
+    <p style="font-size: 1.05rem; line-height: 1.6;">""")
     st.markdown("""
     ---
     ## Critères et niveaux de sévérité
