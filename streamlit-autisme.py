@@ -1659,10 +1659,13 @@ def show_data_exploration():
             import numpy as np
 
             class FAMD_Custom(prince.FAMD):
-                """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
-                def transform(self, X):
-                    utils.validation.check_is_fitted(self, 'eigenvalues_')
-                    return self.row_coordinates(X)
+                    """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
+                    def transform(self, X):
+                        # Vérification simplifiée de l'ajustement du modèle
+                        if not hasattr(self, 'eigenvalues_'):
+                            raise ValueError("Ce modèle FAMD_Custom n'est pas encore ajusté. "
+                                            "Appelez 'fit' avec les arguments appropriés avant d'utiliser cet estimateur.")
+                        return self.row_coordinates(X)
 
                 def column_correlations_custom(self, X):
                     """Méthode personnalisée pour calculer les corrélations des colonnes"""
@@ -1704,28 +1707,61 @@ def show_data_exploration():
 
             df_famd = df.copy()
             df_famd = df_famd.reset_index(drop=True)
-
+            
+            # Conversion correcte des types de données
             for col in df_famd.select_dtypes(include=['object']).columns:
                 df_famd[col] = df_famd[col].astype('category')
-
             for col in df_famd.select_dtypes(include=['number']).columns:
                 df_famd[col] = df_famd[col].astype('float64')
-
+            
             df_famd = df_famd.dropna()
             df_famd = df_famd.reset_index(drop=True)
-
+            
+            # Configuration FAMD avec paramètres explicites
             n_components = min(5, min(df_famd.shape) - 1)
             X_famd = df_famd.copy()
-
+            
+            # Augmentation du nombre d'itérations et normalisation explicite
             famd = FAMD_Custom(
                 n_components=n_components,
-                n_iter=10,
-                random_state=42,
+                n_iter=20,         # Augmentation du nombre d'itérations pour stabilité
+                random_state=42,   # Maintien du même seed
                 copy=True,
-                engine='sklearn'
+                engine='sklearn',  # Utilisation cohérente du moteur
+                normalize=True     # Normalisation explicite des variables numériques
             )
+    
             famd = famd.fit(X_famd)
+            # Extraction des coordonnées
             coordinates = famd.transform(X_famd)
+
+            fig, ax = plt.subplots(figsize=(10, 8))
+
+            if 'TSA' in X_famd.columns:
+                for category in X_famd['TSA'].unique():
+                    mask = (X_famd['TSA'] == category).values
+                    color = "#e74c3c" if category == "Yes" else "#3498db"
+                    ax.scatter(
+                        coordinates.values[mask, 0],
+                        coordinates.values[mask, 1],
+                        label=category,
+                        color=color,
+                        alpha=0.6,
+                        s=30  # Taille des points ajustée
+                    )
+                ax.legend(title="Diagnostic TSA", fontsize=10)
+            
+            # Définition des axes et titres
+            ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.2%} variance expliquée)')
+            ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.2%} variance expliquée)')
+            ax.set_title('Projection des individus sur les deux premières composantes', fontsize=12)
+            ax.grid(True, linestyle='--', alpha=0.7)
+            
+            # Ajout de limites d'axes explicites pour la cohérence
+            ax.set_xlim(-2.5, 3.0)  # Ajuster selon vos données
+            ax.set_ylim(-2.5, 2.5)  # Ajuster selon vos données
+            
+            st.pyplot(fig)
 
             eigenvalues = famd.eigenvalues_
             explained_variance = eigenvalues / sum(eigenvalues)
