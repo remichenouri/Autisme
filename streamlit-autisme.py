@@ -1077,80 +1077,19 @@ def show_home_page():
     <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
         <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
         <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
-            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre Autistique.
+            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre de l’Autisme.
         </h3>
     </div>
-    
     <p style="font-size: 1.05rem; line-height: 1.6;">
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre
-    de l'Autisme (TSA), un ensemble de troubles neuro-développementaux affectant la communication, le
-    comportement et les interactions sociales de la personne avec son environnement.
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l’Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
     </p>
-    
     <p style="font-size: 1.05rem; line-height: 1.6;">
-    L'autisme fait partie du spectre plus large des TSA, qui inclut notamment le syndrome d'Asperger.
-    Ce dernier est une forme d'autisme sans retard mental, souvent associée à une intelligence
-    exceptionnelle et à des talents spécifiques, bien que ces compétences puissent se développer au
-    détriment d'autres aptitudes. Environ un tiers des personnes atteintes de TSA présentent également
-    un retard mental. D'autres manifestations possibles incluent des crises d'épilepsie, de l'anxiété, des
-    troubles obsessionnels compulsifs (TOC), de l'hyperactivité, ainsi que des troubles sensoriels,
-    moteurs, alimentaires et du sommeil.
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ### ⚠️ Avertissement
-    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
-        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
-        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle.
-        Consultez toujours un spécialiste pour une évaluation complète.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## Contexte du projet
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
-    </p>
-    
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Les TSA regroupent des situations cliniques diverses, entraînant des situations de handicap et des
-    trajectoires développementales hétérogènes. La prévalence des TSA est estimée à environ 1% de la
-    population mondiale, bien que cette estimation varie selon les études et les critères diagnostiques.
-    </p>
-    
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Les données utilisées dans ce projet proviennent de bases de données publiques, telles que celles
-    disponibles sur Kaggle, permettant une analyse approfondie et rigoureuse.
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## Critères et niveaux de sévérité
-    """)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🗣️</span> Déficits de communication</h4>
-            <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔄</span> Comportements restreints et répétitifs</h4>
-            <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <p style="font-size: 1.05rem; line-height: 1.6; margin-top: 20px;">
-    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner)
-    au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire:
+    Selon les classifications récentes comme le DSM-5, les TSA sont désormais définis selon une dyade autistique, remplaçant l'ancienne triade. Cette dyade comprend deux catégories de critères diagnostiques : 
+    <ul>
+        <li>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations).</li>
+        <li>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles).</li>
+    </ul>
+    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner) au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire :
     </p>
     """, unsafe_allow_html=True)
 
@@ -1178,6 +1117,35 @@ def show_home_page():
         """, unsafe_allow_html=True)
 
     st.markdown("""
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les manifestations des TSA sont extrêmement variables d'une personne à l'autre, créant un véritable "spectre" de présentations cliniques. Chaque personne autiste présente une combinaison unique de forces et de difficultés. Les particularités sensorielles (hypersensibilité ou hyposensibilité aux stimuli) font désormais partie intégrante des critères diagnostiques.
+    </p>
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les TSA peuvent s'accompagner de diverses conditions associées, notamment des troubles du développement intellectuel (présents chez moins de 40% des personnes diagnostiquées aujourd'hui), des troubles anxieux, des difficultés d'apprentissage, des troubles du sommeil, des particularités alimentaires et des comorbidités médicales. Il s'agit d'une condition neurologique avec laquelle la personne naît et qui évolue tout au long de sa vie, s'exprimant différemment selon l'âge, le contexte et l'environnement.
+    </p>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ### ⚠️ Avertissement
+    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
+        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
+        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle. Consultez toujours un spécialiste pour une évaluation complète.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ## Contexte du projet
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    La reconnaissance des TSA s'est améliorée ces dernières années mais le diagnostic peut parfois être posé tardivement, notamment chez les personnes sans déficience intellectuelle ou chez celles qui ont développé des stratégies de compensation. Un accompagnement adapté, tenant compte des spécificités de chaque personne, est essentiel pour favoriser l'inclusion sociale et l’épanouissement de la personne.
+    </p>
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Les données utilisées dans ce projet proviennent de bases de données publiques, telles que celles disponibles sur Kaggle, permettant une analyse approfondie et rigoureuse.
+    </p>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
     ---
     ## Prévalence
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
@@ -1187,7 +1155,7 @@ def show_home_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("""
     ---
     ## À qui s'adresse ce projet ?
@@ -1200,21 +1168,20 @@ def show_home_page():
         </ul>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("""
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
         <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🎯</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
         <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Chercheurs en santé et psychologie</strong> : une analyse détaillée permet d'étayer leurs hypothèses ou confirmer des tendances cliniques.</li>
-            <li><strong>Professionnels de santé et du médico-social</strong> : des résultats exploitables permettent d'améliorer le dépistage et la prise en charge.</li>
-            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : auto évaluation ou recherche d'un pré-diagnostic afin d'être orienté ou de répondre à de possibles suspicions de TSA.</li>
+            <li><strong>Chercheurs en santé et psychologie</strong> : une analyse détaillée permet d’étayer leurs hypothèses ou confirmer des tendances cliniques.</li>
+            <li><strong>Professionnels de santé et du médico-social</strong> : des résultats exploitables permettent d’améliorer le dépistage et la prise en charge.</li>
+            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : auto-évaluation ou recherche d’un pré-diagnostic afin d’être orienté ou de répondre à de possibles suspicions de TSA.</li>
             <li><strong>Politiques et décideurs</strong> : Les données et analyses peuvent informer les politiques publiques et les décisions de financement pour améliorer les services et les ressources disponibles pour les personnes avec TSA.</li>
             <li><strong>Entreprises et employeurs</strong> : Les recommandations sur l'inclusion et l'adaptation des environnements de travail pour les employés avec TSA favorisent la diversité et l'inclusion en milieu professionnel.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
     pass
-
 
 def show_data_exploration():
     import plotly.express as px
