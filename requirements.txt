@@ -7,7 +7,7 @@ seaborn
 scikit-learn
 xgboost
 lightgbm
-prince
+prince==0.7.1
 requests
 Pillow
 graphviz
