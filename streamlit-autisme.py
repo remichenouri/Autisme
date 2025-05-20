@@ -2524,72 +2524,72 @@ with ml_tabs[3]:
         </div>
         """, unsafe_allow_html=True)
 
-    st.subheader("Analyse de l'importance des variables")
-
-    st.markdown("""
-    ### Facteurs les plus influents dans la prédiction des TSA
-
-    Le graphique ci-dessous montre l'importance relative de chaque variable dans la prédiction du diagnostic TSA.
-    Les variables avec une importance plus élevée ont un impact plus fort sur la décision du modèle.
-    """)
-
-    feature_importance = pd.DataFrame({
-        'Feature': ['Score_A10', 'A7', 'A10', 'A1', 'Age', 'A9', 'A2', 'A3', 'A8', 'A5', 'A4', 'A6', 'Genre_Male', 'Ethnie_White_European', 'Antecedent_autisme_Yes'],
-        'Importance': [0.34, 0.12, 0.10, 0.08, 0.06, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.02, 0.02, 0.01, 0.01]
-    }).sort_values('Importance', ascending=False)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(
-        x='Importance',
-        y='Feature',
-        data=feature_importance,
-        orient='h',
-        palette='viridis'
-    )
-    ax.set_title("Contribution des variables à la prédiction")
-    st.pyplot(fig)
-
-    st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p><strong>Interprétation des résultats :</strong></p>
-        <ul>
-            <li>Le <strong>Score_A10</strong> (score total) est de loin le facteur le plus déterminant, confirmant la validité de ce questionnaire comme outil de dépistage.</li>
-            <li>Les items <strong>A7</strong> (compréhension des intentions des personnages), <strong>A10</strong> (compréhension des intentions) et <strong>A1</strong> (perception sensorielle) sont particulièrement discriminants.</li>
-            <li>L'<strong>âge</strong> joue également un rôle significatif dans la prédiction, suggérant des différences dans l'expression des traits autistiques selon l'âge.</li>
-            <li>Les facteurs démographiques comme le genre et l'ethnie ont une influence moindre mais non négligeable.</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.subheader("Validation et limites du modèle")
-
-    st.markdown("""
-    ### Validation croisée
-
-    Pour évaluer la robustesse du modèle, nous avons utilisé une validation croisée à 5 plis :
-
-    ```
-    from sklearn.model_selection import cross_val_score
-
-    # Validation croisée à 5 plis
-    cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
-    print(f"Scores de validation croisée : {cv_scores}")
-    print(f"Score moyen : {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-    ```
-
-    **Résultat** : Score moyen = 0.9423 ± 0.0156
-
-    ### Limites et considérations éthiques
-
-    Malgré ses bonnes performances, notre modèle présente certaines limites :
-    1. **Biais potentiels dans les données d'entraînement** - La répartition démographique peut ne pas être représentative de toutes les populations
-
-    2. **Interprétabilité limitée** - Le caractère "boîte noire" du Random Forest peut rendre difficile l'explication détaillée des prédictions individuelles
-
-    3. **Utilisation clinique** - Le modèle est un outil d'aide au dépistage et ne remplace pas une évaluation clinique complète
-
-    4. **Effets de seuil** - Le seuil de décision (TSA/non-TSA) peut être ajusté selon les besoins cliniques pour privilégier la sensibilité ou la spécificité
-    """)
+        st.subheader("Analyse de l'importance des variables")
+    
+        st.markdown("""
+        ### Facteurs les plus influents dans la prédiction des TSA
+    
+        Le graphique ci-dessous montre l'importance relative de chaque variable dans la prédiction du diagnostic TSA.
+        Les variables avec une importance plus élevée ont un impact plus fort sur la décision du modèle.
+        """)
+    
+        feature_importance = pd.DataFrame({
+            'Feature': ['Score_A10', 'A7', 'A10', 'A1', 'Age', 'A9', 'A2', 'A3', 'A8', 'A5', 'A4', 'A6', 'Genre_Male', 'Ethnie_White_European', 'Antecedent_autisme_Yes'],
+            'Importance': [0.34, 0.12, 0.10, 0.08, 0.06, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.02, 0.02, 0.01, 0.01]
+        }).sort_values('Importance', ascending=False)
+    
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.barplot(
+            x='Importance',
+            y='Feature',
+            data=feature_importance,
+            orient='h',
+            palette='viridis'
+        )
+        ax.set_title("Contribution des variables à la prédiction")
+        st.pyplot(fig)
+    
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Interprétation des résultats :</strong></p>
+            <ul>
+                <li>Le <strong>Score_A10</strong> (score total) est de loin le facteur le plus déterminant, confirmant la validité de ce questionnaire comme outil de dépistage.</li>
+                <li>Les items <strong>A7</strong> (compréhension des intentions des personnages), <strong>A10</strong> (compréhension des intentions) et <strong>A1</strong> (perception sensorielle) sont particulièrement discriminants.</li>
+                <li>L'<strong>âge</strong> joue également un rôle significatif dans la prédiction, suggérant des différences dans l'expression des traits autistiques selon l'âge.</li>
+                <li>Les facteurs démographiques comme le genre et l'ethnie ont une influence moindre mais non négligeable.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.subheader("Validation et limites du modèle")
+    
+        st.markdown("""
+        ### Validation croisée
+    
+        Pour évaluer la robustesse du modèle, nous avons utilisé une validation croisée à 5 plis :
+    
+        ```
+        from sklearn.model_selection import cross_val_score
+    
+        # Validation croisée à 5 plis
+        cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
+        print(f"Scores de validation croisée : {cv_scores}")
+        print(f"Score moyen : {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+        ```
+    
+        **Résultat** : Score moyen = 0.9423 ± 0.0156
+    
+        ### Limites et considérations éthiques
+    
+        Malgré ses bonnes performances, notre modèle présente certaines limites :
+        1. **Biais potentiels dans les données d'entraînement** - La répartition démographique peut ne pas être représentative de toutes les populations
+    
+        2. **Interprétabilité limitée** - Le caractère "boîte noire" du Random Forest peut rendre difficile l'explication détaillée des prédictions individuelles
+    
+        3. **Utilisation clinique** - Le modèle est un outil d'aide au dépistage et ne remplace pas une évaluation clinique complète
+    
+        4. **Effets de seuil** - Le seuil de décision (TSA/non-TSA) peut être ajusté selon les besoins cliniques pour privilégier la sensibilité ou la spécificité
+        """)
 
 
     with ml_tabs[3]:
