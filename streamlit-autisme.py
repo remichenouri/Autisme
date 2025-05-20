@@ -1725,15 +1725,6 @@ def show_data_exploration():
                 engine='sklearn'
             )
             famd = famd.fit(X_famd)
-            # Débogage pour vérifier les attributs disponibles
-            st.write("Attributs disponibles après fit():", dir(famd))
-            # Vérifiez si eigenvalues_ existe
-            if hasattr(famd, 'eigenvalues_'):
-                st.write("eigenvalues_ existe avec taille:", len(famd.eigenvalues_))
-            else:
-                st.write("eigenvalues_ n'existe pas!")
-
-
             coordinates = famd.transform(X_famd)
 
             eigenvalues = famd.eigenvalues_
