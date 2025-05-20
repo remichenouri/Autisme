@@ -1073,7 +1073,6 @@ def show_home_page():
     st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
 
     st.markdown("""
-    ## Présentation de la plateforme
     <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
         <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
         <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
