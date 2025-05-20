@@ -1644,34 +1644,47 @@ def show_data_exploration():
             <p style="color: #7f8c8d;">Réduction de dimensions pour visualiser la structure des données et les relations entre variables.</p>
         </div>
         """, unsafe_allow_html=True)
-
+    
         st.markdown("""
         L'**Analyse Factorielle de Données Mixtes (FAMD)** est une méthode particulièrement adaptée à nos données car elle permet de traiter simultanément:
         - Des variables numériques (comme l'âge, les scores A1-A10)
         - Des variables catégorielles (comme le genre, l'ethnie, les antécédents familiaux)
-
+    
         Cette méthode nous permet de projeter les données sur un plan à deux dimensions pour visualiser les relations entre les variables et les individus.
         """)
-
+    
         try:
             import prince
             from sklearn import utils
             import numpy as np
-
-            # Classe FAMD_Custom corrigée
+    
             class FAMD_Custom(prince.FAMD):
                 """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
+                def __init__(self, n_components=2, n_iter=3, copy=True, check_input=True, 
+                            random_state=None, engine='auto', handle_unknown='error', normalize=None):
+                    # Ignorer le paramètre normalize, mais l'accepter pour compatibilité
+                    super().__init__(
+                        n_components=n_components,
+                        n_iter=n_iter,
+                        copy=copy,
+                        check_input=check_input,
+                        random_state=random_state,
+                        engine=engine,
+                        handle_unknown=handle_unknown
+                    )
+                
                 def transform(self, X):
                     # Vérification simplifiée de l'ajustement du modèle
                     if not hasattr(self, 'eigenvalues_'):
-                        raise ValueError("Ce modèle FAMD_Custom n'est pas encore ajusté. Appelez 'fit' avec les arguments appropriés avant d'utiliser cet estimateur.")
+                        raise ValueError("Ce modèle FAMD_Custom n'est pas encore ajusté. "
+                                        "Appelez 'fit' avec les arguments appropriés avant d'utiliser cet estimateur.")
                     return self.row_coordinates(X)
-                
+    
                 def column_correlations_custom(self, X):
                     """Méthode personnalisée pour calculer les corrélations des colonnes"""
                     row_pc = self.row_coordinates(X)
                     correlations = {}
-            
+    
                     for feature in X.columns:
                         if X[feature].dtype.kind in 'ifc':
                             corrs = []
@@ -1682,127 +1695,92 @@ def show_data_exploration():
                             means = {}
                             for component in row_pc.columns:
                                 means[component] = []
-            
+    
                             for category in X[feature].unique():
                                 mask = (X[feature] == category).values
                                 for component in row_pc.columns:
                                     coord_mean = row_pc.loc[mask, component].mean()
                                     means[component].append(coord_mean)
-            
+    
                             max_abs = max(abs(v) for comp_means in means.values() for v in comp_means)
                             if max_abs > 0:
                                 for component in means:
                                     means[component] = [v/max_abs for v in means[component]]
-            
+    
                             corrs = []
                             for component in row_pc.columns:
                                 corrs.append(sum(means[component])/len(means[component]))
                             correlations[feature] = corrs
-            
+    
                     return pd.DataFrame(
                         data=[[correlations[feature][i] for feature in X.columns] for i in range(len(row_pc.columns))],
                         columns=X.columns
                     ).T
+    
+            df_famd = df.copy()
+            df_famd = df_famd.reset_index(drop=True)
             
-            # Préparation des données pour FAMD
-            df_famd = df.copy().reset_index(drop=True)
-            
-            # Conversion des types de données
+            # Conversion correcte des types de données
             for col in df_famd.select_dtypes(include=['object']).columns:
                 df_famd[col] = df_famd[col].astype('category')
             for col in df_famd.select_dtypes(include=['number']).columns:
                 df_famd[col] = df_famd[col].astype('float64')
             
-            df_famd = df_famd.dropna().reset_index(drop=True)
+            df_famd = df_famd.dropna()
+            df_famd = df_famd.reset_index(drop=True)
             
-            # Configuration FAMD principale
+            # Configuration FAMD avec paramètres explicites
             n_components = min(5, min(df_famd.shape) - 1)
             X_famd = df_famd.copy()
             
-            # Paramètres communs pour toutes les analyses FAMD
-            common_params = {
-                'n_iter': 20,
-                'random_state': 42,
-                'copy': True,
-                'engine': 'sklearn',
-                'normalize': True
-            }
-            
-            # FAMD globale
+            # Ajustement du modèle (le paramètre normalize est accepté mais ignoré)
             famd = FAMD_Custom(
                 n_components=n_components,
-                **common_params
+                n_iter=20,         # Augmentation du nombre d'itérations pour stabilité
+                random_state=42,   # Maintien du même seed
+                copy=True,
+                engine='sklearn',  # Utilisation cohérente du moteur
+                normalize=True     # Ce paramètre est ignoré mais accepté pour compatibilité
             )
+    
             famd = famd.fit(X_famd)
             
-            # FAMD centrée sur Score_A10
-            if 'Score_A10' in X_famd.columns:
-                key_vars = ['Score_A10', 'TSA']
-                for var in ['Age', 'Genre', 'Ethnie']:
-                    if var in X_famd.columns:
-                        key_vars.append(var)
-                
-                X_a10 = X_famd[key_vars].copy()
-                
-                famd_a10 = FAMD_Custom(
-                    n_components=min(3, len(key_vars)-1),
-                    **common_params
-                )
-                famd_a10 = famd_a10.fit(X_a10)
-            
-            # Visualisation commune
-            def plot_famd_projection(famd_model, X, title, ax_limits=(-2.5, 3.0)):
-                coordinates = famd_model.transform(X)
-                eigenvalues = famd_model.eigenvalues_
-                explained_variance = eigenvalues / sum(eigenvalues)
-            
-                fig, ax = plt.subplots(figsize=(10, 8))
-                
-                if 'TSA' in X.columns:
-                    for category in X['TSA'].unique():
-                        mask = (X['TSA'] == category).values
-                        color = "#e74c3c" if category == "Yes" else "#3498db"
-                        ax.scatter(
-                            coordinates.values[mask, 0],
-                            coordinates.values[mask, 1],
-                            label=category,
-                            color=color,
-                            alpha=0.6,
-                            s=30
-                        )
-                    ax.legend(title="Diagnostic TSA", fontsize=10)
-                
-                ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.2%})')
-                ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.2%})')
-                ax.set_title(title, fontsize=12)
-                ax.grid(True, linestyle='--', alpha=0.7)
-                ax.set_xlim(ax_limits)
-                ax.set_ylim(ax_limits)
-                
-                return fig
-            
-            # Affichage des graphiques
-            try:
-                st.subheader("Analyse FAMD complète")
-                fig1 = plot_famd_projection(famd, X_famd, "Projection globale des individus")
-                st.pyplot(fig1)
-            
-                if 'Score_A10' in X_famd.columns:
-                    st.subheader("Analyse FAMD centrée sur Score_A10")
-                    fig2 = plot_famd_projection(famd_a10, X_a10, "Projection centrée sur Score_A10", ax_limits=(-1.5, 1.5))
-                    st.pyplot(fig2)
-            
-            except Exception as e:
-                st.error(f"Erreur lors de la visualisation : {str(e)}")
-                st.info("""Solution possible :
-                    1. Vérifier la version de prince : `pip install prince==0.7.1`
-                    2. Redémarrer le noyau/runtime après installation
-                    3. Vérifier les types de données en entrée""")
-            
-
+            # Calcul des variances expliquées AVANT utilisation
             eigenvalues = famd.eigenvalues_
             explained_variance = eigenvalues / sum(eigenvalues)
-
+            
+            # Extraction des coordonnées
+            coordinates = famd.transform(X_famd)
+    
+            fig, ax = plt.subplots(figsize=(10, 8))
+    
+            if 'TSA' in X_famd.columns:
+                for category in X_famd['TSA'].unique():
+                    mask = (X_famd['TSA'] == category).values
+                    color = "#e74c3c" if category == "Yes" else "#3498db"
+                    ax.scatter(
+                        coordinates.values[mask, 0],
+                        coordinates.values[mask, 1],
+                        label=category,
+                        color=color,
+                        alpha=0.6,
+                        s=30  # Taille des points ajustée
+                    )
+                ax.legend(title="Diagnostic TSA", fontsize=10)
+            
+            # Définition des axes et titres
+            ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.2%} variance expliquée)')
+            ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.2%} variance expliquée)')
+            ax.set_title('Projection des individus sur les deux premières composantes', fontsize=12)
+            ax.grid(True, linestyle='--', alpha=0.7)
+            
+            # Ajout de limites d'axes explicites pour la cohérence
+            ax.set_xlim(-2.5, 3.0)
+            ax.set_ylim(-2.5, 2.5)
+            
+            st.pyplot(fig)
+            
+            # Le reste du code avec les onglets de visualisation reste inchangé
             famd_tabs = st.tabs([
                 "Projection des individus",
                 "Cercle des corrélations",
@@ -1810,7 +1788,7 @@ def show_data_exploration():
                 "FAMD score A10",
                 "Interprétation"
             ])
-
+    
             with famd_tabs[0]:
                 st.subheader("Projection des individus sur les axes principaux")
                 st.markdown("""
@@ -2025,28 +2003,19 @@ def show_data_exploration():
                 }))
 
         except Exception as e:
-            st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
-
-            st.info("""
-            Pour résoudre ce problème, essayez les solutions suivantes:
-
-            1. Installer une version spécifique de prince compatible:
-              ```
-              !pip install prince==0.7.1
-              ```
-
-            2. Redémarrer votre environnement d'exécution après l'installation
-
-            3. Si le problème persiste, utilisez numpy à la place de pandas pour les opérations d'indexation:
-              ```
-              # Au lieu de:
-              # df.iloc[mask]
-              # Utilisez:
-              mask_array = mask.values  # conversion en numpy array
-              df.values[mask_array]
-              ```
-            """)
-            pass
+                st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
+        
+                st.info("""
+                Pour résoudre ce problème, essayez les solutions suivantes:
+        
+                1. Installer une version spécifique de prince compatible:
+                  ```
+                  !pip install prince==0.7.1
+                  ```
+        
+                2. Redémarrer votre environnement d'exécution après l'installation
+                """)
+                pass
 
 
 def show_ml_analysis():
