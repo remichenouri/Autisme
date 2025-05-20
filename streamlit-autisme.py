@@ -48,11 +48,50 @@ def initialize_session_state():
     """Initialise l'état de session pour conserver les configurations entre les recharges"""
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
-
-        st.session_state.tool_choice = "🏠 Accueil"
+        
+        # Par défaut, commencer sur la page d'accueil
+        default_tool = "🏠 Accueil"
+        
+        # Récupérer le paramètre de sélection de l'URL s'il existe
+        try:
+            # Pour les versions récentes de Streamlit (1.30.0+)
+            if "selection" in st.query_params:
+                selection = st.query_params["selection"]
+                # Mapping entre les valeurs des liens et les options du menu
+                selection_mapping = {
+                    "📝 Test AQ-10": "🤖 Prédiction par IA",
+                    "🤖 Prédiction par IA": "🤖 Prédiction par IA",
+                    "🔍 Exploration des Données": "🔍 Exploration des Données"
+                }
+                
+                if selection in selection_mapping:
+                    st.session_state.tool_choice = selection_mapping[selection]
+                else:
+                    st.session_state.tool_choice = default_tool
+            else:
+                st.session_state.tool_choice = default_tool
+        except:
+            # Fallback pour les versions plus anciennes de Streamlit
+            try:
+                query_params = st.experimental_get_query_params()
+                if "selection" in query_params:
+                    selection = query_params["selection"][0]  # experimental_get_query_params retourne une liste
+                    selection_mapping = {
+                        "📝 Test AQ-10": "🤖 Prédiction par IA",
+                        "🤖 Prédiction par IA": "🤖 Prédiction par IA",
+                        "🔍 Exploration des Données": "🔍 Exploration des Données"
+                    }
+                    
+                    if selection in selection_mapping:
+                        st.session_state.tool_choice = selection_mapping[selection]
+                    else:
+                        st.session_state.tool_choice = default_tool
+                else:
+                    st.session_state.tool_choice = default_tool
+            except:
+                st.session_state.tool_choice = default_tool
+        
         st.session_state.data_exploration_expanded = True
-
-initialize_session_state()
 
 def show_navigation_menu():
     st.markdown("## Autisme - Navigation")
@@ -1055,7 +1094,7 @@ def show_home_page():
                 <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
             </div>
             <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=📝 Test AQ-10" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
+                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
