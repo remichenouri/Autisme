@@ -2278,78 +2278,78 @@ def show_ml_analysis():
         """)
 
     with ml_tabs[2]:
-    st.header("Comparaison des modèles et métriques d'évaluation")
-
-    st.markdown("""
-    <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-        <h3 style="color: #2c3e50; margin-top: 0;">Métriques d'évaluation des modèles</h3>
-        <p style="color: #34495e;">Analyse comparative des performances des différents algorithmes de classification pour la détection des TSA.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.subheader("1. Rapport de classification détaillé")
-
-    report = {
-        'precision': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
-        'recall': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
-        'f1-score': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
-        'support': {'0': 5, '1': 5, 'macro avg': 10, 'weighted avg': 10}
-    }
-
-    report_df = pd.DataFrame(report)
-    st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
-
-    st.subheader("2. Comparaison avec d'autres algorithmes")
-
-    st.markdown("""
-    <p style="margin-bottom: 20px;">
-    Comparaison des performances des différents modèles testés sur notre jeu de données :
-    </p>
-    """, unsafe_allow_html=True)
-
-    models = {
-        "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
-        "XGBoost": XGBClassifier(random_state=42),
-        "LightGBM": LGBMClassifier(random_state=42),
-        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
-    }
-
-    results = [
-        {'Modèle': 'Random Forest', 'Accuracy': 0.96, 'F1-Score': 0.95},
-        {'Modèle': 'XGBoost', 'Accuracy': 0.95, 'F1-Score': 0.94},
-        {'Modèle': 'LightGBM', 'Accuracy': 0.94, 'F1-Score': 0.93},
-        {'Modèle': 'Régression Logistique', 'Accuracy': 0.92, 'F1-Score': 0.91}
-    ]
-
-    results_df = pd.DataFrame(results)
-    st.dataframe(results_df.style.highlight_max(subset=['Accuracy']))
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    x = np.arange(len(results_df))
-    width = 0.35
-    ax.bar(x - width/2, results_df['Accuracy'], width, label='Accuracy')
-    ax.bar(x + width/2, results_df['F1-Score'], width, label='F1-Score')
-    ax.set_xticks(x)
-    ax.set_xticklabels(results_df['Modèle'])
-    ax.legend()
-    ax.set_ylabel('Score')
-    ax.set_title('Comparaison des performances des modèles')
-    st.pyplot(fig)
-
-    st.markdown("""
-    ### Analyse comparative des modèles
-
-    Les différents algorithmes testés présentent des performances variables:
-    1. **Random Forest** offre généralement le meilleur équilibre entre précision et robustesse, ce qui explique notre choix pour le modèle principal.
-
-    2. **XGBoost** montre d'excellentes performances et une grande précision de classification.
-
-    3. **LightGBM** offre un bon compromis entre rapidité et précision, avec des résultats très proches de XGBoost.
-
-    4. **Régression Logistique**, malgré sa simplicité, offre une baseline solide et une meilleure interprétabilité.
-
-    Le choix final du Random Forest est motivé par sa robustesse, sa capacité à gérer efficacement les données mixtes après transformation par le préprocesseur, et sa résistance au surapprentissage.
-    """)
+        st.header("Comparaison des modèles et métriques d'évaluation")
+    
+        st.markdown("""
+        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Métriques d'évaluation des modèles</h3>
+            <p style="color: #34495e;">Analyse comparative des performances des différents algorithmes de classification pour la détection des TSA.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.subheader("1. Rapport de classification détaillé")
+    
+        report = {
+            'precision': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
+            'recall': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
+            'f1-score': {'0': 0.8, '1': 0.8, 'macro avg': 0.8, 'weighted avg': 0.8},
+            'support': {'0': 5, '1': 5, 'macro avg': 10, 'weighted avg': 10}
+        }
+    
+        report_df = pd.DataFrame(report)
+        st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
+    
+        st.subheader("2. Comparaison avec d'autres algorithmes")
+    
+        st.markdown("""
+        <p style="margin-bottom: 20px;">
+        Comparaison des performances des différents modèles testés sur notre jeu de données :
+        </p>
+        """, unsafe_allow_html=True)
+    
+        models = {
+            "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
+            "XGBoost": XGBClassifier(random_state=42),
+            "LightGBM": LGBMClassifier(random_state=42),
+            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
+        }
+    
+        results = [
+            {'Modèle': 'Random Forest', 'Accuracy': 0.96, 'F1-Score': 0.95},
+            {'Modèle': 'XGBoost', 'Accuracy': 0.95, 'F1-Score': 0.94},
+            {'Modèle': 'LightGBM', 'Accuracy': 0.94, 'F1-Score': 0.93},
+            {'Modèle': 'Régression Logistique', 'Accuracy': 0.92, 'F1-Score': 0.91}
+        ]
+    
+        results_df = pd.DataFrame(results)
+        st.dataframe(results_df.style.highlight_max(subset=['Accuracy']))
+    
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = np.arange(len(results_df))
+        width = 0.35
+        ax.bar(x - width/2, results_df['Accuracy'], width, label='Accuracy')
+        ax.bar(x + width/2, results_df['F1-Score'], width, label='F1-Score')
+        ax.set_xticks(x)
+        ax.set_xticklabels(results_df['Modèle'])
+        ax.legend()
+        ax.set_ylabel('Score')
+        ax.set_title('Comparaison des performances des modèles')
+        st.pyplot(fig)
+    
+        st.markdown("""
+        ### Analyse comparative des modèles
+    
+        Les différents algorithmes testés présentent des performances variables:
+        1. **Random Forest** offre généralement le meilleur équilibre entre précision et robustesse, ce qui explique notre choix pour le modèle principal.
+    
+        2. **XGBoost** montre d'excellentes performances et une grande précision de classification.
+    
+        3. **LightGBM** offre un bon compromis entre rapidité et précision, avec des résultats très proches de XGBoost.
+    
+        4. **Régression Logistique**, malgré sa simplicité, offre une baseline solide et une meilleure interprétabilité.
+    
+        Le choix final du Random Forest est motivé par sa robustesse, sa capacité à gérer efficacement les données mixtes après transformation par le préprocesseur, et sa résistance au surapprentissage.
+        """)
 
 with ml_tabs[3]:
     st.header("Modèle Random Forest")
