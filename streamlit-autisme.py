@@ -1063,134 +1063,196 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 def show_home_page():
     df, _, _, _, _, _, _ = load_dataset()
 
+    # Bannière principale avec image de fond et appel à l'action
     st.markdown("""
-    <div class="header-container" style="margin-bottom: 30px;">
-        <h1 class="app-title">Dépistage et Prédiction de l'Autisme</h1>
-    </div>
-    """, unsafe_allow_html=True)
-
-    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
-    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
-
-    st.markdown("""
-    ## Présentation de la plateforme
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
-        <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
-        <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
-            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre de l’Autisme.
-        </h3>
-    </div>
-    <p style="font-size: 1.05rem; line-height: 1.6;">""")
-    st.markdown("""
-    ---
-    ## Critères et niveaux de sévérité
-    """)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#x1F5E3;</span> Déficits de communication</h4>
-            <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#128260;</span> Comportements restreints et répétitifs</h4>
-            <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2ecc71;">
-            <h4 style="color: #2ecc71; margin-top: 0;">Niveau 1</h4>
-            <p>Nécessite un soutien</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: #eaf2f8; padding: 15px; border-radius: 10px; border-left: 4px solid #3498db;">
-            <h4 style="color: #3498db; margin-top: 0;">Niveau 2</h4>
-            <p>Nécessite un soutien important</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown("""
-        <div style="background-color: #f5eef8; padding: 15px; border-radius: 10px; border-left: 4px solid #9b59b6;">
-            <h4 style="color: #9b59b6; margin-top: 0;">Niveau 3</h4>
-            <p>Nécessite un soutien très important</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Les manifestations des TSA sont extrêmement variables d'une personne à l'autre, créant un véritable "spectre" de présentations cliniques. Chaque personne autiste présente une combinaison unique de forces et de difficultés. Les particularités sensorielles (hypersensibilité ou hyposensibilité aux stimuli) font désormais partie intégrante des critères diagnostiques.
-    </p>
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Les TSA peuvent s'accompagner de diverses conditions associées, notamment des troubles du développement intellectuel (présents chez moins de 40% des personnes diagnostiquées aujourd'hui), des troubles anxieux, des difficultés d'apprentissage, des troubles du sommeil, des particularités alimentaires et des comorbidités médicales. Il s'agit d'une condition neurologique avec laquelle la personne naît et qui évolue tout au long de sa vie, s'exprimant différemment selon l'âge, le contexte et l'environnement.
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ### ⚠️ Avertissement
-    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
-        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
-        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle. Consultez toujours un spécialiste pour une évaluation complète.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## Contexte du projet
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    '''La reconnaissance des TSA s'est améliorée ces dernières années mais le diagnostic peut parfois être posé tardivement, notamment chez les personnes sans déficience intellectuelle ou chez celles qui ont développé des stratégies de compensation. 
-Un accompagnement adapté, tenant compte des spécificités de chaque personne, est essentiel pour favoriser l'inclusion sociale et l'épanouissement de la personne.'''
-
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Les données utilisées dans ce projet proviennent de bases de données publiques, telles que celles disponibles sur Kaggle, permettant une analyse approfondie et rigoureuse.
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## Prévalence
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
-        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#128202;</span> Prévalence</h4>
-        <p style="font-size: 1.05rem; line-height: 1.6;">
-        '''La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.'''
+    <div style="background: linear-gradient(rgba(52, 152, 219, 0.7), rgba(52, 152, 219, 0.9)), url('https://drive.google.com/uc?export=view&id=1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW'); 
+         background-size: cover; 
+         background-position: center; 
+         color: white; 
+         padding: 3rem 2rem; 
+         border-radius: 15px; 
+         text-align: center; 
+         margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">Plateforme de Dépistage et Prédiction de l'Autisme</h1>
+        <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto 1.5rem auto;">
+            Une approche innovante combinant l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre de l'Autisme (TSA).
         </p>
+        <a href="/?selection=📝%20Test%20AQ-10" style="background-color: white; color: #3498db; padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s ease;">
+            Commencer le dépistage
+        </a>
     </div>
     """, unsafe_allow_html=True)
 
+    # À propos de la plateforme - Résumé avec icônes visuelles
     st.markdown("""
-    ---
-    ## À qui s'adresse ce projet ?
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Personnes concernées par les TSA</strong> : '''Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.'''</li>
-            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.'''</li>
-            <li><strong>Professionnels de santé</strong> :''' Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.'''</li>
-            <li><strong>Chercheurs et étudiants</strong> : '''Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.'''</li>
-        </ul>
+    <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">À propos de notre plateforme</h2>
+        
+        <p style="font-size: 1.05rem; line-height: 1.6; color: #333;">
+            Notre plateforme utilise des algorithmes avancés de machine learning pour aider au dépistage précoce des Troubles du Spectre de l'Autisme (TSA), 
+            en combinant le questionnaire validé AQ-10 avec des analyses statistiques poussées pour une meilleure précision.
+        </p>
+        
+        <div style="display: flex; flex-wrap: wrap; margin-top: 1.5rem; gap: 1rem;">
+            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                <span style="font-size: 2.5rem; color: #3498db;">🧩</span>
+                <h4 style="margin: 0.7rem 0;">Questionnaire AQ-10</h4>
+                <p style="color: #555;">Outil de dépistage validé scientifiquement</p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                <span style="font-size: 2.5rem; color: #3498db;">🤖</span>
+                <h4 style="margin: 0.7rem 0;">IA prédictive</h4>
+                <p style="color: #555;">Algorithmes entraînés sur des milliers de cas</p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px; background-color: #f8f9fa; padding: 1.2rem; border-radius: 10px; text-align: center;">
+                <span style="font-size: 2.5rem; color: #3498db;">📊</span>
+                <h4 style="margin: 0.7rem 0;">Analyses détaillées</h4>
+                <p style="color: #555;">Visualisation et interprétation des résultats</p>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
+    # Critères et niveaux de sévérité
+        st.markdown("""
+        <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Critères et niveaux de sévérité des TSA</h2>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="flex: 1; min-width: 300px; background-color: #eaf2f8; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #3498db;">
+                    <h3 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.4rem;">🗣️</span> Déficits de communication</h3>
+                    <p style="color: #445; line-height: 1.6;">Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px; background-color: #eaf2f8; padding: 1.5rem; border-radius: 10px; border-left: 5px solid #3498db;">
+                    <h3 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.4rem;">🔄</span> Comportements restreints et répétitifs</h3>
+                    <p style="color: #445; line-height: 1.6;">Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; margin-top: 1.5rem;">
+                <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); padding: 1.2rem; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #2e7d32; margin-top: 0; font-size: 1.3rem;">Niveau 1</h4>
+                    <div style="width: 70px; height: 8px; background-color: #4caf50; border-radius: 4px; margin: 0.8rem auto;"></div>
+                    <p style="color: #1b5e20; font-weight: 500;">Nécessite un soutien</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 1.2rem; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #1565c0; margin-top: 0; font-size: 1.3rem;">Niveau 2</h4>
+                    <div style="width: 70px; height: 8px; background-color: #2196f3; border-radius: 4px; margin: 0.8rem auto;"></div>
+                    <p style="color: #0d47a1; font-weight: 500;">Nécessite un soutien important</p>
+                </div>
+                
+                <div style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #f3e5f5, #e1bee7); padding: 1.2rem; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #6a1b9a; margin-top: 0; font-size: 1.3rem;">Niveau 3</h4>
+                    <div style="width: 70px; height: 8px; background-color: #9c27b0; border-radius: 4px; margin: 0.8rem auto;"></div>
+                    <p style="color: #4a148c; font-weight: 500;">Nécessite un soutien très important</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # Avertissement important
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fff8e1, #fffde7); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #ffc107; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 2rem;">
+            <h3 style="color: #f57c00; display: flex; align-items: center; margin-top: 0;">
+                <span style="font-size: 1.6rem; margin-right: 0.7rem;">⚠️</span> Avertissement important
+            </h3>
+            <p style="font-size: 1.05rem; line-height: 1.6; color: #5d4037;">
+                Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle. 
+                Les résultats doivent être interprétés avec précaution et confirmés par un spécialiste.
+            </p>
+            <p style="font-weight: 600; color: #e65100; margin-top: 0.8rem;">
+                Consultez toujours un professionnel de santé qualifié pour une évaluation complète.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        # Prévalence et données statistiques
+        st.markdown("""
+        <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Prévalence et données statistiques</h2>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: stretch;">
+                <div style="flex: 1.5; min-width: 300px;">
+                    <p style="font-size: 1.05rem; line-height: 1.7; color: #333;">
+                        La prévalence des TSA est estimée à environ <strong>1%</strong> de la population mondiale, avec des études récentes suggérant une fourchette entre <strong>1% et 2%</strong> dans les pays à revenu élevé. En France, environ <strong>700 000 personnes</strong> sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ <strong>4:1</strong>.
+                    </p>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px; background-color: #f8f9fa; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-around;">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">1-2%</span>
+                        <p style="color: #555; margin-top: 0.5rem;">de la population mondiale</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">4:1</span>
+                        <p style="color: #555; margin-top: 0.5rem;">ratio garçons/filles</p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <span style="font-size: 2.5rem; color: #3498db; font-weight: 700;">700k</span>
+                        <p style="color: #555; margin-top: 0.5rem;">personnes en France</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # À qui s'adresse ce projet
+        st.markdown("""
+        <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">À qui s'adresse ce projet ?</h2>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-around;">
+                <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e3f2fd; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                        <span style="font-size: 2rem; color: #1976d2;">👤</span>
+                    </div>
+                    <h4 style="color: #3498db; margin: 0.7rem 0;">Personnes concernées</h4>
+                    <p style="color: #445; line-height: 1.5;">Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble.</p>
+                </div>
+                
+                <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                        <span style="font-size: 2rem; color: #388e3c;">👨‍👩‍👧</span>
+                    </div>
+                    <h4 style="color: #3498db; margin: 0.7rem 0;">Familles et proches</h4>
+                    <p style="color: #445; line-height: 1.5;">Parents et entourage cherchant à mieux comprendre les TSA et identifier d'éventuels signes.</p>
+                </div>
+                
+                <div style="width: 200px; text-align: center; padding: 1.5rem 1rem; background-color: #f8f9fa; border-radius: 12px; transition: all 0.3s ease;">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background-color: #e0f7fa; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+                        <span style="font-size: 2rem; color: #0097a7;">👩‍⚕️</span>
+                    </div>
+                    <h4 style="color: #3498db; margin: 0.7rem 0;">Professionnels</h4>
+                    <p style="color: #445; line-height: 1.5;">Médecins et thérapeutes souhaitant utiliser un outil d'aide au dépistage.</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # Boutons d'appel à l'action finaux
+        st.markdown("""
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem; margin-bottom: 3rem;">
+            <a href="/?selection=📝%20Test%20AQ-10" style="text-decoration: none; flex: 1; max-width: 280px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
+                    <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📝</span>
+                    <h3 style="margin: 0.5rem 0; font-size: 1.3rem;">Commencer le test AQ-10</h3>
+                    <p style="margin-top: 0.5rem; opacity: 0.9;">Évaluez les traits autistiques en quelques minutes</p>
+                </div>
+            </a>
+            
+            <a href="/?selection=🔍%20Exploration%20des%20Données" style="text-decoration: none; flex: 1; max-width: 280px;">
+                <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);">
+                    <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🔍</span>
+                    <h3 style="margin: 0.5rem 0; font-size: 1.3rem;">Explorer les données</h3>
+                    <p style="margin-top: 0.5rem; opacity: 0.9;">Découvrez les statistiques et analyses sur l'autisme</p>
+                </div>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
-        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#127919;</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Chercheurs en santé et psychologie</strong> : '''une analyse détaillée permet d’étayer leurs hypothèses ou confirmer des tendances cliniques.'''</li>
-            <li><strong>Professionnels de santé et du médico-social</strong> :''' des résultats exploitables permettent d’améliorer le dépistage et la prise en charge.'''</li>
-            <li><strong>Membres de la famille, entourage ou la personne elle-même</strong> : '''auto-évaluation ou recherche d’un pré-diagnostic afin d’être orienté ou de répondre à de possibles suspicions de TSA.'''</li>
-            <li><strong>Politiques et décideurs</strong> : '''Les données et analyses peuvent informer les politiques publiques et les décisions de financement pour améliorer les services et les ressources disponibles pour les personnes avec TSA.'''</li>
-            <li><strong>Entreprises et employeurs</strong> : '''Les recommandations sur l'inclusion et l'adaptation des environnements de travail pour les employés avec TSA favorisent la diversité et l'inclusion en milieu professionnel.'''</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    pass
+
+
 
 def show_data_exploration():
     import plotly.express as px
