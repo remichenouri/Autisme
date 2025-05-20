@@ -1205,7 +1205,7 @@ def show_data_exploration():
 
     st.markdown("""
     <div class="header-container">
-        <span style="font-size:2.5rem">🔍</span>
+        <span style="font-size:2.5rem">'''🔍'''</span>
         <h1 class="app-title">Exploration des Données TSA</h1>
     </div>
     """, unsafe_allow_html=True)
