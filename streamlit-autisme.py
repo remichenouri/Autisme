@@ -1063,6 +1063,26 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 def show_home_page():
     df, _, _, _, _, _, _ = load_dataset()
 
+    st.markdown("""
+    <div class="header-container" style="margin-bottom: 30px;">
+        <h1 class="app-title">Dépistage et Prédiction de l'Autisme</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+    st.markdown("""
+    ## Présentation de la plateforme
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
+        <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
+        <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
+            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre Autistique.
+        </h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+
     # Bannière principale avec image de fond et appel à l'action
     st.markdown("""
     <div style="background: linear-gradient(rgba(52, 152, 219, 0.7), rgba(52, 152, 219, 0.9)), url('https://drive.google.com/uc?export=view&id=1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW'); 
