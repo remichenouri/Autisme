@@ -1081,53 +1081,7 @@ def show_home_page():
         </h3>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("## Accès rapide aux outils")
-    col1, col2, col3 = st.columns(3, gap="large")
-
-    with col1:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">📝 Test AQ-10</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=📝 Test AQ-10" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-    with col2:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🤖 Prédiction IA</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Découvrir l'IA</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🔍 Analyses</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
-                <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🔍 Exploration des Données" class="cta-button" style="display: block; margin: 0 auto;">Explorer les données</a>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
+    
     st.markdown("""
     ---
     ### ⚠️ Avertissement
