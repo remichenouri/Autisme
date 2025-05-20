@@ -1168,7 +1168,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
         # Prévalence et données statistiques
-        st.markdown("""
+    st.markdown("""
         <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
             <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Prévalence et données statistiques</h2>
             
