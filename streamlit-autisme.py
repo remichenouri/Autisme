@@ -1395,19 +1395,42 @@ def show_data_exploration():
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #2c3e50; margin-top: 0;">Distribution des Variables Clés</h3>
-            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable et diagnostic TSA.</p>
+            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable.</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Dictionnaire de commentaires pour les variables
+        variable_comments = {
+            'A1': "Variable liée au questionnaire AQ-10 : évalue la capacité à remarquer des détails que d'autres pourraient manquer.",
+            'A2': "Variable liée au questionnaire AQ-10 : évalue la capacité à imaginer des histoires.",
+            'A3': "Variable liée au questionnaire AQ-10 : évalue la préférence pour la socialisation vs activités solitaires.",
+            'A4': "Variable liée au questionnaire AQ-10 : évalue la tendance à se concentrer sur un sujet spécifique.",
+            'A5': "Variable liée au questionnaire AQ-10 : évalue l'attention aux détails numériques et dates.",
+            'A6': "Variable liée au questionnaire AQ-10 : évalue la capacité à comprendre les intentions des autres.",
+            'A7': "Variable liée au questionnaire AQ-10 : évalue la capacité à réagir de manière appropriée socialement.",
+            'A8': "Variable liée au questionnaire AQ-10 : évalue les interactions sociales en groupe.",
+            'A9': "Variable liée au questionnaire AQ-10 : évalue la reconnaissance des émotions chez autrui.",
+            'A10': "Variable liée au questionnaire AQ-10 : évalue la capacité à gérer plusieurs tâches simultanément.",
+            'Jaunisse': "Indique si l'individu a eu une jaunisse à la naissance, facteur potentiellement associé au risque d'autisme.",
+            'Statut_testeur': "Indique la relation entre le testeur et la personne évaluée (Famille, Professionnel de santé, Individu, etc.).",
+        }
+        
+        # Définition par défaut pour les variables sans commentaire spécifique
+        default_comment = "Distribution de la variable dans l'ensemble du dataset."
+        
         all_columns = [col for col in df.columns if col != 'TSA']
         analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
+        
+        # Afficher le commentaire pour la variable sélectionnée
+        comment = variable_comments.get(analysis_var, default_comment)
+        st.info(comment)
+        
         col1, col2 = st.columns(2)
         with col1:
-            color_var = 'TSA' if 'TSA' in df.columns else None
+            color_var = None  # Ne pas utiliser la coloration par TSA
             if analysis_var == 'Jaunisse':
-                fig = px.histogram(df, x='Jaunisse', color='TSA',
-                                   color_discrete_map=palette,
-                                   barnorm='percent',
-                                   title="Prévalence de la jaunisse par statut TSA")
+                fig = px.histogram(df, x='Jaunisse',
+                                   title=f"Distribution de la jaunisse dans le dataset")
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 is_categorical_aq = analysis_var.startswith('A') and analysis_var[1:].isdigit() and len(analysis_var) <= 3
@@ -1418,11 +1441,9 @@ def show_data_exploration():
                 if fig:
                     st.plotly_chart(fig, use_container_width=True)
         with col2:
-            if 'TSA' in df.columns:
-                stats = df.groupby('TSA')[analysis_var].describe()
-            else:
-                stats = df[analysis_var].describe().to_frame().T
+            stats = df[analysis_var].describe().to_frame().T
             st.dataframe(stats, use_container_width=True)
+
 
     with st.expander("📝 Analyse des Réponses au Questionnaire AQ-10", expanded=True):
         st.subheader("Analyse des Réponses au Questionnaire AQ-10")
