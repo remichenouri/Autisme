@@ -1158,7 +1158,7 @@ Un accompagnement adapté, tenant compte des spécificités de chaque personne, 
     ---
     ## Prévalence
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
-        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">📊</span> Prévalence</h4>
+        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#128202;</span> Prévalence</h4>
         <p style="font-size: 1.05rem; line-height: 1.6;">
         La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.
         </p>
@@ -1180,7 +1180,7 @@ Un accompagnement adapté, tenant compte des spécificités de chaque personne, 
 
     st.markdown("""
     <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
-        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🎯</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
+        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#127919;</span> Ce travail vise à produire des résultats utiles pour différents publics :</h4>
         <ul style="font-size: 1.05rem; line-height: 1.6;">
             <li><strong>Chercheurs en santé et psychologie</strong> : une analyse détaillée permet d’étayer leurs hypothèses ou confirmer des tendances cliniques.</li>
             <li><strong>Professionnels de santé et du médico-social</strong> : des résultats exploitables permettent d’améliorer le dépistage et la prise en charge.</li>
