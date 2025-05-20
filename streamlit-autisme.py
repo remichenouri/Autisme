@@ -1146,7 +1146,7 @@ def show_home_page():
     ---
     ## Contexte du projet
     <p style="font-size: 1.05rem; line-height: 1.6;">
-    La reconnaissance des TSA s'est améliorée ces dernières années mais le diagnostic peut parfois être posé tardivement, notamment chez les personnes sans déficience intellectuelle ou chez celles qui ont développé des stratégies de compensation. Un accompagnement adapté, tenant compte des spécificités de chaque personne, est essentiel pour favoriser l'inclusion sociale et l’épanouissement de la personne.
+    La reconnaissance des TSA s'est améliorée ces dernières années mais le diagnostic peut parfois être posé tardivement, notamment chez les personnes sans déficience intellectuelle ou chez celles qui ont développé des stratégies de compensation. Un accompagnement adapté, tenant compte des spécificités de chaque personne, est essentiel pour favoriser l'inclusion sociale et l'épanouissement de la personne.
     </p>
     <p style="font-size: 1.05rem; line-height: 1.6;">
     Les données utilisées dans ce projet proviennent de bases de données publiques, telles que celles disponibles sur Kaggle, permettant une analyse approfondie et rigoureuse.
