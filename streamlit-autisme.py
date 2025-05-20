@@ -1115,7 +1115,7 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
     # Critères et niveaux de sévérité
-        st.markdown("""
+    st.markdown("""
         <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
             <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">Critères et niveaux de sévérité des TSA</h2>
             
@@ -1153,7 +1153,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
         # Avertissement important
-        st.markdown("""
+    st.markdown("""
         <div style="background: linear-gradient(135deg, #fff8e1, #fffde7); padding: 1.5rem; border-radius: 15px; border-left: 5px solid #ffc107; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 2rem;">
             <h3 style="color: #f57c00; display: flex; align-items: center; margin-top: 0;">
                 <span style="font-size: 1.6rem; margin-right: 0.7rem;">⚠️</span> Avertissement important
@@ -1199,7 +1199,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
         # À qui s'adresse ce projet
-        st.markdown("""
+    st.markdown("""
         <div style="background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem;">
             <h2 style="color: #3498db; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 2px solid #f0f2f6; padding-bottom: 0.8rem;">À qui s'adresse ce projet ?</h2>
             
@@ -1231,7 +1231,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
         # Boutons d'appel à l'action finaux
-        st.markdown("""
+    st.markdown("""
         <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem; margin-bottom: 3rem;">
             <a href="/?selection=📝%20Test%20AQ-10" style="text-decoration: none; flex: 1; max-width: 280px;">
                 <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 1.2rem; border-radius: 10px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
