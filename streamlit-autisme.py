@@ -1089,14 +1089,14 @@ def show_home_page():
     with col1:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🗣️</span> Déficits de communication</h4>
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#x1F5E3;</span> Déficits de communication</h4>
             <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
         </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔄</span> Comportements restreints et répétitifs</h4>
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">&#128260;</span> Comportements restreints et répétitifs</h4>
             <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
         </div>
         """, unsafe_allow_html=True)
