@@ -1380,87 +1380,71 @@ def show_data_exploration():
                     st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
                 pass
                 
-    # Définition des explications pour chaque variable
-variable_explanations = {
-    'A1': "La variable A1 correspond à la première question du questionnaire, qui évalue la capacité de l'enfant à établir spontanément un contact visuel, compétence essentielle pour les interactions sociales.",
-    'A2': "La variable A2 vérifie si l'enfant pointe du doigt pour attirer l'attention sur un objet ou un événement, démontrant ainsi une communication non verbale et un partage d'attention.",
-    'A3': "La variable A3 observe la capacité de l'enfant à reproduire des gestes ou expressions faciales, une compétence importante pour l'apprentissage social.",
-    'A4': "La variable A4 évalue la présence de jeux de faire semblant, tels que l'imitation de situations réelles.",
-    'A5': "La variable A5 évalue la réaction de l'enfant lorsqu'on l'appelle par son prénom, indiquant son niveau d'attention et d'engagement social.",
-    'A6': "La variable A6 évalue l'intérêt de l'enfant à interagir ou jouer avec d'autres enfants.",
-    'A7': "La variable A7 évalue la capacité de l'enfant à comprendre et suivre des instructions simples, reflétant sa compréhension verbale.",
-    'A8': "La variable A8 examine si l'enfant utilise des mots pour demander quelque chose ou commenter une situation, démontrant une communication fonctionnelle.",
-    'A9': "La variable A9 repère les gestes répétitifs ou stéréotypés (comme se balancer ou battre des mains).",
-    'A10': "La variable A10 observe si l'enfant réagit de manière excessive ou inhabituelle à certains sons, textures ou lumières, révélant une hypersensibilité sensorielle.",
-    'Score_A10': "Le score A10 est une variable calculée à partir des réponses aux 10 questions du questionnaire A10. Il s'agit de la somme des scores des variables A1 à A10.",
-    'Jaunisse': "La jaunisse est une condition caractérisée par la coloration jaune de la peau et des muqueuses, souvent observée chez les nouveau-nés.",
-    # Ajouter d'autres variables si nécessaire
-}
 
-with st.expander("📊 Distribution des Variables Clés", expanded=True):
-    st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="color: #2c3e50; margin-top: 0;">Distribution des Variables Clés</h3>
-        <p style="color: #7f8c8d;">Analyse interactive des distributions par variable.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Filtrer les colonnes pour exclure 'TSA'
-    all_columns = [col for col in df.columns if col != 'TSA']
-    
-    # Sélection de la variable à analyser
-    analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
-    
-    # Afficher l'explication de la variable sélectionnée
-    if analysis_var in variable_explanations:
-        st.markdown(f"**{analysis_var}**: {variable_explanations[analysis_var]}")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if analysis_var == 'Jaunisse':
-            fig = px.histogram(df, x='Jaunisse',
-                               barnorm='percent',
-                               title="Prévalence de la jaunisse")
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            # Vérifier si c'est une variable catégorielle A1-A10
-            is_categorical_aq = analysis_var.startswith('A') and analysis_var[1:].isdigit() and len(analysis_var) <= 3
-            if is_categorical_aq:
-                # Pour les variables A1-A10, créer un graphique en barres
-                counts = df[analysis_var].value_counts().reset_index()
-                counts.columns = [analysis_var, 'count']
-                fig = px.bar(
-                    counts, 
-                    x=analysis_var, 
-                    y='count',
-                    color=analysis_var,  # Utiliser la valeur elle-même pour la coloration
-                    color_discrete_map={0: "#3498db", 1: "#2ecc71"},  # Palette de couleurs personnalisée
-                    title=f"Distribution de {analysis_var} (catégorielle)"
-                )
-                fig.update_layout(
-                    xaxis_title=f"Valeur de {analysis_var}",
-                    yaxis_title="Nombre d'occurrences"
-                )
+    with st.expander("📊 Distribution des Variables Clés", expanded=True):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Distribution des Variables Clés</h3>
+            <p style="color: #7f8c8d;">Analyse interactive des distributions par variable.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Filtrer les colonnes pour exclure 'TSA'
+        all_columns = [col for col in df.columns if col != 'TSA']
+        
+        # Sélection de la variable à analyser
+        analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
+        
+        # Afficher l'explication de la variable sélectionnée
+        if analysis_var in variable_explanations:
+            st.markdown(f"**{analysis_var}**: {variable_explanations[analysis_var]}")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if analysis_var == 'Jaunisse':
+                fig = px.histogram(df, x='Jaunisse',
+                                   barnorm='percent',
+                                   title="Prévalence de la jaunisse")
+                st.plotly_chart(fig, use_container_width=True)
             else:
-                # Pour les autres variables, créer un histogramme
-                fig = px.histogram(
-                    df, 
-                    x=analysis_var,
-                    color_discrete_sequence=["#3498db"],  # Couleur unique
-                    title=f"Distribution de {analysis_var}"
-                )
-                fig.update_layout(
-                    xaxis_title=analysis_var,
-                    yaxis_title="Fréquence"
-                )
-            
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Ajouter des informations sur l'équilibre des distributions pour certaines variables
-            if analysis_var in ['A1', 'A10']:
-                st.info("Cette variable présente une distribution relativement équilibrée entre les valeurs 0 et 1, comme mentionné dans le rapport du 12/05.")
-            elif analysis_var in ['A3', 'A9']:
-                st.info("Cette variable présente plus de valeurs 0 que de valeurs 1, comme mentionné dans le rapport du 12/05.")
+                # Vérifier si c'est une variable catégorielle A1-A10
+                is_categorical_aq = analysis_var.startswith('A') and analysis_var[1:].isdigit() and len(analysis_var) <= 3
+                if is_categorical_aq:
+                    # Pour les variables A1-A10, créer un graphique en barres
+                    counts = df[analysis_var].value_counts().reset_index()
+                    counts.columns = [analysis_var, 'count']
+                    fig = px.bar(
+                        counts, 
+                        x=analysis_var, 
+                        y='count',
+                        color=analysis_var,  # Utiliser la valeur elle-même pour la coloration
+                        color_discrete_map={0: "#3498db", 1: "#2ecc71"},  # Palette de couleurs personnalisée
+                        title=f"Distribution de {analysis_var} (catégorielle)"
+                    )
+                    fig.update_layout(
+                        xaxis_title=f"Valeur de {analysis_var}",
+                        yaxis_title="Nombre d'occurrences"
+                    )
+                else:
+                    # Pour les autres variables, créer un histogramme
+                    fig = px.histogram(
+                        df, 
+                        x=analysis_var,
+                        color_discrete_sequence=["#3498db"],  # Couleur unique
+                        title=f"Distribution de {analysis_var}"
+                    )
+                    fig.update_layout(
+                        xaxis_title=analysis_var,
+                        yaxis_title="Fréquence"
+                    )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Ajouter des informations sur l'équilibre des distributions pour certaines variables
+                if analysis_var in ['A1', 'A10']:
+                    st.info("Cette variable présente une distribution relativement équilibrée entre les valeurs 0 et 1, comme mentionné dans le rapport du 12/05.")
+                elif analysis_var in ['A3', 'A9']:
+                    st.info("Cette variable présente plus de valeurs 0 que de valeurs 1, comme mentionné dans le rapport du 12/05.")
     
     with col2:
         # Afficher les statistiques descriptives
