@@ -1062,191 +1062,163 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 
 def show_home_page():
     df, _, _, _, _, _, _ = load_dataset()
-    
+
     st.markdown("""
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 20px; border-radius: 10px; margin-bottom: 25px;">
-        <h1 style="color: white; text-align: center; font-size: 2.5rem;">Dépistage et Prédiction de l'Autisme</h1>
-        <p style="color: white; text-align: center; font-size: 1.2rem; font-style: italic; margin-top: 10px;">
-            Une approche basée sur les données pour le dépistage des Troubles du Spectre Autistique
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Image bannière
-    st.image("https://cherishedfutures.org/wp-content/uploads/2020/04/Autism_Awareness.jpg", use_column_width=True)
-    
-    # Avertissement
-    st.markdown("""
-    <div style="background-color: rgba(231, 76, 60, 0.1); border-left: 4px solid #e74c3c; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <h3 style="color: #e74c3c; margin-top: 0;">⚠️ Avertissement</h3>
-        <p style="margin-bottom: 0;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle.
-        Consultez toujours un spécialiste pour une évaluation complète.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Introduction du rapport
-    with st.expander("📝 Introduction au Trouble du Spectre de l'Autisme (TSA)", expanded=True):
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown("""
-            ## Comprendre les TSA
-            
-            Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau.
-            
-            Selon les classifications récentes comme le DSM-5, les TSA sont désormais définis selon une dyade autistique, remplaçant l'ancienne triade. Cette dyade comprend deux catégories de critères diagnostiques :
-            
-            1. **Déficits persistants de la communication et des interactions sociales** observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)
-            
-            2. **Caractère restreint et répétitif des comportements, des intérêts ou des activités** (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)
-            """)
-        with col2:
-            st.image("https://cdn-icons-png.flaticon.com/512/4039/4039232.png", width=150)
-            st.markdown("""
-            ### Prévalence
-            - Environ 1% de la population mondiale
-            - En France: ~700 000 personnes 
-            - Ratio garçons/filles: 4:1
-            """)
-    
-    # Niveaux de sévérité
-    st.markdown("## Niveaux de Sévérité des TSA")
-    st.markdown("Les classifications actuelles ont abandonné les sous-types d'autisme au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité :")
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; height: 150px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2ecc71; margin-top: 0;">Niveau 1</h3>
-            <p>Nécessite un soutien</p>
-            <p>La personne présente des difficultés sans soutien, mais peut fonctionner avec une aide modérée.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: #eaf2f8; padding: 15px; border-radius: 10px; height: 150px; border-left: 4px solid #3498db;">
-            <h3 style="color: #3498db; margin-top: 0;">Niveau 2</h3>
-            <p>Nécessite un soutien important</p>
-            <p>La personne montre des déficits marqués même avec soutien et requiert une aide substantielle.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown("""
-        <div style="background-color: #f5eef8; padding: 15px; border-radius: 10px; height: 150px; border-left: 4px solid #9b59b6;">
-            <h3 style="color: #9b59b6; margin-top: 0;">Niveau 3</h3>
-            <p>Nécessite un soutien très important</p>
-            <p>La personne présente des déficits sévères causant des limitations majeures et nécessite une aide intensive.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Manifestations et comorbidités
-    with st.expander("📊 Manifestations et Conditions Associées", expanded=False):
-        st.markdown("""
-        ### Manifestations des TSA
-        
-        Les manifestations des TSA sont extrêmement variables d'une personne à l'autre, créant un véritable "spectre" de présentations cliniques. Chaque personne autiste présente une combinaison unique de forces et de difficultés. Les particularités sensorielles (hypersensibilité ou hyposensibilité aux stimuli) font désormais partie intégrante des critères diagnostiques.
-        
-        ### Conditions Associées
-        
-        Les TSA peuvent s'accompagner de diverses conditions associées, notamment :
-        - Des troubles du développement intellectuel (présents chez moins de 40% des personnes diagnostiquées aujourd'hui)
-        - Des troubles anxieux
-        - Des difficultés d'apprentissage
-        - Des troubles du sommeil
-        - Des particularités alimentaires
-        - Des comorbidités médicales
-        
-        Il est important de souligner que les TSA ne sont pas liés aux caractéristiques psychologiques des parents ou à des événements traumatisants. Il s'agit d'une condition neurologique avec laquelle la personne naît et qui évolue tout au long de sa vie, s'exprimant différemment selon l'âge, le contexte et l'environnement.
-        """)
-    
-    # Objectifs du projet
-    st.markdown("## Objectifs de ce Projet")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 300px;">
-            <h3 style="color: #3498db; margin-top: 0;">🔍 Analyse et Exploration</h3>
-            <ul>
-                <li>Identifier les facteurs associés à la présence d'un TSA</li>
-                <li>Explorer les données pour déceler des tendances et motifs</li>
-                <li>Analyser les relations entre variables et diagnostic</li>
-                <li>Visualiser les distributions et corrélations clés</li>
-                <li>Fournir des insights basés sur les données</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 300px;">
-            <h3 style="color: #2ecc71; margin-top: 0;">🤖 Prédiction et Outil d'Aide</h3>
-            <ul>
-                <li>Construire des modèles prédictifs robustes</li>
-                <li>Développer un outil de dépistage préliminaire</li>
-                <li>Fournir des visualisations interactives</li>
-                <li>Offrir une interface simple pour les tests AQ-10</li>
-                <li>Supporter la prise de décision professionnelle</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Public visé
-    st.markdown("## À qui s'adresse cette Application ?")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div style="background-color: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); height: 200px;">
-            <h4 style="color: #3498db;"><i class="fas fa-user-md"></i> Professionnels de Santé</h4>
-            <p>Médecins, psychologues, thérapeutes et autres professionnels qui cherchent un outil complémentaire pour le dépistage et l'évaluation des TSA.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background-color: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); height: 200px;">
-            <h4 style="color: #2ecc71;"><i class="fas fa-users"></i> Familles et Entourage</h4>
-            <p>Parents, membres de la famille ou personnes proches qui souhaitent mieux comprendre les TSA et évaluer les signes potentiels.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown("""
-        <div style="background-color: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); height: 200px;">
-            <h4 style="color: #9b59b6;"><i class="fas fa-search"></i> Chercheurs et Étudiants</h4>
-            <p>Personnes intéressées par l'analyse de données sur l'autisme et les méthodologies de dépistage précoce.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Découvrez nos outils
-    st.markdown("## Découvrez Nos Outils")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #3498db, #2980b9); border-radius: 10px; padding: 20px; color: white; text-align: center; cursor: pointer;" onclick="window.location.href='?selection=🤖 Prédiction par IA'">
-            <h3 style="margin-top: 0;">📝 Test AQ-10</h3>
-            <p>Réalisez le questionnaire d'auto-évaluation AQ-10 pour obtenir un premier aperçu des traits autistiques.</p>
-            <div style="background-color: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin-top: 10px;">
-                Commencer le test →
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); border-radius: 10px; padding: 20px; color: white; text-align: center; cursor: pointer;" onclick="window.location.href='?selection=🔍 Exploration des Données'">
-            <h3 style="margin-top: 0;">🔍 Explorer les Données</h3>
-            <p>Plongez dans les statistiques et visualisations pour mieux comprendre les facteurs associés aux TSA.</p>
-            <div style="background-color: rgba(255,255,255,0.2); padding: 8px; border-radius: 5px; margin-top: 10px;">
-                Explorer maintenant →
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Pied de page
-    st.markdown("""
-    <div style="background-color: #f5f7fa; padding: 15px; border-radius: 10px; margin-top: 30px; text-align: center;">
-        <p style="margin-bottom: 5px; color: #7f8c8d;">© 2025 - Projet d'Analyse des Troubles du Spectre de l'Autisme</p>
-        <p style="margin-bottom: 0; font-size: 0.9em; color: #95a5a6;">
-            Auteurs : Alexandre Bernard, Rémi Chenouri, Ahmed Ibnabasse, Laurence Souppayaraza
-        </p>
+    <div class="header-container" style="margin-bottom: 30px;">
+        <h1 class="app-title">Dépistage et Prédiction de l'Autisme</h1>
     </div>
     """, unsafe_allow_html=True)
 
+    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+    st.markdown("""
+    ## Présentation de la plateforme
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
+        <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
+        <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
+            Combiner l'intelligence artificielle et les connaissances cliniques pour un meilleur dépistage des Troubles du Spectre Autistique.
+        </h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("## Accès rapide aux outils")
+    col1, col2, col3 = st.columns(3, gap="large")
+
+    with col1:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">📝 Test AQ-10</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
+                <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=📝 Test AQ-10" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    with col2:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">🤖 Prédiction IA</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
+                <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Découvrir l'IA</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <div>
+                <h3 class="card-title">🔍 Analyses</h3>
+                <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
+                <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
+            </div>
+            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
+                <a href="?selection=🔍 Exploration des Données" class="cta-button" style="display: block; margin: 0 auto;">Explorer les données</a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ### ⚠️ Avertissement
+    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
+        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
+        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle.
+        Consultez toujours un spécialiste pour une évaluation complète.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ## Contexte du projet
+    <p style="font-size: 1.05rem; line-height: 1.6;">
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau
+    </p>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ## À qui s'adresse ce projet ?
+    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+        <ul style="font-size: 1.05rem; line-height: 1.6;">
+            <li><strong>Personnes concernées par les TSA</strong> : Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.</li>
+            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.</li>
+            <li><strong>Professionnels de santé</strong> : Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.</li>
+            <li><strong>Chercheurs et étudiants</strong> : Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ## Critères et niveaux de sévérité
+    """)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🗣️</span> Déficits de communication</h4>
+            <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔄</span> Comportements restreints et répétitifs</h4>
+            <p>Caractère restreint et répétitif des comportements, des intérêts ou des activités (mouvements stéréotypés, attachement aux routines, intérêts restreints et particularités sensorielles)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <p style="font-size: 1.05rem; line-height: 1.6; margin-top: 20px;">
+    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner)
+    au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire:
+    </p>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2ecc71;">
+            <h4 style="color: #2ecc71; margin-top: 0;">Niveau 1</h4>
+            <p>Nécessite un soutien</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background-color: #eaf2f8; padding: 15px; border-radius: 10px; border-left: 4px solid #3498db;">
+            <h4 style="color: #3498db; margin-top: 0;">Niveau 2</h4>
+            <p>Nécessite un soutien important</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div style="background-color: #f5eef8; padding: 15px; border-radius: 10px; border-left: 4px solid #9b59b6;">
+            <h4 style="color: #9b59b6; margin-top: 0;">Niveau 3</h4>
+            <p>Nécessite un soutien très important</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    ---
+    ## Prévalence
+    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
+        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">📊</span> Prévalence</h4>
+        <p style="font-size: 1.05rem; line-height: 1.6;">
+        La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     pass
 
 def show_data_exploration():
