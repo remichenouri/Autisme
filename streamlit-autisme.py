@@ -667,7 +667,7 @@ def train_advanced_model(df):
 
     try:
         if 'Jaunisse' in df.columns:
-        df = df.drop(columns=['Jaunisse'])
+            df = df.drop(columns=['Jaunisse'])
 
         if 'TSA' not in df.columns:
             st.error("La colonne 'TSA' n'existe pas dans le dataframe")
