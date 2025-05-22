@@ -2108,9 +2108,9 @@ def show_ml_analysis():
     
     # CORRECTION: 'false' -> 'False' et utilisation de try/except pour gérer l'option
     try:
-        st.set_option('deprecation.showPyplotGlobalUse', False)  # Correction avec F majuscule
+        st.set_option('deprecation.showPyplotGlobalUse', False)
     except Exception:
-        # Si l'option n'est pas reconnue, on l'ignore simplement
+        # Si l'option n'est pas reconnue (cas des versions récentes de Streamlit), l'ignorer
         pass
 
     # Gestion des dépendances
