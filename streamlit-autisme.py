@@ -2064,43 +2064,24 @@ def show_ml_analysis():
     from sklearn.pipeline import Pipeline
     from xgboost import XGBClassifier
     from lightgbm import LGBMClassifier
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-    from sklearn.metrics import roc_auc_score, confusion_matrix, classification_report
-    from sklearn.metrics import balanced_accuracy_score
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report, balanced_accuracy_score
     from sklearn.model_selection import cross_val_score, train_test_split
     import time
     import os
-    import joblib
-    from joblib import Memory, Parallel, delayed
-    import hashlib
-
-    # Création du dossier de cache s'il n'existe pas
-    cache_dir = "model_cache"
-    os.makedirs(cache_dir, exist_ok=True)
 
     df, _, _, _, _, _, _ = load_dataset()
-
-    aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
-    if aq_columns:
-        df = df.drop(columns=aq_columns)
-
     if 'Jaunisse' in df.columns:
         df = df.drop(columns=['Jaunisse'])
     if 'TSA' not in df.columns:
         st.error("La colonne 'TSA' n'existe pas dans le dataframe")
         return
-    
+
     X = df.drop(columns=['TSA'])
     y = df['TSA'].map({'Yes': 1, 'No': 0})
-    
-    # Diviser les données en ensembles d'entraînement et de test
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    
-    # Identifier les colonnes numériques et catégorielles
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
-    
-    # Créer le préprocesseur
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', StandardScaler(), numerical_cols),
@@ -2109,82 +2090,43 @@ def show_ml_analysis():
         remainder='passthrough',
         verbose_feature_names_out=False
     )
-    
-    # Créer et entraîner le pipeline avec RandomForest
-    rf_classifier = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=8,
-        min_samples_split=10,
-        min_samples_leaf=2,
-        max_features='sqrt',
-        bootstrap=True,
-        random_state=42,
-        n_jobs=-1
-    )
-    
-    pipeline = Pipeline([
-        ('preprocessor', preprocessor),
-        ('classifier', rf_classifier)
-    ])
-    
-    # Entraîner le modèle principal et calculer les métriques réelles
-    pipeline.fit(X_train, y_train)
-    y_pred = pipeline.predict(X_test)
-    y_prob = pipeline.predict_proba(X_test)[:, 1]
-    
-    # Calculer les vraies métriques
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_prob)
-    
-    # Créer la vraie matrice de confusion
-    cm = confusion_matrix(y_test, y_pred)
-    
-    # Générer le rapport de classification réel
-    report_dict = classification_report(y_test, y_pred, output_dict=True)
-    report_df = pd.DataFrame(report_dict).transpose()
-    
-    # Fonction pour entraîner et évaluer plusieurs modèles
+
+    # Modèles à comparer
+    models = {
+        "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
+        "XGBoost": XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'),
+        "LightGBM": LGBMClassifier(random_state=42),
+        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+        "Gradient Boosting": GradientBoostingClassifier(random_state=42)
+    }
+
+    # Fonction d'évaluation des modèles
     def train_and_evaluate_models():
-        models = {
-            "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
-            "XGBoost": XGBClassifier(random_state=42),
-            "LightGBM": LGBMClassifier(random_state=42),
-            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-            "Gradient Boosting": GradientBoostingClassifier(random_state=42)
-        }
-        
         results = []
-        
-        # Préprocesser les données
         X_train_prep = preprocessor.fit_transform(X_train)
         X_test_prep = preprocessor.transform(X_test)
-        
         for name, model in models.items():
             try:
                 model.fit(X_train_prep, y_train)
                 y_pred = model.predict(X_test_prep)
                 y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
-                
                 acc = accuracy_score(y_test, y_pred)
                 prec = precision_score(y_test, y_pred)
                 rec = recall_score(y_test, y_pred)
-                f1 = f1_score(y_test, y_pred)
-                auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
-                
+                f1s = f1_score(y_test, y_pred)
+                auc = roc_auc_score(y_test, y_prob) if y_prob is not None else np.nan
+                bal_acc = balanced_accuracy_score(y_test, y_pred)
                 results.append({
                     'Modèle': name,
                     'Accuracy': acc,
                     'Precision': prec,
                     'Recall': rec,
-                    'F1-Score': f1,
-                    'AUC': auc if auc is not None else float('nan')
+                    'F1-Score': f1s,
+                    'AUC': auc,
+                    'Balanced Accuracy': bal_acc
                 })
             except Exception as e:
                 st.error(f"Erreur avec {name}: {str(e)}")
-            
         return pd.DataFrame(results)
 
     st.markdown("""
@@ -2196,441 +2138,167 @@ def show_ml_analysis():
 
     ml_tabs = st.tabs([
         "📊 Préprocessing",
-        "🚀 Comparaison des modèles",  # Fusion des onglets "Lazy Predict" et "Comparaison des modèles"
+        "🚀 Comparaison des modèles",
         "🌲 Random Forest"
     ])
 
+    # Onglet Préprocessing
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
-
-        st.markdown("""
-        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Préparation des données pour la modélisation</h3>
-            <p style="color: #34495e;">Un prétraitement robuste est essentiel pour garantir la qualité des modèles prédictifs.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
         col1, col2 = st.columns([1, 1])
         with col1:
-            st.markdown("""
-            ### Étapes du préprocessing
-
-            1. **Nettoyage des données**
-               - Gestion des valeurs manquantes
-               - Correction des incohérences
-               - Suppression des doublons
-
-            2. **Encodage des variables catégorielles**
-               - One-Hot Encoding pour les variables nominales
-               - Encodage ordinal pour les variables ordinales
-
-            3. **Standardisation des variables numériques**
-               - Z-score standardization (moyenne=0, écart-type=1)
-               - Important pour les algorithmes sensibles à l'échelle
-
-            4. **Réduction de dimensionnalité**
-               - FAMD pour l'analyse exploratoire
-               - Feature selection pour la modélisation
-            """)
-
+            st.markdown("### Étapes du préprocessing\n\n- Nettoyage des données\n- Encodage des variables catégorielles\n- Standardisation des variables numériques\n- Réduction de dimensionnalité")
         with col2:
-            preprocessing_code = """
-            digraph preprocessing {
-                rankdir=TB;
-                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
-                edge [arrowhead=vee, arrowsize=0.8];
-                data [label="Données brutes", fillcolor="#e1f5fe"];
-                cleaning [label="Nettoyage des données"];
-                encoding [label="Encodage des variables\ncatégorielles"];
-                scaling [label="Standardisation des\nvariables numériques"];
-                feature_eng [label="Feature Engineering"];
-                split [label="Train/Test Split", fillcolor="#e8f5e9"];
-
-                data -> cleaning;
-                cleaning -> encoding;
-                encoding -> scaling;
-                scaling -> feature_eng;
-                feature_eng -> split;
-            }
-            """
-
-            try:
-                from graphviz import Source
-                st.graphviz_chart(preprocessing_code)
-            except:
-                st.warning("Graphviz n'est pas disponible. Installation requise: `pip install graphviz`")
-                st.code(preprocessing_code, language="python")
-        
-        st.markdown("### Pipeline de préprocessing utilisé")
-
-        st.code("""
-        # Définition du préprocesseur pour variables mixtes
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', StandardScaler(), numerical_cols),
-                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
-            ],
-            remainder='passthrough',
-            verbose_feature_names_out=False
-        )
-
-        # Pipeline complet avec préprocesseur et modèle
-        pipeline = Pipeline([
-            ('preprocessor', preprocessor),
-            ('classifier', RandomForestClassifier())
-        ])
-        """, language="python")
-
-        st.subheader("Transformation des données")
-        col1, col2 = st.columns(2)
-        with col1:
             st.markdown("#### Données avant préprocessing")
-            # Utiliser des données réelles du DataFrame
-            if not df.empty:
-                sample_rows = min(4, len(df))
-                raw_sample = df.iloc[:sample_rows].copy()
-                columns_to_show = [col for col in raw_sample.columns if col in ['A1', 'A2', 'A3', 'Genre', 'Age', 'TSA']][:6]
-                st.dataframe(raw_sample[columns_to_show])
-            else:
-                st.error("Aucune donnée disponible.")
-
-        with col2:
+            st.dataframe(X.head(4))
             st.markdown("#### Données après préprocessing")
-            # Afficher un exemple réel de transformation
-            if not df.empty:
-                try:
-                    sample_X = X.iloc[:4]
-                    transformed_sample = preprocessor.fit_transform(sample_X)
-                    st.code(f"{transformed_sample[:, :10]}")
-                except Exception as e:
-                    st.error(f"Erreur lors de la transformation: {str(e)}")
+            try:
+                transformed_sample = preprocessor.fit_transform(X.iloc[:4])
+                st.write(transformed_sample[:,:10])
+            except Exception as e:
+                st.error(f"Erreur lors de la transformation: {str(e)}")
 
-    # Nouvel onglet fusionné "Comparaison des modèles"
+    # Onglet Comparaison des modèles (LazyPredict + visualisations)
     with ml_tabs[1]:
         st.header("Comparaison des modèles et évaluation des performances")
+        if st.button("🚀 Lancer la comparaison des modèles", type="primary", use_container_width=True):
+            with st.spinner("Analyse en cours..."):
+                comparison_results = train_and_evaluate_models()
+                st.session_state.comparison_results = comparison_results
 
-        st.markdown("""
-        <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse comparative des algorithmes de Machine Learning</h3>
-            <p style="color: #34495e;">Cette section compare différents algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        if 'comparison_results' in st.session_state:
+            comparison_results = st.session_state.comparison_results
+            # Affichage du tableau avec plus de métriques et un dégradé contrasté
+            st.success("✅ Analyse terminée avec succès!")
+            st.dataframe(comparison_results.style.format({
+                'Accuracy': '{:.2%}',
+                'Precision': '{:.2%}',
+                'Recall': '{:.2%}',
+                'F1-Score': '{:.2%}',
+                'AUC': '{:.2%}',
+                'Balanced Accuracy': '{:.2%}'
+            }).background_gradient(cmap='YlOrRd', subset=['Accuracy', 'F1-Score', 'AUC', 'Balanced Accuracy']), use_container_width=True)
 
-        tabs_comparison = st.tabs(["Comparaison rapide", "Métriques détaillées", "Visualisations"])
+            # Visualisation : ne garder que les 4 meilleurs modèles
+            top_models = comparison_results.sort_values("Accuracy", ascending=False).head(4)
+            fig = px.bar(
+                top_models,
+                y='Modèle',
+                x='Accuracy',
+                orientation='h',
+                title="Précision des meilleurs modèles",
+                color='Accuracy',
+                color_continuous_scale='YlOrRd'
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
-        with tabs_comparison[0]:
-            st.subheader("Comparaison rapide des algorithmes")
+            # Graphe radar (pour les 4 premiers modèles)
+            fig = go.Figure()
+            for i, model in enumerate(top_models['Modèle']):
+                fig.add_trace(go.Scatterpolar(
+                    r=[
+                        top_models.iloc[i]['Accuracy'],
+                        top_models.iloc[i]['Precision'],
+                        top_models.iloc[i]['Recall'],
+                        top_models.iloc[i]['F1-Score'],
+                        top_models.iloc[i]['AUC'],
+                        top_models.iloc[i]['Balanced Accuracy']
+                    ],
+                    theta=['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC', 'Balanced Accuracy'],
+                    fill='toself',
+                    name=model
+                ))
+            fig.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+                showlegend=True,
+                title="Radar chart des performances (top 4 modèles)"
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
 
-            col1, col2 = st.columns([2, 1])
-
-            with col1:
-                st.markdown("""
-                ### Modèles évalués
-
-                Nous comparons plusieurs algorithmes de classification:
-
-                1. **Random Forest** - Ensemble d'arbres de décision
-                2. **Gradient Boosting** - Modèle additif d'arbres de décision
-                3. **XGBoost** - Implémentation optimisée du gradient boosting
-                4. **LightGBM** - Framework de gradient boosting léger et rapide  
-                5. **Régression Logistique** - Modèle linéaire de référence
-                """)
-
-            with col2:
-                st.markdown("### Avantages")
-                st.markdown("""
-                ✅ **Vue d'ensemble** des performances
-
-                ✅ **Identification** des meilleurs modèles
-                
-                ✅ **Économie** de temps de développement
-
-                ✅ **Sélection optimale** pour le déploiement
-                """)
-
-            # Bouton pour lancer l'analyse comparative
-            if st.button("🚀 Lancer la comparaison des modèles", type="primary", use_container_width=True):
-                with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
-                    try:
-                        # Exécuter notre fonction personnalisée qui remplace LazyPredict
-                        comparison_results = train_and_evaluate_models()
-                        
-                        # Stocker les résultats dans l'état de session
-                        st.session_state.comparison_results = comparison_results
-                        
-                        # Afficher les résultats
-                        st.success("✅ Analyse terminée avec succès!")
-                        st.dataframe(comparison_results.style.format({
-                            'Accuracy': '{:.2%}',
-                            'Precision': '{:.2%}',
-                            'Recall': '{:.2%}',
-                            'F1-Score': '{:.2%}',
-                            'AUC': '{:.2%}'
-                        }).background_gradient(cmap='Blues', subset=['Accuracy', 'F1-Score']), use_container_width=True)
-                        
-                        # Visualiser les performances
-                        try:
-                            fig = px.bar(
-                                comparison_results,
-                                y='Modèle',
-                                x='Accuracy',
-                                orientation='h',
-                                title="Précision des modèles",
-                                color='Accuracy',
-                                color_continuous_scale='Blues'
-                            )
-                            st.plotly_chart(fig, use_container_width=True)
-                            
-                            # Ajouter les recommandations basées sur les résultats
-                            st.markdown("""
-                            <div style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #2196f3;">
-                                <h3 style="color: #0d47a1; margin-top: 0;">Recommandations basées sur les résultats</h3>
-                                <p>En fonction des performances des modèles, voici nos recommandations :</p>
-                                <ol>
-                                    <li><strong>Sélectionnez les 2-3 meilleurs modèles</strong> pour une optimisation plus poussée</li>
-                                    <li><strong>Équilibrez précision et interprétabilité</strong> : parfois un modèle légèrement moins précis mais plus interprétable est préférable</li>
-                                    <li><strong>Évitez le surajustement</strong> : vérifiez la stabilité des performances avec validation croisée</li>
-                                    <li><strong>Évaluez d'autres métriques</strong> comme le F1-Score pour les données déséquilibrées</li>
-                                    <li><strong>Optimisez les hyperparamètres</strong> du modèle sélectionné avec GridSearchCV ou RandomizedSearchCV</li>
-                                </ol>
-                                <h4 style="color: #0d47a1; margin-top: 15px;">Prochaines étapes recommandées :</h4>
-                                <ul>
-                                    <li>Effectuer une analyse des caractéristiques importantes du modèle le plus performant</li>
-                                    <li>Utiliser la validation croisée pour confirmer la robustesse des performances</li>
-                                    <li>Calibrer les probabilités pour améliorer l'interprétabilité des prédictions</li>
-                                    <li>Explorer l'onglet Random Forest pour une analyse plus détaillée du modèle principal</li>
-                                </ul>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        except Exception as e:
-                            st.error(f"Erreur lors de la visualisation: {str(e)}")
-                    
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'analyse: {str(e)}")
-            else:
-                # Si l'analyse n'a pas encore été lancée
-                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
-
-        with tabs_comparison[1]:
-            st.subheader("Métriques d'évaluation détaillées")
-            
-            # Afficher les métriques réelles calculées
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
-                st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
-            with col2:
-                st.metric("Spécificité (Precision)", f"{precision:.2%}")
-                st.metric("Score F1", f"{f1:.2%}")
-            with col3:
-                st.metric("AUC-ROC", f"{auc:.2%}")
-                st.metric("Erreur", f"{1-accuracy:.2%}")
-
-            st.subheader("Matrice de confusion")
-
-            # Afficher la véritable matrice de confusion
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-            plt.xlabel('Prédiction')
-            plt.ylabel('Réalité')
-            plt.title('Matrice de confusion')
-            ax.set_xticklabels(['Non-TSA', 'TSA'])
-            ax.set_yticklabels(['Non-TSA', 'TSA'])
-            st.pyplot(fig)
-
-            st.markdown("""
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>Interprétation :</strong></p>
-                <ul>
-                    <li>Vrai Négatif (coin supérieur gauche) : Cas correctement identifiés comme non-TSA</li>
-                    <li>Faux Positif (coin supérieur droit) : Cas incorrectement identifiés comme TSA</li>
-                    <li>Faux Négatif (coin inférieur gauche) : Cas de TSA manqués par le modèle</li>
-                    <li>Vrai Positif (coin inférieur droit) : Cas de TSA correctement identifiés</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.subheader("Rapport de classification détaillé")
-            st.dataframe(report_df.style.format({
-                'precision': '{:.2%}',
-                'recall': '{:.2%}',
-                'f1-score': '{:.2%}'
-            }).background_gradient(cmap='Blues', subset=['precision', 'recall', 'f1-score']), use_container_width=True)
-
-        with tabs_comparison[2]:
-            st.subheader("Visualisations des performances")
-            
-            if 'comparison_results' in st.session_state:
-                results = st.session_state.comparison_results
-                
-                # Graphe de comparaison des métriques par modèle
-                fig = px.bar(
-                    results.melt(id_vars='Modèle', value_vars=['Accuracy', 'Precision', 'Recall', 'F1-Score'], 
-                               var_name='Métrique', value_name='Valeur'),
-                    x='Modèle', y='Valeur', color='Métrique',
-                    barmode='group',
-                    title="Comparaison des métriques par modèle",
-                    color_discrete_sequence=px.colors.qualitative.Set1
-                )
-                fig.update_layout(yaxis_tickformat='.0%')
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Graphe radar pour comparer les modèles
-                try:
-                    fig = go.Figure()
-                    for i, model in enumerate(results['Modèle']):
-                        fig.add_trace(go.Scatterpolar(
-                            r=[results.iloc[i]['Accuracy'], results.iloc[i]['Precision'], 
-                               results.iloc[i]['Recall'], results.iloc[i]['F1-Score']],
-                            theta=['Accuracy', 'Precision', 'Recall', 'F1-Score'],
-                            fill='toself',
-                            name=model
-                        ))
-                    fig.update_layout(
-                        polar=dict(
-                            radialaxis=dict(
-                                visible=True,
-                                range=[0, 1]
-                            )),
-                        showlegend=True,
-                        title="Radar chart des performances des modèles"
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                except Exception as e:
-                    st.warning(f"Impossible d'afficher le graphique radar: {str(e)}")
-            else:
-                st.info("Exécutez d'abord l'analyse des modèles pour voir les visualisations.")
-
+    # Onglet Random Forest détaillé + métriques détaillées
     with ml_tabs[2]:
         st.header("Modèle Random Forest")
-    
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Random Forest pour la détection des TSA</h3>
-            <p style="color: #34495e;">Un modèle d'apprentissage automatique basé sur un ensemble d'arbres de décision pour la classification des cas TSA.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-        st.subheader("Principe de fonctionnement de Random Forest")
-    
-        col1, col2 = st.columns([1, 1])
-    
+        pipeline = Pipeline([
+            ('preprocessor', preprocessor),
+            ('classifier', RandomForestClassifier(n_estimators=100, random_state=42))
+        ])
+        pipeline.fit(X_train, y_train)
+        y_pred = pipeline.predict(X_test)
+        y_prob = pipeline.predict_proba(X_test)[:, 1]
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        auc = roc_auc_score(y_test, y_prob)
+        bal_acc = balanced_accuracy_score(y_test, y_pred)
+        cm = confusion_matrix(y_test, y_pred)
+        report_dict = classification_report(y_test, y_pred, output_dict=True)
+        report_df = pd.DataFrame(report_dict).transpose()
+
+        st.subheader("Métriques détaillées Random Forest")
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown("""
-            ### Comment fonctionne Random Forest?
-    
-            La méthode Random Forest est un algorithme d'apprentissage supervisé qui:
-    
-            1. **Crée plusieurs arbres de décision** sur des sous-échantillons aléatoires des données
-    
-            2. **Utilise le principe du bagging** (Bootstrap Aggregating) pour réduire la variance et éviter le surapprentissage
-    
-            3. **Sélectionne aléatoirement des sous-ensembles de caractéristiques** pour chaque nœud de division
-    
-            4. **Agrège les prédictions** de tous les arbres par vote majoritaire pour la classification
-    
-            Cette approche d'ensemble améliore significativement la robustesse et la précision par rapport à un arbre de décision unique.
-            """)
-    
+            st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
+            st.metric("Rappel (Recall)", f"{recall:.2%}")
         with col2:
-            rf_diagram = """
-            digraph RandomForest {
-                rankdir=TB;
-                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
-                edge [arrowhead=vee, arrowsize=0.8];
-    
-                data [label="Données d'entraînement", fillcolor="#e1f5fe"];
-    
-                sample1 [label="Échantillon 1\n(bootstrap)", fillcolor="#e8f5e9"];
-                sample2 [label="Échantillon 2\n(bootstrap)", fillcolor="#e8f5e9"];
-                sample3 [label="Échantillon 3\n(bootstrap)", fillcolor="#e8f5e9"];
-    
-                tree1 [label="Arbre 1", fillcolor="#d4efdf"];
-                tree2 [label="Arbre 2", fillcolor="#d4efdf"];
-                tree3 [label="Arbre 3", fillcolor="#d4efdf"];
-    
-                predict [label="Agrégation\n(vote majoritaire)", fillcolor="#bbdefb"];
-    
-                data -> sample1;
-                data -> sample2;
-                data -> sample3;
-    
-                sample1 -> tree1;
-                sample2 -> tree2;
-                sample3 -> tree3;
-    
-                tree1 -> predict;
-                tree2 -> predict;
-                tree3 -> predict;
-            }
-            """
-    
-            try:
-                from graphviz import Source
-                st.graphviz_chart(rf_diagram)
-            except:
-                st.warning("Graphviz n'est pas disponible. Schéma en texte uniquement.")
-                st.code(rf_diagram, language="dot")
-    
-        # Importance des caractéristiques réelles
-        st.subheader("Analyse de l'importance des variables")
-    
+            st.metric("Précision (Precision)", f"{precision:.2%}")
+            st.metric("Score F1", f"{f1:.2%}")
+        with col3:
+            st.metric("AUC-ROC", f"{auc:.2%}")
+            st.metric("Balanced Accuracy", f"{bal_acc:.2%}")
+
+        st.subheader("Matrice de confusion")
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='YlOrRd', cbar=False)
+        plt.xlabel('Prédiction')
+        plt.ylabel('Réalité')
+        plt.title('Matrice de confusion')
+        ax.set_xticklabels(['Non-TSA', 'TSA'])
+        ax.set_yticklabels(['Non-TSA', 'TSA'])
+        st.pyplot(fig)
+
+        st.subheader("Rapport de classification détaillé")
+        st.dataframe(report_df.style.format({
+            'precision': '{:.2%}',
+            'recall': '{:.2%}',
+            'f1-score': '{:.2%}'
+        }).background_gradient(cmap='YlOrRd', subset=['precision', 'recall', 'f1-score']), use_container_width=True)
+
+        st.subheader("Importance des variables")
+        rf = pipeline.named_steps['classifier']
         try:
-            # Obtenir l'importance des caractéristiques du modèle entraîné
-            rf = pipeline.named_steps['classifier']
-            
-            # Tenter d'obtenir les noms des caractéristiques après prétraitement
-            try:
-                feature_names = preprocessor.get_feature_names_out()
-            except:
-                # Si cela échoue, créer des noms génériques
-                feature_names = [f"feature_{i}" for i in range(len(rf.feature_importances_))]
-            
-            # Créer le DataFrame d'importance des caractéristiques
-            importance_df = pd.DataFrame({
-                'Feature': feature_names,
-                'Importance': rf.feature_importances_
-            }).sort_values('Importance', ascending=False).head(15)  # Montrer les 15 plus importantes
-            
-            # Visualiser l'importance des caractéristiques
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.barplot(
-                x='Importance',
-                y='Feature',
-                data=importance_df,
-                orient='h',
-                palette='viridis'
-            )
-            ax.set_title("Contribution des variables à la prédiction")
-            st.pyplot(fig)
-            
-        except Exception as e:
-            st.error(f"Erreur lors de l'analyse d'importance des variables: {str(e)}")
-            
-        # Validation croisée réelle
-        st.subheader("Validation croisée du modèle")
-        
-        try:
-            # Effectuer la validation croisée avec le modèle
-            cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
-            
-            # Afficher les résultats
-            st.success(f"**Score moyen de validation croisée (5-fold)**: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-            
-            # Afficher les scores individuels
-            st.write("Scores par fold:", cv_scores)
-            
-            # Visualiser les scores
-            fig, ax = plt.subplots(figsize=(10, 4))
-            ax.bar(range(1, len(cv_scores)+1), cv_scores, color='#3498db')
-            ax.axhline(y=cv_scores.mean(), color='red', linestyle='-', label=f'Moyenne: {cv_scores.mean():.4f}')
-            ax.set_xlabel('Fold')
-            ax.set_ylabel('Score')
-            ax.set_title('Scores de validation croisée')
-            ax.legend()
-            st.pyplot(fig)
-        except Exception as e:
-            st.error(f"Erreur lors de la validation croisée: {str(e)}")
+            feature_names = preprocessor.get_feature_names_out()
+        except:
+            feature_names = [f"feature_{i}" for i in range(len(rf.feature_importances_))]
+        importance_df = pd.DataFrame({
+            'Feature': feature_names,
+            'Importance': rf.feature_importances_
+        }).sort_values('Importance', ascending=False).head(15)
+        fig, ax = plt.subplots(figsize=(8, 5))
+        sns.barplot(
+            x='Importance',
+            y='Feature',
+            data=importance_df,
+            orient='h',
+            palette='YlOrRd'
+        )
+        ax.set_title("Contribution des variables à la prédiction")
+        st.pyplot(fig)
+
+        st.subheader("Validation croisée")
+        cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
+        st.success(f"**Score moyen de validation croisée (5-fold)**: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+        fig, ax = plt.subplots(figsize=(8, 2))
+        ax.bar(range(1, len(cv_scores)+1), cv_scores, color='#c62828')
+        ax.axhline(y=cv_scores.mean(), color='navy', linestyle='-', label=f'Moyenne: {cv_scores.mean():.4f}')
+        ax.set_xlabel('Fold')
+        ax.set_ylabel('Score')
+        ax.set_title('Scores de validation croisée')
+        ax.legend()
+        st.pyplot(fig)
+
 
         
 def show_aq10_and_prediction():
