@@ -1969,16 +1969,25 @@ def show_data_exploration():
                 st.markdown("""
                 Analyse spécifique mettant en évidence la relation entre le Score A10 et le diagnostic TSA.
                 """)
-
+            
                 try:
                     if 'Score_A10' in X_famd.columns:
+                        # Création d'une liste de variables à exclure
+                        excluded_vars = [f'A{i}' for i in range(1, 11)]
+                        
+                        # Filtrer X_famd pour exclure les variables A1-A10
+                        filtered_cols = [col for col in X_famd.columns if col not in excluded_vars]
+                        X_filtered = X_famd[filtered_cols].copy()
+                        
+                        # Définir les variables clés pour l'analyse FAMD centrée sur Score_A10
                         key_vars = ['Score_A10', 'TSA']
                         for var in ['Age', 'Genre', 'Ethnie']:
-                            if var in X_famd.columns:
+                            if var in X_filtered.columns:
                                 key_vars.append(var)
-
-                        X_a10 = X_famd[key_vars].copy()
-
+                                
+                        # Créer le dataset final pour l'analyse
+                        X_a10 = X_filtered[key_vars].copy()
+                        
                         famd_a10 = FAMD_Custom(
                             n_components=min(3, len(key_vars)-1),
                             n_iter=10,
@@ -1988,11 +1997,11 @@ def show_data_exploration():
                         )
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
-
+                        
+                        # Création du graphique de projection unique
                         fig, ax = plt.subplots(figsize=(10, 8))
-
                         coords_array = coords_a10.values
-
+                        
                         if 'TSA' in X_a10.columns:
                             for category in X_a10['TSA'].unique():
                                 mask = (X_a10['TSA'] == category).values
@@ -2007,33 +2016,10 @@ def show_data_exploration():
                             ax.legend(title="Diagnostic TSA")
                         else:
                             ax.scatter(coords_array[:, 0], coords_array[:, 1], alpha=0.7)
-
+                            
                         ax.set_xlabel('Composante 1')
                         ax.set_ylabel('Composante 2')
                         ax.set_title('FAMD centrée sur Score_A10 et variables clés')
-                        ax.grid(True, linestyle='--', alpha=0.7)
-                        st.pyplot(fig)
-
-                        fig, ax = plt.subplots(figsize=(10, 6))
-
-                        if 'TSA' in X_a10.columns:
-                            for category in X_a10['TSA'].unique():
-                                mask = (X_a10['TSA'] == category).values
-                                color = "#e74c3c" if category == "Yes" else "#3498db"
-                                ax.scatter(
-                                    X_a10['Score_A10'].values[mask],
-                                    coords_array[mask, 0],
-                                    label=category,
-                                    color=color,
-                                    alpha=0.7
-                                )
-                            ax.legend(title="Diagnostic TSA")
-                        else:
-                            ax.scatter(X_a10['Score_A10'], coords_array[:, 0], alpha=0.7)
-
-                        ax.set_xlabel('Score A10')
-                        ax.set_ylabel('Composante 1')
-                        ax.set_title('Score_A10 vs Première Composante')
                         ax.grid(True, linestyle='--', alpha=0.7)
                         st.pyplot(fig)
                     else:
