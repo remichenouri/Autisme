@@ -2007,42 +2007,45 @@ def show_data_exploration():
             with famd_tabs[3]:
                 st.subheader("Cercle de corrélation 2")
                 try:
-                        if 'Score_A10' in X_famd.columns:
-                            # Utiliser X_a10 et famd_a10 définis précédemment
-                            if hasattr(famd_a10, 'column_correlations'):
-                                column_corr_a10 = famd_a10.column_correlations(X_a10)
-                            else:
-                                st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
-                                column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
-            
-                            fig, ax = plt.subplots(figsize=(10, 10))
-                            circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
-                            ax.add_artist(circle)
-            
-                            ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
-                            ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-            
-                            for i, var in enumerate(column_corr_a10.index):
-                                x = column_corr_a10.iloc[i, 0]
-                                y = column_corr_a10.iloc[i, 1]
-            
-                                ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-                                
-                                # Mise en évidence du Score_A10
-                                if var == 'Score_A10':
-                                    ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
-                                else:
-                                    ax.text(x*1.1, y*1.1, var, fontsize=10)
-            
-                            ax.set_xlim(-1.1, 1.1)
-                            ax.set_ylim(-1.1, 1.1)
-                            ax.set_xlabel(f'Composante 1')
-                            ax.set_ylabel(f'Composante 2')
-                            ax.set_title('Cercle des corrélations pour FAMD centrée sur Score_A10')
-                            ax.grid(True, linestyle='--', alpha=0.5)
-                            st.pyplot(fig)
+                    if 'Score_A10' in X_famd.columns:
+                        # Utiliser X_a10 et famd_a10 définis précédemment
+                        if hasattr(famd_a10, 'column_correlations'):
+                            column_corr_a10 = famd_a10.column_correlations(X_a10)
                         else:
-                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                            st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
+                            column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
+        
+                        fig, ax = plt.subplots(figsize=(10, 10))
+                        circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
+                        ax.add_artist(circle)
+        
+                        ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+                        ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
+        
+                        for i, var in enumerate(column_corr_a10.index):
+                            x = column_corr_a10.iloc[i, 0]
+                            y = column_corr_a10.iloc[i, 1]
+        
+                            ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
+                            
+                            # Mise en évidence du Score_A10
+                            if var == 'Score_A10':
+                                ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
+                            else:
+                                ax.text(x*1.1, y*1.1, var, fontsize=10)
+        
+                        ax.set_xlim(-1.1, 1.1)
+                        ax.set_ylim(-1.1, 1.1)
+                        ax.set_xlabel(f'Composante 1')
+                        ax.set_ylabel(f'Composante 2')
+                        ax.set_title('Cercle des corrélations pour FAMD centrée sur Score_A10')
+                        ax.grid(True, linestyle='--', alpha=0.5)
+                        st.pyplot(fig)
+                    else:
+                        st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                except Exception as e:
+                    st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
+
                 
             with famd_tabs[4]:
                 st.subheader("Interprétation des résultats")
