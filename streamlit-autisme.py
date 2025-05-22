@@ -71,7 +71,6 @@ def initialize_session_state():
             else:
                 st.session_state.tool_choice = default_tool
         except:
-            # Fallback pour les versions plus anciennes de Streamlit
             try:
                 query_params = st.experimental_get_query_params()
                 if "selection" in query_params:
@@ -1946,49 +1945,54 @@ def show_data_exploration():
                             col_name = f'A{i}'
                             if col_name in X_famd.columns:
                                 a_vars_to_exclude.append(col_name)
-                            
+                        
+                        # Créer un nouveau dataframe en excluant explicitement les variables A1-A10
                         X_filtered = X_famd.drop(columns=a_vars_to_exclude, errors='ignore').copy()
-                            
+                        
+                        # Vérification que toutes les variables A1-A10 sont bien exclues
                         remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit()]
                         if remaining_a_vars:
                             st.warning(f"Variables A résiduelles : {remaining_a_vars}")
                             X_filtered = X_filtered.drop(columns=remaining_a_vars, errors='ignore')
-
+                        
+                        # Définir les variables clés pour l'analyse FAMD centrée sur Score_A10
                         key_vars = ['Score_A10', 'TSA']
                         for var in ['Age', 'Genre', 'Ethnie']:
                             if var in X_filtered.columns:
                                 key_vars.append(var)
-    
+                        
+                        # Créer le dataset final pour l'analyse
                         X_a10 = X_filtered[key_vars].copy()
-                            
+                        
                         famd_a10 = FAMD_Custom(
-                                n_components=min(3, len(key_vars)-1),
-                                n_iter=10,
-                                random_state=42,
-                                copy=True,
-                                engine='sklearn'
-                            )
+                            n_components=min(3, len(key_vars)-1),
+                            n_iter=10,
+                            random_state=42,
+                            copy=True,
+                            engine='sklearn'
+                        )
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
-
+                        
+                        # Création du graphique de projection unique
                         fig, ax = plt.subplots(figsize=(10, 8))
                         coords_array = coords_a10.values
-                            
+                        
                         if 'TSA' in X_a10.columns:
                             for category in X_a10['TSA'].unique():
                                 mask = (X_a10['TSA'] == category).values
                                 color = "#e74c3c" if category == "Yes" else "#3498db"
                                 ax.scatter(
-                                        coords_array[mask, 0],
-                                        coords_array[mask, 1],
-                                        label=category,
-                                        color=color,
-                                        alpha=0.7
-                                    )
+                                    coords_array[mask, 0],
+                                    coords_array[mask, 1],
+                                    label=category,
+                                    color=color,
+                                    alpha=0.7
+                                )
                             ax.legend(title="Diagnostic TSA")
                         else:
                             ax.scatter(coords_array[:, 0], coords_array[:, 1], alpha=0.7)
-                                
+                            
                         ax.set_xlabel('Composante 1')
                         ax.set_ylabel('Composante 2')
                         ax.set_title('FAMD centrée sur Score_A10')
