@@ -2677,6 +2677,220 @@ def show_aq10_and_prediction():
                             </div>
                         """, unsafe_allow_html=True)
 
+                        # Section des KPI personnalisés après la prédiction
+                        st.markdown("""
+                            <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                                Profil détaillé des traits autistiques
+                            </h3>
+                        """, unsafe_allow_html=True)
+                        
+                        # Calcul des sous-scores par domaine
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100  # Questions liées aux aspects sociaux
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100  # Questions liées à la flexibilité cognitive
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100  # Questions liées à l'attention au détail
+                        
+                        # Calcul du masking index (plus le score est élevé dans des domaines spécifiques mais pas en social, plus l'indice est élevé)
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)  # Normalisation entre 0 et 100
+                        
+                        # Définition de seuils pour les indices de sévérité
+                        def severity_color(score, reverse=False):
+                            if reverse:
+                                score = 100 - score
+                            if score < 30:
+                                return "#2ecc71"  # vert
+                            elif score < 60:
+                                return "#f39c12"  # orange
+                            else:
+                                return "#e74c3c"  # rouge
+                        
+                        # Estimation du risque relatif basé sur le score total et les facteurs de risque
+                        base_risk = 1.0
+                        if total_score >= 6:
+                            base_risk *= 4.5
+                        if antecedents == "Yes":
+                            base_risk *= 2.2
+                        risk_factor = min(10.0, base_risk)  # Plafond à 10x
+                        
+                        # Affichage des KPI en trois colonnes
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Perception sociale</div>
+                                    <div class="kpi-value" style="color:{severity_color(social_score)};">{social_score:.0f}%</div>
+                                    <div class="kpi-comparison">Difficulté à interpréter les interactions sociales</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Flexibilité cognitive</div>
+                                    <div class="kpi-value" style="color:{severity_color(cognitive_score)};">{cognitive_score:.0f}%</div>
+                                    <div class="kpi-comparison">Rigidité face au changement et adaptation</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Attention au détail</div>
+                                    <div class="kpi-value" style="color:{severity_color(detail_score, reverse=True)};">{detail_score:.0f}%</div>
+                                    <div class="kpi-comparison">Focalisation sur les détails spécifiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        # Deuxième rangée de KPI
+                        col4, col5, col6 = st.columns(3)
+                        
+                        with col4:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Indice de masquage</div>
+                                    <div class="kpi-value" style="color:{severity_color(masking_index, reverse=True)};">{masking_index:.0f}%</div>
+                                    <div class="kpi-comparison">Estimation de la compensation des traits autistiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col5:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Risque relatif</div>
+                                    <div class="kpi-value" style="color:{severity_color(risk_factor*10)};">{risk_factor:.1f}x</div>
+                                    <div class="kpi-comparison">Par rapport à la population générale</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col6:
+                            # Calcul d'un score d'impact fonctionnel estimé
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Impact fonctionnel estimé</div>
+                                    <div class="kpi-value" style="color:{severity_color(impact_score)};">{impact_score:.0f}%</div>
+                                    <div class="kpi-comparison">Niveau d'impact potentiel sur le quotidien</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        
+                        # Ajout d'un graphique radar pour visualiser les différentes dimensions
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Profil de sensibilité multidimensionnel
+                            </h4>
+                        """, unsafe_allow_html=True)
+                        
+                        # Calcul des scores par dimension
+                        dimensions = [
+                            "Communication sociale",
+                            "Interactions sociales", 
+                            "Intérêts restreints",
+                            "Comportements répétitifs",
+                            "Sensibilité sensorielle"
+                        ]
+                        
+                        # Mapping des questions vers les dimensions (simplifié)
+                        dim_scores = [
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100,  # Communication
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  # Interactions
+                            (scores_individuels[7]) * 100,  # Intérêts
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  # Comportements
+                            (scores_individuels[0]) * 100  # Sensibilité
+                        ]
+                        
+                        # Création du graphique radar
+                        fig = go.Figure()
+                        
+                        fig.add_trace(go.Scatterpolar(
+                            r=dim_scores,
+                            theta=dimensions,
+                            fill='toself',
+                            name='Votre profil',
+                            line_color='#3498db',
+                            fillcolor='rgba(52, 152, 219, 0.3)'
+                        ))
+                        
+                        # Ajouter profil typique TSA pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[80, 75, 70, 65, 85],  # Valeurs typiques pour TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil typique TSA',
+                            line_color='#e74c3c',
+                            fillcolor='rgba(231, 76, 60, 0.1)'
+                        ))
+                        
+                        # Ajouter profil neurotypique pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[20, 25, 30, 25, 15],  # Valeurs typiques pour non-TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil neurotypique',
+                            line_color='#2ecc71',
+                            fillcolor='rgba(46, 204, 113, 0.1)'
+                        ))
+                        
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            title="Comparaison de votre profil avec les profils de référence",
+                            showlegend=True,
+                            height=500,
+                            margin=dict(t=70, b=20)
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Ajout des recommandations personnalisées
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Recommandations personnalisées
+                            </h4>
+                        """, unsafe_allow_html=True)
+                        
+                        # Définir les recommandations basées sur les scores
+                        recommendations = []
+                        
+                        if social_score > 50:
+                            recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
+                            
+                        if cognitive_score > 50:
+                            recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
+                            
+                        if detail_score > 60:
+                            recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
+                        
+                        if masking_index > 60:
+                            recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
+                        
+                        if risk_factor > 3:
+                            recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
+                        else:
+                            recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
+                        
+                        # Affichage des recommandations
+                        st.markdown("""
+                            <div style="background-color: #eaf7fb; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                        """, unsafe_allow_html=True)
+                        
+                        for rec in recommendations:
+                            st.markdown(f"""
+                                <p style="margin-bottom: 10px;"><span style="color: #3498db; font-weight: bold;">•</span> {rec}</p>
+                            """, unsafe_allow_html=True)
+                        
+                        st.markdown("""
+                            <p style="font-style: italic; margin-top: 15px; color: #7f8c8d; text-align: center;">
+                                Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+
                         # 6. Affichage du graphique comparatif
                         st.markdown("### Analyse comparative")
 
