@@ -2084,6 +2084,18 @@ def show_ml_analysis():
     """
     Fonction pour afficher l'analyse de Machine Learning avec LazyPredict et Random Forest.
     """
+    # Importations nécessaires pour cette fonction
+    import io  # Ajout de l'import manquant ici
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import plotly.graph_objects as go
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import LabelEncoder
+    from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+    import pickle
+    
     st.title('🧠 Analyse par Machine Learning')
     
     # Chargement des données avec mise en cache
@@ -2126,7 +2138,7 @@ def show_ml_analysis():
         
         # Informations sur les données
         st.subheader("Informations sur les données")
-        buffer = io.StringIO()
+        buffer = io.StringIO()  # Création du buffer avec l'import io ajouté plus haut
         df.info(buf=buffer)
         st.text(buffer.getvalue())
         
@@ -2137,7 +2149,7 @@ def show_ml_analysis():
         # Préparation des données pour le ML
         st.subheader("Préparation des données pour le Machine Learning")
         
-        # Sélection des colonnes d'intérêt (modifiable selon vos données)
+        # Sélection des colonnes d'intérêt
         X = df.drop(columns=['TSA'], errors='ignore')
         y = df['TSA'] if 'TSA' in df.columns else None
         
@@ -2190,13 +2202,13 @@ def show_ml_analysis():
         if models is not None:
             st.success("✅ Performances de tous les modèles testés")
             
-            # Affichage du tableau avec tous les modèles et leurs métriques
+            # Affichage du tableau complet avec tous les modèles
             st.dataframe(models.style.format({
                 'Accuracy': '{:.2%}',
                 'Balanced Accuracy': '{:.2%}',
                 'ROC AUC': '{:.2%}',
                 'F1 Score': '{:.2%}',
-                'Temps d\'exécution (s)': '{:.2f}'
+                'Time Taken': '{:.2f}'
             }).background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score', 'ROC AUC']), use_container_width=True)
             
             # Extraction des top modèles pour la visualisation
@@ -2268,7 +2280,6 @@ def show_ml_analysis():
             Entraîne un modèle Random Forest et retourne les résultats
             """
             from sklearn.ensemble import RandomForestClassifier
-            from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
             
             # Initialisation du modèle
             rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
