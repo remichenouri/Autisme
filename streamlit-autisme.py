@@ -2084,17 +2084,15 @@ def show_ml_analysis():
     """
     Fonction pour afficher l'analyse de Machine Learning avec LazyPredict et Random Forest.
     """
-    # Importations nécessaires pour cette fonction
-    import io  # Ajout de l'import manquant ici
+    # Ajout des imports manquants
+    import io
     import pandas as pd
     import numpy as np
     import matplotlib.pyplot as plt
     import seaborn as sns
-    import plotly.graph_objects as go
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
-    import pickle
+    from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+    from sklearn.compose import ColumnTransformer
+    from sklearn.pipeline import Pipeline
     
     st.title('🧠 Analyse par Machine Learning')
     
@@ -2103,7 +2101,7 @@ def show_ml_analysis():
     def load_preprocessed_data():
         df, _, _, _, _, _, _ = load_dataset()
         
-        # Suppression des variables A1 à A10
+        # Suppression cohérente des variables A1 à A10
         aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
         if aq_columns:
             df = df.drop(columns=aq_columns)
@@ -2116,265 +2114,115 @@ def show_ml_analysis():
     # Chargement des données
     df = load_preprocessed_data()
     
-    # Vérifier si les données sont chargées correctement
+    # Vérification des données
     if df is None or df.empty:
         st.error("Impossible de charger les données. Veuillez vérifier la source de données.")
         return
     
-    # Interface utilisateur pour l'analyse ML
-    ml_tabs = st.tabs([
-        "📊 Préprocessing",
-        "🔄 Comparaison des modèles",
-        "🌲 Random Forest"
-    ])
+    # Interface utilisateur
+    ml_tabs = st.tabs(["📊 Préprocessing", "🔄 Comparaison des modèles", "🌲 Random Forest"])
     
     # Onglet 1: Préprocessing
     with ml_tabs[0]:
         st.header("Préparation des données")
         
-        # Affichage du dataframe
+        # Affichage des données
         st.subheader("Aperçu des données")
         st.dataframe(df.head())
+
+        # Encodage des variables catégorielles
+        categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+        numerical_cols = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
         
-        # Informations sur les données
-        st.subheader("Informations sur les données")
-        buffer = io.StringIO()  # Création du buffer avec l'import io ajouté plus haut
-        df.info(buf=buffer)
-        st.text(buffer.getvalue())
+        if 'TSA' in categorical_cols:
+            categorical_cols.remove('TSA')
         
-        # Statistiques descriptives
-        st.subheader("Statistiques descriptives")
-        st.dataframe(df.describe())
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', 'passthrough', numerical_cols),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+            ]
+        )
         
-        # Préparation des données pour le ML
-        st.subheader("Préparation des données pour le Machine Learning")
-        
-        # Sélection des colonnes d'intérêt
-        X = df.drop(columns=['TSA'], errors='ignore')
+        # Séparation des données
+        X = df.drop('TSA', axis=1, errors='ignore')
         y = df['TSA'] if 'TSA' in df.columns else None
         
         if y is None:
             st.error("La colonne cible 'TSA' n'est pas présente dans les données.")
             return
             
-        # Conversion de la variable cible en numérique
         le = LabelEncoder()
         y = le.fit_transform(y)
         
-        # Affichage des dimensions des données
-        st.write(f"Dimensions des features (X): {X.shape}")
-        st.write(f"Dimensions de la cible (y): {len(y)}")
-        
-        # Séparation train/test
         test_size = st.slider("Proportion du jeu de test", 0.1, 0.5, 0.2, 0.05)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
         
-        st.write(f"X_train: {X_train.shape}, X_test: {X_test.shape}")
-        st.success("✅ Données préparées avec succès")
+        # Application du préprocessing
+        try:
+            X_train = preprocessor.fit_transform(X_train)
+            X_test = preprocessor.transform(X_test)
+            st.success("✅ Données préparées avec succès")
+        except Exception as e:
+            st.error(f"Erreur lors du prétraitement : {str(e)}")
+            return
     
-    # Onglet 2: Comparaison des modèles avec LazyPredict
+    # Onglet 2: Comparaison des modèles
     with ml_tabs[1]:
-        st.header("Comparaison des modèles et évaluation des performances")
+        st.header("Comparaison des modèles")
+        
+        # Gestion de l'absence de lazypredict
+        try:
+            from lazypredict.Supervised import LazyClassifier
+        except ImportError:
+            st.error("Le module 'lazypredict' n'est pas installé. Veuillez exécuter :")
+            st.code("pip install lazypredict")
+            return
         
         @st.cache_data(ttl=3600)
-        def run_lazy_predict(X_train, X_test, y_train, y_test):
-            """
-            Fonction pour exécuter LazyPredict et récupérer les résultats de tous les modèles
-            """
+        def run_lazy_predict(_X_train, _X_test, _y_train, _y_test):
+            clf = LazyClassifier(verbose=0, ignore_warnings=True)
+            models, predictions = clf.fit(_X_train, _X_test, _y_train, _y_test)
+            return models
+        
+        with st.spinner("Analyse comparative des modèles..."):
             try:
-                from lazypredict.Supervised import LazyClassifier
-                
-                # Initialisation de LazyClassifier
-                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                
-                # Entraînement et évaluation de tous les modèles
-                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-                
-                return models, predictions
+                models = run_lazy_predict(X_train, X_test, y_train, y_test)
+                st.dataframe(models.style.format({
+                    'Accuracy': '{:.2%}',
+                    'Time Taken': '{:.2f}s'
+                }))
             except Exception as e:
-                st.error(f"Erreur lors de l'exécution de LazyPredict: {str(e)}")
-                return None, None
-        
-        # Exécution de LazyPredict
-        with st.spinner("Exécution de tous les modèles en cours... Cela peut prendre quelques instants."):
-            models, predictions = run_lazy_predict(X_train, X_test, y_train, y_test)
-        
-        if models is not None:
-            st.success("✅ Performances de tous les modèles testés")
-            
-            # Affichage du tableau complet avec tous les modèles
-            st.dataframe(models.style.format({
-                'Accuracy': '{:.2%}',
-                'Balanced Accuracy': '{:.2%}',
-                'ROC AUC': '{:.2%}',
-                'F1 Score': '{:.2%}',
-                'Time Taken': '{:.2f}'
-            }).background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score', 'ROC AUC']), use_container_width=True)
-            
-            # Extraction des top modèles pour la visualisation
-            top_models = models.head(5)
-            
-            # Visualisation des performances des meilleurs modèles
-            st.subheader("Top 5 des modèles par précision")
-            
-            # Graphique à barres pour l'accuracy
-            fig1, ax1 = plt.subplots(figsize=(10, 6))
-            top_models['Accuracy'].sort_values().plot(kind='barh', ax=ax1, color='cornflowerblue')
-            ax1.set_title('Accuracy des meilleurs modèles')
-            ax1.set_xlabel('Accuracy')
-            st.pyplot(fig1)
-            
-            # Graphique à barres pour le F1 Score
-            fig2, ax2 = plt.subplots(figsize=(10, 6))
-            top_models['F1 Score'].sort_values().plot(kind='barh', ax=ax2, color='lightseagreen')
-            ax2.set_title('F1 Score des meilleurs modèles')
-            ax2.set_xlabel('F1 Score')
-            st.pyplot(fig2)
-            
-            # Graphique à barres pour le temps d'exécution
-            fig3, ax3 = plt.subplots(figsize=(10, 6))
-            top_models['Time Taken'].sort_values().plot(kind='barh', ax=ax3, color='salmon')
-            ax3.set_title('Temps d\'exécution des meilleurs modèles')
-            ax3.set_xlabel('Temps (s)')
-            st.pyplot(fig3)
-            
-            # Graphique radar pour comparer les modèles sur plusieurs métriques
-            st.subheader("Comparaison multi-critères des modèles")
-            
-            # Préparation des données pour le graphique radar
-            metrics = ['Accuracy', 'Balanced Accuracy', 'ROC AUC', 'F1 Score']
-            top_5_models = models.head(5).reset_index()
-            
-            fig = go.Figure()
-            
-            for i, model in enumerate(top_5_models['Model']):
-                values = top_5_models.loc[i, metrics].tolist()
-                # Dupliquer le premier point pour fermer le polygone
-                values_closed = values + [values[0]]
-                
-                fig.add_trace(go.Scatterpolar(
-                    r=values_closed,
-                    theta=metrics + [metrics[0]],
-                    fill='toself',
-                    name=model
-                ))
-            
-            fig.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True,
-                        range=[0.8, 1]  # Ajuster selon vos données
-                    )),
-                showlegend=True
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        
-    # Onglet 3: Analyse Random Forest
+                st.error(f"Échec de la comparaison : {str(e)}")
+    
+    # Onglet 3: Random Forest
     with ml_tabs[2]:
-        st.header("🌲 Analyse Random Forest")
+        st.header("Analyse Random Forest")
         
         @st.cache_data(ttl=3600)
-        def train_random_forest(X_train, y_train, X_test, y_test):
-            """
-            Entraîne un modèle Random Forest et retourne les résultats
-            """
+        def train_rf_model(_X_train, _y_train):
             from sklearn.ensemble import RandomForestClassifier
-            
-            # Initialisation du modèle
-            rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-            
-            # Entraînement
-            rf.fit(X_train, y_train)
-            
-            # Prédictions
-            y_pred = rf.predict(X_test)
-            y_prob = rf.predict_proba(X_test)[:, 1]
-            
-            # Calcul des métriques
-            report = classification_report(y_test, y_pred, output_dict=True)
-            cm = confusion_matrix(y_test, y_pred)
-            
-            # Calcul de la courbe ROC
-            fpr, tpr, _ = roc_curve(y_test, y_prob)
-            roc_auc = auc(fpr, tpr)
-            
-            # Importance des caractéristiques
-            feature_importance = pd.DataFrame({
-                'Feature': X_train.columns,
-                'Importance': rf.feature_importances_
-            }).sort_values(by='Importance', ascending=False)
-            
-            return rf, report, cm, fpr, tpr, roc_auc, feature_importance
+            model = RandomForestClassifier(n_estimators=100, random_state=42)
+            model.fit(_X_train, _y_train)
+            return model
         
-        # Entraînement du Random Forest
-        with st.spinner("Entraînement du modèle Random Forest..."):
-            rf, report, cm, fpr, tpr, roc_auc, feature_importance = train_random_forest(X_train, y_train, X_test, y_test)
-        
-        # Affichage des résultats
-        st.success("✅ Modèle Random Forest entraîné avec succès")
-        
-        # Rapport de classification
-        st.subheader("Rapport de classification")
-        
-        # Conversion du rapport en dataframe pour meilleur affichage
-        report_df = pd.DataFrame(report).transpose()
-        
-        # Les métriques globales sont dans les dernières lignes
-        metrics_df = report_df.iloc[:-3]  # Exclure les lignes accuracy, macro avg, weighted avg
-        global_metrics = report_df.iloc[-3:]  # Obtenir les métriques globales
-        
-        # Affichage des métriques par classe
-        st.dataframe(metrics_df.style.format({
-            'precision': '{:.2%}',
-            'recall': '{:.2%}',
-            'f1-score': '{:.2%}',
-            'support': '{:.0f}'
-        }))
-        
-        # Affichage des métriques globales
-        st.dataframe(global_metrics.style.format({
-            'precision': '{:.2%}',
-            'recall': '{:.2%}',
-            'f1-score': '{:.2%}',
-            'support': '{:.0f}'
-        }))
-        
-        # Matrice de confusion
-        st.subheader("Matrice de confusion")
-        fig_cm, ax_cm = plt.subplots(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax_cm)
-        ax_cm.set_xlabel('Prédictions')
-        ax_cm.set_ylabel('Valeurs réelles')
-        st.pyplot(fig_cm)
-        
-        # Courbe ROC
-        st.subheader("Courbe ROC")
-        fig_roc, ax_roc = plt.subplots(figsize=(8, 6))
-        ax_roc.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-        ax_roc.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        ax_roc.set_xlim([0.0, 1.0])
-        ax_roc.set_ylim([0.0, 1.05])
-        ax_roc.set_xlabel('Taux de faux positifs')
-        ax_roc.set_ylabel('Taux de vrais positifs')
-        ax_roc.set_title('Courbe ROC')
-        ax_roc.legend(loc="lower right")
-        st.pyplot(fig_roc)
-        
-        # Importance des caractéristiques
-        st.subheader("Importance des caractéristiques")
-        fig_feat, ax_feat = plt.subplots(figsize=(10, 8))
-        sns.barplot(x='Importance', y='Feature', data=feature_importance.head(15), ax=ax_feat, palette='viridis')
-        ax_feat.set_title('Top 15 des caractéristiques les plus importantes')
-        st.pyplot(fig_feat)
-        
-        # Téléchargement du modèle
-        st.download_button(
-            label="📥 Télécharger le modèle Random Forest",
-            data=pickle.dumps(rf),
-            file_name="random_forest_model.pkl",
-            mime="application/octet-stream"
-        )
+        try:
+            with st.spinner("Entraînement du modèle..."):
+                rf_model = train_rf_model(X_train, y_train)
+                y_pred = rf_model.predict(X_test)
+                
+                # Calcul des métriques
+                from sklearn.metrics import classification_report, confusion_matrix
+                st.write("Rapport de classification :")
+                st.write(classification_report(y_test, y_pred))
+                
+                # Matrice de confusion
+                fig, ax = plt.subplots()
+                sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', ax=ax)
+                st.pyplot(fig)
+                
+        except Exception as e:
+            st.error(f"Échec de l'entraînement : {str(e)}")
 
 def show_aq10_and_prediction():
     """
@@ -3184,6 +3032,9 @@ def show_documentation():
         <h1 class="app-title">Documentation</h1>
     </div>
     """, unsafe_allow_html=True)
+    
+    new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
+    st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
 
     with st.expander("📋 À propos du questionnaire AQ-10", expanded=True):
         st.markdown("""
