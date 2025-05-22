@@ -1057,7 +1057,7 @@ def show_home_page():
 
     st.markdown("""
     <div class="header-container" style="margin-bottom: 30px;">
-        <h1 class="app-title">Dépistage et Prédiction de l'Autisme</h1>
+        <h1 class="app-title">Comprendre les Troubles du Spectre Autistique (TSA)</h1>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1065,7 +1065,7 @@ def show_home_page():
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
 
     st.markdown("""
-    ## Présentation de la plateforme
+    ## Introduction aux Troubles du Spectre Autistique
     <div style="background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 10px; padding: 15px; margin: 20px 0;">
         <h2 style="color: white; margin: 0; text-align: center;">Notre plateforme de dépistage innovante</h2>
         <h3 style="font-size:1.2rem; font-weight:normal; color:white; margin-top:5px; font-style:italic; text-align: center;">
@@ -1074,78 +1074,114 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("## Nos outils de dépistage")
-    col1, col2, col3 = st.columns(3, gap="large")
-
-    with col1:
-        st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">📝 Test AQ-10</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
+    # Section d'information sur les caractéristiques principales - Remplace la première carte
+    st.markdown("## Caractéristiques principales de l'autisme")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
     with col2:
         st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🤖 Prédiction IA</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
-                <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
+        <div class="info-card fade-in" style="height: auto; padding: 20px; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 1.05rem; margin-bottom: 15px;">
+            Les Troubles du Spectre Autistique (TSA) se caractérisent par des différences dans la façon dont le cerveau traite l'information, affectant principalement la communication sociale et les comportements. Ces différences neurologiques sont présentes dès la petite enfance et persistent tout au long de la vie.
+            </p>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <div style="flex: 1; padding: 10px; background-color: #e8f4f8; border-radius: 10px; margin-right: 10px;">
+                    <h4 style="color: #3498db;">Communication sociale</h4>
+                    <ul style="padding-left: 20px;">
+                        <li>Difficultés avec les interactions sociales</li>
+                        <li>Compréhension différente des expressions faciales</li>
+                        <li>Approche unique de la communication verbale et non verbale</li>
+                    </ul>
+                </div>
+                <div style="flex: 1; padding: 10px; background-color: #e8f8ef; border-radius: 10px; margin-left: 10px;">
+                    <h4 style="color: #2ecc71;">Comportements</h4>
+                    <ul style="padding-left: 20px;">
+                        <li>Intérêts spécifiques et souvent intenses</li>
+                        <li>Préférence pour les routines et la prévisibilité</li>
+                        <li>Sensibilités sensorielles particulières</li>
+                    </ul>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    with col3:
+    # Section sur le spectre autistique - Remplace la deuxième carte
+    st.markdown("## Le spectre autistique : une diversité de profils")
+    
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
         st.markdown("""
-        <div class="info-card fade-in" style="height: 320px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
-            <div>
-                <h3 class="card-title">🔍 Analyses</h3>
-                <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
-                <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
+        <div class="info-card fade-in" style="height: auto; padding: 20px; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 1.05rem; margin-bottom: 15px;">
+            L'autisme est un <strong>spectre</strong>, ce qui signifie qu'il se manifeste différemment d'une personne à l'autre. Chaque personne autiste possède un profil unique de forces et de défis.
+            </p>
+            <p style="font-size: 1.05rem; margin-bottom: 15px;">
+            Les classifications actuelles définissent trois niveaux de soutien nécessaire, remplaçant les anciens sous-types comme le syndrome d'Asperger ou l'autisme de Kanner :
+            </p>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <div style="flex: 1; padding: 10px; background-color: #e8f5e9; border-radius: 10px; margin-right: 5px;">
+                    <h4 style="color: #2ecc71; text-align: center;">Niveau 1</h4>
+                    <p style="text-align: center;">Nécessite un soutien</p>
+                </div>
+                <div style="flex: 1; padding: 10px; background-color: #eaf2f8; border-radius: 10px; margin: 0 5px;">
+                    <h4 style="color: #3498db; text-align: center;">Niveau 2</h4>
+                    <p style="text-align: center;">Nécessite un soutien important</p>
+                </div>
+                <div style="flex: 1; padding: 10px; background-color: #f5eef8; border-radius: 10px; margin-left: 5px;">
+                    <h4 style="color: #9b59b6; text-align: center;">Niveau 3</h4>
+                    <p style="text-align: center;">Nécessite un soutien très important</p>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
+    
+    with col2:
+        # Créer un graphique simple illustrant la distribution des scores AQ-10
+        if 'Score_A10' in df.columns:
+            fig = px.histogram(df, x='Score_A10', nbins=10, 
+                            title="Distribution des scores AQ-10 dans notre base de données",
+                            labels={'Score_A10': 'Score AQ-10', 'count': 'Nombre de personnes'},
+                            color_discrete_sequence=['#3498db'])
+            fig.add_vline(x=6, line_dash="dash", line_color="red", 
+                        annotation_text="Seuil clinique", 
+                        annotation_position="top right")
+            fig.update_layout(
+                font=dict(family="Arial", size=12),
+                margin=dict(l=40, r=40, t=50, b=40),
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("""
-    ---
-    ### ⚠️ Avertissement
-    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
-        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
-        <p style="margin-top: 5px;">Cet outil est conçu comme aide au dépistage et ne remplace en aucun cas une consultation médicale professionnelle.
-        Consultez toujours un spécialiste pour une évaluation complète.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## Contexte du projet
-    <p style="font-size: 1.05rem; line-height: 1.6;">
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des Troubles du Spectre de l'Autisme (TSA), représentant un ensemble de troubles neurodéveloppementaux qui apparaissent généralement durant la petite enfance et persistent tout au long de la vie. Il ne s'agit pas d'une maladie mais d'une différence neurologique affectant le fonctionnement du cerveau
-    </p>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ---
-    ## À qui s'adresse ce projet ?
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
-        <ul style="font-size: 1.05rem; line-height: 1.6;">
-            <li><strong>Personnes concernées par les TSA</strong> : Personnes autistes ou suspectant de l'être, souhaitant mieux comprendre ce trouble et réaliser un premier dépistage.</li>
-            <li><strong>Familles et proches</strong> : Parents, membres de la famille ou amis qui cherchent à mieux comprendre les TSA et à identifier d'éventuels signes.</li>
-            <li><strong>Professionnels de santé</strong> : Médecins, psychologues, thérapeutes qui souhaitent utiliser un outil d'aide au dépistage.</li>
-            <li><strong>Chercheurs et étudiants</strong> : Personnes intéressées par l'analyse de données sur l'autisme et les outils de dépistage.</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
+    # Section sur la prévalence et les recherches actuelles - Remplace la troisième carte
+    st.markdown("## Prévalence et recherches actuelles")
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.markdown("""
+        <div class="info-card fade-in" style="height: auto; padding: 20px; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 1.05rem; margin-bottom: 15px;">
+            Les recherches récentes estiment que la prévalence des TSA est d'environ <strong>1 à 2%</strong> de la population mondiale. En France, environ <strong>700 000 personnes</strong> sont concernées, avec un ratio hommes/femmes d'environ <strong>4:1</strong>, bien que ce ratio soit actuellement remis en question par de nouvelles études suggérant un sous-diagnostic chez les femmes.
+            </p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <h4 style="color: #3498db; margin-top: 0;">Avancées de la recherche</h4>
+                <ul style="padding-left: 20px;">
+                    <li>Meilleure compréhension des bases neurologiques</li>
+                    <li>Développement d'interventions précoces plus efficaces</li>
+                    <li>Reconnaissance de la neurodiversité et des approches centrées sur les forces</li>
+                    <li>Exploration de l'influence des facteurs environnementaux et génétiques</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("""
     ---
     ## Critères et niveaux de sévérité
     """)
+    
     col1, col2 = st.columns(2)
+    
     with col1:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
@@ -1153,6 +1189,7 @@ def show_home_page():
             <p>Déficits persistants de la communication et des interactions sociales observés dans des contextes variés (difficultés dans la réciprocité émotionnelle, les comportements non verbaux et le développement des relations)</p>
         </div>
         """, unsafe_allow_html=True)
+    
     with col2:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
@@ -1161,47 +1198,268 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
+    # Ajouter un graphique ou une visualisation sur les manifestations cliniques
+    st.markdown("## Manifestations cliniques du TSA")
+    
+    # Création d'un graphique en radar pour illustrer les différentes dimensions du TSA
+    categories = ['Communication\nverbale', 'Interaction\nsociale', 'Comportements\nrépétitifs', 
+                 'Intérêts\nrestreints', 'Sensibilité\nsensorielle', 'Difficultés\nd\'adaptation']
+    
+    # Valeurs pour trois profils différents
+    values_mild = [2, 3, 4, 3, 5, 2]
+    values_moderate = [4, 5, 6, 5, 7, 6]
+    values_severe = [7, 8, 9, 8, 9, 9]
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatterpolar(
+        r=values_mild,
+        theta=categories,
+        fill='toself',
+        name='Léger',
+        line_color='#2ecc71'
+    ))
+    
+    fig.add_trace(go.Scatterpolar(
+        r=values_moderate,
+        theta=categories,
+        fill='toself',
+        name='Modéré',
+        line_color='#3498db'
+    ))
+    
+    fig.add_trace(go.Scatterpolar(
+        r=values_severe,
+        theta=categories,
+        fill='toself',
+        name='Sévère',
+        line_color='#9b59b6'
+    ))
+    
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 10]
+            )
+        ),
+        title="Manifestations cliniques selon l'intensité du TSA",
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        ),
+        height=500
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
     st.markdown("""
-    <p style="font-size: 1.05rem; line-height: 1.6; margin-top: 20px;">
-    Les classifications actuelles ont abandonné les sous-types d'autisme (comme le syndrome d'Asperger ou l'autisme de Kanner)
-    au profit d'un diagnostic unique de TSA avec trois niveaux de sévérité reflétant le degré de soutien nécessaire:
-    </p>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0;">
+        <p style="font-size: 1.05rem; margin-bottom: 10px;">
+        Ce graphique illustre comment les manifestations cliniques du TSA peuvent varier en intensité selon le profil de la personne. Il est important de noter que chaque personne autiste présente une combinaison unique de ces caractéristiques, et que ce graphique est une simplification à des fins illustratives.
+        </p>
+        <p style="font-size: 1.05rem; margin-bottom: 0;">
+        Les manifestations peuvent également évoluer avec l'âge et varier selon le contexte, soulignant l'importance d'une approche personnalisée dans l'accompagnement.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
+    # Section sur les signes précoces et dépistage
+    st.markdown("## Signes précoces et dépistage")
+    
+    col1, col2 = st.columns(2)
+    
     with col1:
         st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #2ecc71;">
-            <h4 style="color: #2ecc71; margin-top: 0;">Niveau 1</h4>
-            <p>Nécessite un soutien</p>
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🔍</span> Signaux d'alerte potentiels</h4>
+            <ul style="padding-left: 20px;">
+                <li><strong>Avant 12 mois</strong> : Peu ou pas de babillage, de gestes ou de réponse au nom</li>
+                <li><strong>Avant 16 mois</strong> : Absence de mots isolés</li>
+                <li><strong>Avant 24 mois</strong> : Pas de phrases spontanées de deux mots</li>
+                <li><strong>À tout âge</strong> : Perte de langage ou de compétences sociales déjà acquises</li>
+                <li>Contact visuel réduit ou atypique</li>
+                <li>Intérêts restreints et comportements répétitifs</li>
+                <li>Réactions sensorielles inhabituelles</li>
+            </ul>
+            <p style="font-style: italic; margin-top: 10px; color: #7f8c8d;">
+            Note : La présence de ces signes ne signifie pas nécessairement un diagnostic d'autisme, mais justifie une évaluation professionnelle.
+            </p>
         </div>
         """, unsafe_allow_html=True)
+    
     with col2:
         st.markdown("""
-        <div style="background-color: #eaf2f8; padding: 15px; border-radius: 10px; border-left: 4px solid #3498db;">
-            <h4 style="color: #3498db; margin-top: 0;">Niveau 2</h4>
-            <p>Nécessite un soutien important</p>
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">📋</span> Outils de dépistage</h4>
+            <p>Plusieurs outils validés existent pour aider au dépistage précoce :</p>
+            <ul style="padding-left: 20px;">
+                <li><strong>M-CHAT</strong> (Modified Checklist for Autism in Toddlers) : Pour les enfants de 16 à 30 mois</li>
+                <li><strong>AQ-10</strong> (Quotient Autistique - version courte) : Pour les adultes et adolescents</li>
+                <li><strong>SCQ</strong> (Social Communication Questionnaire) : Pour les enfants de plus de 4 ans</li>
+                <li><strong>ADOS-2</strong> (Autism Diagnostic Observation Schedule) : Outil d'observation clinique</li>
+            </ul>
+            <div style="background-color: #e8f4f8; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                <p style="margin: 0;"><strong>Important</strong> : Le diagnostic de TSA doit toujours être établi par une équipe pluridisciplinaire de professionnels de santé spécialisés.</p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
+
+    # Section sur les forces et les talents souvent associés à l'autisme
+    st.markdown("## Forces et talents associés à l'autisme")
+    
+    st.markdown("""
+    <div class="info-card fade-in" style="height: auto; padding: 20px; border-radius: 15px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);">
+        <p style="font-size: 1.05rem; margin-bottom: 20px;">
+        La vision contemporaine de l'autisme reconnaît qu'au-delà des défis, les personnes autistes présentent souvent des forces et des capacités remarquables. Le modèle de la neurodiversité considère l'autisme comme une variation naturelle du cerveau humain plutôt qu'un déficit à corriger.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #e8f6f3; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #1abc9c;">Attention aux détails</h4>
+                <p>Capacité à remarquer des détails que d'autres peuvent manquer, permettant une grande précision dans certaines tâches.</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #e8f4f8; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #3498db;">Mémoire exceptionnelle</h4>
+                <p>Mémoire souvent remarquable, particulièrement pour les informations factuelles liées aux centres d'intérêt.</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #ebf5fb; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #2980b9;">Pensée systématique</h4>
+                <p>Excellente compréhension des systèmes et capacité à identifier des patterns complexes.</p>
+            </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 10px;">
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #f4f6f6; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #7f8c8d;">Honnêteté et authenticité</h4>
+                <p>Communication directe et sincère, sans manipulations sociales.</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #eafaf1; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #27ae60;">Persévérance</h4>
+                <p>Grande concentration et persévérance dans les domaines d'intérêt.</p>
+            </div>
+            <div style="flex: 1; min-width: 200px; padding: 15px; background-color: #f9ebea; border-radius: 10px; margin: 5px;">
+                <h4 style="color: #c0392b;">Créativité unique</h4>
+                <p>Approche originale et non conventionnelle des problèmes.</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Section sur les approches de soutien et d'accompagnement
+    st.markdown("## Approches de soutien et d'accompagnement")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); height: 350px;">
+            <h4 style="color: #3498db; margin-top: 0; text-align: center;"><span style="font-size: 1.2rem;">👶</span> Intervention précoce</h4>
+            <ul style="padding-left: 20px;">
+                <li>Programmes comportementaux structurés</li>
+                <li>Thérapies développementales</li>
+                <li>Accompagnement parental</li>
+                <li>Stimulation de la communication</li>
+                <li>Adaptation de l'environnement</li>
+            </ul>
+            <p style="font-style: italic; color: #7f8c8d; margin-top: 15px;">
+            Plus l'intervention est précoce, plus elle peut être efficace pour favoriser le développement.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); height: 350px;">
+            <h4 style="color: #3498db; margin-top: 0; text-align: center;"><span style="font-size: 1.2rem;">🏫</span> Adaptations éducatives</h4>
+            <ul style="padding-left: 20px;">
+                <li>Plans d'éducation individualisés</li>
+                <li>Aménagements sensoriels</li>
+                <li>Soutien visuel et structuration</li>
+                <li>Accompagnants spécialisés</li>
+                <li>Développement des compétences sociales</li>
+                <li>Valorisation des centres d'intérêt</li>
+            </ul>
+            <p style="font-style: italic; color: #7f8c8d; margin-top: 15px;">
+            Une éducation adaptée permet de développer le potentiel unique de chaque personne.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
         st.markdown("""
-        <div style="background-color: #f5eef8; padding: 15px; border-radius: 10px; border-left: 4px solid #9b59b6;">
-            <h4 style="color: #9b59b6; margin-top: 0;">Niveau 3</h4>
-            <p>Nécessite un soutien très important</p>
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); height: 350px;">
+            <h4 style="color: #3498db; margin-top: 0; text-align: center;"><span style="font-size: 1.2rem;">🧠</span> Approches thérapeutiques</h4>
+            <ul style="padding-left: 20px;">
+                <li>Orthophonie</li>
+                <li>Psychomotricité</li>
+                <li>Ergothérapie</li>
+                <li>Psychoéducation</li>
+                <li>Thérapies comportementales</li>
+                <li>Groupes d'habiletés sociales</li>
+            </ul>
+            <p style="font-style: italic; color: #7f8c8d; margin-top: 15px;">
+            L'approche multidisciplinaire permet d'adresser les différents aspects du développement.
+            </p>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("""
     ---
-    ## Prévalence
-    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-top: 20px;">
-        <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">📊</span> Prévalence</h4>
-        <p style="font-size: 1.05rem; line-height: 1.6;">
-        La prévalence des TSA est estimée à environ 1% de la population mondiale, avec des études récentes suggérant une fourchette entre 1% et 2% dans les pays à revenu élevé. En France, environ 700 000 personnes sont concernées. On observe une proportion plus importante chez les garçons, avec un ratio d'environ 4:1.
-        </p>
+    ### ⚠️ Avertissement
+    <div style="background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 15px; border-radius: 5px; margin: 30px 0;">
+        <strong style="color: #3498db; font-size: 1.1rem;">Important :</strong>
+        <p style="margin-top: 5px;">Les informations présentées sur cette plateforme sont à titre informatif et éducatif uniquement. Elles ne remplacent en aucun cas l'avis médical professionnel. Si vous suspectez un trouble du spectre autistique, consultez un professionnel de santé qualifié pour une évaluation complète.</p>
     </div>
     """, unsafe_allow_html=True)
-    pass
+
+    # Terminer avec une section sur les ressources
+    st.markdown("## Ressources et soutien")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🏥</span> Structures spécialisées</h4>
+            <ul style="padding-left: 20px;">
+                <li><strong>CRA</strong> (Centres Ressources Autisme) : centres régionaux d'évaluation et d'information</li>
+                <li><strong>CAMSP</strong> : Centres d'Action Médico-Sociale Précoce (0-6 ans)</li>
+                <li><strong>CMP</strong> : Centres Médico-Psychologiques</li>
+                <li><strong>SESSAD</strong> : Services d'Éducation Spéciale et de Soins à Domicile</li>
+                <li><strong>IME</strong> : Instituts Médico-Éducatifs</li>
+                <li><strong>ULIS</strong> : Unités Localisées pour l'Inclusion Scolaire</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08);">
+            <h4 style="color: #3498db; margin-top: 0;"><span style="font-size: 1.2rem;">🤝</span> Associations et groupes de soutien</h4>
+            <ul style="padding-left: 20px;">
+                <li>Associations nationales : Autisme France, SOS Autisme, UNAPEI</li>
+                <li>Associations locales de parents</li>
+                <li>Groupes d'entraide pour adultes autistes</li>
+                <li>Forums en ligne et communautés virtuelles</li>
+                <li>Groupes de parole pour les familles</li>
+            </ul>
+            <p style="font-style: italic; margin-top: 10px; color: #7f8c8d;">
+            Le partage d'expériences et le soutien mutuel sont essentiels dans le parcours des personnes autistes et de leurs familles.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Conclusion
+    st.markdown("""
+    ---
+    ## En résumé
+    <p style="font-size: 1.1rem; line-height: 1.6;">
+    L'autisme est une condition neurologique complexe qui affecte la façon dont une personne perçoit le monde et interagit avec lui. Avec une meilleure compréhension, des interventions adaptées et un environnement inclusif, les personnes autistes peuvent développer pleinement leur potentiel unique. L'acceptation de la neurodiversité et la reconnaissance des forces associées à l'autisme sont essentielles pour construire une société plus inclusive.
+    </p>
+    """, unsafe_allow_html=True)
 
 def show_data_exploration():
     import plotly.express as px
