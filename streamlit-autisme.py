@@ -175,10 +175,7 @@ def set_custom_theme():
         }
         .sidebar-title {
             margin-bottom: 2rem !important;
-        }
-
-
-        /* Assurer que le contenu est correctement dimensionné */
+        }... /* Assurer que le contenu est correctement dimensionné */
         [data-testid="stSidebarContent"] {
             width: 100%;
             overflow: auto;
@@ -401,10 +398,7 @@ def set_custom_theme():
             border: 1px solid #dfe4ea;
             transition: all 0.3s ease;
             font-weight: 500;
-        }
-
-
-        input[type="radio"] + div:hover {
+        }... input[type="radio"] + div:hover {
             background: #e9f0ff !important;
             border-color: var(--primary);
             transform: translateY(-1px);
@@ -590,10 +584,7 @@ def set_custom_theme():
         [data-testid="stSidebar"] label[data-selected="true"] {
             background: linear-gradient(90deg, #eaf6fb 60%, #e0f7fa 100%) !important;
             color: #0077b6 !important;
-        }
-
-
-        [data-testid="stSidebar"] svg {
+        }... [data-testid="stSidebar"] svg {
             margin-right: 10px;
             vertical-align: middle;
         }
@@ -666,8 +657,6 @@ def train_advanced_model(df):
     load_metrics_libraries()
 
     try:
-        if 'Jaunisse' in df.columns:
-            df = df.drop(columns=['Jaunisse'])
 
         if 'TSA' not in df.columns:
             st.error("La colonne 'TSA' n'existe pas dans le dataframe")
@@ -720,8 +709,6 @@ def train_advanced_model(df):
         st.error(f"Erreur lors de l'entraînement du modèle: {str(e)}")
         return None, None, None
 
-
-
 def get_question_text(question_number):
     """Fonction utilitaire pour obtenir le texte des questions AQ-10"""
     questions = {
@@ -755,11 +742,12 @@ def load_metrics_libraries():
 
 @st.cache_data(ttl=86400)
 def get_img_with_href(img_url, target_url, as_banner=False):
-
+    """
+    Crée une image cliquable avec un lien (ou non cliquable si target_url est None, vide ou '#')
+    """
     if "drive.google.com" in img_url and "/d/" in img_url:
         file_id = img_url.split("/d/")[1].split("/")[0]
         img_url = f"https://drive.google.com/uc?export=view&id={file_id}"
-
 
     cache_filename = hashlib.md5(img_url.encode()).hexdigest() + ".webp"
     cache_dir = "image_cache"
@@ -803,12 +791,16 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
         container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
-        html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+        
+        # Ne pas ajouter de lien si target_url est None, vide ou '#'
+        if target_url and target_url != "#":
+            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+        else:
+            html_code = f'<div {container_style}><img src="data:image/webp;base64,{img_str}" {style}></div>'
 
         return html_code
     except Exception as e:
         return f'<div style="text-align:center;padding:20px;background:#f0f2f6;border-radius:10px;"><p>Image non disponible ({str(e)})</p></div>'
-
 
 @st.cache_data(ttl=86400)
 def load_dataset():
@@ -850,7 +842,6 @@ def load_dataset():
                     futures.append(executor.submit(download_and_save_dataset, url, os.path.join(cache_dir, filename)))
 
                 df_ds1, df_ds2, df_ds3, df_ds4, df_ds5 = [future.result() for future in futures]
-
 
         rename_dict = {'tsa': 'TSA', 'gender': 'Genre'}
         df = df.rename(columns={k: v for k, v in rename_dict.items() if k in df.columns})
@@ -920,7 +911,6 @@ def create_mann_whitney_visualization(data, variable):
     )
 
     return fig
-
 
 def create_distribution_chart(data, variable):
     fig = px.histogram(data, x=variable, color="TSA")
@@ -1072,7 +1062,7 @@ def show_home_page():
     """, unsafe_allow_html=True)
 
     image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
-    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+    st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
 
     st.markdown("""
     ## Présentation de la plateforme
@@ -1084,7 +1074,7 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("## Accès rapide aux outils")
+    st.markdown("## Nos outils de dépistage")
     col1, col2, col3 = st.columns(3, gap="large")
 
     with col1:
@@ -1095,12 +1085,8 @@ def show_home_page():
                 <p style="font-size: 1.05rem; margin-bottom: 15px;">Questionnaire standardisé reconnu internationalement pour le dépistage des troubles du spectre autistique.</p>
                 <p style="color: #2c3e50; font-weight: 500;">Simple, rapide et validé scientifiquement.</p>
             </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=📝 Test AQ-10" class="cta-button" style="display: block; margin: 0 auto;">Commencer le test</a>
-            </div>
         </div>
         """, unsafe_allow_html=True)
-
 
     with col2:
         st.markdown("""
@@ -1109,9 +1095,6 @@ def show_home_page():
                 <h3 class="card-title">🤖 Prédiction IA</h3>
                 <p style="font-size: 1.05rem; margin-bottom: 15px;">Notre modèle d'intelligence artificielle analyse vos réponses et d'autres facteurs pour une évaluation personnalisée.</p>
                 <p style="color: #2c3e50; font-weight: 500;">Précision élevée basée sur des milliers de cas cliniques.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🤖 Prédiction par IA" class="cta-button" style="display: block; margin: 0 auto;">Découvrir l'IA</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1123,9 +1106,6 @@ def show_home_page():
                 <h3 class="card-title">🔍 Analyses</h3>
                 <p style="font-size: 1.05rem; margin-bottom: 15px;">Explorez nos données, visualisations et insights sur les Troubles du Spectre Autistique (TSA).</p>
                 <p style="color: #2c3e50; font-weight: 500;">Comprendre les corrélations et facteurs importants.</p>
-            </div>
-            <div style="margin-top: auto; text-align: center; padding-bottom: 15px;">
-                <a href="?selection=🔍 Exploration des Données" class="cta-button" style="display: block; margin: 0 auto;">Explorer les données</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
