@@ -2110,7 +2110,7 @@ def show_ml_analysis():
     cache_dir = "model_cache"
     os.makedirs(cache_dir, exist_ok=True)
 
-   df, _, _, _, _, _, _ = load_dataset()
+    df, _, _, _, _, _, _ = load_dataset()
 
     aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
     if aq_columns:
