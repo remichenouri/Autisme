@@ -2124,9 +2124,6 @@ def show_ml_analysis():
     cache_dir = "model_cache"
     os.makedirs(cache_dir, exist_ok=True)
 
-    # Configuration du cache joblib
-    memory = Memory(cache_dir, verbose=0)
-
     df, _, _, _, _, _, _ = load_dataset()
 
     # Préparation des données pour l'analyse ML
@@ -2193,116 +2190,14 @@ def show_ml_analysis():
     report_dict = classification_report(y_test, y_pred, output_dict=True)
     report_df = pd.DataFrame(report_dict).transpose()
     
-    # Fonction mise en cache pour entraîner un seul modèle
-    @memory.cache
-    def train_single_model(model_name, model_class, X_train_prep, X_test_prep, y_train, y_test):
-        """Entraîne un seul modèle et retourne ses performances (avec mise en cache)"""
-        try:
-            start = time.time()
-            model = model_class()
-            model.fit(X_train_prep, y_train)
-            y_pred = model.predict(X_test_prep)
-            y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
-            
-            # Calculer les métriques
-            acc = accuracy_score(y_test, y_pred)
-            balanced_acc = balanced_accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred)
-            roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
-            
-            time_taken = time.time() - start
-            
-            return {
-                "model_name": model_name,
-                "Accuracy": acc,
-                "Balanced Accuracy": balanced_acc,
-                "ROC AUC": roc_auc if roc_auc is not None else 0.0,
-                "F1 Score": f1,
-                "Time Taken": time_taken,
-                "predictions": y_pred
-            }
-        except Exception as e:
-            return {
-                "model_name": model_name,
-                "Accuracy": 0.0,
-                "Balanced Accuracy": 0.0,
-                "ROC AUC": 0.0,
-                "F1 Score": 0.0,
-                "Time Taken": 0.0,
-                "error": str(e)
-            }
-    
-    # Fonction mise en cache pour l'analyse Lazy Predict complète
-    @memory.cache
-    def cached_lazy_predict(data_hash, models_dict):
-        """Fonction pour mettre en cache les résultats de l'analyse Lazy Predict"""
-        # Préprocesser les données
-        X_train_prep = preprocessor.fit_transform(X_train)
-        X_test_prep = preprocessor.transform(X_test)
-        
-        # Paralléliser l'entraînement des modèles
-        results = Parallel(n_jobs=-1)(
-            delayed(train_single_model)(name, cls, X_train_prep, X_test_prep, y_train, y_test)
-            for name, cls in models_dict.items()
-        )
-        
-        # Traiter les résultats
-        results_dict = {}
-        predictions_dict = {}
-        
-        for res in results:
-            model_name = res.pop("model_name")
-            if "predictions" in res:
-                predictions_dict[model_name] = res.pop("predictions")
-            if "error" in res:
-                # Gérer silencieusement les erreurs, ou les journaliser si nécessaire
-                continue
-            results_dict[model_name] = res
-        
-        results_df = pd.DataFrame(results_dict).T
-        results_df = results_df.sort_values(by="Accuracy", ascending=False)
-        
-        return results_df, predictions_dict
-    
-    # Fonction pour générer une clé de hachage pour les données
-    def get_data_hash(X_train, y_train):
-        """Génère un hash unique pour les données d'entraînement pour utilisation comme clé de cache"""
-        data_str = str(X_train.shape) + str(y_train.shape) + str(hash(str(X_train.index)))
-        return hashlib.md5(data_str.encode()).hexdigest()
-
-    
-    # Version personnalisée améliorée de LazyClassifier
-    class OptimizedLazyClassifier:
-        def __init__(self, verbose=0, ignore_warnings=True, custom_metric=None):
-            self.verbose = verbose
-            self.ignore_warnings = ignore_warnings
-            self.custom_metric = custom_metric
-        
-        def fit(self, X_train, X_test, y_train, y_test):
-            """Version optimisée avec mise en cache via joblib"""
-            # Génération d'un hash pour identifier les données
-            data_hash = get_data_hash(X_train, y_train)
-            
-            # Définition des modèles à tester
-            models = {
-                "RandomForestClassifier": RandomForestClassifier,
-                "GradientBoostingClassifier": GradientBoostingClassifier,
-                "XGBClassifier": XGBClassifier,
-                "LGBMClassifier": LGBMClassifier,
-                "LogisticRegression": LogisticRegression
-            }
-            
-            # Récupération depuis le cache ou calcul si nécessaire
-            results_df, predictions = cached_lazy_predict(data_hash, models)
-            return results_df, predictions
-
     # Fonction pour entraîner et évaluer plusieurs modèles
     def train_and_evaluate_models():
         models = {
             "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
             "XGBoost": XGBClassifier(random_state=42),
             "LightGBM": LGBMClassifier(random_state=42),
-            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
+            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+            "Gradient Boosting": GradientBoostingClassifier(random_state=42)
         }
         
         results = []
@@ -2312,17 +2207,27 @@ def show_ml_analysis():
         X_test_prep = preprocessor.transform(X_test)
         
         for name, model in models.items():
-            model.fit(X_train_prep, y_train)
-            y_pred = model.predict(X_test_prep)
-            
-            acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred)
-            
-            results.append({
-                'Modèle': name,
-                'Accuracy': acc,
-                'F1-Score': f1
-            })
+            try:
+                model.fit(X_train_prep, y_train)
+                y_pred = model.predict(X_test_prep)
+                y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
+                
+                acc = accuracy_score(y_test, y_pred)
+                prec = precision_score(y_test, y_pred)
+                rec = recall_score(y_test, y_pred)
+                f1 = f1_score(y_test, y_pred)
+                auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
+                
+                results.append({
+                    'Modèle': name,
+                    'Accuracy': acc,
+                    'Precision': prec,
+                    'Recall': rec,
+                    'F1-Score': f1,
+                    'AUC': auc if auc is not None else float('nan')
+                })
+            except Exception as e:
+                st.error(f"Erreur avec {name}: {str(e)}")
             
         return pd.DataFrame(results)
 
@@ -2335,11 +2240,9 @@ def show_ml_analysis():
 
     ml_tabs = st.tabs([
         "📊 Préprocessing",
-        "🚀 Lazy Predict",
-        "📈 Comparaison des modèles",
+        "🚀 Comparaison des modèles",  # Fusion des onglets "Lazy Predict" et "Comparaison des modèles"
         "🌲 Random Forest"
     ])
-
 
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
@@ -2446,193 +2349,203 @@ def show_ml_analysis():
                 except Exception as e:
                     st.error(f"Erreur lors de la transformation: {str(e)}")
 
+    # Nouvel onglet fusionné "Comparaison des modèles"
     with ml_tabs[1]:
-        st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
-    
+        st.header("Comparaison des modèles et évaluation des performances")
+
         st.markdown("""
         <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
-            <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse comparative des algorithmes de Machine Learning</h3>
+            <p style="color: #34495e;">Cette section compare différents algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
         </div>
         """, unsafe_allow_html=True)
-    
-        st.markdown("""
-        ### Comment fonctionne Lazy Predict?
-    
-        1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
-        2. **Comparaison rapide**: Résultats triés par performance décroissante
-        3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
-        4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
-        """)
-    
-        with st.container():
+
+        tabs_comparison = st.tabs(["Comparaison rapide", "Métriques détaillées", "Visualisations"])
+
+        with tabs_comparison[0]:
+            st.subheader("Comparaison rapide des algorithmes")
+
             col1, col2 = st.columns([2, 1])
-    
+
             with col1:
-                st.markdown("### Code utilisé")
-                st.code("""
-                from lazypredict.Supervised import LazyClassifier
-    
-                # Préparation des données
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    
-                # Instanciation et entraînement avec Lazy Predict
-                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-    
-                # Affichage des résultats
-                print(models)
-                """, language="python")
-    
+                st.markdown("""
+                ### Modèles évalués
+
+                Nous comparons plusieurs algorithmes de classification:
+
+                1. **Random Forest** - Ensemble d'arbres de décision
+                2. **Gradient Boosting** - Modèle additif d'arbres de décision
+                3. **XGBoost** - Implémentation optimisée du gradient boosting
+                4. **LightGBM** - Framework de gradient boosting léger et rapide  
+                5. **Régression Logistique** - Modèle linéaire de référence
+                """)
+
             with col2:
                 st.markdown("### Avantages")
                 st.markdown("""
-                ✅ **Rapidité** d'évaluation
-    
                 ✅ **Vue d'ensemble** des performances
-    
+
                 ✅ **Identification** des meilleurs modèles
                 
                 ✅ **Économie** de temps de développement
-    
-                ✅ **Simplicité** d'utilisation
-                """)
-        
-        # Ajouter un bouton pour lancer l'analyse à la demande
-        if st.button("🚀 Exécuter l'analyse Lazy Predict", type="primary", use_container_width=True):
-            with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
-                try:
-                    # Importer ici seulement si le bouton est cliqué
-                    from lazypredict.Supervised import LazyClassifier
-                    
-                    # Prétraiter les données
-                    X_train_prep = preprocessor.fit_transform(X_train)
-                    X_test_prep = preprocessor.transform(X_test)
-                    
-                    # Exécuter Lazy Predict
-                    clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                    models, predictions = clf.fit(X_train_prep, X_test_prep, y_train, y_test)
-                    
-                    # Afficher les résultats
-                    st.success("✅ Analyse terminée avec succès!")
-                    st.dataframe(models, use_container_width=True)
-                    
-                    # Visualiser les performances
-                    try:
-                        plot_df = models.reset_index().rename(columns={'index': 'Model'})
-                        fig = px.bar(
-                            plot_df,
-                            y='Model',
-                            x='Accuracy',
-                            orientation='h',
-                            title="Précision des modèles",
-                            color='Accuracy',
-                            color_continuous_scale='Blues'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Ajouter les recommandations basées sur les résultats
-                        st.markdown("""
-                        <div style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #2196f3;">
-                            <h3 style="color: #0d47a1; margin-top: 0;">Recommandations basées sur les résultats</h3>
-                            <p>En fonction des performances des modèles, voici nos recommandations :</p>
-                            <ol>
-                                <li><strong>Sélectionnez les 2-3 meilleurs modèles</strong> pour une optimisation plus poussée</li>
-                                <li><strong>Équilibrez précision et interprétabilité</strong> : parfois un modèle légèrement moins précis mais plus interprétable est préférable</li>
-                                <li><strong>Évitez le surajustement</strong> : vérifiez la stabilité des performances avec validation croisée</li>
-                                <li><strong>Évaluez d'autres métriques</strong> comme le F1-Score pour les données déséquilibrées</li>
-                                <li><strong>Optimisez les hyperparamètres</strong> du modèle sélectionné avec GridSearchCV ou RandomizedSearchCV</li>
-                            </ol>
-                            <h4 style="color: #0d47a1; margin-top: 15px;">Prochaines étapes recommandées :</h4>
-                            <ul>
-                                <li>Effectuer une analyse des caractéristiques importantes du modèle le plus performant</li>
-                                <li>Utiliser la validation croisée pour confirmer la robustesse des performances</li>
-                                <li>Calibrer les probabilités pour améliorer l'interprétabilité des prédictions</li>
-                                <li>Explorer l'onglet Random Forest pour une analyse plus détaillée du modèle principal</li>
-                            </ul>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    except Exception as e:
-                        st.error(f"Erreur lors de la visualisation: {str(e)}")
-                
-                except Exception as e:
-                    st.error(f"Erreur lors de l'analyse: {str(e)}")
-                    st.info("Essayez d'installer lazypredict: `pip install lazypredict`")
 
+                ✅ **Sélection optimale** pour le déploiement
+                """)
+
+            # Bouton pour lancer l'analyse comparative
+            if st.button("🚀 Lancer la comparaison des modèles", type="primary", use_container_width=True):
+                with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
+                    try:
+                        # Exécuter notre fonction personnalisée qui remplace LazyPredict
+                        comparison_results = train_and_evaluate_models()
+                        
+                        # Stocker les résultats dans l'état de session
+                        st.session_state.comparison_results = comparison_results
+                        
+                        # Afficher les résultats
+                        st.success("✅ Analyse terminée avec succès!")
+                        st.dataframe(comparison_results.style.format({
+                            'Accuracy': '{:.2%}',
+                            'Precision': '{:.2%}',
+                            'Recall': '{:.2%}',
+                            'F1-Score': '{:.2%}',
+                            'AUC': '{:.2%}'
+                        }).background_gradient(cmap='Blues', subset=['Accuracy', 'F1-Score']), use_container_width=True)
+                        
+                        # Visualiser les performances
+                        try:
+                            fig = px.bar(
+                                comparison_results,
+                                y='Modèle',
+                                x='Accuracy',
+                                orientation='h',
+                                title="Précision des modèles",
+                                color='Accuracy',
+                                color_continuous_scale='Blues'
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                            # Ajouter les recommandations basées sur les résultats
+                            st.markdown("""
+                            <div style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #2196f3;">
+                                <h3 style="color: #0d47a1; margin-top: 0;">Recommandations basées sur les résultats</h3>
+                                <p>En fonction des performances des modèles, voici nos recommandations :</p>
+                                <ol>
+                                    <li><strong>Sélectionnez les 2-3 meilleurs modèles</strong> pour une optimisation plus poussée</li>
+                                    <li><strong>Équilibrez précision et interprétabilité</strong> : parfois un modèle légèrement moins précis mais plus interprétable est préférable</li>
+                                    <li><strong>Évitez le surajustement</strong> : vérifiez la stabilité des performances avec validation croisée</li>
+                                    <li><strong>Évaluez d'autres métriques</strong> comme le F1-Score pour les données déséquilibrées</li>
+                                    <li><strong>Optimisez les hyperparamètres</strong> du modèle sélectionné avec GridSearchCV ou RandomizedSearchCV</li>
+                                </ol>
+                                <h4 style="color: #0d47a1; margin-top: 15px;">Prochaines étapes recommandées :</h4>
+                                <ul>
+                                    <li>Effectuer une analyse des caractéristiques importantes du modèle le plus performant</li>
+                                    <li>Utiliser la validation croisée pour confirmer la robustesse des performances</li>
+                                    <li>Calibrer les probabilités pour améliorer l'interprétabilité des prédictions</li>
+                                    <li>Explorer l'onglet Random Forest pour une analyse plus détaillée du modèle principal</li>
+                                </ul>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        except Exception as e:
+                            st.error(f"Erreur lors de la visualisation: {str(e)}")
+                    
+                    except Exception as e:
+                        st.error(f"Erreur lors de l'analyse: {str(e)}")
+            else:
+                # Si l'analyse n'a pas encore été lancée
+                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
+
+        with tabs_comparison[1]:
+            st.subheader("Métriques d'évaluation détaillées")
+            
+            # Afficher les métriques réelles calculées
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
+                st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
+            with col2:
+                st.metric("Spécificité (Precision)", f"{precision:.2%}")
+                st.metric("Score F1", f"{f1:.2%}")
+            with col3:
+                st.metric("AUC-ROC", f"{auc:.2%}")
+                st.metric("Erreur", f"{1-accuracy:.2%}")
+
+            st.subheader("Matrice de confusion")
+
+            # Afficher la véritable matrice de confusion
+            fig, ax = plt.subplots(figsize=(8, 6))
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+            plt.xlabel('Prédiction')
+            plt.ylabel('Réalité')
+            plt.title('Matrice de confusion')
+            ax.set_xticklabels(['Non-TSA', 'TSA'])
+            ax.set_yticklabels(['Non-TSA', 'TSA'])
+            st.pyplot(fig)
+
+            st.markdown("""
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p><strong>Interprétation :</strong></p>
+                <ul>
+                    <li>Vrai Négatif (coin supérieur gauche) : Cas correctement identifiés comme non-TSA</li>
+                    <li>Faux Positif (coin supérieur droit) : Cas incorrectement identifiés comme TSA</li>
+                    <li>Faux Négatif (coin inférieur gauche) : Cas de TSA manqués par le modèle</li>
+                    <li>Vrai Positif (coin inférieur droit) : Cas de TSA correctement identifiés</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.subheader("Rapport de classification détaillé")
+            st.dataframe(report_df.style.format({
+                'precision': '{:.2%}',
+                'recall': '{:.2%}',
+                'f1-score': '{:.2%}'
+            }).background_gradient(cmap='Blues', subset=['precision', 'recall', 'f1-score']), use_container_width=True)
+
+        with tabs_comparison[2]:
+            st.subheader("Visualisations des performances")
+            
+            if 'comparison_results' in st.session_state:
+                results = st.session_state.comparison_results
+                
+                # Graphe de comparaison des métriques par modèle
+                fig = px.bar(
+                    results.melt(id_vars='Modèle', value_vars=['Accuracy', 'Precision', 'Recall', 'F1-Score'], 
+                               var_name='Métrique', value_name='Valeur'),
+                    x='Modèle', y='Valeur', color='Métrique',
+                    barmode='group',
+                    title="Comparaison des métriques par modèle",
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
+                fig.update_layout(yaxis_tickformat='.0%')
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Graphe radar pour comparer les modèles
+                try:
+                    fig = go.Figure()
+                    for i, model in enumerate(results['Modèle']):
+                        fig.add_trace(go.Scatterpolar(
+                            r=[results.iloc[i]['Accuracy'], results.iloc[i]['Precision'], 
+                               results.iloc[i]['Recall'], results.iloc[i]['F1-Score']],
+                            theta=['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+                            fill='toself',
+                            name=model
+                        ))
+                    fig.update_layout(
+                        polar=dict(
+                            radialaxis=dict(
+                                visible=True,
+                                range=[0, 1]
+                            )),
+                        showlegend=True,
+                        title="Radar chart des performances des modèles"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                except Exception as e:
+                    st.warning(f"Impossible d'afficher le graphique radar: {str(e)}")
+            else:
+                st.info("Exécutez d'abord l'analyse des modèles pour voir les visualisations.")
 
     with ml_tabs[2]:
-        st.header("Comparaison des modèles et métriques d'évaluation")
-
-        st.markdown("""
-        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Métriques d'évaluation des modèles</h3>
-            <p style="color: #34495e;">Analyse comparative des performances des différents algorithmes de classification pour la détection des TSA.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.subheader("1. Métriques de performance du modèle principal")
-
-        # Afficher les métriques réelles calculées
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
-            st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
-        with col2:
-            st.metric("Spécificité (Precision)", f"{precision:.2%}")
-            st.metric("Score F1", f"{f1:.2%}")
-        with col3:
-            st.metric("AUC-ROC", f"{auc:.2%}")
-            st.metric("Erreur", f"{1-accuracy:.2%}")
-
-        st.subheader("2. Matrice de confusion")
-
-        # Afficher la véritable matrice de confusion
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-        plt.xlabel('Prédiction')
-        plt.ylabel('Réalité')
-        plt.title('Matrice de confusion')
-        ax.set_xticklabels(['Non-TSA', 'TSA'])
-        ax.set_yticklabels(['Non-TSA', 'TSA'])
-        st.pyplot(fig)
-
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Interprétation :</strong></p>
-            <ul>
-                <li>Vrai Négatif (coin supérieur gauche) : Cas correctement identifiés comme non-TSA</li>
-                <li>Faux Positif (coin supérieur droit) : Cas incorrectement identifiés comme TSA</li>
-                <li>Faux Négatif (coin inférieur gauche) : Cas de TSA manqués par le modèle</li>
-                <li>Vrai Positif (coin inférieur droit) : Cas de TSA correctement identifiés</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.subheader("3. Rapport de classification détaillé")
-
-        # Afficher le vrai rapport de classification
-        st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
-
-        st.subheader("4. Comparaison avec d'autres algorithmes")
-
-        # Obtenir les résultats réels des modèles comparés
-        comparison_results = train_and_evaluate_models()
-        st.dataframe(comparison_results.style.highlight_max(subset=['Accuracy']))
-
-        # Créer un graphique à barres de comparaison
-        fig, ax = plt.subplots(figsize=(10, 6))
-        x = np.arange(len(comparison_results))
-        width = 0.35
-        ax.bar(x - width/2, comparison_results['Accuracy'], width, label='Accuracy')
-        ax.bar(x + width/2, comparison_results['F1-Score'], width, label='F1-Score')
-        ax.set_xticks(x)
-        ax.set_xticklabels(comparison_results['Modèle'])
-        ax.legend()
-        ax.set_ylabel('Score')
-        ax.set_title('Comparaison des performances des modèles')
-        st.pyplot(fig)
-
-    with ml_tabs[3]:
         st.header("Modèle Random Forest")
     
         st.markdown("""
