@@ -2269,7 +2269,7 @@ def show_ml_analysis():
         return cache_data
 
     # Version optimisée de LazyPredict
-    @st.cache_data(show_spinner=False, ttl=3600)
+    @st.cache_data(show_spinner="Exécution de Lazy Predict...", ttl=3600)
     def run_lazy_predict(_X_train, _X_test, _y_train, _y_test, _cache_path):
         """Version mise en cache de LazyClassifier optimisée"""
         
@@ -2277,7 +2277,7 @@ def show_ml_analysis():
         if os.path.exists(_cache_path):
             try:
                 cached_results = joblib.load(_cache_path)
-                return models, predictions, execution_time
+                return cached_results["results_df"], cached_results["predictions"], cached_results["execution_time"]
             except Exception as e:
                 st.warning(f"Erreur lors du chargement du cache Lazy Predict: {str(e)}. Réexécution de l'analyse...")
         
@@ -2445,17 +2445,17 @@ def show_ml_analysis():
 
     with ml_tabs[1]:
         st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
-        
+
         st.markdown("""
         <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
             <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
             <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         # Exécution automatique de Lazy Predict (sans bouton ni messages)
         try:
-            # CORRECTION: S'assurer de récupérer les 3 valeurs retournées
+            # Modification ici: récupérer les trois valeurs retournées
             lazy_models, lazy_predictions, execution_time = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
             
             # Afficher uniquement le tableau des résultats
@@ -2469,23 +2469,23 @@ def show_ml_analysis():
                 
         except Exception as e:
             st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
-    
 
     with ml_tabs[2]:
         st.header("Comparaison des performances des modèles")
-    
+
         st.markdown("""
         <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
             <h3 style="color: #2c3e50; margin-top: 0;">Graphiques de comparaison</h3>
             <p style="color: #34495e;">Visualisation des performances des 5 premiers algorithmes identifiés par Lazy Predict.</p>
         </div>
         """, unsafe_allow_html=True)
-    
+
         # Affichage des graphiques
         try:
             # Récupérer les résultats de Lazy Predict (avec les trois valeurs)
             lazy_results, _, _ = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
-
+            
+            # Ne garder que les 5 premiers algorithmes
             top_5_models = lazy_results.head(5)
             
             # Créer un DataFrame pour les graphiques
@@ -2916,7 +2916,7 @@ def show_ml_analysis():
             
         except Exception as e:
             st.error(f"Erreur lors de l'affichage des performances Random Forest: {str(e)}")
-            
+
 
 def show_aq10_and_prediction():
     """
