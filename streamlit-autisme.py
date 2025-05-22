@@ -666,6 +666,8 @@ def train_advanced_model(df):
     load_metrics_libraries()
 
     try:
+        if 'Jaunisse' in df.columns:
+        df = df.drop(columns=['Jaunisse'])
 
         if 'TSA' not in df.columns:
             st.error("La colonne 'TSA' n'existe pas dans le dataframe")
@@ -1718,6 +1720,11 @@ def show_data_exploration():
             from sklearn import utils
             import numpy as np
 
+            df_famd = df.copy()
+            if 'Jaunisse' in df_famd.columns:
+                df_famd = df_famd.drop(columns=['Jaunisse'])
+            df_famd = df_famd.reset_index(drop=True)
+
             class FAMD_Custom(prince.FAMD):
                 """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
                 def transform(self, X):
@@ -2061,6 +2068,8 @@ def show_ml_analysis():
     df, _, _, _, _, _, _ = load_dataset()
 
     # Préparation des données pour l'analyse ML
+    if 'Jaunisse' in df.columns:
+        df = df.drop(columns=['Jaunisse'])
     if 'TSA' not in df.columns:
         st.error("La colonne 'TSA' n'existe pas dans le dataframe")
         return
@@ -2698,6 +2707,8 @@ def show_aq10_and_prediction():
 
     try:
         df, _, _, _, _, _, _ = load_dataset()
+        if 'Jaunisse' in df.columns:
+        df = df.drop(columns=['Jaunisse'])
         rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
         st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
