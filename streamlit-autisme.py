@@ -2073,7 +2073,7 @@ def show_data_exploration():
                     else:
                 except Exception as e:
                     st.warning(f"Impossible de générer l'analyse FAMD centrée sur Score_A10: {str(e)}")
-
+                    pass
 
 def show_ml_analysis():
     import plotly.express as px
