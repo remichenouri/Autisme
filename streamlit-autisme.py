@@ -2104,12 +2104,22 @@ def show_ml_analysis():
     from tempfile import NamedTemporaryFile
     from streamlit.components.v1 import html
     
-    # Configuration initiale
     os.environ['TQDM_DISABLE'] = '1'  # Désactiver les barres de progression
-    st.set_option('deprecation.showPyplotGlobalUse', False)  # Supprimer les avertissements matplotlib
+    
+    # CORRECTION: 'false' -> 'False' et utilisation de try/except pour gérer l'option
+    try:
+        st.set_option('deprecation.showPyplotGlobalUse', False)  # Correction avec F majuscule
+    except Exception:
+        # Si l'option n'est pas reconnue, on l'ignore simplement
+        pass
 
     # Gestion des dépendances
     try:
+        from lazypredict.Supervised import LazyClassifier
+    except ImportError:
+        import sys
+        import subprocess
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "lazypredict"])
         from lazypredict.Supervised import LazyClassifier
     except ImportError:
         import sys
@@ -2234,7 +2244,6 @@ def show_ml_analysis():
         "🌲 Random Forest",
         "⚙ Performances"
     ])
-
     with tabs[0]:
         st.subheader("Prétraitement des données")
         # ... (code existant pour l'onglet préprocessing)
