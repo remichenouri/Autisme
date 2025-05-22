@@ -784,10 +784,10 @@ def get_img_with_href(img_url, target_url, as_banner=False):
 
         img_str = base64.b64encode(img_data).decode()
 
-        if as_banner:
-            style = 'style="width:100%;height:550px;display:block;object-fit:cover;border-radius:10px;" loading="lazy"'
-        else:
-            style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
+            if as_banner:
+                style = 'style="width:100%;height:700px;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
+            else:
+                style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
         container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
         
@@ -3035,6 +3035,7 @@ def show_documentation():
     
     new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
     st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
+
 
     with st.expander("📋 À propos du questionnaire AQ-10", expanded=True):
         st.markdown("""
