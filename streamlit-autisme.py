@@ -2036,12 +2036,12 @@ def show_data_exploration():
                             x = column_corr_a10.iloc[i, 0]
                             y = column_corr_a10.iloc[i, 1]
         
-                                ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
+                            ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
                                 
-                                # Mise en évidence du Score_A10
-                                if var == 'Score_A10':
+                            
+                            if var == 'Score_A10':
                                     ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
-                                else:
+                            else:
                                     ax.text(x*1.1, y*1.1, var, fontsize=10)
             
                             ax.set_xlim(-1.1, 1.1)
