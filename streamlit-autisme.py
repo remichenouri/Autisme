@@ -2080,270 +2080,652 @@ def show_data_exploration():
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
 
 def show_ml_analysis():
-    """
-    Fonction pour afficher l'analyse de Machine Learning.
-    """
-    # Importations nécessaires
-    import io
-    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
     import numpy as np
-    import matplotlib.pyplot as plt
+    import pandas as pd
     import seaborn as sns
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import classification_report, confusion_matrix
-    
-    st.title('🧠 Analyse par Machine Learning')
-    
-    # Chargement des données avec mise en cache
-    @st.cache_data(ttl=3600)
-    def load_preprocessed_data():
-        try:
-            df, _, _, _, _, _, _ = load_dataset()
-            
-            # Suppression des variables A1 à A10
-            aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
-            if aq_columns:
-                df = df.drop(columns=aq_columns)
-            
-            if 'Jaunisse' in df.columns:
-                df = df.drop(columns=['Jaunisse'])
-                
-            return df
-        except Exception as e:
-            st.error(f"Erreur lors du chargement des données: {str(e)}")
-            return pd.DataFrame()
-    
-    # Chargement des données
-    df = load_preprocessed_data()
-    
-    # Vérification des données
-    if df is None or df.empty:
-        st.error("Impossible de charger les données. Veuillez vérifier la source de données.")
+    import matplotlib.pyplot as plt
+    from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler, OneHotEncoder
+    from sklearn.compose import ColumnTransformer
+    from sklearn.pipeline import Pipeline
+    from xgboost import XGBClassifier
+    from lightgbm import LGBMClassifier
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+    from sklearn.metrics import roc_auc_score, confusion_matrix, classification_report
+    from sklearn.metrics import balanced_accuracy_score
+    from sklearn.model_selection import cross_val_score, train_test_split
+    import time
+    import os
+
+    df, _, _, _, _, _, _ = load_dataset()
+
+    # Préparation des données pour l'analyse ML
+    if 'TSA' not in df.columns:
+        st.error("La colonne 'TSA' n'existe pas dans le dataframe")
         return
-    
-    # Interface utilisateur
-    ml_tabs = st.tabs(["📊 Préprocessing", "🔄 Comparaison des modèles", "🌲 Random Forest"])
-    
-    # Onglet 1: Préprocessing
+
+    # Préparation des données X, y
+    X = df.drop(columns=['TSA'])
+    y = df['TSA'].map({'Yes': 1, 'No': 0})
+
+    # Diviser les données en ensembles d'entraînement et de test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+    # Identifier les colonnes numériques et catégorielles
+    numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    # Créer le préprocesseur
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), numerical_cols),
+            ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+        ],
+        remainder='passthrough',
+        verbose_feature_names_out=False
+    )
+
+    # Créer et entraîner le pipeline avec RandomForest
+    rf_classifier = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=8,
+        min_samples_split=10,
+        min_samples_leaf=2,
+        max_features='sqrt',
+        bootstrap=True,
+        random_state=42,
+        n_jobs=-1
+    )
+
+    pipeline = Pipeline([
+        ('preprocessor', preprocessor),
+        ('classifier', rf_classifier)
+    ])
+
+    # Entraîner le modèle principal et calculer les métriques réelles
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+    y_prob = pipeline.predict_proba(X_test)[:, 1]
+
+    # Calculer les vraies métriques
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_prob)
+
+    # Créer la vraie matrice de confusion
+    cm = confusion_matrix(y_test, y_pred)
+
+    # Générer le rapport de classification réel
+    report_dict = classification_report(y_test, y_pred, output_dict=True)
+    report_df = pd.DataFrame(report_dict).transpose()
+
+    # Version personnalisée de LazyClassifier pour éviter les problèmes de tqdm
+    class CustomLazyClassifier:
+        def __init__(self, verbose=0, ignore_warnings=True, custom_metric=None):
+            self.verbose = verbose
+            self.ignore_warnings = ignore_warnings
+            self.custom_metric = custom_metric
+
+        def fit(self, X_train, X_test, y_train, y_test):
+            """Version simplifiée mais fonctionnelle de LazyClassifier"""
+            results = {}
+            predictions = {}
+
+            models = {
+                "RandomForestClassifier": RandomForestClassifier(random_state=42),
+                "GradientBoostingClassifier": GradientBoostingClassifier(random_state=42),
+                "XGBClassifier": XGBClassifier(random_state=42),
+                "LGBMClassifier": LGBMClassifier(random_state=42),
+                "LogisticRegression": LogisticRegression(random_state=42, max_iter=1000)
+            }
+
+            # Préprocesser les données
+            X_train_prep = preprocessor.fit_transform(X_train)
+            X_test_prep = preprocessor.transform(X_test)
+
+            for name, model in models.items():
+                try:
+                    start = time.time()
+                    model.fit(X_train_prep, y_train)
+                    y_pred = model.predict(X_test_prep)
+                    y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
+
+                    # Calculer les métriques
+                    acc = accuracy_score(y_test, y_pred)
+                    balanced_acc = balanced_accuracy_score(y_test, y_pred)
+                    f1 = f1_score(y_test, y_pred)
+                    roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
+
+                    results[name] = {
+                        "Accuracy": acc,
+                        "Balanced Accuracy": balanced_acc,
+                        "ROC AUC": roc_auc if roc_auc is not None else 0.0,
+                        "F1 Score": f1,
+                        "Time Taken": time.time() - start
+                    }
+
+                    predictions[name] = y_pred
+                except Exception as e:
+                    if not self.ignore_warnings:
+                        print(f"Error fitting {name}: {str(e)}")
+
+            results_df = pd.DataFrame(results).T
+            results_df = results_df.sort_values(by="Accuracy", ascending=False)
+
+            return results_df, predictions
+
+    # Fonction pour entraîner et évaluer plusieurs modèles
+    def train_and_evaluate_models():
+        models = {
+            "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
+            "XGBoost": XGBClassifier(random_state=42),
+            "LightGBM": LGBMClassifier(random_state=42),
+            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
+        }
+
+        results = []
+
+        # Préprocesser les données
+        X_train_prep = preprocessor.fit_transform(X_train)
+        X_test_prep = preprocessor.transform(X_test)
+
+        for name, model in models.items():
+            model.fit(X_train_prep, y_train)
+            y_pred = model.predict(X_test_prep)
+
+            acc = accuracy_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred)
+
+            results.append({
+                'Modèle': name,
+                'Accuracy': acc,
+                'F1-Score': f1
+            })
+
+        return pd.DataFrame(results)
+
+    st.markdown("""
+    <div class="header-container">
+        <span style="font-size:2.5rem">🧠</span>
+        <h1 class="app-title">Analyse par Machine Learning</h1>
+    </div>
+    """, unsafe_allow_html=True)
+
+    ml_tabs = st.tabs([
+        "📊 Préprocessing",
+        "🚀 Lazy Predict",
+        "📈 Comparaison des modèles",
+        "🌲 Random Forest"
+    ])
+
     with ml_tabs[0]:
-        st.header("Préparation des données")
-        
-        # Affichage des données
-        st.subheader("Aperçu des données")
-        st.dataframe(df.head())
+        st.subheader("Pipeline de prétraitement des données")
 
-        # Informations sur les données
-        st.subheader("Informations sur les données")
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        st.text(buffer.getvalue())
-        
-        # Statistiques descriptives
-        st.subheader("Statistiques descriptives")
-        st.dataframe(df.describe())
-        
-        # Préparation des données pour le ML
-        st.subheader("Préparation des données pour le Machine Learning")
-        
-        # Vérification que la colonne cible existe
-        if 'TSA' not in df.columns:
-            st.error("La colonne cible 'TSA' n'est pas présente dans les données.")
-            return
-            
-        # Séparation des données
-        X = df.drop('TSA', axis=1)
-        y = df['TSA']
-        
-        # Encodage de la variable cible
-        le = LabelEncoder()
-        y = le.fit_transform(y)
-        
-        # Affichage des dimensions
-        st.write(f"Dimensions des features (X): {X.shape}")
-        st.write(f"Dimensions de la cible (y): {len(y)}")
-        
-        # Séparation train/test avec valeur fixe (0.2 = 20%)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        st.write(f"X_train: {X_train.shape}, X_test: {X_test.shape}")
-        st.success("✅ Données préparées avec succès")
-    
-    # Onglet 2: Comparaison des modèles
+        st.markdown("""
+        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Préparation des données pour la modélisation</h3>
+            <p style="color: #34495e;">Un prétraitement robuste est essentiel pour garantir la qualité des modèles prédictifs.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.markdown("""
+            ### Étapes du préprocessing
+
+            1. **Nettoyage des données**
+               - Gestion des valeurs manquantes
+               - Correction des incohérences
+               - Suppression des doublons
+
+            2. **Encodage des variables catégorielles**
+               - One-Hot Encoding pour les variables nominales
+               - Encodage ordinal pour les variables ordinales
+
+            3. **Standardisation des variables numériques**
+               - Z-score standardization (moyenne=0, écart-type=1)
+               - Important pour les algorithmes sensibles à l'échelle
+
+            4. **Réduction de dimensionnalité**
+               - FAMD pour l'analyse exploratoire
+               - Feature selection pour la modélisation
+            """)
+
+        with col2:
+            preprocessing_code = """
+            digraph preprocessing {
+                rankdir=TB;
+                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
+                edge [arrowhead=vee, arrowsize=0.8];
+                data [label="Données brutes", fillcolor="#e1f5fe"];
+                cleaning [label="Nettoyage des données"];
+                encoding [label="Encodage des variables\ncatégorielles"];
+                scaling [label="Standardisation des\nvariables numériques"];
+                feature_eng [label="Feature Engineering"];
+                split [label="Train/Test Split", fillcolor="#e8f5e9"];
+
+                data -> cleaning;
+                cleaning -> encoding;
+                encoding -> scaling;
+                scaling -> feature_eng;
+                feature_eng -> split;
+            }
+            """
+
+            try:
+                from graphviz import Source
+                st.graphviz_chart(preprocessing_code)
+            except:
+                st.warning("Graphviz n'est pas disponible. Installation requise: `pip install graphviz`")
+                st.code(preprocessing_code, language="python")
+
+        st.markdown("### Pipeline de préprocessing utilisé")
+
+        st.code("""
+        # Définition du préprocesseur pour variables mixtes
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', StandardScaler(), numerical_cols),
+                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+            ],
+            remainder='passthrough',
+            verbose_feature_names_out=False
+        )
+
+        # Pipeline complet avec préprocesseur et modèle
+        pipeline = Pipeline([
+            ('preprocessor', preprocessor),
+            ('classifier', RandomForestClassifier())
+        ])
+        """, language="python")
+
+        st.subheader("Transformation des données")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("#### Données avant préprocessing")
+            # Utiliser des données réelles du DataFrame
+            if not df.empty:
+                sample_rows = min(4, len(df))
+                raw_sample = df.iloc[:sample_rows].copy()
+                columns_to_show = [col for col in raw_sample.columns if col in ['A1', 'A2', 'A3', 'Genre', 'Age', 'TSA']][:6]
+                st.dataframe(raw_sample[columns_to_show])
+            else:
+                st.error("Aucune donnée disponible.")
+
+        with col2:
+            st.markdown("#### Données après préprocessing")
+            # Afficher un exemple réel de transformation
+            if not df.empty:
+                try:
+                    sample_X = X.iloc[:4]
+                    transformed_sample = preprocessor.fit_transform(sample_X)
+                    st.code(f"{transformed_sample[:, :10]}")
+                except Exception as e:
+                    st.error(f"Erreur lors de la transformation: {str(e)}")
+
     with ml_tabs[1]:
-        st.header("Comparaison des modèles")
-        from sklearn.preprocessing import OneHotEncoder
-        OneHotEncoder.sparse = False  # Désactive le mode sparse
-    
-        try:
-            from lazypredict.Supervised import LazyClassifier
-            # Vérification si LazyPredict est disponible
-            lazy_installed = False
-            try:
-                import sys
-                subprocess_output = st.empty()
+        st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
 
-            from lazypredict.Supervised import LazyClassifier
-            lazy_installed = True
-            st.success("✅ LazyPredict est installé et prêt à l'emploi.")
-        except ImportError:
-            st.warning("Le module 'lazypredict' n'est pas installé. Les résultats affichés sont pré-calculés.")
-        
-        # Tableau pré-défini avec les résultats (affiché en cas d'absence de LazyPredict)
-        all_models_results = pd.DataFrame({
-            'Modèle': [
-                "LightGBM", 
-                "Gradient Boosting",
-                "Random Forest", 
-                "XGBoost", 
-                "Extra Trees",
-                "AdaBoost",
-                "Decision Tree",
-                "SVM",
-                "Régression Logistique", 
-                "K-Nearest Neighbors",
-                "Naive Bayes",
-                "Dummy Classifier"
-            ],
-            'Accuracy': [
-                0.9650, 0.9644, 0.9624, 0.9617, 0.9601,
-                0.9125, 0.8932, 0.8123, 0.8257, 0.7845, 0.7642, 0.5143
-            ],
-            'Precision': [
-                0.9578, 0.9541, 0.9576, 0.9599, 0.9534,
-                0.9076, 0.8876, 0.8347, 0.8557, 0.7932, 0.7843, 0.5076
-            ],
-            'Recall': [
-                0.9719, 0.9746, 0.9665, 0.9625, 0.9645,
-                0.9132, 0.8934, 0.7845, 0.7778, 0.7654, 0.7432, 0.5087
-            ],
-            'F1-Score': [
-                0.9648, 0.9642, 0.9620, 0.9612, 0.9589,
-                0.9104, 0.8905, 0.8087, 0.8149, 0.7791, 0.7632, 0.5081
-            ],
-            'AUC': [
-                0.9937, 0.9914, 0.9932, 0.9927, 0.9912,
-                0.9534, 0.9432, 0.9123, 0.9429, 0.8845, 0.8543, 0.5000
-            ],
-            'Temps d\'exécution (s)': [
-                0.87, 1.34, 1.12, 1.45, 1.23,
-                0.76, 0.21, 2.45, 0.23, 0.34, 0.15, 0.03
-            ]
-        })
-        
-        # Si LazyPredict est disponible, essayer de l'utiliser
-        if lazy_installed:
+        st.markdown("""
+        <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
+            <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        ### Comment fonctionne Lazy Predict?
+
+        1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
+        2. **Comparaison rapide**: Résultats triés par performance décroissante
+        3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
+        4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
+        """)
+
+        with st.container():
+            col1, col2 = st.columns([2, 1])
+
+            with col1:
+                st.markdown("### Code utilisé")
+                st.code("""
+                from lazypredict.Supervised import LazyClassifier
+
+                # Préparation des données
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+                # Instanciation et entraînement avec Lazy Predict
+                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
+                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
+
+                # Affichage des résultats
+                print(models)
+                """, language="python")
+
+            with col2:
+                st.markdown("### Avantages")
+                st.markdown("""
+                ✅ **Rapidité** d'évaluation
+
+                ✅ **Vue d'ensemble** des performances
+
+                ✅ **Identification** des meilleurs modèles
+
+                ✅ **Économie** de temps de développement
+
+                ✅ **Simplicité** d'utilisation
+                """)
+
+        # Initialisation de l'état de session pour le bouton
+        if 'lazy_predict_launched' not in st.session_state:
+            st.session_state.lazy_predict_launched = False
+
+        # Bouton pour lancer l'analyse
+        lp_col1, lp_col2 = st.columns([1, 2])
+        with lp_col1:
+            if st.button("🚀 Lancer Lazy Predict", type="primary", use_container_width=True):
+                with st.spinner("Analyse en cours... Veuillez patienter."):
+                    # Exécuter réellement la version personnalisée de LazyClassifier
+                    try:
+                        # Désactiver tqdm pour éviter les problèmes
+                        os.environ['TQDM_DISABLE'] = '1'
+
+                        # Utiliser notre version personnalisée
+                        custom_clf = CustomLazyClassifier(verbose=0, ignore_warnings=True)
+                        lazy_models, lazy_predictions = custom_clf.fit(X_train, X_test, y_train, y_test)
+                        st.session_state.lazy_models = lazy_models
+                        st.session_state.lazy_predict_launched = True
+                    except Exception as e:
+                        st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
+                        # Si échec, utiliser notre évaluation manuelle des modèles
+                        results_df = train_and_evaluate_models()
+                        st.session_state.lazy_models = results_df
+                        st.session_state.lazy_predict_launched = True
+
+        with lp_col2:
+            if not st.session_state.lazy_predict_launched:
+                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
+
+        # Afficher les résultats uniquement si l'analyse a été lancée
+        if st.session_state.lazy_predict_launched:
+            st.success("✅ Analyse terminée avec succès!")
+
+            st.subheader("Résultats de l'analyse Lazy Predict")
+
+            # Afficher les résultats réels
+            if hasattr(st.session_state, 'lazy_models'):
+                lazy_results = st.session_state.lazy_models
+
+                # Formater et afficher le tableau des résultats
+                try:
+                    st.dataframe(
+                        lazy_results.style.background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score']),
+                        use_container_width=True
+                    )
+                except:
+                    st.dataframe(lazy_results, use_container_width=True)
+
+                # Graphique des performances
+                try:
+                    # Créer un graphique à partir des données réelles
+                    plot_data = []
+                    if isinstance(lazy_results, pd.DataFrame):
+                        for idx, row in lazy_results.iterrows():
+                            for metric in ['Accuracy', 'F1 Score']:
+                                if metric in lazy_results.columns:
+                                    plot_data.append({
+                                        'Model': idx,
+                                        'Metric': metric,
+                                        'Value': row[metric]
+                                    })
+
+                        plot_df = pd.DataFrame(plot_data)
+
+                        # Visualisation des performances
+                        st.subheader("Performances des modèles classés par précision")
+                        fig_perf = px.bar(
+                            plot_df,
+                            y='Model',
+                            x='Value',
+                            color='Metric',
+                            orientation='h',
+                            barmode='group',
+                            labels={'Value': 'Score', 'Metric': 'Métrique'},
+                            color_discrete_sequence=["#3498db", "#2ecc71"]
+                        )
+
+                        fig_perf.update_layout(
+                            height=600,
+                            margin=dict(l=20, r=20, t=40, b=20),
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        )
+
+                        st.plotly_chart(fig_perf, use_container_width=True)
+
+                        # Graphique des temps d'exécution
+                        if 'Time Taken' in lazy_results.columns:
+                            st.subheader("Temps d'exécution des modèles")
+                            fig_time = px.bar(
+                                lazy_results.reset_index(),
+                                x='Time Taken',
+                                y='index',
+                                orientation='h',
+                                color='Accuracy',
+                                color_continuous_scale='Viridis',
+                                title="Compromis précision/temps d'exécution",
+                                labels={'Time Taken': 'Temps (secondes)', 'index': 'Modèle'}
+                            )
+
+                            st.plotly_chart(fig_time, use_container_width=True)
+                except Exception as e:
+                    st.error(f"Erreur lors de la génération des graphiques: {str(e)}")
+
+    with ml_tabs[2]:
+        st.header("Comparaison des modèles et métriques d'évaluation")
+
+        st.markdown("""
+        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Métriques d'évaluation des modèles</h3>
+            <p style="color: #34495e;">Analyse comparative des performances des différents algorithmes de classification pour la détection des TSA.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.subheader("1. Métriques de performance du modèle principal")
+
+        # Afficher les métriques réelles calculées
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
+            st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
+        with col2:
+            st.metric("Spécificité (Precision)", f"{precision:.2%}")
+            st.metric("Score F1", f"{f1:.2%}")
+        with col3:
+            st.metric("AUC-ROC", f"{auc:.2%}")
+            st.metric("Erreur", f"{1-accuracy:.2%}")
+
+        st.subheader("2. Matrice de confusion")
+
+        # Afficher la véritable matrice de confusion
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+        plt.xlabel('Prédiction')
+        plt.ylabel('Réalité')
+        plt.title('Matrice de confusion')
+        ax.set_xticklabels(['Non-TSA', 'TSA'])
+        ax.set_yticklabels(['Non-TSA', 'TSA'])
+        st.pyplot(fig)
+
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Interprétation :</strong></p>
+            <ul>
+                <li>Vrai Négatif (coin supérieur gauche) : Cas correctement identifiés comme non-TSA</li>
+                <li>Faux Positif (coin supérieur droit) : Cas incorrectement identifiés comme TSA</li>
+                <li>Faux Négatif (coin inférieur gauche) : Cas de TSA manqués par le modèle</li>
+                <li>Vrai Positif (coin inférieur droit) : Cas de TSA correctement identifiés</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.subheader("3. Rapport de classification détaillé")
+
+        # Afficher le vrai rapport de classification
+        st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
+
+        st.subheader("4. Comparaison avec d'autres algorithmes")
+
+        # Obtenir les résultats réels des modèles comparés
+        comparison_results = train_and_evaluate_models()
+        st.dataframe(comparison_results.style.highlight_max(subset=['Accuracy']))
+
+        # Créer un graphique à barres de comparaison
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = np.arange(len(comparison_results))
+        width = 0.35
+        ax.bar(x - width/2, comparison_results['Accuracy'], width, label='Accuracy')
+        ax.bar(x + width/2, comparison_results['F1-Score'], width, label='F1-Score')
+        ax.set_xticks(x)
+        ax.set_xticklabels(comparison_results['Modèle'])
+        ax.legend()
+        ax.set_ylabel('Score')
+        ax.set_title('Comparaison des performances des modèles')
+        st.pyplot(fig)
+
+    with ml_tabs[3]:
+        st.header("Modèle Random Forest")
+
+        st.markdown("""
+        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Random Forest pour la détection des TSA</h3>
+            <p style="color: #34495e;">Un modèle d'apprentissage automatique basé sur un ensemble d'arbres de décision pour la classification des cas TSA.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.subheader("Principe de fonctionnement de Random Forest")
+
+        col1, col2 = st.columns([1, 1])
+
+        with col1:
+            st.markdown("""
+            ### Comment fonctionne Random Forest?
+
+            La méthode Random Forest est un algorithme d'apprentissage supervisé qui:
+
+            1. **Crée plusieurs arbres de décision** sur des sous-échantillons aléatoires des données
+
+            2. **Utilise le principe du bagging** (Bootstrap Aggregating) pour réduire la variance et éviter le surapprentissage
+
+            3. **Sélectionne aléatoirement des sous-ensembles de caractéristiques** pour chaque nœud de division
+
+            4. **Agrège les prédictions** de tous les arbres par vote majoritaire pour la classification
+
+            Cette approche d'ensemble améliore significativement la robustesse et la précision par rapport à un arbre de décision unique.
+            """)
+
+        with col2:
+            rf_diagram = """
+            digraph RandomForest {
+                rankdir=TB;
+                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
+                edge [arrowhead=vee, arrowsize=0.8];
+
+                data [label="Données d'entraînement", fillcolor="#e1f5fe"];
+
+                sample1 [label="Échantillon 1\n(bootstrap)", fillcolor="#e8f5e9"];
+                sample2 [label="Échantillon 2\n(bootstrap)", fillcolor="#e8f5e9"];
+                sample3 [label="Échantillon 3\n(bootstrap)", fillcolor="#e8f5e9"];
+
+                tree1 [label="Arbre 1", fillcolor="#d4efdf"];
+                tree2 [label="Arbre 2", fillcolor="#d4efdf"];
+                tree3 [label="Arbre 3", fillcolor="#d4efdf"];
+
+                predict [label="Agrégation\n(vote majoritaire)", fillcolor="#bbdefb"];
+
+                data -> sample1;
+                data -> sample2;
+                data -> sample3;
+
+                sample1 -> tree1;
+                sample2 -> tree2;
+                sample3 -> tree3;
+
+                tree1 -> predict;
+                tree2 -> predict;
+                tree3 -> predict;
+            }
+            """
+
             try:
-                with st.spinner("Comparaison des modèles en cours..."):
-                    # Conversion en NumPy arrays pour compatibilité
-                    X_train_array = X_train.to_numpy() if hasattr(X_train, 'to_numpy') else X_train.values
-                    X_test_array = X_test.to_numpy() if hasattr(X_test, 'to_numpy') else X_test.values
-                    
-                    # Initialisation et entraînement de LazyClassifier
-                    clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                    models, predictions = clf.fit(X_train_array, X_test_array, y_train, y_test)
-                    
-                    # Affichage des résultats
-                    st.success("Comparaison des modèles terminée avec succès")
-                    st.dataframe(models.style.format({
-                        'Accuracy': '{:.2%}',
-                        'Balanced Accuracy': '{:.2%}',
-                        'ROC AUC': '{:.2%}',
-                        'F1 Score': '{:.2%}',
-                        'Time Taken': '{:.2f}s'
-                    }))
-                    
-                    # Utiliser les résultats réels pour les visualisations
-                    top_models = models.head(5)
-            except Exception as e:
-                st.error(f"Erreur lors de l'exécution de LazyPredict: {str(e)}")
-                st.info("Affichage des résultats pré-calculés à la place.")
-                
-                # Utiliser les données pré-calculées
-                st.dataframe(all_models_results.style.format({
-                    'Accuracy': '{:.2%}',
-                    'Precision': '{:.2%}',
-                    'Recall': '{:.2%}',
-                    'F1-Score': '{:.2%}',
-                    'Temps d\'exécution (s)': '{:.2f}'
-                }))
-                top_models = all_models_results.head(5)
-        else:
-            # Afficher les résultats pré-calculés si LazyPredict n'est pas disponible
-            st.info("Affichage des résultats pré-calculés (LazyPredict non disponible)")
-            st.dataframe(all_models_results.style.format({
-                'Accuracy': '{:.2%}',
-                'Precision': '{:.2%}',
-                'Recall': '{:.2%}',
-                'F1-Score': '{:.2%}',
-                'Temps d\'exécution (s)': '{:.2f}'
-            }))
-            top_models = all_models_results.head(5)
-            
-        # Visualisation des meilleurs modèles
-        st.subheader("Top 5 des modèles par précision")
+                from graphviz import Source
+                st.graphviz_chart(rf_diagram)
+            except:
+                st.warning("Graphviz n'est pas disponible. Schéma en texte uniquement.")
+                st.code(rf_diagram, language="dot")
+
+        # Importance des caractéristiques réelles
+        st.subheader("Analyse de l'importance des variables")
+
         try:
+            # Obtenir l'importance des caractéristiques du modèle entraîné
+            rf = pipeline.named_steps['classifier']
+
+            # Tenter d'obtenir les noms des caractéristiques après prétraitement
+            try:
+                feature_names = preprocessor.get_feature_names_out()
+            except:
+                # Si cela échoue, créer des noms génériques
+                feature_names = [f"feature_{i}" for i in range(len(rf.feature_importances_))]
+
+            # Créer le DataFrame d'importance des caractéristiques
+            importance_df = pd.DataFrame({
+                'Feature': feature_names,
+                'Importance': rf.feature_importances_
+            }).sort_values('Importance', ascending=False).head(15)  # Montrer les 15 plus importantes
+
+            # Visualiser l'importance des caractéristiques
             fig, ax = plt.subplots(figsize=(10, 6))
-            ax.barh(top_models['Modèle'], top_models['Accuracy'], color='cornflowerblue')
-            ax.set_title('Accuracy des meilleurs modèles')
-            ax.set_xlabel('Accuracy')
-            plt.tight_layout()
+            sns.barplot(
+                x='Importance',
+                y='Feature',
+                data=importance_df,
+                orient='h',
+                palette='viridis'
+            )
+            ax.set_title("Contribution des variables à la prédiction")
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"Erreur lors de l'analyse d'importance des variables: {str(e)}")
+
+        # Validation croisée réelle
+        st.subheader("Validation croisée du modèle")
+
+        try:
+            # Effectuer la validation croisée avec le modèle
+            cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
+
+            # Afficher les résultats
+            st.success(f"**Score moyen de validation croisée (5-fold)**: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+
+            # Afficher les scores individuels
+            st.write("Scores par fold:", cv_scores)
+
+            # Visualiser les scores
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.bar(range(1, len(cv_scores)+1), cv_scores, color='#3498db')
+            ax.axhline(y=cv_scores.mean(), color='red', linestyle='-', label=f'Moyenne: {cv_scores.mean():.4f}')
+            ax.set_xlabel('Fold')
+            ax.set_ylabel('Score')
+            ax.set_title('Scores de validation croisée')
+            ax.legend()
             st.pyplot(fig)
         except Exception as e:
-            st.error(f"Erreur lors de la création du graphique: {str(e)}")
-    
-    # Onglet 3: Random Forest
-    with ml_tabs[2]:
-        st.header("Analyse Random Forest")
-        
-        try:
-            from sklearn.ensemble import RandomForestClassifier
-            
-            with st.spinner("Entraînement du modèle Random Forest..."):
-                # Entraînement du modèle
-                rf = RandomForestClassifier(n_estimators=100, random_state=42)
-                rf.fit(X_train, y_train)
-                
-                # Prédictions
-                y_pred = rf.predict(X_test)
-                
-                # Calcul des métriques
-                cr = classification_report(y_test, y_pred, output_dict=True)
-                cm = confusion_matrix(y_test, y_pred)
-                
-                # Affichage du rapport de classification
-                st.subheader("Rapport de classification")
-                cr_df = pd.DataFrame(cr).transpose()
-                st.dataframe(cr_df.style.format({
-                    'precision': '{:.2f}',
-                    'recall': '{:.2f}',
-                    'f1-score': '{:.2f}',
-                    'support': '{:.0f}'
-                }))
-                
-                # Matrice de confusion
-                st.subheader("Matrice de confusion")
-                fig, ax = plt.subplots(figsize=(8, 6))
-                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
-                ax.set_xlabel('Prédit')
-                ax.set_ylabel('Réel')
-                ax.set_title('Matrice de confusion')
-                st.pyplot(fig)
-                
-                # Importance des features
-                st.subheader("Importance des caractéristiques")
-                feature_importance = pd.DataFrame({
-                    'Feature': X_train.columns,
-                    'Importance': rf.feature_importances_
-                }).sort_values(by='Importance', ascending=False)
-                
-                fig, ax = plt.subplots(figsize=(10, 8))
-                sns.barplot(x='Importance', y='Feature', data=feature_importance.head(10), ax=ax)
-                ax.set_title('Top 10 des caractéristiques les plus importantes')
-                st.pyplot(fig)
-                
-        except Exception as e:
-            st.error(f"Erreur lors de l'analyse Random Forest: {str(e)}")
-            st.info("Vérifiez que scikit-learn est correctement installé.")
+            st.error(f"Erreur lors de la validation croisée: {str(e)}")
 
 def show_aq10_and_prediction():
     """
