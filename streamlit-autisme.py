@@ -2071,7 +2071,6 @@ def show_data_exploration():
                         ax.grid(True, linestyle='--', alpha=0.7)
                         st.pyplot(fig)
                     else:
-                        st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
                     st.warning(f"Impossible de générer l'analyse FAMD centrée sur Score_A10: {str(e)}")
 
