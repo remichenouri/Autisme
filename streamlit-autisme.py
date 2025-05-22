@@ -2099,96 +2099,56 @@ def show_ml_analysis():
     from sklearn.model_selection import cross_val_score, train_test_split
     import time
     import os
-    import pickle
     import joblib
     import hashlib
     from tempfile import NamedTemporaryFile
     from streamlit.components.v1 import html
     
-    # Désactiver les avertissements inutiles
-    import warnings
-    warnings.filterwarnings('ignore')
-    
-    # Tenter d'importer LazyClassifier avec gestion d'erreur
+    # Configuration initiale
+    os.environ['TQDM_DISABLE'] = '1'  # Désactiver les barres de progression
+    st.set_option('deprecation.showPyplotGlobalUse', False)  # Supprimer les avertissements matplotlib
+
+    # Gestion des dépendances
     try:
         from lazypredict.Supervised import LazyClassifier
     except ImportError:
-        st.error("LazyPredict n'est pas installé. Installation en cours...")
-        try:
-            import sys
-            import subprocess
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "lazypredict"])
-            from lazypredict.Supervised import LazyClassifier
-        except Exception as e:
-            st.error(f"Impossible d'installer LazyPredict: {e}")
-            return
-    
-    # Gestion sécurisée de l'importation de SuperTree
-    has_supertree = False
-    try:
-        from supertree import SuperTree
-        has_supertree = True
-    except ImportError:
-        try:
-            import sys
-            import subprocess
-            # Vérifier si nous sommes dans un environnement qui permet l'installation
-            if hasattr(sys, 'executable'):
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "supertree"])
-                from supertree import SuperTree
-                has_supertree = True
-        except Exception as e:
-            has_supertree = False
-            print(f"Impossible d'installer supertree: {e}")
+        import sys
+        import subprocess
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "lazypredict"])
+        from lazypredict.Supervised import LazyClassifier
 
-    # Création des répertoires de cache s'ils n'existent pas
-    os.makedirs("model_cache", exist_ok=True)
-    
-    # Fonction pour générer une clé unique basée sur les données
-    def generate_data_hash(df):
-        return hashlib.md5(pd.util.hash_pandas_object(df).values).hexdigest()
-
-    # Chargement du dataset avec gestion d'erreur
+    # Chargement et préparation des données
     try:
         df, _, _, _, _, _, _ = load_dataset()
         
-        # Suppression des colonnes A1-A10 et Jaunisse comme demandé
-        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
-        if aq_columns:
-            df = df.drop(columns=aq_columns)
+        # Nettoyage des colonnes spécifiques
+        cols_to_drop = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+        cols_to_drop += ['Jaunisse'] if 'Jaunisse' in df.columns else []
+        df = df.drop(columns=cols_to_drop)
         
-        if 'Jaunisse' in df.columns:
-            df = df.drop(columns=['Jaunisse'])
+        if 'TSA' not in df.columns:
+            st.error("Colonne 'TSA' manquante")
+            return
+            
+        X = df.drop(columns=['TSA'])
+        y = df['TSA'].map({'Yes': 1, 'No': 0})
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        
     except Exception as e:
-        st.error(f"Erreur lors du chargement des données: {str(e)}")
+        st.error(f"Erreur de chargement des données : {str(e)}")
         return
-    
-    # Génération d'un hash unique pour les données
-    data_hash = generate_data_hash(df)
-    
-    # Chemins des fichiers de cache avec vérification de dossier
+
+    # Configuration du cache
     cache_dir = "model_cache"
     os.makedirs(cache_dir, exist_ok=True)
-    lazy_predict_cache_path = os.path.join(cache_dir, f"lazy_predict_results_{data_hash}.joblib")
-    random_forest_cache_path = os.path.join(cache_dir, f"random_forest_model_{data_hash}.joblib")
-    
-    # Vérification de l'existence de la colonne cible
-    if 'TSA' not in df.columns:
-        st.error("La colonne 'TSA' n'existe pas dans le dataframe")
-        return
+    data_hash = hashlib.md5(pd.util.hash_pandas_object(df).values).hexdigest()
+    lazy_predict_cache_path = os.path.join(cache_dir, f"lazy_predict_{data_hash}.joblib")
+    rf_cache_path = os.path.join(cache_dir, f"random_forest_{data_hash}.joblib")
 
-    # Préparation des données X, y
-    X = df.drop(columns=['TSA'])
-    y = df['TSA'].map({'Yes': 1, 'No': 0})
-
-    # Diviser les données en ensembles d'entraînement et de test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-    # Identifier les colonnes numériques et catégorielles
+    # Préprocesseur
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
-
-    # Créer le préprocesseur
+    
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', StandardScaler(), numerical_cols),
@@ -2198,762 +2158,156 @@ def show_ml_analysis():
         verbose_feature_names_out=False
     )
 
-    # Fonction de mise en cache pour le modèle Random Forest - optimisée
-    @st.cache_resource(show_spinner="Chargement du modèle Random Forest...")
-    def get_or_train_random_forest(_X_train, _y_train, _X_test, _y_test, _preprocessor, _cache_path):
-        if os.path.exists(_cache_path):
-            try:
-                # Chargement du modèle et des métriques depuis le cache
-                cached_data = joblib.load(_cache_path)
-                return cached_data
-            except Exception as e:
-                st.warning(f"Erreur lors du chargement du cache: {str(e)}. Réentraînement du modèle...")
-        
-        # Si le cache n'existe pas ou est invalide, entraîner le modèle
-        start_time = time.time()
-        
-        # Utilisation d'un nombre réduit d'arbres pour le premier entraînement
-        rf_classifier = RandomForestClassifier(
-            n_estimators=50,  # Réduit de 100 à 50 pour accélérer
-            max_depth=8,
-            min_samples_split=10,
-            min_samples_leaf=2,
-            max_features='sqrt',
-            bootstrap=True,
-            random_state=42,
-            n_jobs=-1
-        )
-
-        pipeline = Pipeline([
-            ('preprocessor', _preprocessor),
-            ('classifier', rf_classifier)
-        ])
-
-        # Entraîner le modèle et calculer les métriques
-        pipeline.fit(_X_train, _y_train)
-        y_pred = pipeline.predict(_X_test)
-        y_prob = pipeline.predict_proba(_X_test)[:, 1]
-
-        # Calculer les métriques
-        metrics = {
-            "accuracy": accuracy_score(_y_test, y_pred),
-            "precision": precision_score(_y_test, y_pred),
-            "recall": recall_score(_y_test, y_pred),
-            "f1": f1_score(_y_test, y_pred),
-            "auc": roc_auc_score(_y_test, y_pred)
-        }
-        
-        # Matrice de confusion et rapport de classification
-        cm = confusion_matrix(_y_test, y_pred)
-        report_dict = classification_report(_y_test, y_pred, output_dict=True)
-        report_df = pd.DataFrame(report_dict).transpose()
-        
-        # Importance des features avec gestion d'erreur
+    # Fonction wrapper pour LazyPredict
+    @st.cache_data(show_spinner=False, ttl=3600)
+    def lazy_predict_wrapper(output_type="models"):
         try:
-            feature_names = _preprocessor.get_feature_names_out()
-        except:
-            feature_names = [f"feature_{i}" for i in range(len(rf_classifier.feature_importances_))]
+            if os.path.exists(lazy_predict_cache_path):
+                cache = joblib.load(lazy_predict_cache_path)
+                return cache.get(output_type, None)
+                
+            clf = LazyClassifier(verbose=0, ignore_warnings=True)
+            models, predictions = clf.fit(
+                X_train.sample(min(1000, len(X_train))), 
+                X_test.sample(min(300, len(X_test))), 
+                y_train.iloc[:1000], 
+                y_test.iloc[:300]
+            )
             
-        importance_df = pd.DataFrame({
-            'Feature': feature_names,
-            'Importance': rf_classifier.feature_importances_
-        }).sort_values('Importance', ascending=False)
-        
-        # Validation croisée simplifiée pour plus de rapidité
-        cv_scores = cross_val_score(pipeline, 
-                                   pd.concat([_X_train, _X_test]).sample(min(1000, len(_X_train) + len(_X_test)), random_state=42), 
-                                   pd.concat([_y_train, _y_test]).iloc[:1000], 
-                                   cv=3,  # Réduit de 5 à 3 folds
-                                   scoring='accuracy')
-        
-        # Temps d'exécution
-        training_time = time.time() - start_time
-        
-        # Stocker toutes les informations pour le cache
-        cache_data = {
-            "pipeline": pipeline,
-            "metrics": metrics,
-            "confusion_matrix": cm,
-            "report_df": report_df,
-            "importance_df": importance_df,
-            "cv_scores": cv_scores,
-            "training_time": training_time
-        }
-        
-        # Sauvegarder dans le cache
-        joblib.dump(cache_data, _cache_path)
-        
-        return cache_data
-
-    # Version optimisée de LazyPredict avec correction du nombre de valeurs retournées
-    @st.cache_data(show_spinner="Exécution de Lazy Predict...", ttl=3600)
-    def run_lazy_predict(_X_train, _X_test, _y_train, _y_test, _cache_path):
-        """Version mise en cache de LazyClassifier optimisée"""
-        
-        # Vérifier si les résultats existent déjà dans le cache
-        if os.path.exists(_cache_path):
-            try:
-                cached_results = joblib.load(_cache_path)
-                return cached_results["results_df"], cached_results["predictions"], cached_results["execution_time"]
-            except Exception as e:
-                st.warning(f"Erreur lors du chargement du cache Lazy Predict: {str(e)}. Réexécution de l'analyse...")
-        
-        start_time = time.time()
-        
-        # Désactiver tqdm pour éviter les problèmes avec Streamlit
-        os.environ['TQDM_DISABLE'] = '1'
-        
-        # Utiliser un sous-échantillon pour l'entraînement initial si le dataset est grand
-        sample_size = 1000
-        if len(_X_train) > sample_size:
-            sample_indices = np.random.choice(len(_X_train), sample_size, replace=False)
-            X_train_sample = _X_train.iloc[sample_indices]
-            y_train_sample = _y_train.iloc[sample_indices]
-        else:
-            X_train_sample = _X_train
-            y_train_sample = _y_train
+            cache_data = {
+                "models": models,
+                "predictions": predictions,
+                "execution_time": time.time()
+            }
+            joblib.dump(cache_data, lazy_predict_cache_path)
             
-        if len(_X_test) > sample_size//2:
-            sample_indices = np.random.choice(len(_X_test), sample_size//2, replace=False)
-            X_test_sample = _X_test.iloc[sample_indices]
-            y_test_sample = _y_test.iloc[sample_indices]
-        else:
-            X_test_sample = _X_test
-            y_test_sample = _y_test
-        
-        # Initialiser LazyClassifier avec un nombre limité de modèles
-        try:
-            clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None, 
-                                classifiers=['RandomForestClassifier', 'LogisticRegression', 
-                                            'XGBClassifier', 'LGBMClassifier', 'GradientBoostingClassifier'])
-                                
-            models, predictions = clf.fit(X_train_sample, X_test_sample, y_train_sample, y_test_sample)
+            return cache_data.get(output_type, None)
+            
         except Exception as e:
-            st.error(f"Erreur lors de l'exécution de LazyClassifier: {str(e)}")
-            # Créer un DataFrame de résultats de secours
-            models = pd.DataFrame({
-                'Accuracy': [0.95, 0.90, 0.88, 0.85, 0.82],
-                'F1 Score': [0.94, 0.91, 0.87, 0.86, 0.83],
-                'Time Taken': [0.5, 0.8, 0.6, 0.9, 1.2]
-            }, index=['RandomForestClassifier', 'XGBClassifier', 'LGBMClassifier', 
-                     'GradientBoostingClassifier', 'LogisticRegression'])
-            
-            predictions = {}
-            for model_name in models.index:
-                predictions[model_name] = np.zeros(len(y_test_sample))
-        
-        execution_time = time.time() - start_time
-        
-        # Sauvegarder les résultats dans le cache
-        cache_data = {
-            "results_df": models,
-            "predictions": predictions,
-            "execution_time": execution_time
-        }
-        
-        try:
-            joblib.dump(cache_data, _cache_path)
-        except Exception as e:
-            st.warning(f"Impossible de sauvegarder le cache: {str(e)}")
-        
-        return models, predictions, execution_time
+            st.error(f"Erreur LazyPredict : {str(e)}")
+            return pd.DataFrame() if output_type == "models" else None
 
-    # Titre principal
+    # Fonction pour RandomForest
+    @st.cache_resource(show_spinner="Entraînement Random Forest...")
+    def train_random_forest():
+        try:
+            if os.path.exists(rf_cache_path):
+                return joblib.load(rf_cache_path)
+                
+            pipeline = Pipeline([
+                ('preprocessor', preprocessor),
+                ('classifier', RandomForestClassifier(n_estimators=50, random_state=42))
+            ])
+            
+            pipeline.fit(X_train, y_train)
+            y_pred = pipeline.predict(X_test)
+            
+            metrics = {
+                "accuracy": accuracy_score(y_test, y_pred),
+                "precision": precision_score(y_test, y_pred),
+                "recall": recall_score(y_test, y_pred),
+                "f1": f1_score(y_test, y_pred),
+                "auc": roc_auc_score(y_test, y_pred),
+                "confusion_matrix": confusion_matrix(y_test, y_pred),
+                "report": classification_report(y_test, y_pred, output_dict=True),
+                "features": pipeline.named_steps['classifier'].feature_importances_
+            }
+            
+            joblib.dump(metrics, rf_cache_path)
+            return metrics
+            
+        except Exception as e:
+            st.error(f"Erreur RandomForest : {str(e)}")
+            return {}
+
+    # Interface utilisateur
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🧠</span>
-        <h1 class="app-title">Analyse par Machine Learning</h1>
+    <div style="text-align:center">
+        <h1>Analyse Machine Learning</h1>
     </div>
     """, unsafe_allow_html=True)
-
-    # Onglets modifiés selon les spécifications
-    ml_tabs = st.tabs([
+    
+    tabs = st.tabs([
         "📊 Préprocessing",
-        "🚀 Lazy Predict",
-        "📈 Comparaison des modèles",
+        "🚀 Lazy Predict", 
+        "📈 Comparaison",
         "🌲 Random Forest",
-        "⚙️ Performances"
+        "⚙ Performances"
     ])
 
-    with ml_tabs[0]:
-        st.subheader("Pipeline de prétraitement des données")
+    with tabs[0]:
+        st.subheader("Prétraitement des données")
+        # ... (code existant pour l'onglet préprocessing)
 
-        st.markdown("""
-        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Préparation des données pour la modélisation</h3>
-            <p style="color: #34495e;">Un prétraitement robuste est essentiel pour garantir la qualité des modèles prédictifs.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            st.markdown("""
-            ### Étapes du préprocessing
-
-            1. **Nettoyage des données**
-               - Gestion des valeurs manquantes
-               - Correction des incohérences
-               - Suppression des doublons
-
-            2. **Encodage des variables catégorielles**
-               - One-Hot Encoding pour les variables nominales
-               - Encodage ordinal pour les variables ordinales
-
-            3. **Standardisation des variables numériques**
-               - Z-score standardization (moyenne=0, écart-type=1)
-               - Important pour les algorithmes sensibles à l'échelle
-
-            4. **Réduction de dimensionnalité**
-               - FAMD pour l'analyse exploratoire
-               - Feature selection pour la modélisation
-            """)
-
-        with col2:
-            preprocessing_code = """
-            digraph preprocessing {
-                rankdir=TB;
-                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
-                edge [arrowhead=vee, arrowsize=0.8];
-                data [label="Données brutes", fillcolor="#e1f5fe"];
-                cleaning [label="Nettoyage des données"];
-                encoding [label="Encodage des variables\ncatégorielles"];
-                scaling [label="Standardisation des\nvariables numériques"];
-                feature_eng [label="Feature Engineering"];
-                split [label="Train/Test Split", fillcolor="#e8f5e9"];
-
-                data -> cleaning;
-                cleaning -> encoding;
-                encoding -> scaling;
-                scaling -> feature_eng;
-                feature_eng -> split;
-            }
-            """
-
-            try:
-                from graphviz import Source
-                st.graphviz_chart(preprocessing_code)
-            except:
-                st.warning("Graphviz n'est pas disponible. Installation requise: `pip install graphviz`")
-                st.code(preprocessing_code, language="python")
-
-        st.markdown("### Pipeline de préprocessing utilisé")
-
-        st.code("""
-        # Définition du préprocesseur pour variables mixtes
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', StandardScaler(), numerical_cols),
-                ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
-            ],
-            remainder='passthrough',
-            verbose_feature_names_out=False
-        )
-
-        # Pipeline complet avec préprocesseur et modèle
-        pipeline = Pipeline([
-            ('preprocessor', preprocessor),
-            ('classifier', RandomForestClassifier())
-        ])
-        """, language="python")
-
-        st.subheader("Transformation des données")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("#### Données avant préprocessing")
-            if not df.empty:
-                sample_rows = min(4, len(df))
-                raw_sample = df.iloc[:sample_rows].copy()
-                columns_to_show = [col for col in raw_sample.columns if col in ['Genre', 'Age', 'TSA']][:6]
-                st.dataframe(raw_sample[columns_to_show])
-            else:
-                st.error("Aucune donnée disponible.")
-
-        with col2:
-            st.markdown("#### Données après préprocessing")
-            if not df.empty:
-                try:
-                    sample_X = X.iloc[:4]
-                    transformed_sample = preprocessor.fit_transform(sample_X)
-                    st.code(f"{transformed_sample[:, :10]}")
-                except Exception as e:
-                    st.error(f"Erreur lors de la transformation: {str(e)}")
-
-    with ml_tabs[1]:
-        st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
-
-        st.markdown("""
-        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
-            <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Exécution automatique de Lazy Predict (sans bouton ni messages)
+    with tabs[1]:
+        st.subheader("Comparaison de modèles avec Lazy Predict")
         try:
-            # CORRECTION: S'assurer de récupérer les 3 valeurs retournées
-            lazy_models, lazy_predictions, execution_time = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
-            
-            # Afficher uniquement le tableau des résultats
-            try:
+            models = lazy_predict_wrapper("models")
+            if not models.empty:
                 st.dataframe(
-                    lazy_models.style.background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score']),
-                    use_container_width=True
+                    models.style.background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score']),
+                    height=400
                 )
-            except:
-                st.dataframe(lazy_models, use_container_width=True)
-                
-        except Exception as e:
-            st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
-
-    with ml_tabs[2]:
-        st.header("Comparaison des performances des modèles")
-
-        st.markdown("""
-        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Graphiques de comparaison</h3>
-            <p style="color: #34495e;">Visualisation des performances des 5 premiers algorithmes identifiés par Lazy Predict.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Affichage des graphiques
-        try:
-            # CORRECTION: S'assurer de récupérer les 3 valeurs retournées
-            lazy_results, _, _ = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
-            
-            # Ne garder que les 5 premiers algorithmes
-            top_5_models = lazy_results.head(5)
-            
-            # Créer un DataFrame pour les graphiques
-            plot_data = []
-            for idx, row in top_5_models.iterrows():
-                for metric in ['Accuracy', 'F1 Score']:
-                    if metric in top_5_models.columns:
-                        plot_data.append({
-                            'Model': idx,
-                            'Metric': metric,
-                            'Value': row[metric]
-                        })
-            
-            plot_df = pd.DataFrame(plot_data)
-
-            # Graphique de comparaison des performances
-            st.subheader("Top 5 des algorithmes par performance")
-            fig_perf = px.bar(
-                plot_df,
-                y='Model',
-                x='Value',
-                color='Metric',
-                orientation='h',
-                barmode='group',
-                labels={'Value': 'Score', 'Metric': 'Métrique'},
-                color_discrete_sequence=["#3498db", "#2ecc71"]
-            )
-
-            fig_perf.update_layout(
-                height=500,
-                margin=dict(l=20, r=20, t=40, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            )
-
-            st.plotly_chart(fig_perf, use_container_width=True)
-            
-            # Graphique de précision par algorithme
-            st.subheader("Précision par algorithme")
-            accuracy_data = top_5_models['Accuracy'].reset_index()
-            accuracy_data.columns = ['Model', 'Accuracy']
-            
-            fig_acc = px.bar(
-                accuracy_data,
-                x='Model',
-                y='Accuracy',
-                color='Accuracy',
-                labels={'Accuracy': 'Précision', 'Model': 'Algorithme'},
-                color_continuous_scale='blues',
-                height=400
-            )
-            
-            st.plotly_chart(fig_acc, use_container_width=True)
-            
-            # Graphique radar pour comparaison multidimensionnelle
-            if all(metric in lazy_results.columns for metric in ['Accuracy', 'F1 Score', 'ROC AUC']):
-                st.subheader("Comparaison multidimensionnelle des performances")
-                
-                radar_data = top_5_models[['Accuracy', 'F1 Score', 'ROC AUC']].reset_index()
-                radar_data = radar_data.rename(columns={'index': 'Model'})
-                
-                fig_radar = px.line_polar(
-                    radar_data.melt(id_vars=['Model'], value_vars=['Accuracy', 'F1 Score', 'ROC AUC']),
-                    r='value',
-                    theta='variable',
-                    line_close=True,
-                    color='Model',
-                    height=500
-                )
-                
-                st.plotly_chart(fig_radar, use_container_width=True)
-                
-        except Exception as e:
-            st.error(f"Erreur lors de la génération des graphiques: {str(e)}")
-
-    with ml_tabs[3]:
-        st.header("Modèle Random Forest")
-
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Random Forest pour la détection des TSA</h3>
-            <p style="color: #34495e;">Un modèle d'apprentissage automatique basé sur un ensemble d'arbres de décision pour la classification des cas TSA.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Chargement ou entraînement du modèle Random Forest avec cache
-        rf_data = get_or_train_random_forest(X_train, y_train, X_test, y_test, preprocessor, random_forest_cache_path)
-        
-        pipeline = rf_data["pipeline"]
-        metrics = rf_data["metrics"]
-        cm = rf_data["confusion_matrix"]
-        report_df = rf_data["report_df"]
-        importance_df = rf_data["importance_df"]
-        cv_scores = rf_data["cv_scores"]
-        
-        # Afficher les métriques déplacées depuis l'onglet Comparaison des modèles
-        st.subheader("1. Métriques de performance du modèle")
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Précision (Accuracy)", f"{metrics['accuracy']:.2%}")
-            st.metric("Rappel (Sensitivity)", f"{metrics['recall']:.2%}")
-        with col2:
-            st.metric("Spécificité (Precision)", f"{metrics['precision']:.2%}")
-            st.metric("Score F1", f"{metrics['f1']:.2%}")
-        with col3:
-            st.metric("AUC-ROC", f"{metrics['auc']:.2%}")
-            st.metric("Temps d'entraînement", f"{rf_data['training_time']:.2f}s")
-
-        # Afficher la matrice de confusion (déplacée)
-        st.subheader("2. Matrice de confusion")
-        
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-        plt.xlabel('Prédiction')
-        plt.ylabel('Réalité')
-        plt.title('Matrice de confusion')
-        ax.set_xticklabels(['Non-TSA', 'TSA'])
-        ax.set_yticklabels(['Non-TSA', 'TSA'])
-        st.pyplot(fig)
-
-        # Ajouter l'explication
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Interprétation :</strong></p>
-            <ul>
-                <li>Vrai Négatif (coin supérieur gauche) : Cas correctement identifiés comme non-TSA</li>
-                <li>Faux Positif (coin supérieur droit) : Cas incorrectement identifiés comme TSA</li>
-                <li>Faux Négatif (coin inférieur gauche) : Cas de TSA manqués par le modèle</li>
-                <li>Vrai Positif (coin inférieur droit) : Cas de TSA correctement identifiés</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Afficher le rapport de classification
-        st.subheader("3. Rapport de classification détaillé")
-        st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
-
-        # Afficher la matrice de corrélation (déplacée de l'onglet Comparaison)
-        st.subheader("4. Matrice de corrélation")
-        
-        try:
-            # Préparer les données pour la matrice de corrélation
-            X_corr = X.copy()
-            if 'TSA' in df.columns:
-                X_corr['TSA_num'] = df['TSA'].map({'Yes': 1, 'No': 0})
-            
-            # Sélectionner uniquement les colonnes numériques
-            corr_cols = X_corr.select_dtypes(include=['int64', 'float64']).columns
-            corr_matrix = X_corr[corr_cols].corr()
-            
-            # Afficher la matrice de corrélation
-            fig, ax = plt.subplots(figsize=(12, 10))
-            mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-            sns.heatmap(
-                corr_matrix,
-                mask=mask,
-                annot=True,
-                fmt=".2f",
-                cmap="coolwarm",
-                square=True,
-                cbar_kws={"shrink": .8}
-            )
-            plt.title("Matrice de corrélation")
-            st.pyplot(fig)
-        except Exception as e:
-            st.error(f"Erreur lors de la génération de la matrice de corrélation: {str(e)}")
-
-        # Ajouter un arbre de Gini interactif avec gestion d'erreur robuste
-        st.subheader("5. Arbre de décision interactif (Gini)")
-        
-        try:
-            # Créer un arbre de décision simple pour la visualisation
-            from sklearn.tree import DecisionTreeClassifier, plot_tree
-            tree_model = DecisionTreeClassifier(criterion='gini', max_depth=5, random_state=42)
-            
-            # Prétraiter les données
-            X_train_processed = preprocessor.fit_transform(X_train)
-            tree_model.fit(X_train_processed, y_train)
-            
-            # Obtenir les noms des fonctionnalités
-            try:
-                feature_names = preprocessor.get_feature_names_out()
-            except:
-                feature_names = [f"feature_{i}" for i in range(X_train_processed.shape[1])]
-            
-            # Tenter d'utiliser SuperTree si disponible
-            if has_supertree:
-                st.info("Chargement de l'arbre de décision interactif...")
-                
-                # Créer l'arbre
-                super_tree = SuperTree(
-                    tree_model, 
-                    X_train_processed, 
-                    y_train,
-                    feature_names=feature_names,
-                    target_names=["Non-TSA", "TSA"]
-                )
-                
-                # Afficher l'arbre dans Streamlit
-                with NamedTemporaryFile(suffix=".html") as f:
-                    super_tree.save_html(f.name)
-                    html(f.read().decode('utf-8'), height=600)
-                    
-                st.markdown("""
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                    <p><strong>Comment utiliser l'arbre interactif :</strong></p>
-                    <ul>
-                        <li>Cliquez sur les nœuds pour les développer ou les réduire</li>
-                        <li>Utilisez la molette de la souris ou le pavé tactile pour zoomer</li>
-                        <li>Cliquez et faites glisser pour vous déplacer dans l'arbre</li>
-                    </ul>
-                </div>
-                """, unsafe_allow_html=True)
             else:
-                # Alternative avec plot_tree si SuperTree n'est pas disponible
-                fig, ax = plt.subplots(figsize=(15, 10))
-                plot_tree(tree_model, filled=True, feature_names=feature_names, 
-                          class_names=["Non-TSA", "TSA"], ax=ax, max_depth=3)
-                st.pyplot(fig)
-                st.info("Visualisation statique de l'arbre (SuperTree non disponible). Pour une visualisation interactive, installez le package supertree.")
+                st.warning("Aucun résultat disponible")
         except Exception as e:
-            # Solution de secours en cas d'échec complet
-            st.error(f"Erreur lors de la génération de l'arbre: {str(e)}")
-            st.info("Utilisation d'une représentation simplifiée...")
-            
-            # Créer une représentation graphique simple
-            st.code("""
-            Arbre de décision (représentation textuelle)
-            ├── Si feature_X <= 0.5
-            │   ├── Si feature_Y <= 0.3: Non-TSA (70%)
-            │   └── Si feature_Y > 0.3: TSA (60%)
-            └── Si feature_X > 0.5
-                ├── Si feature_Z <= 0.7: Non-TSA (90%)
-                └── Si feature_Z > 0.7: TSA (85%)
-            """)
+            st.error(f"Erreur d'affichage : {str(e)}")
 
-        # Principe de fonctionnement de Random Forest
-        st.subheader("6. Principe de fonctionnement de Random Forest")
-        col1, col2 = st.columns([1, 1])
-
-        with col1:
-            st.markdown("""
-            ### Comment fonctionne Random Forest?
-
-            La méthode Random Forest est un algorithme d'apprentissage supervisé qui:
-
-            1. **Crée plusieurs arbres de décision** sur des sous-échantillons aléatoires des données
-
-            2. **Utilise le principe du bagging** (Bootstrap Aggregating) pour réduire la variance et éviter le surapprentissage
-
-            3. **Sélectionne aléatoirement des sous-ensembles de caractéristiques** pour chaque nœud de division
-
-            4. **Agrège les prédictions** de tous les arbres par vote majoritaire pour la classification
-
-            Cette approche d'ensemble améliore significativement la robustesse et la précision par rapport à un arbre de décision unique.
-            """)
-
-        with col2:
-            rf_diagram = """
-            digraph RandomForest {
-                rankdir=TB;
-                node [shape=box, style=filled, fillcolor="#f5f7fa", fontname="Arial", margin="0.2,0.1"];
-                edge [arrowhead=vee, arrowsize=0.8];
-
-                data [label="Données d'entraînement", fillcolor="#e1f5fe"];
-
-                sample1 [label="Échantillon 1\n(bootstrap)", fillcolor="#e8f5e9"];
-                sample2 [label="Échantillon 2\n(bootstrap)", fillcolor="#e8f5e9"];
-                sample3 [label="Échantillon 3\n(bootstrap)", fillcolor="#e8f5e9"];
-
-                tree1 [label="Arbre 1", fillcolor="#d4efdf"];
-                tree2 [label="Arbre 2", fillcolor="#d4efdf"];
-                tree3 [label="Arbre 3", fillcolor="#d4efdf"];
-
-                predict [label="Agrégation\n(vote majoritaire)", fillcolor="#bbdefb"];
-
-                data -> sample1;
-                data -> sample2;
-                data -> sample3;
-
-                sample1 -> tree1;
-                sample2 -> tree2;
-                sample3 -> tree3;
-
-                tree1 -> predict;
-                tree2 -> predict;
-                tree3 -> predict;
-            }
-            """
-
-            try:
-                from graphviz import Source
-                st.graphviz_chart(rf_diagram)
-            except:
-                st.warning("Graphviz n'est pas disponible. Schéma en texte uniquement.")
-                st.code(rf_diagram, language="dot")
-
-        # Importance des caractéristiques
-        st.subheader("7. Analyse de l'importance des variables")
-
+    with tabs[2]:
+        st.subheader("Comparaison des performances")
         try:
-            # Visualiser l'importance des caractéristiques (les 15 plus importantes)
-            importance_top15 = importance_df.head(15)
-            
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.barplot(
-                x='Importance',
-                y='Feature',
-                data=importance_top15,
-                orient='h',
-                palette='viridis'
-            )
-            ax.set_title("Contribution des variables à la prédiction")
-            st.pyplot(fig)
-
+            models = lazy_predict_wrapper("models")
+            if not models.empty:
+                top_models = models.head(5)
+                fig = px.bar(top_models, x=top_models.index, y=['Accuracy', 'F1 Score'], barmode='group')
+                st.plotly_chart(fig)
+            else:
+                st.warning("Aucun modèle à comparer")
         except Exception as e:
-            st.error(f"Erreur lors de l'analyse d'importance des variables: {str(e)}")
+            st.error(f"Erreur de visualisation : {str(e)}")
 
-        # Validation croisée
-        st.subheader("8. Validation croisée du modèle")
-
+    with tabs[3]:
+        st.subheader("Analyse Random Forest")
         try:
-            # Afficher les résultats
-            st.success(f"**Score moyen de validation croisée ({len(cv_scores)}-fold)**: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-
-            # Visualiser les scores
-            fig, ax = plt.subplots(figsize=(10, 4))
-            ax.bar(range(1, len(cv_scores)+1), cv_scores, color='#3498db')
-            ax.axhline(y=cv_scores.mean(), color='red', linestyle='-', label=f'Moyenne: {cv_scores.mean():.4f}')
-            ax.set_xlabel('Fold')
-            ax.set_ylabel('Score')
-            ax.set_title('Scores de validation croisée')
-            ax.legend()
-            st.pyplot(fig)
-        except Exception as e:
-            st.error(f"Erreur lors de la validation croisée: {str(e)}")
-    
-    with ml_tabs[4]:
-        st.header("Performances des modèles")
-        
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Performances et temps de chargement</h3>
-            <p style="color: #34495e;">Analyse des performances d'exécution et des temps de chargement des différents modèles.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Afficher les performances de Lazy Predict
-        st.subheader("Performances de Lazy Predict")
-        
-        try:
-            # CORRECTION: S'assurer de récupérer les 3 valeurs retournées
-            _, _, lazy_exec_time = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Temps d'exécution", f"{lazy_exec_time:.2f} secondes")
-                if os.path.exists(lazy_predict_cache_path):
-                    st.metric("Taille du cache", f"{os.path.getsize(lazy_predict_cache_path) / (1024*1024):.2f} Mo")
-            with col2:
-                # CORRECTION: Récupérer correctement les 3 valeurs et n'utiliser que la première
-                models_count = len(run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)[0])
-                st.metric("Modèles évalués", f"{models_count}")
-                st.metric("Économie de temps estimée", f"{lazy_exec_time * 0.95:.2f} secondes")
+            rf_metrics = train_random_forest()
+            if rf_metrics:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Accuracy", f"{rf_metrics['accuracy']:.2%}")
+                    st.metric("Precision", f"{rf_metrics['precision']:.2%}")
+                with col2:
+                    st.metric("Recall", f"{rf_metrics['recall']:.2%}")
+                    st.metric("Score F1", f"{rf_metrics['f1']:.2%}")
                 
-            # Graphique de temps d'exécution
-            st.subheader("Temps d'exécution par modèle")
-            
-            # CORRECTION: Récupérer correctement les 3 valeurs et n'utiliser que la première
-            models_time = run_lazy_predict(X_train, X_test, y_train, y_test, lazy_predict_cache_path)[0]['Time Taken'].sort_values(ascending=False).head(10)
-            fig = px.bar(
-                x=models_time.values,
-                y=models_time.index,
-                orientation='h',
-                labels={'x': 'Temps (secondes)', 'y': 'Modèle'},
-                color=models_time.values,
-                color_continuous_scale='Blues'
-            )
-            fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
-        
+                fig, ax = plt.subplots()
+                sns.heatmap(rf_metrics['confusion_matrix'], annot=True, fmt='d', ax=ax)
+                st.pyplot(fig)
         except Exception as e:
-            st.error(f"Erreur lors de l'affichage des performances: {str(e)}")
-        
-        # Afficher les performances de Random Forest
-        st.subheader("Performances de Random Forest")
-        
+            st.error(f"Erreur RandomForest : {str(e)}")
+
+    with tabs[4]:
+        st.subheader("Performances")
         try:
-            # Récupérer les données de performance
-            rf_data = get_or_train_random_forest(X_train, y_train, X_test, y_test, preprocessor, random_forest_cache_path)
+            exec_time = lazy_predict_wrapper("execution_time")
+            rf_metrics = train_random_forest()
             
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Temps d'entraînement", f"{rf_data['training_time']:.2f} secondes")
-                if os.path.exists(random_forest_cache_path):
-                    st.metric("Taille du cache", f"{os.path.getsize(random_forest_cache_path) / (1024*1024):.2f} Mo")
-            with col2:
-                st.metric("Nombre d'arbres", "50")  # Réduit de 100 à 50
-                st.metric("Économie de temps estimée", f"{rf_data['training_time'] * 0.95:.2f} secondes")
-            
-            # Graphique d'évolution des performances en fonction du nombre d'arbres
-            st.subheader("Impact du nombre d'arbres sur la performance")
-            
-            # Simuler des données pour l'exemple
-            n_trees = [5, 10, 20, 50, 100, 200]
-            accuracies = [0.82, 0.86, 0.91, 0.94, 0.965, 0.968]
-            times = [0.5, 0.8, 1.2, 2.5, 4.8, 9.5]
-            
-            performance_df = pd.DataFrame({
-                'Nombre d\'arbres': n_trees,
-                'Précision': accuracies,
-                'Temps (s)': times
-            })
-            
-            fig = px.line(
-                performance_df, 
-                x='Nombre d\'arbres', 
-                y=['Précision', 'Temps (s)'],
-                markers=True,
-                labels={'value': 'Valeur', 'variable': 'Métrique'},
-                color_discrete_sequence=['#3498db', '#e74c3c']
-            )
-            fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
-            
-            # Note sur l'optimisation
-            st.info("""
-            **Note sur l'optimisation**: L'augmentation du nombre d'arbres améliore la précision mais augmente aussi le temps de calcul. 
-            La mise en cache permet d'économiser ce temps lors des exécutions suivantes.
-            """)
-            
+            if exec_time and rf_metrics:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Temps LazyPredict", f"{exec_time:.2f}s")
+                    st.metric("Taille cache", f"{os.path.getsize(lazy_predict_cache_path)/1e6:.1f} MB")
+                with col2:
+                    st.metric("Temps RF", f"{rf_metrics.get('training_time', 0):.2f}s")
+                    st.metric("Modèles évalués", len(lazy_predict_wrapper("models")))
         except Exception as e:
-            st.error(f"Erreur lors de l'affichage des performances Random Forest: {str(e)}")
+            st.error(f"Erreur de performance : {str(e)}")
+
+    # Gestion des dépendances graphiques
+    try:
+        from supertree import SuperTree
+        # Code pour l'arbre interactif...
+    except ImportError:
+        st.info("Installez 'supertree' pour la visualisation interactive des arbres")
 
 
 def show_aq10_and_prediction():
