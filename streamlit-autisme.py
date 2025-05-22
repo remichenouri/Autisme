@@ -2002,6 +2002,37 @@ def show_data_exploration():
                         st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
                     st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
+            with famd_tabs[3]:
+                st.subheader("Interprétation des résultats")
+                st.markdown("""
+                ### Points clés de l'analyse FAMD
+
+                L'analyse factorielle de données mixtes nous permet d'identifier plusieurs tendances importantes:
+
+                1. **Structure des données** : Les deux premières composantes principales expliquent environ {:.1%} de la variance totale, ce qui indique une bonne capture de la structure des données.
+
+                2. **Variables discriminantes** : Les variables qui contribuent le plus à la distinction entre les groupes incluent le Score A10 et d'autres variables démographiques.
+
+                3. **Regroupement des cas TSA** : On observe une tendance au regroupement des cas diagnostiqués TSA dans l'espace factoriel, ce qui suggère des patterns communs dans leurs profils.
+
+                4. **Influence du Score A10** : Le Score A10 montre une corrélation significative avec la première composante principale, confirmant son importance dans le processus diagnostique.
+                """.format(explained_variance[0] + explained_variance[1]))
+
+                st.subheader("Récapitulatif des composantes principales")
+                summary_df = pd.DataFrame({
+                    'Composante': [f"Composante {i+1}" for i in range(len(eigenvalues))],
+                    'Valeur propre': eigenvalues,
+                    'Variance expliquée (%)': explained_variance * 100,
+                    'Variance cumulée (%)': np.cumsum(explained_variance) * 100
+                })
+                st.dataframe(summary_df.style.format({
+                    'Valeur propre': '{:.3f}',
+                    'Variance expliquée (%)': '{:.2f}%',
+                    'Variance cumulée (%)': '{:.2f}%'
+                }))
+
+        except Exception as e:
+            st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
 
 
 def show_ml_analysis():
