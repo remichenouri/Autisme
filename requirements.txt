@@ -12,5 +12,5 @@ requests
 Pillow
 graphviz
 lazypredict==0.2.12
-scikit-learn>=1.0.2
+scikit-learn==1.0.2
 
