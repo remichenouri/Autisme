@@ -2300,6 +2300,16 @@ def show_ml_analysis():
     from sklearn.model_selection import cross_val_score, train_test_split
     import time
     import os
+    import joblib
+    from joblib import Memory, Parallel, delayed
+    import hashlib
+
+    # Création du dossier de cache s'il n'existe pas
+    cache_dir = "model_cache"
+    os.makedirs(cache_dir, exist_ok=True)
+
+    # Configuration du cache joblib
+    memory = Memory(cache_dir, verbose=0)
 
     df, _, _, _, _, _, _ = load_dataset()
 
@@ -2367,59 +2377,106 @@ def show_ml_analysis():
     report_dict = classification_report(y_test, y_pred, output_dict=True)
     report_df = pd.DataFrame(report_dict).transpose()
     
-    # Version personnalisée de LazyClassifier pour éviter les problèmes de tqdm
-    class CustomLazyClassifier:
+    # Fonction mise en cache pour entraîner un seul modèle
+    @memory.cache
+    def train_single_model(model_name, model_class, X_train_prep, X_test_prep, y_train, y_test):
+        """Entraîne un seul modèle et retourne ses performances (avec mise en cache)"""
+        try:
+            start = time.time()
+            model = model_class()
+            model.fit(X_train_prep, y_train)
+            y_pred = model.predict(X_test_prep)
+            y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
+            
+            # Calculer les métriques
+            acc = accuracy_score(y_test, y_pred)
+            balanced_acc = balanced_accuracy_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred)
+            roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
+            
+            time_taken = time.time() - start
+            
+            return {
+                "model_name": model_name,
+                "Accuracy": acc,
+                "Balanced Accuracy": balanced_acc,
+                "ROC AUC": roc_auc if roc_auc is not None else 0.0,
+                "F1 Score": f1,
+                "Time Taken": time_taken,
+                "predictions": y_pred
+            }
+        except Exception as e:
+            return {
+                "model_name": model_name,
+                "Accuracy": 0.0,
+                "Balanced Accuracy": 0.0,
+                "ROC AUC": 0.0,
+                "F1 Score": 0.0,
+                "Time Taken": 0.0,
+                "error": str(e)
+            }
+    
+    # Fonction pour générer une clé de hachage pour les données
+    def get_data_hash(X_train, y_train):
+        """Génère un hash unique pour les données d'entraînement pour utilisation comme clé de cache"""
+        data_str = str(X_train.shape) + str(y_train.shape) + str(hash(X_train.index.to_string()))
+        return hashlib.md5(data_str.encode()).hexdigest()
+    
+    # Fonction mise en cache pour l'analyse Lazy Predict complète
+    @memory.cache
+    def cached_lazy_predict(data_hash, models_dict):
+        """Fonction pour mettre en cache les résultats de l'analyse Lazy Predict"""
+        # Préprocesser les données
+        X_train_prep = preprocessor.fit_transform(X_train)
+        X_test_prep = preprocessor.transform(X_test)
+        
+        # Paralléliser l'entraînement des modèles
+        results = Parallel(n_jobs=-1)(
+            delayed(train_single_model)(name, cls, X_train_prep, X_test_prep, y_train, y_test)
+            for name, cls in models_dict.items()
+        )
+        
+        # Traiter les résultats
+        results_dict = {}
+        predictions_dict = {}
+        
+        for res in results:
+            model_name = res.pop("model_name")
+            if "predictions" in res:
+                predictions_dict[model_name] = res.pop("predictions")
+            if "error" in res:
+                # Gérer silencieusement les erreurs, ou les journaliser si nécessaire
+                continue
+            results_dict[model_name] = res
+        
+        results_df = pd.DataFrame(results_dict).T
+        results_df = results_df.sort_values(by="Accuracy", ascending=False)
+        
+        return results_df, predictions_dict
+    
+    # Version personnalisée améliorée de LazyClassifier
+    class OptimizedLazyClassifier:
         def __init__(self, verbose=0, ignore_warnings=True, custom_metric=None):
             self.verbose = verbose
             self.ignore_warnings = ignore_warnings
             self.custom_metric = custom_metric
         
         def fit(self, X_train, X_test, y_train, y_test):
-            """Version simplifiée mais fonctionnelle de LazyClassifier"""
-            results = {}
-            predictions = {}
+            """Version optimisée avec mise en cache via joblib"""
+            # Génération d'un hash pour identifier les données
+            data_hash = get_data_hash(X_train, y_train)
             
+            # Définition des modèles à tester
             models = {
-                "RandomForestClassifier": RandomForestClassifier(random_state=42),
-                "GradientBoostingClassifier": GradientBoostingClassifier(random_state=42),
-                "XGBClassifier": XGBClassifier(random_state=42),
-                "LGBMClassifier": LGBMClassifier(random_state=42),
-                "LogisticRegression": LogisticRegression(random_state=42, max_iter=1000)
+                "RandomForestClassifier": RandomForestClassifier,
+                "GradientBoostingClassifier": GradientBoostingClassifier,
+                "XGBClassifier": XGBClassifier,
+                "LGBMClassifier": LGBMClassifier,
+                "LogisticRegression": LogisticRegression
             }
             
-            # Préprocesser les données
-            X_train_prep = preprocessor.fit_transform(X_train)
-            X_test_prep = preprocessor.transform(X_test)
-            
-            for name, model in models.items():
-                try:
-                    start = time.time()
-                    model.fit(X_train_prep, y_train)
-                    y_pred = model.predict(X_test_prep)
-                    y_prob = model.predict_proba(X_test_prep)[:, 1] if hasattr(model, "predict_proba") else None
-                    
-                    # Calculer les métriques
-                    acc = accuracy_score(y_test, y_pred)
-                    balanced_acc = balanced_accuracy_score(y_test, y_pred)
-                    f1 = f1_score(y_test, y_pred)
-                    roc_auc = roc_auc_score(y_test, y_prob) if y_prob is not None else None
-                    
-                    results[name] = {
-                        "Accuracy": acc,
-                        "Balanced Accuracy": balanced_acc,
-                        "ROC AUC": roc_auc if roc_auc is not None else 0.0,
-                        "F1 Score": f1,
-                        "Time Taken": time.time() - start
-                    }
-                    
-                    predictions[name] = y_pred
-                except Exception as e:
-                    if not self.ignore_warnings:
-                        print(f"Error fitting {name}: {str(e)}")
-            
-            results_df = pd.DataFrame(results).T
-            results_df = results_df.sort_values(by="Accuracy", ascending=False)
-            
+            # Récupération depuis le cache ou calcul si nécessaire
+            results_df, predictions = cached_lazy_predict(data_hash, models)
             return results_df, predictions
 
     # Fonction pour entraîner et évaluer plusieurs modèles
@@ -2465,6 +2522,7 @@ def show_ml_analysis():
         "📈 Comparaison des modèles",
         "🌲 Random Forest"
     ])
+
 
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
@@ -2594,52 +2652,61 @@ def show_ml_analysis():
             col1, col2 = st.columns([2, 1])
 
             with col1:
-                st.markdown("### Code utilisé")
+                st.markdown("### Code utilisé (avec optimisation joblib)")
                 st.code("""
-                from lazypredict.Supervised import LazyClassifier
-
-                # Préparation des données
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-                # Instanciation et entraînement avec Lazy Predict
-                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-
-                # Affichage des résultats
-                print(models)
+                # Utilisation de joblib pour mettre en cache et paralléliser
+                from joblib import Memory, Parallel, delayed
+                
+                # Configurer le cache
+                memory = Memory("model_cache", verbose=0)
+                
+                # Fonction mise en cache pour l'entraînement des modèles
+                @memory.cache
+                def cached_lazy_predict(data_hash, models_dict):
+                    # Prétraitement des données
+                    X_train_prep = preprocessor.fit_transform(X_train)
+                    X_test_prep = preprocessor.transform(X_test)
+                    
+                    # Paralléliser l'entraînement
+                    results = Parallel(n_jobs=-1)(
+                        delayed(train_single_model)(name, cls, X_train_prep, X_test_prep, y_train, y_test)
+                        for name, cls in models_dict.items()
+                    )
+                    
+                    # Créer le DataFrame de résultats
+                    results_df = pd.DataFrame(...)
+                    return results_df, predictions
                 """, language="python")
 
             with col2:
-                st.markdown("### Avantages")
+                st.markdown("### Avantages de l'optimisation")
                 st.markdown("""
-                ✅ **Rapidité** d'évaluation
-
-                ✅ **Vue d'ensemble** des performances
-
-                ✅ **Identification** des meilleurs modèles
+                ✅ **Mise en cache** des résultats précédents
                 
-                ✅ **Économie** de temps de développement
-
-                ✅ **Simplicité** d'utilisation
+                ✅ **Parallélisation** de l'entraînement des modèles
+                
+                ✅ **Réutilisation** des calculs entre les sessions
+                
+                ✅ **Temps de réponse** considérablement réduit
                 """)
         
         # Initialisation de l'état de session pour le bouton
         if 'lazy_predict_launched' not in st.session_state:
             st.session_state.lazy_predict_launched = False
         
-        # Bouton pour lancer l'analyse
+        # Bouton pour lancer l'analyse avec feedback visuel
         lp_col1, lp_col2 = st.columns([1, 2])
         with lp_col1:
             if st.button("🚀 Lancer Lazy Predict", type="primary", use_container_width=True):
-                with st.spinner("Analyse en cours... Veuillez patienter."):
-                    # Exécuter réellement la version personnalisée de LazyClassifier
+                with st.spinner("Analyse en cours... Vérification du cache en premier..."):
+                    # Exécuter la version optimisée avec joblib
                     try:
                         # Désactiver tqdm pour éviter les problèmes
                         os.environ['TQDM_DISABLE'] = '1'
                         
-                        # Utiliser notre version personnalisée
-                        custom_clf = CustomLazyClassifier(verbose=0, ignore_warnings=True)
-                        lazy_models, lazy_predictions = custom_clf.fit(X_train, X_test, y_train, y_test)
+                        # Utiliser notre version optimisée
+                        optimized_clf = OptimizedLazyClassifier(verbose=0, ignore_warnings=True)
+                        lazy_models, lazy_predictions = optimized_clf.fit(X_train, X_test, y_train, y_test)
                         st.session_state.lazy_models = lazy_models
                         st.session_state.lazy_predict_launched = True
                     except Exception as e:
@@ -2651,7 +2718,9 @@ def show_ml_analysis():
         
         with lp_col2:
             if not st.session_state.lazy_predict_launched:
-                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
+                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles (optimisée avec joblib).")
+            else:
+                st.success("✅ Analyse chargée rapidement grâce à l'optimisation joblib!")
         
         # Afficher les résultats uniquement si l'analyse a été lancée
         if st.session_state.lazy_predict_launched:
@@ -2659,7 +2728,7 @@ def show_ml_analysis():
             
             st.subheader("Résultats de l'analyse Lazy Predict")
 
-            # Afficher les résultats réels
+            # Afficher les résultats
             if hasattr(st.session_state, 'lazy_models'):
                 lazy_results = st.session_state.lazy_models
                 
