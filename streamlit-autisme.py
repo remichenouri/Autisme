@@ -1932,37 +1932,6 @@ def show_data_exploration():
                     st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
                     st.info("Essayez d'installer une version antérieure de prince: `pip install prince==0.7.1`")
 
-            with famd_tabs[2]:
-                st.subheader("Variables explicatives")
-                st.markdown("""
-                Ce graphique montre les variables qui contribuent le plus à chaque composante principale.
-                """)
-
-                try:
-                    if hasattr(famd, 'column_contributions_'):
-                        contribs = famd.column_contributions_
-
-                        fig, ax = plt.subplots(figsize=(12, 8))
-                        contribs.iloc[:, :2].sort_values(by=0, ascending=False).plot(
-                            kind='bar', ax=ax
-                        )
-                        ax.set_title('Contribution des variables aux deux premières composantes')
-                        ax.set_ylabel('Contribution (%)')
-                        ax.legend(['Composante 1', 'Composante 2'])
-                        st.pyplot(fig)
-                    else:
-                        st.info("Les contributions des variables ne sont pas disponibles dans cette version de prince.")
-
-                        if 'column_corr' in locals():
-                            fig, ax = plt.subplots(figsize=(12, 8))
-                            abs_corr = column_corr.iloc[:, :2].abs().sort_values(by=0, ascending=False)
-                            abs_corr.plot(kind='bar', ax=ax)
-                            ax.set_title('Magnitude des corrélations avec les composantes principales')
-                            ax.set_ylabel('|Corrélation|')
-                            ax.legend(['Composante 1', 'Composante 2'])
-                            st.pyplot(fig)
-                except Exception as e:
-                    st.warning(f"Impossible de générer le graphique des contributions: {str(e)}")
 
             with famd_tabs[3]:
                 st.subheader("FAMD centrée sur Score A10")
