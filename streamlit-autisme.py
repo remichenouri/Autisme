@@ -2171,29 +2171,17 @@ def show_ml_analysis():
     # Onglet 2: Comparaison des modèles
     with ml_tabs[1]:
         st.header("Comparaison des modèles")
-        
-        # Vérification si LazyPredict est disponible
-        lazy_installed = False
+        from sklearn.preprocessing import OneHotEncoder
+        OneHotEncoder.sparse = False  # Désactive le mode sparse
+    
         try:
-            import sys
-            subprocess_output = st.empty()
-            
-            with st.expander("Installation de LazyPredict"):
-                st.info("Si LazyPredict n'est pas installé, vous pouvez l'installer ci-dessous:")
-                install_col1, install_col2 = st.columns([3, 1])
-                with install_col1:
-                    st.code("pip install lazypredict", language="bash")
-                with install_col2:
-                    if st.button("Installer"):
-                        try:
-                            import subprocess
-                            result = subprocess.run([f"{sys.executable}", "-m", "pip", "install", "lazypredict"], 
-                                                   capture_output=True, text=True)
-                            subprocess_output.code(result.stdout)
-                            st.success("Installation terminée. Veuillez redémarrer l'application.")
-                        except Exception as e:
-                            st.error(f"Erreur d'installation: {e}")
-            
+            from lazypredict.Supervised import LazyClassifier
+            # Vérification si LazyPredict est disponible
+            lazy_installed = False
+            try:
+                import sys
+                subprocess_output = st.empty()
+
             from lazypredict.Supervised import LazyClassifier
             lazy_installed = True
             st.success("✅ LazyPredict est installé et prêt à l'emploi.")
