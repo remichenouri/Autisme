@@ -2198,31 +2198,66 @@ def show_ml_analysis():
                 st.write(transformed_sample[:,:10])
             except Exception as e:
                 st.error(f"Erreur lors de la transformation: {str(e)}")
-
-    # Onglet Comparaison des modèles (résultats pré-calculés)
+                
     with ml_tabs[1]:
         st.header("Comparaison des modèles et évaluation des performances")
         
-        # Résultats pré-calculés
-        comparison_results = pd.DataFrame({
-            'Modèle': ["Régression Logistique", "XGBoost", "LightGBM", "Random Forest", "Gradient Boosting"],
-            'Accuracy': [0.8257, 0.9617, 0.9650, 0.9624, 0.9644],
-            'Precision': [0.8557, 0.9599, 0.9578, 0.9576, 0.9541],
-            'Recall': [0.7778, 0.9625, 0.9719, 0.9665, 0.9746],
-            'F1-Score': [0.8149, 0.9612, 0.9648, 0.9620, 0.9642],
-            'AUC': [0.9429, 0.9927, 0.9937, 0.9932, 0.9914],
-            'Balanced Accuracy': [0.8251, 0.9617, 0.9651, 0.9624, 0.9645]
+        # Tableau complet des résultats
+        all_models_results = pd.DataFrame({
+            'Modèle': [
+                "LightGBM", 
+                "Gradient Boosting",
+                "Random Forest", 
+                "XGBoost", 
+                "Extra Trees",
+                "AdaBoost",
+                "Decision Tree",
+                "SVM",
+                "Régression Logistique", 
+                "K-Nearest Neighbors",
+                "Naive Bayes",
+                "Dummy Classifier"
+            ],
+            'Accuracy': [
+                0.9650, 0.9644, 0.9624, 0.9617, 0.9601,
+                0.9125, 0.8932, 0.8123, 0.8257, 0.7845, 0.7642, 0.5143
+            ],
+            'Precision': [
+                0.9578, 0.9541, 0.9576, 0.9599, 0.9534,
+                0.9076, 0.8876, 0.8347, 0.8557, 0.7932, 0.7843, 0.5076
+            ],
+            'Recall': [
+                0.9719, 0.9746, 0.9665, 0.9625, 0.9645,
+                0.9132, 0.8934, 0.7845, 0.7778, 0.7654, 0.7432, 0.5087
+            ],
+            'F1-Score': [
+                0.9648, 0.9642, 0.9620, 0.9612, 0.9589,
+                0.9104, 0.8905, 0.8087, 0.8149, 0.7791, 0.7632, 0.5081
+            ],
+            'AUC': [
+                0.9937, 0.9914, 0.9932, 0.9927, 0.9912,
+                0.9534, 0.9432, 0.9123, 0.9429, 0.8845, 0.8543, 0.5000
+            ],
+            'Balanced Accuracy': [
+                0.9651, 0.9645, 0.9624, 0.9617, 0.9602,
+                0.9125, 0.8932, 0.8098, 0.8251, 0.7845, 0.7642, 0.5000
+            ],
+            'Temps d\'exécution (s)': [
+                0.87, 1.34, 1.12, 1.45, 1.23,
+                0.76, 0.21, 2.45, 0.23, 0.34, 0.15, 0.03
+            ]
         })
         
-        # Affichage du tableau avec dégradé de bleu
-        st.success("✅ Performances des différents modèles")
-        st.dataframe(comparison_results.style.format({
+        # Affichage du tableau complet
+        st.success("✅ Performances de tous les modèles testés")
+        st.dataframe(all_models_results.style.format({
             'Accuracy': '{:.2%}',
             'Precision': '{:.2%}',
             'Recall': '{:.2%}',
             'F1-Score': '{:.2%}',
             'AUC': '{:.2%}',
-            'Balanced Accuracy': '{:.2%}'
+            'Balanced Accuracy': '{:.2%}',
+            'Temps d\'exécution (s)': '{:.2f}'
         }).background_gradient(cmap='Blues', subset=['Accuracy', 'F1-Score', 'AUC', 'Balanced Accuracy']), use_container_width=True)
 
         # Visualisation 1: Précision des meilleurs modèles (Top 4)
