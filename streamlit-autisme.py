@@ -1054,92 +1054,128 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 
 def show_home_page():
     st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
-    <h1 style="color: white; text-align: center; font-size: 2.5rem;">Comprendre les Troubles du Spectre Autistique</h1>
-    <p style="color: white; text-align: center; font-size: 1.2rem;">Une approche moderne et scientifique</p>
-</div>
-""", unsafe_allow_html=True)
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+        <h1 style="color: white; text-align: center; font-size: 2.5rem;">Comprendre les Troubles du Spectre Autistique</h1>
+        <p style="color: white; text-align: center; font-size: 1.2rem;">Une approche moderne et scientifique</p>
+    </div>
+    """, unsafe_allow_html=True)
 
+    # Conservation de l'image Ghibli sans lien cliquable
     image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
     
     st.markdown("""
-<div style="padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
-    <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2rem;">Qu'est-ce que l'autisme?</h2>
-    <p style="font-size: 1.2rem; line-height: 1.6; text-align: justify; max-width: 800px; margin: 0 auto;">
-    Les Troubles du Spectre Autistique (TSA) sont des conditions neurodéveloppementales qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des différences dans la communication sociale, les interactions sociales et par des comportements ou intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de niveaux de fonctionnement.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-    st.markdown("""
-<h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Évolution de la compréhension de l'autisme</h2>
-
-<div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; overflow-x: auto;">
-    <div style="display: flex; justify-content: space-between; min-width: 650px;">
-        <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-            <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1943</div>
-            <div style="margin-top: 10px; font-size: 0.9rem;">Leo Kanner décrit l'autisme infantile</div>
-        </div>
-        <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-            <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1980</div>
-            <div style="margin-top: 10px; font-size: 0.9rem;">L'autisme dans le DSM-III</div>
-        </div>
-        <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-            <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">2013</div>
-            <div style="margin-top: 10px; font-size: 0.9rem;">Le DSM-5 introduit les TSA</div>
-        </div>
-        <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-            <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">Aujourd'hui</div>
-            <div style="margin-top: 10px; font-size: 0.9rem;">Approche neurodiversité</div>
-        </div>
+    <div style="padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
+        <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2rem;">Qu'est-ce que l'autisme?</h2>
+        <p style="font-size: 1.2rem; line-height: 1.6; text-align: justify; max-width: 800px; margin: 0 auto;">
+        Les Troubles du Spectre Autistique (TSA) sont des conditions neurodéveloppementales qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des différences dans la communication sociale, les interactions sociales et par des comportements ou intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de niveaux de fonctionnement.
+        </p>
     </div>
-</div>
-""", unsafe_allow_html=True)
-    st.markdown("""
-<h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Le spectre autistique</h2>
-""", unsafe_allow_html=True)
-
-    col1, col2 = st.columns([3, 2])
+    """, unsafe_allow_html=True)
     
-    with col1:
-        st.markdown("""
-        <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-            <p style="font-size: 1.1rem; line-height: 1.6;">
-            L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, reflétant la grande variabilité des manifestations. Cette conception reconnaît que:
-            </p>
-            <ul style="font-size: 1.05rem; line-height: 1.5;">
-                <li>Chaque personne autiste présente un profil unique de forces et de défis</li>
-                <li>Les manifestations varient en intensité et en expression</li>
-                <li>Les niveaux de soutien nécessaires peuvent différer considérablement</li>
-            </ul>
-            <p style="font-size: 1.1rem; margin-top: 15px;">
-            Le DSM-5 définit trois niveaux de soutien nécessaire:
-            </p>
-            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                <div style="flex: 1; padding: 10px; background-color: #e8f5e9; border-radius: 10px; margin-right: 5px; text-align: center;">
-                    <h4 style="color: #2ecc71;">Niveau 1</h4>
-                    <p style="font-size: 0.9rem;">Nécessite un soutien</p>
-                </div>
-                <div style="flex: 1; padding: 10px; background-color: #eaf2f8; border-radius: 10px; margin: 0 5px; text-align: center;">
-                    <h4 style="color: #3498db;">Niveau 2</h4>
-                    <p style="font-size: 0.9rem;">Nécessite un soutien important</p>
-                </div>
-                <div style="flex: 1; padding: 10px; background-color: #f5eef8; border-radius: 10px; margin-left: 5px; text-align: center;">
-                    <h4 style="color: #9b59b6;">Niveau 3</h4>
-                    <p style="font-size: 0.9rem;">Nécessite un soutien très important</p>
-                </div>
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Évolution de la compréhension de l'autisme</h2>
+
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; overflow-x: auto;">
+        <div style="display: flex; justify-content: space-between; min-width: 650px;">
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1943</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Leo Kanner décrit l'autisme infantile</div>
+            </div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1980</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">L'autisme dans le DSM-III</div>
+            </div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">2013</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Le DSM-5 introduit les TSA</div>
+            </div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">Aujourd'hui</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Approche neurodiversité</div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Rectangle du spectre autistique recentré (image 265)
+    st.markdown("## Le spectre autistique", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
+    with col2:  # Utilisation de la colonne centrale pour centrer le contenu
+        st.write("""
+        L'autisme est aujourd'hui compris comme un **spectre** de conditions, reflétant la 
+        grande variabilité des manifestations. Cette conception reconnaît que:
+        
+        * Chaque personne autiste présente un profil unique de forces et de défis
+        * Les manifestations varient en intensité et en expression
+        * Les niveaux de soutien nécessaires peuvent différer considérablement
+        """)
+        
+        st.write("Le DSM-5 définit trois niveaux de soutien nécessaire:")
+        
+        niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
+        
+        with niveau_col1:
+            st.info("**Niveau 1**\n\nNécessite un soutien")
+        
+        with niveau_col2:
+            st.info("**Niveau 2**\n\nNécessite un soutien important")
+        
+        with niveau_col3:
+            st.info("**Niveau 3**\n\nNécessite un soutien très important")
+    
+    # Section "Contexte du projet" (ajoutée depuis le rapport)
+    st.markdown("## Contexte du projet", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
     with col2:
-        # Visualisation du spectre avec un graphique
-        # Code pour afficher un histogram des scores AQ-10 ou une visualisation radar
-        pass
+        st.write("""
+        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des **Troubles du Spectre de l'Autisme (TSA)**. 
+        L'autisme n'est pas une maladie mais une **différence neurologique** affectant le fonctionnement du cerveau.
+        
+        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 5000 personnes de différentes origines 
+        (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) pour identifier les facteurs associés à la présence d'un TSA.
+        
+        L'objectif est de construire des modèles prédictifs capables d'assister dans l'évaluation de la présence d'un TSA 
+        en fonction des caractéristiques individuelles, tout en offrant une compréhension claire et accessible de ce qu'est 
+        l'autisme pour tous les publics.
+        """)
+        
+        st.write("""
+        📊 **Prévalence de l'autisme:**
+        * 1 à 2% de la population mondiale est concernée
+        * En France, environ 700 000 personnes sont concernées
+        * Ratio historique garçons/filles d'environ 4:1 (aujourd'hui remis en question)
+        """)
+    
+    # Section "À qui s'adresse ce projet" (ajoutée depuis le rapport)
+    st.markdown("## À qui s'adresse ce projet", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
+    with col2:
+        col_a, col_b = st.columns(2)
+        
+        with col_a:
+            st.info("### Chercheurs en santé et psychologie\nUne analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer des tendances cliniques dans le domaine des TSA.")
+            st.warning("### Familles et particuliers\nOutils d'auto-évaluation et d'information pour répondre aux questions ou suspicions de TSA et faciliter l'orientation.")
+            
+        with col_b:
+            st.success("### Professionnels de santé\nDes résultats exploitables permettant d'améliorer le dépistage et la prise en charge des personnes avec TSA.")
+            st.error("### Décideurs publics\nDonnées et analyses pouvant informer les politiques publiques et orienter les décisions de financement pour les services aux personnes avec TSA.")
+
+        st.write("""
+        Notre plateforme facilite la compréhension des TSA pour tous ces publics grâce à des visualisations claires
+        et des explications vulgarisées. Les outils de prédiction peuvent aider à une détection précoce, facilitant
+        ainsi une prise en charge adaptée et personnalisée.
+        """)
         
     st.markdown("""
-<h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Accompagnement et soutien</h2>
-""", unsafe_allow_html=True)
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Accompagnement et soutien</h2>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
     
@@ -1183,8 +1219,8 @@ def show_home_page():
         """, unsafe_allow_html=True)
         
     st.markdown("""
-<h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Caractéristiques principales</h2>
-""", unsafe_allow_html=True)
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Caractéristiques principales</h2>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     
@@ -1213,30 +1249,38 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        
+    
+    # Rectangle "Notre approche" recentré sans liens cliquables (image 291)
+    st.markdown("## Notre approche", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
+    with col2:
+        # Création d'un conteneur avec dégradé de couleur pour la section "Notre approche"
         st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 30px; border-radius: 15px; margin-top: 40px; text-align: center; color: white;">
-    <h2 style="margin-bottom: 20px;">Notre approche</h2>
-    <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
-    Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
-    </p>
-    <div style="margin-top: 25px;">
-        <a href="#" style="background-color: white; color: #3498db; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; margin: 0 10px;">
-            Commencer le dépistage
-        </a>
-        <a href="#" style="background-color: rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; margin: 0 10px;">
-            Explorer les données
-        </a>
+        <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 30px; border-radius: 15px; margin-top: 0px; text-align: center; color: white;">
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
+            Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
+            </p>
+            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
+                <div style="background-color: white; color: #3498db; padding: 10px 20px; border-radius: 30px; font-weight: bold;">
+                    Commencer le dépistage
+                </div>
+                <div style="background-color: rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold;">
+                    Explorer les données
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+            
+    # Avertissement professionnel
+    st.markdown("""
+    <div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
+        <p style="font-size: 0.9rem;">
+        <strong style="color: #e74c3c;">Avertissement :</strong> Les informations présentées sur cette plateforme sont à titre informatif uniquement. Elles ne remplacent pas l'avis médical professionnel.
+        </p>
     </div>
-</div>
-
-<div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
-    <p style="font-size: 0.9rem;">
-    <strong style="color: #e74c3c;">Avertissement :</strong> Les informations présentées sur cette plateforme sont à titre informatif uniquement. Elles ne remplacent pas l'avis médical professionnel.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
+    """, unsafe_allow_html=True)
 
 def show_data_exploration():
     import plotly.express as px
@@ -2408,171 +2452,95 @@ def show_ml_analysis():
                     st.error(f"Erreur lors de la transformation: {str(e)}")
 
     with ml_tabs[1]:
-        st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
+    st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
 
-        st.markdown("""
-        <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
-            <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
+        <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
+        <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown("""
-        ### Comment fonctionne Lazy Predict?
+    st.markdown("""
+    ### Comment fonctionne Lazy Predict?
 
-        1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
-        2. **Comparaison rapide**: Résultats triés par performance décroissante
-        3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
-        4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
-        """)
+    1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
+    2. **Comparaison rapide**: Résultats triés par performance décroissante
+    3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
+    4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
+    """)
 
-        with st.container():
-            col1, col2 = st.columns([2, 1])
+    with st.container():
+        col1, col2 = st.columns([2, 1])
 
-            with col1:
-                st.markdown("### Code utilisé (avec optimisation joblib)")
-                st.code("""
-                # Utilisation de joblib pour mettre en cache et paralléliser
-                from joblib import Memory, Parallel, delayed
-                
-                # Configurer le cache
-                memory = Memory("model_cache", verbose=0)
-                
-                # Fonction mise en cache pour l'entraînement des modèles
-                @memory.cache
-                def cached_lazy_predict(data_hash, models_dict):
-                    # Prétraitement des données
-                    X_train_prep = preprocessor.fit_transform(X_train)
-                    X_test_prep = preprocessor.transform(X_test)
-                    
-                    # Paralléliser l'entraînement
-                    results = Parallel(n_jobs=-1)(
-                        delayed(train_single_model)(name, cls, X_train_prep, X_test_prep, y_train, y_test)
-                        for name, cls in models_dict.items()
-                    )
-                    
-                    # Créer le DataFrame de résultats
-                    results_df = pd.DataFrame(...)
-                    return results_df, predictions
-                """, language="python")
+        with col1:
+            st.markdown("### Code utilisé")
+            st.code("""
+            from lazypredict.Supervised import LazyClassifier
 
-            with col2:
-                st.markdown("### Avantages de l'optimisation")
-                st.markdown("""
-                ✅ **Mise en cache** des résultats précédents
-                
-                ✅ **Parallélisation** de l'entraînement des modèles
-                
-                ✅ **Réutilisation** des calculs entre les sessions
-                
-                ✅ **Temps de réponse** considérablement réduit
-                """)
-        
-        # Initialisation de l'état de session pour le bouton
-        if 'lazy_predict_launched' not in st.session_state:
-            st.session_state.lazy_predict_launched = False
-        
-        # Bouton pour lancer l'analyse avec feedback visuel
-        lp_col1, lp_col2 = st.columns([1, 2])
-        with lp_col1:
-            if st.button("🚀 Lancer Lazy Predict", type="primary", use_container_width=True):
-                with st.spinner("Analyse en cours... Vérification du cache en premier..."):
-                    # Exécuter la version optimisée avec joblib
-                    try:
-                        # Désactiver tqdm pour éviter les problèmes
-                        os.environ['TQDM_DISABLE'] = '1'
-                        
-                        # Utiliser notre version optimisée
-                        optimized_clf = OptimizedLazyClassifier(verbose=0, ignore_warnings=True)
-                        lazy_models, lazy_predictions = optimized_clf.fit(X_train, X_test, y_train, y_test)
-                        st.session_state.lazy_models = lazy_models
-                        st.session_state.lazy_predict_launched = True
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
-                        # Si échec, utiliser notre évaluation manuelle des modèles
-                        results_df = train_and_evaluate_models()
-                        st.session_state.lazy_models = results_df
-                        st.session_state.lazy_predict_launched = True
-        
-        with lp_col2:
-            if not st.session_state.lazy_predict_launched:
-                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles (optimisée avec joblib).")
-            else:
-                st.success("✅ Analyse chargée rapidement grâce à l'optimisation joblib!")
-        
-        # Afficher les résultats uniquement si l'analyse a été lancée
-        if st.session_state.lazy_predict_launched:
-            st.success("✅ Analyse terminée avec succès!")
+            # Préparation des données
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+            # Instanciation et entraînement avec Lazy Predict
+            clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
+            models, predictions = clf.fit(X_train, X_test, y_train, y_test)
+
+            # Affichage des résultats
+            print(models)
+            """, language="python")
+
+        with col2:
+            st.markdown("### Avantages")
+            st.markdown("""
+            ✅ **Rapidité** d'évaluation
+
+            ✅ **Vue d'ensemble** des performances
+
+            ✅ **Identification** des meilleurs modèles
             
-            st.subheader("Résultats de l'analyse Lazy Predict")
+            ✅ **Économie** de temps de développement
 
-            # Afficher les résultats
-            if hasattr(st.session_state, 'lazy_models'):
-                lazy_results = st.session_state.lazy_models
+            ✅ **Simplicité** d'utilisation
+            """)
+            
+    # Ajouter un bouton pour lancer l'analyse à la demande
+    if st.button("🚀 Exécuter l'analyse Lazy Predict", type="primary", use_container_width=True):
+        with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
+            try:
+                # Importer ici seulement si le bouton est cliqué
+                from lazypredict.Supervised import LazyClassifier
                 
-                # Formater et afficher le tableau des résultats
+                # Prétraiter les données
+                X_train_prep = preprocessor.fit_transform(X_train)
+                X_test_prep = preprocessor.transform(X_test)
+                
+                # Exécuter Lazy Predict
+                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
+                models, predictions = clf.fit(X_train_prep, X_test_prep, y_train, y_test)
+                
+                # Afficher les résultats
+                st.success("✅ Analyse terminée avec succès!")
+                st.dataframe(models, use_container_width=True)
+                
+                # Visualiser les performances
                 try:
-                    st.dataframe(
-                        lazy_results.style.background_gradient(cmap='Blues', subset=['Accuracy', 'F1 Score']),
-                        use_container_width=True
+                    plot_df = models.reset_index().rename(columns={'index': 'Model'})
+                    fig = px.bar(
+                        plot_df,
+                        y='Model',
+                        x='Accuracy',
+                        orientation='h',
+                        title="Précision des modèles",
+                        color='Accuracy',
+                        color_continuous_scale='Blues'
                     )
-                except:
-                    st.dataframe(lazy_results, use_container_width=True)
-
-                # Graphique des performances
-                try:
-                    # Créer un graphique à partir des données réelles
-                    plot_data = []
-                    if isinstance(lazy_results, pd.DataFrame):
-                        for idx, row in lazy_results.iterrows():
-                            for metric in ['Accuracy', 'F1 Score']:
-                                if metric in lazy_results.columns:
-                                    plot_data.append({
-                                        'Model': idx,
-                                        'Metric': metric,
-                                        'Value': row[metric]
-                                    })
-                        
-                        plot_df = pd.DataFrame(plot_data)
-                        
-                        # Visualisation des performances
-                        st.subheader("Performances des modèles classés par précision")
-                        fig_perf = px.bar(
-                            plot_df,
-                            y='Model',
-                            x='Value',
-                            color='Metric',
-                            orientation='h',
-                            barmode='group',
-                            labels={'Value': 'Score', 'Metric': 'Métrique'},
-                            color_discrete_sequence=["#3498db", "#2ecc71"]
-                        )
-                        
-                        fig_perf.update_layout(
-                            height=600,
-                            margin=dict(l=20, r=20, t=40, b=20),
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                        )
-                        
-                        st.plotly_chart(fig_perf, use_container_width=True)
-                        
-                        # Graphique des temps d'exécution
-                        if 'Time Taken' in lazy_results.columns:
-                            st.subheader("Temps d'exécution des modèles")
-                            fig_time = px.bar(
-                                lazy_results.reset_index(),
-                                x='Time Taken',
-                                y='index',
-                                orientation='h',
-                                color='Accuracy',
-                                color_continuous_scale='Viridis',
-                                title="Compromis précision/temps d'exécution",
-                                labels={'Time Taken': 'Temps (secondes)', 'index': 'Modèle'}
-                            )
-                            
-                            st.plotly_chart(fig_time, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True)
                 except Exception as e:
-                    st.error(f"Erreur lors de la génération des graphiques: {str(e)}")
+                    st.error(f"Erreur lors de la visualisation: {str(e)}")
+            
+            except Exception as e:
+                st.error(f"Erreur lors de l'analyse: {str(e)}")
+                st.info("Essayez d'installer lazypredict: `pip install lazypredict`")
 
     with ml_tabs[2]:
         st.header("Comparaison des modèles et métriques d'évaluation")
