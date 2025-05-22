@@ -2009,32 +2009,19 @@ def show_data_exploration():
                             if col_name in X_famd.columns:
                                 a_vars_to_exclude.append(col_name)
                         
-                        # Créer un nouveau dataframe en excluant explicitement les variables A1-A10
                         X_filtered = X_famd.drop(columns=a_vars_to_exclude, errors='ignore').copy()
                         
-                        # Vérification que toutes les variables A1-A10 sont bien exclues
-                        remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit() and len(col) <= 3]
+                        remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit()]
                         if remaining_a_vars:
-                            st.warning(f"Certaines variables A n'ont pas été exclues: {remaining_a_vars}")
+                            st.warning(f"Variables A résiduelles : {remaining_a_vars}")
                             X_filtered = X_filtered.drop(columns=remaining_a_vars, errors='ignore')
                         
-                        # Définir les variables clés pour l'analyse FAMD centrée sur Score_A10
                         key_vars = ['Score_A10', 'TSA']
                         for var in ['Age', 'Genre', 'Ethnie']:
                             if var in X_filtered.columns:
                                 key_vars.append(var)
                         
-                        # S'assurer que toutes les variables key_vars existent dans X_filtered
-                        missing_key_vars = [var for var in key_vars if var not in X_filtered.columns]
-                        if missing_key_vars:
-                            st.warning(f"Variables clés manquantes: {missing_key_vars}")
-                            key_vars = [var for var in key_vars if var in X_filtered.columns]
-                        
-                        # Créer le dataset final pour l'analyse
                         X_a10 = X_filtered[key_vars].copy()
-                        
-                        # Vérification de débogage facultative
-                        st.write(f"Variables utilisées dans l'analyse FAMD: {X_a10.columns.tolist()}")
                         
                         famd_a10 = FAMD_Custom(
                             n_components=min(3, len(key_vars)-1),
@@ -2046,7 +2033,6 @@ def show_data_exploration():
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
                         
-                        # Création du graphique de projection unique
                         fig, ax = plt.subplots(figsize=(10, 8))
                         coords_array = coords_a10.values
                         
@@ -2067,13 +2053,15 @@ def show_data_exploration():
                             
                         ax.set_xlabel('Composante 1')
                         ax.set_ylabel('Composante 2')
-                        ax.set_title('FAMD centrée sur Score_A10 et variables clés')
+                        ax.set_title('FAMD centrée sur Score_A10')
                         ax.grid(True, linestyle='--', alpha=0.7)
                         st.pyplot(fig)
+                        
                     else:
+                        st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                        
                 except Exception as e:
-                    st.warning(f"Impossible de générer l'analyse FAMD centrée sur Score_A10: {str(e)}")
-                    pass
+                    st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
 
 def show_ml_analysis():
     import plotly.express as px
