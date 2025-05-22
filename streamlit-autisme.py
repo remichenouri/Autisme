@@ -2076,7 +2076,6 @@ def show_data_exploration():
                     st.warning(f"Impossible de générer l'analyse FAMD centrée sur Score_A10: {str(e)}")
 
 
-
 def show_ml_analysis():
     import plotly.express as px
     import plotly.graph_objects as go
@@ -2130,7 +2129,6 @@ def show_ml_analysis():
         "🌲 Random Forest"
     ])
 
-    # Onglet Préprocessing
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
         col1, col2 = st.columns([1, 1])
