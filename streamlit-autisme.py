@@ -1769,9 +1769,6 @@ def show_data_exploration():
                         columns=X.columns
                     ).T
 
-            df_famd = df.copy()
-            df_famd = df_famd.reset_index(drop=True)
-
             for col in df_famd.select_dtypes(include=['object']).columns:
                 df_famd[col] = df_famd[col].astype('category')
 
