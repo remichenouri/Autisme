@@ -2099,8 +2099,27 @@ def show_ml_analysis():
     from sklearn.model_selection import cross_val_score, train_test_split
     import time
     import os
+    import pickle
+    import joblib
+    import hashlib
 
+    # Création des répertoires de cache s'ils n'existent pas
+    os.makedirs("model_cache", exist_ok=True)
+    
+    # Fonction pour générer une clé unique basée sur les données
+    def generate_data_hash(df):
+        return hashlib.md5(pd.util.hash_pandas_object(df).values).hexdigest()
+
+    # Chargement du dataset
     df, _, _, _, _, _, _ = load_dataset()
+    
+    # Génération d'un hash unique pour les données
+    data_hash = generate_data_hash(df)
+    
+    # Chemins des fichiers de cache
+    lazy_predict_cache_path = f"model_cache/lazy_predict_results_{data_hash}.joblib"
+    random_forest_cache_path = f"model_cache/random_forest_model_{data_hash}.joblib"
+    metrics_cache_path = f"model_cache/model_metrics_{data_hash}.joblib"
 
     # Préparation des données pour l'analyse ML
     if 'TSA' not in df.columns:
@@ -2128,54 +2147,113 @@ def show_ml_analysis():
         verbose_feature_names_out=False
     )
 
-    # Créer et entraîner le pipeline avec RandomForest
-    rf_classifier = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=8,
-        min_samples_split=10,
-        min_samples_leaf=2,
-        max_features='sqrt',
-        bootstrap=True,
-        random_state=42,
-        n_jobs=-1
-    )
+    # Fonction de mise en cache pour le modèle Random Forest
+    @st.cache_resource(show_spinner="Chargement du modèle Random Forest...")
+    def get_or_train_random_forest(_X_train, _y_train, _X_test, _y_test, _preprocessor, _cache_path):
+        if os.path.exists(_cache_path):
+            try:
+                # Chargement du modèle et des métriques depuis le cache
+                cached_data = joblib.load(_cache_path)
+                return cached_data
+            except Exception as e:
+                st.warning(f"Erreur lors du chargement du cache: {str(e)}. Réentraînement du modèle...")
+        
+        # Si le cache n'existe pas ou est invalide, entraîner le modèle
+        start_time = time.time()
+        
+        rf_classifier = RandomForestClassifier(
+            n_estimators=100,
+            max_depth=8,
+            min_samples_split=10,
+            min_samples_leaf=2,
+            max_features='sqrt',
+            bootstrap=True,
+            random_state=42,
+            n_jobs=-1
+        )
 
-    pipeline = Pipeline([
-        ('preprocessor', preprocessor),
-        ('classifier', rf_classifier)
-    ])
+        pipeline = Pipeline([
+            ('preprocessor', _preprocessor),
+            ('classifier', rf_classifier)
+        ])
 
-    # Entraîner le modèle principal et calculer les métriques réelles
-    pipeline.fit(X_train, y_train)
-    y_pred = pipeline.predict(X_test)
-    y_prob = pipeline.predict_proba(X_test)[:, 1]
+        # Entraîner le modèle et calculer les métriques
+        pipeline.fit(_X_train, _y_train)
+        y_pred = pipeline.predict(_X_test)
+        y_prob = pipeline.predict_proba(_X_test)[:, 1]
 
-    # Calculer les vraies métriques
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_prob)
+        # Calculer les métriques
+        metrics = {
+            "accuracy": accuracy_score(_y_test, y_pred),
+            "precision": precision_score(_y_test, y_pred),
+            "recall": recall_score(_y_test, y_pred),
+            "f1": f1_score(_y_test, y_pred),
+            "auc": roc_auc_score(_y_test, y_pred)
+        }
+        
+        # Matrice de confusion et rapport de classification
+        cm = confusion_matrix(_y_test, y_pred)
+        report_dict = classification_report(_y_test, y_pred, output_dict=True)
+        report_df = pd.DataFrame(report_dict).transpose()
+        
+        # Importance des features
+        try:
+            feature_names = _preprocessor.get_feature_names_out()
+        except:
+            feature_names = [f"feature_{i}" for i in range(len(rf_classifier.feature_importances_))]
+            
+        importance_df = pd.DataFrame({
+            'Feature': feature_names,
+            'Importance': rf_classifier.feature_importances_
+        }).sort_values('Importance', ascending=False)
+        
+        # Validation croisée
+        cv_scores = cross_val_score(pipeline, pd.concat([_X_train, _X_test]), 
+                                   pd.concat([_y_train, _y_test]), cv=5, scoring='accuracy')
+        
+        # Temps d'exécution
+        training_time = time.time() - start_time
+        
+        # Stocker toutes les informations pour le cache
+        cache_data = {
+            "pipeline": pipeline,
+            "metrics": metrics,
+            "confusion_matrix": cm,
+            "report_df": report_df,
+            "importance_df": importance_df,
+            "cv_scores": cv_scores,
+            "training_time": training_time
+        }
+        
+        # Sauvegarder dans le cache
+        joblib.dump(cache_data, _cache_path)
+        
+        return cache_data
 
-    # Créer la vraie matrice de confusion
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Générer le rapport de classification réel
-    report_dict = classification_report(y_test, y_pred, output_dict=True)
-    report_df = pd.DataFrame(report_dict).transpose()
-
-    # Version personnalisée de LazyClassifier pour éviter les problèmes de tqdm
+    # Version personnalisée de LazyClassifier avec mise en cache
     class CustomLazyClassifier:
         def __init__(self, verbose=0, ignore_warnings=True, custom_metric=None):
             self.verbose = verbose
             self.ignore_warnings = ignore_warnings
             self.custom_metric = custom_metric
 
-        def fit(self, X_train, X_test, y_train, y_test):
-            """Version simplifiée mais fonctionnelle de LazyClassifier"""
+        @st.cache_data(show_spinner="Exécution de Lazy Predict...", ttl=3600)
+        def fit(self, X_train, X_test, y_train, y_test, _cache_path):
+            """Version mise en cache de LazyClassifier"""
+            
+            # Vérifier si les résultats existent déjà dans le cache
+            if os.path.exists(_cache_path):
+                try:
+                    cached_results = joblib.load(_cache_path)
+                    return cached_results["results_df"], cached_results["predictions"]
+                except Exception as e:
+                    st.warning(f"Erreur lors du chargement du cache Lazy Predict: {str(e)}. Réexécution de l'analyse...")
+            
+            start_time = time.time()
             results = {}
             predictions = {}
 
+            # Modèles à tester (limités aux 5 plus importants pour optimiser)
             models = {
                 "RandomForestClassifier": RandomForestClassifier(random_state=42),
                 "GradientBoostingClassifier": GradientBoostingClassifier(random_state=42),
@@ -2216,39 +2294,18 @@ def show_ml_analysis():
 
             results_df = pd.DataFrame(results).T
             results_df = results_df.sort_values(by="Accuracy", ascending=False)
+            
+            # Sauvegarder les résultats dans le cache
+            cache_data = {
+                "results_df": results_df,
+                "predictions": predictions,
+                "execution_time": time.time() - start_time
+            }
+            joblib.dump(cache_data, _cache_path)
 
             return results_df, predictions
 
-    # Fonction pour entraîner et évaluer plusieurs modèles
-    def train_and_evaluate_models():
-        models = {
-            "Régression Logistique": LogisticRegression(random_state=42, max_iter=1000),
-            "XGBoost": XGBClassifier(random_state=42),
-            "LightGBM": LGBMClassifier(random_state=42),
-            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42)
-        }
-
-        results = []
-
-        # Préprocesser les données
-        X_train_prep = preprocessor.fit_transform(X_train)
-        X_test_prep = preprocessor.transform(X_test)
-
-        for name, model in models.items():
-            model.fit(X_train_prep, y_train)
-            y_pred = model.predict(X_test_prep)
-
-            acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred)
-
-            results.append({
-                'Modèle': name,
-                'Accuracy': acc,
-                'F1-Score': f1
-            })
-
-        return pd.DataFrame(results)
-
+    # Titre principal
     st.markdown("""
     <div class="header-container">
         <span style="font-size:2.5rem">🧠</span>
@@ -2256,6 +2313,7 @@ def show_ml_analysis():
     </div>
     """, unsafe_allow_html=True)
 
+    # Onglets modifiés selon les spécifications
     ml_tabs = st.tabs([
         "📊 Préprocessing",
         "🚀 Lazy Predict",
@@ -2348,7 +2406,6 @@ def show_ml_analysis():
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("#### Données avant préprocessing")
-            # Utiliser des données réelles du DataFrame
             if not df.empty:
                 sample_rows = min(4, len(df))
                 raw_sample = df.iloc[:sample_rows].copy()
@@ -2359,7 +2416,6 @@ def show_ml_analysis():
 
         with col2:
             st.markdown("#### Données après préprocessing")
-            # Afficher un exemple réel de transformation
             if not df.empty:
                 try:
                     sample_X = X.iloc[:4]
@@ -2378,88 +2434,39 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("""
-        ### Comment fonctionne Lazy Predict?
-
-        1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
-        2. **Comparaison rapide**: Résultats triés par performance décroissante
-        3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
-        4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
-        """)
-
-        with st.container():
-            col1, col2 = st.columns([2, 1])
-
-            with col1:
-                st.markdown("### Code utilisé")
-                st.code("""
-                from lazypredict.Supervised import LazyClassifier
-
-                # Préparation des données
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-                # Instanciation et entraînement avec Lazy Predict
-                clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-
-                # Affichage des résultats
-                print(models)
-                """, language="python")
-
-            with col2:
-                st.markdown("### Avantages")
-                st.markdown("""
-                ✅ **Rapidité** d'évaluation
-
-                ✅ **Vue d'ensemble** des performances
-
-                ✅ **Identification** des meilleurs modèles
-
-                ✅ **Économie** de temps de développement
-
-                ✅ **Simplicité** d'utilisation
-                """)
-
         # Initialisation de l'état de session pour le bouton
         if 'lazy_predict_launched' not in st.session_state:
             st.session_state.lazy_predict_launched = False
 
-        # Bouton pour lancer l'analyse
-        lp_col1, lp_col2 = st.columns([1, 2])
-        with lp_col1:
-            if st.button("🚀 Lancer Lazy Predict", type="primary", use_container_width=True):
-                with st.spinner("Analyse en cours... Veuillez patienter."):
-                    # Exécuter réellement la version personnalisée de LazyClassifier
-                    try:
-                        # Désactiver tqdm pour éviter les problèmes
-                        os.environ['TQDM_DISABLE'] = '1'
+        # Bouton pour lancer l'analyse avec système de cache
+        if st.button("🚀 Lancer Lazy Predict", type="primary", use_container_width=True):
+            with st.spinner("Analyse en cours... Veuillez patienter."):
+                try:
+                    # Désactiver tqdm pour éviter les problèmes
+                    os.environ['TQDM_DISABLE'] = '1'
 
-                        # Utiliser notre version personnalisée
-                        custom_clf = CustomLazyClassifier(verbose=0, ignore_warnings=True)
-                        lazy_models, lazy_predictions = custom_clf.fit(X_train, X_test, y_train, y_test)
-                        st.session_state.lazy_models = lazy_models
-                        st.session_state.lazy_predict_launched = True
-                    except Exception as e:
-                        st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
-                        # Si échec, utiliser notre évaluation manuelle des modèles
-                        results_df = train_and_evaluate_models()
-                        st.session_state.lazy_models = results_df
-                        st.session_state.lazy_predict_launched = True
-
-        with lp_col2:
-            if not st.session_state.lazy_predict_launched:
-                st.info("👈 Cliquez sur le bouton pour lancer l'analyse comparative des modèles.")
+                    # Utiliser notre version personnalisée avec cache
+                    custom_clf = CustomLazyClassifier(verbose=0, ignore_warnings=True)
+                    lazy_models, lazy_predictions = custom_clf.fit(X_train, X_test, y_train, y_test, lazy_predict_cache_path)
+                    st.session_state.lazy_models = lazy_models
+                    st.session_state.lazy_predict_launched = True
+                    
+                    # Afficher le temps de chargement sauvé si les données viennent du cache
+                    if os.path.exists(lazy_predict_cache_path):
+                        cached_data = joblib.load(lazy_predict_cache_path)
+                        if "execution_time" in cached_data:
+                            st.success(f"Temps économisé grâce au cache: {cached_data['execution_time']:.2f} secondes")
+                except Exception as e:
+                    st.error(f"Erreur lors de l'analyse Lazy Predict: {str(e)}")
 
         # Afficher les résultats uniquement si l'analyse a été lancée
         if st.session_state.lazy_predict_launched:
             st.success("✅ Analyse terminée avec succès!")
 
-            st.subheader("Résultats de l'analyse Lazy Predict")
-
-            # Afficher les résultats réels
+            # Afficher uniquement le tableau des résultats (selon les spécifications)
             if hasattr(st.session_state, 'lazy_models'):
                 lazy_results = st.session_state.lazy_models
-
+                
                 # Formater et afficher le tableau des résultats
                 try:
                     st.dataframe(
@@ -2469,88 +2476,136 @@ def show_ml_analysis():
                 except:
                     st.dataframe(lazy_results, use_container_width=True)
 
-                # Graphique des performances
-                try:
-                    # Créer un graphique à partir des données réelles
-                    plot_data = []
-                    if isinstance(lazy_results, pd.DataFrame):
-                        for idx, row in lazy_results.iterrows():
-                            for metric in ['Accuracy', 'F1 Score']:
-                                if metric in lazy_results.columns:
-                                    plot_data.append({
-                                        'Model': idx,
-                                        'Metric': metric,
-                                        'Value': row[metric]
-                                    })
-
-                        plot_df = pd.DataFrame(plot_data)
-
-                        # Visualisation des performances
-                        st.subheader("Performances des modèles classés par précision")
-                        fig_perf = px.bar(
-                            plot_df,
-                            y='Model',
-                            x='Value',
-                            color='Metric',
-                            orientation='h',
-                            barmode='group',
-                            labels={'Value': 'Score', 'Metric': 'Métrique'},
-                            color_discrete_sequence=["#3498db", "#2ecc71"]
-                        )
-
-                        fig_perf.update_layout(
-                            height=600,
-                            margin=dict(l=20, r=20, t=40, b=20),
-                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                        )
-
-                        st.plotly_chart(fig_perf, use_container_width=True)
-
-                        # Graphique des temps d'exécution
-                        if 'Time Taken' in lazy_results.columns:
-                            st.subheader("Temps d'exécution des modèles")
-                            fig_time = px.bar(
-                                lazy_results.reset_index(),
-                                x='Time Taken',
-                                y='index',
-                                orientation='h',
-                                color='Accuracy',
-                                color_continuous_scale='Viridis',
-                                title="Compromis précision/temps d'exécution",
-                                labels={'Time Taken': 'Temps (secondes)', 'index': 'Modèle'}
-                            )
-
-                            st.plotly_chart(fig_time, use_container_width=True)
-                except Exception as e:
-                    st.error(f"Erreur lors de la génération des graphiques: {str(e)}")
-
     with ml_tabs[2]:
-        st.header("Comparaison des modèles et métriques d'évaluation")
+        st.header("Comparaison des performances des modèles")
 
         st.markdown("""
         <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Métriques d'évaluation des modèles</h3>
-            <p style="color: #34495e;">Analyse comparative des performances des différents algorithmes de classification pour la détection des TSA.</p>
+            <h3 style="color: #2c3e50; margin-top: 0;">Graphiques de comparaison</h3>
+            <p style="color: #34495e;">Visualisation des performances des 5 premiers algorithmes identifiés par Lazy Predict.</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.subheader("1. Métriques de performance du modèle principal")
+        # Affichage des graphiques uniquement si Lazy Predict a été exécuté
+        if 'lazy_predict_launched' in st.session_state and st.session_state.lazy_predict_launched:
+            if hasattr(st.session_state, 'lazy_models'):
+                lazy_results = st.session_state.lazy_models
+                
+                try:
+                    # Ne garder que les 5 premiers algorithmes
+                    top_5_models = lazy_results.head(5)
+                    
+                    # Créer un DataFrame pour les graphiques
+                    plot_data = []
+                    for idx, row in top_5_models.iterrows():
+                        for metric in ['Accuracy', 'F1 Score']:
+                            if metric in top_5_models.columns:
+                                plot_data.append({
+                                    'Model': idx,
+                                    'Metric': metric,
+                                    'Value': row[metric]
+                                })
+                    
+                    plot_df = pd.DataFrame(plot_data)
 
-        # Afficher les métriques réelles calculées
+                    # Graphique de comparaison des performances
+                    st.subheader("Top 5 des algorithmes par performance")
+                    fig_perf = px.bar(
+                        plot_df,
+                        y='Model',
+                        x='Value',
+                        color='Metric',
+                        orientation='h',
+                        barmode='group',
+                        labels={'Value': 'Score', 'Metric': 'Métrique'},
+                        color_discrete_sequence=["#3498db", "#2ecc71"]
+                    )
+
+                    fig_perf.update_layout(
+                        height=500,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                    )
+
+                    st.plotly_chart(fig_perf, use_container_width=True)
+                    
+                    # Graphique de précision par algorithme
+                    st.subheader("Précision par algorithme")
+                    accuracy_data = top_5_models['Accuracy'].reset_index()
+                    accuracy_data.columns = ['Model', 'Accuracy']
+                    
+                    fig_acc = px.bar(
+                        accuracy_data,
+                        x='Model',
+                        y='Accuracy',
+                        color='Accuracy',
+                        labels={'Accuracy': 'Précision', 'Model': 'Algorithme'},
+                        color_continuous_scale='blues',
+                        height=400
+                    )
+                    
+                    st.plotly_chart(fig_acc, use_container_width=True)
+                    
+                    # Graphique radar pour comparaison multidimensionnelle
+                    if all(metric in lazy_results.columns for metric in ['Accuracy', 'F1 Score', 'ROC AUC']):
+                        st.subheader("Comparaison multidimensionnelle des performances")
+                        
+                        radar_data = top_5_models[['Accuracy', 'F1 Score', 'ROC AUC']].reset_index()
+                        radar_data = radar_data.rename(columns={'index': 'Model'})
+                        
+                        fig_radar = px.line_polar(
+                            radar_data.melt(id_vars=['Model'], value_vars=['Accuracy', 'F1 Score', 'ROC AUC']),
+                            r='value',
+                            theta='variable',
+                            line_close=True,
+                            color='Model',
+                            height=500
+                        )
+                        
+                        st.plotly_chart(fig_radar, use_container_width=True)
+                    
+                except Exception as e:
+                    st.error(f"Erreur lors de la génération des graphiques: {str(e)}")
+        else:
+            st.info("Exécutez Lazy Predict dans l'onglet précédent pour voir les graphiques de comparaison.")
+
+    with ml_tabs[3]:
+        st.header("Modèle Random Forest")
+
+        st.markdown("""
+        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Random Forest pour la détection des TSA</h3>
+            <p style="color: #34495e;">Un modèle d'apprentissage automatique basé sur un ensemble d'arbres de décision pour la classification des cas TSA.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Chargement ou entraînement du modèle Random Forest avec cache
+        rf_data = get_or_train_random_forest(X_train, y_train, X_test, y_test, preprocessor, random_forest_cache_path)
+        
+        pipeline = rf_data["pipeline"]
+        metrics = rf_data["metrics"]
+        cm = rf_data["confusion_matrix"]
+        report_df = rf_data["report_df"]
+        importance_df = rf_data["importance_df"]
+        cv_scores = rf_data["cv_scores"]
+        
+        # Afficher les métriques déplacées depuis l'onglet Comparaison des modèles
+        st.subheader("1. Métriques de performance du modèle")
+
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Précision (Accuracy)", f"{accuracy:.2%}")
-            st.metric("Rappel (Sensitivity)", f"{recall:.2%}")
+            st.metric("Précision (Accuracy)", f"{metrics['accuracy']:.2%}")
+            st.metric("Rappel (Sensitivity)", f"{metrics['recall']:.2%}")
         with col2:
-            st.metric("Spécificité (Precision)", f"{precision:.2%}")
-            st.metric("Score F1", f"{f1:.2%}")
+            st.metric("Spécificité (Precision)", f"{metrics['precision']:.2%}")
+            st.metric("Score F1", f"{metrics['f1']:.2%}")
         with col3:
-            st.metric("AUC-ROC", f"{auc:.2%}")
-            st.metric("Erreur", f"{1-accuracy:.2%}")
+            st.metric("AUC-ROC", f"{metrics['auc']:.2%}")
+            st.metric("Temps d'entraînement", f"{rf_data['training_time']:.2f}s")
 
+        # Afficher la matrice de confusion (déplacée)
         st.subheader("2. Matrice de confusion")
-
-        # Afficher la véritable matrice de confusion
+        
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
         plt.xlabel('Prédiction')
@@ -2560,6 +2615,7 @@ def show_ml_analysis():
         ax.set_yticklabels(['Non-TSA', 'TSA'])
         st.pyplot(fig)
 
+        # Ajouter l'explication
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p><strong>Interprétation :</strong></p>
@@ -2572,42 +2628,42 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
+        # Afficher le rapport de classification
         st.subheader("3. Rapport de classification détaillé")
-
-        # Afficher le vrai rapport de classification
         st.dataframe(report_df.style.set_properties(**{'background-color': 'white'}))
 
-        st.subheader("4. Comparaison avec d'autres algorithmes")
+        # Afficher la matrice de corrélation (déplacée de l'onglet Comparaison)
+        st.subheader("4. Matrice de corrélation")
+        
+        try:
+            # Préparer les données pour la matrice de corrélation
+            X_corr = X.copy()
+            if 'TSA' in df.columns:
+                X_corr['TSA_num'] = df['TSA'].map({'Yes': 1, 'No': 0})
+            
+            # Sélectionner uniquement les colonnes numériques
+            corr_cols = X_corr.select_dtypes(include=['int64', 'float64']).columns
+            corr_matrix = X_corr[corr_cols].corr()
+            
+            # Afficher la matrice de corrélation
+            fig, ax = plt.subplots(figsize=(12, 10))
+            mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+            sns.heatmap(
+                corr_matrix,
+                mask=mask,
+                annot=True,
+                fmt=".2f",
+                cmap="coolwarm",
+                square=True,
+                cbar_kws={"shrink": .8}
+            )
+            plt.title("Matrice de corrélation")
+            st.pyplot(fig)
+        except Exception as e:
+            st.error(f"Erreur lors de la génération de la matrice de corrélation: {str(e)}")
 
-        # Obtenir les résultats réels des modèles comparés
-        comparison_results = train_and_evaluate_models()
-        st.dataframe(comparison_results.style.highlight_max(subset=['Accuracy']))
-
-        # Créer un graphique à barres de comparaison
-        fig, ax = plt.subplots(figsize=(10, 6))
-        x = np.arange(len(comparison_results))
-        width = 0.35
-        ax.bar(x - width/2, comparison_results['Accuracy'], width, label='Accuracy')
-        ax.bar(x + width/2, comparison_results['F1-Score'], width, label='F1-Score')
-        ax.set_xticks(x)
-        ax.set_xticklabels(comparison_results['Modèle'])
-        ax.legend()
-        ax.set_ylabel('Score')
-        ax.set_title('Comparaison des performances des modèles')
-        st.pyplot(fig)
-
-    with ml_tabs[3]:
-        st.header("Modèle Random Forest")
-
-        st.markdown("""
-        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Random Forest pour la détection des TSA</h3>
-            <p style="color: #34495e;">Un modèle d'apprentissage automatique basé sur un ensemble d'arbres de décision pour la classification des cas TSA.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.subheader("Principe de fonctionnement de Random Forest")
-
+        # Principe de fonctionnement de Random Forest
+        st.subheader("5. Principe de fonctionnement de Random Forest")
         col1, col2 = st.columns([1, 1])
 
         with col1:
@@ -2667,32 +2723,18 @@ def show_ml_analysis():
                 st.warning("Graphviz n'est pas disponible. Schéma en texte uniquement.")
                 st.code(rf_diagram, language="dot")
 
-        # Importance des caractéristiques réelles
-        st.subheader("Analyse de l'importance des variables")
+        # Importance des caractéristiques
+        st.subheader("6. Analyse de l'importance des variables")
 
         try:
-            # Obtenir l'importance des caractéristiques du modèle entraîné
-            rf = pipeline.named_steps['classifier']
-
-            # Tenter d'obtenir les noms des caractéristiques après prétraitement
-            try:
-                feature_names = preprocessor.get_feature_names_out()
-            except:
-                # Si cela échoue, créer des noms génériques
-                feature_names = [f"feature_{i}" for i in range(len(rf.feature_importances_))]
-
-            # Créer le DataFrame d'importance des caractéristiques
-            importance_df = pd.DataFrame({
-                'Feature': feature_names,
-                'Importance': rf.feature_importances_
-            }).sort_values('Importance', ascending=False).head(15)  # Montrer les 15 plus importantes
-
-            # Visualiser l'importance des caractéristiques
+            # Visualiser l'importance des caractéristiques (les 15 plus importantes)
+            importance_top15 = importance_df.head(15)
+            
             fig, ax = plt.subplots(figsize=(10, 6))
             sns.barplot(
                 x='Importance',
                 y='Feature',
-                data=importance_df,
+                data=importance_top15,
                 orient='h',
                 palette='viridis'
             )
@@ -2702,18 +2744,12 @@ def show_ml_analysis():
         except Exception as e:
             st.error(f"Erreur lors de l'analyse d'importance des variables: {str(e)}")
 
-        # Validation croisée réelle
-        st.subheader("Validation croisée du modèle")
+        # Validation croisée
+        st.subheader("7. Validation croisée du modèle")
 
         try:
-            # Effectuer la validation croisée avec le modèle
-            cv_scores = cross_val_score(pipeline, X, y, cv=5, scoring='accuracy')
-
             # Afficher les résultats
             st.success(f"**Score moyen de validation croisée (5-fold)**: {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-
-            # Afficher les scores individuels
-            st.write("Scores par fold:", cv_scores)
 
             # Visualiser les scores
             fig, ax = plt.subplots(figsize=(10, 4))
