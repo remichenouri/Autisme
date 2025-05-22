@@ -1853,7 +1853,7 @@ def show_data_exploration():
                 "Projection des individus",
                 "Cercle des corrélations",
                 "FAMD score A10",
-                "Cercle de corrélation de la FAMD centrée sur Score A10"
+                "Cercle de corrélation de la FAMD centrée sur Score A10",
                 "Interprétation"
             ])
 
@@ -1938,80 +1938,71 @@ def show_data_exploration():
                 st.markdown("""
                 Analyse spécifique mettant en évidence la relation entre le Score A10 et le diagnostic TSA.
                 """)
-            
-                # Création de sous-onglets pour la FAMD centrée sur Score A10
-                a10_subtabs = st.tabs(["Projection des individus", "Cercle de corrélation"])
-                
-                with a10_subtabs[0]:
-                    # Le code existant pour la projection des individus
-                    try:
-                        if 'Score_A10' in X_famd.columns:
-                            a_vars_to_exclude = []
-                            for i in range(1, 11):
-                                col_name = f'A{i}'
-                                if col_name in X_famd.columns:
-                                    a_vars_to_exclude.append(col_name)
+          
+                try:
+                    if 'Score_A10' in X_famd.columns:
+                        a_vars_to_exclude = []
+                        for i in range(1, 11):
+                            col_name = f'A{i}'
+                            if col_name in X_famd.columns:
+                                a_vars_to_exclude.append(col_name)
                             
-                            # Créer un nouveau dataframe en excluant explicitement les variables A1-A10
-                            X_filtered = X_famd.drop(columns=a_vars_to_exclude, errors='ignore').copy()
+                        X_filtered = X_famd.drop(columns=a_vars_to_exclude, errors='ignore').copy()
                             
-                            # Vérification que toutes les variables A1-A10 sont bien exclues
-                            remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit()]
-                            if remaining_a_vars:
-                                st.warning(f"Variables A résiduelles : {remaining_a_vars}")
-                                X_filtered = X_filtered.drop(columns=remaining_a_vars, errors='ignore')
+                        remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit()]
+                        if remaining_a_vars:
+                            st.warning(f"Variables A résiduelles : {remaining_a_vars}")
+                            X_filtered = X_filtered.drop(columns=remaining_a_vars, errors='ignore')
+
+                        key_vars = ['Score_A10', 'TSA']
+                        for var in ['Age', 'Genre', 'Ethnie']:
+                            if var in X_filtered.columns:
+                                key_vars.append(var)
+    
+                        X_a10 = X_filtered[key_vars].copy()
                             
-                            # Définir les variables clés pour l'analyse FAMD centrée sur Score_A10
-                            key_vars = ['Score_A10', 'TSA']
-                            for var in ['Age', 'Genre', 'Ethnie']:
-                                if var in X_filtered.columns:
-                                    key_vars.append(var)
-                            
-                            # Créer le dataset final pour l'analyse
-                            X_a10 = X_filtered[key_vars].copy()
-                            
-                            famd_a10 = FAMD_Custom(
+                        famd_a10 = FAMD_Custom(
                                 n_components=min(3, len(key_vars)-1),
                                 n_iter=10,
                                 random_state=42,
                                 copy=True,
                                 engine='sklearn'
                             )
-                            famd_a10 = famd_a10.fit(X_a10)
-                            coords_a10 = famd_a10.transform(X_a10)
+                        famd_a10 = famd_a10.fit(X_a10)
+                        coords_a10 = famd_a10.transform(X_a10)
+
+                        fig, ax = plt.subplots(figsize=(10, 8))
+                        coords_array = coords_a10.values
                             
-                            # Création du graphique de projection unique
-                            fig, ax = plt.subplots(figsize=(10, 8))
-                            coords_array = coords_a10.values
-                            
-                            if 'TSA' in X_a10.columns:
-                                for category in X_a10['TSA'].unique():
-                                    mask = (X_a10['TSA'] == category).values
-                                    color = "#e74c3c" if category == "Yes" else "#3498db"
-                                    ax.scatter(
+                        if 'TSA' in X_a10.columns:
+                            for category in X_a10['TSA'].unique():
+                                mask = (X_a10['TSA'] == category).values
+                                color = "#e74c3c" if category == "Yes" else "#3498db"
+                                ax.scatter(
                                         coords_array[mask, 0],
                                         coords_array[mask, 1],
                                         label=category,
                                         color=color,
                                         alpha=0.7
                                     )
-                                ax.legend(title="Diagnostic TSA")
-                            else:
-                                ax.scatter(coords_array[:, 0], coords_array[:, 1], alpha=0.7)
-                                
-                            ax.set_xlabel('Composante 1')
-                            ax.set_ylabel('Composante 2')
-                            ax.set_title('FAMD centrée sur Score_A10')
-                            ax.grid(True, linestyle='--', alpha=0.7)
-                            st.pyplot(fig)
+                            ax.legend(title="Diagnostic TSA")
                         else:
-                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
-                    except Exception as e:
-                        st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
+                            ax.scatter(coords_array[:, 0], coords_array[:, 1], alpha=0.7)
+                                
+                        ax.set_xlabel('Composante 1')
+                        ax.set_ylabel('Composante 2')
+                        ax.set_title('FAMD centrée sur Score_A10')
+                        ax.grid(True, linestyle='--', alpha=0.7)
+                        st.pyplot(fig)
+                    else:
+                        st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                except Exception as e:
+                    st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
                 
-                with a10_subtabs[1]:
-                    # Nouveau code pour le cercle de corrélation
-                    try:
+                    
+            with famd_tabs[3]:
+                st.subheader("Cercle de corrélation 2")
+                try:
                         if 'Score_A10' in X_famd.columns:
                             # Utiliser X_a10 et famd_a10 définis précédemment
                             if hasattr(famd_a10, 'column_correlations'):
@@ -2050,52 +2041,6 @@ def show_data_exploration():
                             st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                     except Exception as e:
                         st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-
-                    
-            with famd_tabs[3]:
-                st.subheader("Cercle de corrélation de la FAMD centrée sur Score A10")
-       
-                try:
-                    if 'Score_A10' in X_famd.columns:
-                        # Utiliser X_a10 et famd_a10 définis précédemment
-                        if hasattr(famd_a10, 'column_correlations'):
-                            column_corr_a10 = famd_a10.column_correlations(X_a10)
-                        else:
-                            st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
-                            column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
-        
-                        fig, ax = plt.subplots(figsize=(10, 10))
-                        circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
-                        ax.add_artist(circle)
-        
-                        ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
-                        ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-        
-                        for i, var in enumerate(column_corr_a10.index):
-                            x = column_corr_a10.iloc[i, 0]
-                            y = column_corr_a10.iloc[i, 1]
-        
-                            ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-                                
-                            
-                            if var == 'Score_A10':
-                                    ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
-                            else:
-                                    ax.text(x*1.1, y*1.1, var, fontsize=10)
-            
-                            ax.set_xlim(-1.1, 1.1)
-                            ax.set_ylim(-1.1, 1.1)
-                            ax.set_xlabel(f'Composante 1')
-                            ax.set_ylabel(f'Composante 2')
-                            ax.set_title('Cercle des corrélations pour FAMD centrée sur Score_A10')
-                            ax.grid(True, linestyle='--', alpha=0.5)
-                            st.pyplot(fig)
-                        else:
-                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
-                except Exception as e:
-                    st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-
-            
         
             with famd_tabs[4]:
                 st.subheader("Interprétation des résultats")
