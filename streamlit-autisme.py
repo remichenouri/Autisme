@@ -1852,7 +1852,7 @@ def show_data_exploration():
                 "Projection des individus",
                 "Cercle des corrélations",
                 "FAMD score A10",
-                "Cercle de corrélation de la FAMD centrée sur Score A10",
+                "Cercle de corrélation Score A10",
                 "Interprétation"
             ])
 
@@ -2005,7 +2005,7 @@ def show_data_exploration():
                 
                     
             with famd_tabs[3]:
-                st.subheader("Cercle de corrélation 2")
+                st.subheader("Cercle de corrélation Score A10")
                 try:
                     if 'Score_A10' in X_famd.columns:
                         # Utiliser X_a10 et famd_a10 définis précédemment
