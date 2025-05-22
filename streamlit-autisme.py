@@ -1786,7 +1786,6 @@ def show_data_exploration():
                 n_iter=10,
                 random_state=42,
                 copy=True,
-                engine='sklearn'
             )
             famd = famd.fit(X_famd)
 
