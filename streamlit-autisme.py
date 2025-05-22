@@ -1053,7 +1053,6 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         return None
 
 def show_home_page():
-    def show_home_page():
     st.markdown("""
     <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
         <h1 style="color: white; text-align: center; font-size: 2.5rem;">Comprendre les Troubles du Spectre Autistique</h1>
