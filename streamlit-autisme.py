@@ -1852,7 +1852,6 @@ def show_data_exploration():
             famd_tabs = st.tabs([
                 "Projection des individus",
                 "Cercle des corrélations",
-                "Variables explicatives",
                 "FAMD score A10",
                 "Interprétation"
             ])
@@ -1933,7 +1932,7 @@ def show_data_exploration():
                     st.info("Essayez d'installer une version antérieure de prince: `pip install prince==0.7.1`")
 
 
-            with famd_tabs[3]:
+            with famd_tabs[2]:
                 st.subheader("FAMD centrée sur Score A10")
                 st.markdown("""
                 Analyse spécifique mettant en évidence la relation entre le Score A10 et le diagnostic TSA.
@@ -1996,7 +1995,7 @@ def show_data_exploration():
                 except Exception as e:
                     st.warning(f"Impossible de générer l'analyse FAMD centrée sur Score_A10: {str(e)}")
 
-            with famd_tabs[4]:
+            with famd_tabs[3]:
                 st.subheader("Interprétation des résultats")
                 st.markdown("""
                 ### Points clés de l'analyse FAMD
