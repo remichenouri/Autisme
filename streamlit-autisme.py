@@ -1263,13 +1263,7 @@ def show_home_page():
             Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
             </p>
             <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
-                <div style="background-color: white; color: #3498db; padding: 10px 20px; border-radius: 30px; font-weight: bold;">
-                    Commencer le dépistage
-                </div>
-                <div style="background-color: rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold;">
-                    Explorer les données
-                </div>
-            </div>
+            
         </div>
         """, unsafe_allow_html=True)
             
