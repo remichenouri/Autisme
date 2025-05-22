@@ -2708,7 +2708,7 @@ def show_aq10_and_prediction():
     try:
         df, _, _, _, _, _, _ = load_dataset()
         if 'Jaunisse' in df.columns:
-        df = df.drop(columns=['Jaunisse'])
+            df = df.drop(columns=['Jaunisse'])
         rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
         st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
