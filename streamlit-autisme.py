@@ -2039,9 +2039,7 @@ def show_data_exploration():
                             st.pyplot(fig)
                         else:
                             st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
-                    except Exception as e:
-                        st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-        
+                
             with famd_tabs[4]:
                 st.subheader("Interprétation des résultats")
                 st.markdown("""
