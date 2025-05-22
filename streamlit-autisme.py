@@ -2055,11 +2055,12 @@ def show_ml_analysis():
     import os
 
     df, _, _, _, _, _, _ = load_dataset()
+    aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+    if aq_columns:
+        df = df.drop(columns=aq_columns)
+    
     if 'Jaunisse' in df.columns:
         df = df.drop(columns=['Jaunisse'])
-    if 'TSA' not in df.columns:
-        st.error("La colonne 'TSA' n'existe pas dans le dataframe")
-        return
 
     X = df.drop(columns=['TSA'])
     y = df['TSA'].map({'Yes': 1, 'No': 0})
@@ -2277,15 +2278,14 @@ def show_aq10_and_prediction():
 
     try:
         df, _, _, _, _, _, _ = load_dataset()
-    
         aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
         if aq_columns:
             df = df.drop(columns=aq_columns)
         
-        # Puis la suite du code existant
         if 'Jaunisse' in df.columns:
             df = df.drop(columns=['Jaunisse'])
-        rf_model, preprocessor, feature_names = train_advanced_model(df)
+            
+            rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
         st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
         rf_model, preprocessor, feature_names = None, None, None
