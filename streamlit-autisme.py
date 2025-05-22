@@ -2452,95 +2452,118 @@ def show_ml_analysis():
                     st.error(f"Erreur lors de la transformation: {str(e)}")
 
     with ml_tabs[1]:
-    st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
-
-    st.markdown("""
-    <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
-        <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
-        <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    ### Comment fonctionne Lazy Predict?
-
-    1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
-    2. **Comparaison rapide**: Résultats triés par performance décroissante
-    3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
-    4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
-    """)
-
-    with st.container():
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.markdown("### Code utilisé")
-            st.code("""
-            from lazypredict.Supervised import LazyClassifier
-
-            # Préparation des données
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-            # Instanciation et entraînement avec Lazy Predict
-            clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-            models, predictions = clf.fit(X_train, X_test, y_train, y_test)
-
-            # Affichage des résultats
-            print(models)
-            """, language="python")
-
-        with col2:
-            st.markdown("### Avantages")
-            st.markdown("""
-            ✅ **Rapidité** d'évaluation
-
-            ✅ **Vue d'ensemble** des performances
-
-            ✅ **Identification** des meilleurs modèles
-            
-            ✅ **Économie** de temps de développement
-
-            ✅ **Simplicité** d'utilisation
-            """)
-            
-    # Ajouter un bouton pour lancer l'analyse à la demande
-    if st.button("🚀 Exécuter l'analyse Lazy Predict", type="primary", use_container_width=True):
-        with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
-            try:
-                # Importer ici seulement si le bouton est cliqué
+        st.subheader("Comparaison rapide de plusieurs modèles avec Lazy Predict")
+    
+        st.markdown("""
+        <div style="background-color: #fff8e1; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse automatique avec Lazy Predict</h3>
+            <p style="color: #34495e;">Cette bibliothèque nous permet de tester rapidement plusieurs algorithmes de machine learning pour identifier les plus performants sur notre jeu de données.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.markdown("""
+        ### Comment fonctionne Lazy Predict?
+    
+        1. **Évaluation automatique**: Entraîne et évalue plusieurs modèles de ML différents
+        2. **Comparaison rapide**: Résultats triés par performance décroissante
+        3. **Économie de temps**: Évite la configuration manuelle de chaque modèle
+        4. **Identification des modèles prometteurs**: Permet de se concentrer sur les algorithmes les plus performants
+        """)
+    
+        with st.container():
+            col1, col2 = st.columns([2, 1])
+    
+            with col1:
+                st.markdown("### Code utilisé")
+                st.code("""
                 from lazypredict.Supervised import LazyClassifier
-                
-                # Prétraiter les données
-                X_train_prep = preprocessor.fit_transform(X_train)
-                X_test_prep = preprocessor.transform(X_test)
-                
-                # Exécuter Lazy Predict
+    
+                # Préparation des données
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    
+                # Instanciation et entraînement avec Lazy Predict
                 clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
-                models, predictions = clf.fit(X_train_prep, X_test_prep, y_train, y_test)
+                models, predictions = clf.fit(X_train, X_test, y_train, y_test)
+    
+                # Affichage des résultats
+                print(models)
+                """, language="python")
+    
+            with col2:
+                st.markdown("### Avantages")
+                st.markdown("""
+                ✅ **Rapidité** d'évaluation
+    
+                ✅ **Vue d'ensemble** des performances
+    
+                ✅ **Identification** des meilleurs modèles
                 
-                # Afficher les résultats
-                st.success("✅ Analyse terminée avec succès!")
-                st.dataframe(models, use_container_width=True)
-                
-                # Visualiser les performances
+                ✅ **Économie** de temps de développement
+    
+                ✅ **Simplicité** d'utilisation
+                """)
+        
+        # Ajouter un bouton pour lancer l'analyse à la demande
+        if st.button("🚀 Exécuter l'analyse Lazy Predict", type="primary", use_container_width=True):
+            with st.spinner("Analyse en cours... Cette opération peut prendre quelques instants..."):
                 try:
-                    plot_df = models.reset_index().rename(columns={'index': 'Model'})
-                    fig = px.bar(
-                        plot_df,
-                        y='Model',
-                        x='Accuracy',
-                        orientation='h',
-                        title="Précision des modèles",
-                        color='Accuracy',
-                        color_continuous_scale='Blues'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
+                    # Importer ici seulement si le bouton est cliqué
+                    from lazypredict.Supervised import LazyClassifier
+                    
+                    # Prétraiter les données
+                    X_train_prep = preprocessor.fit_transform(X_train)
+                    X_test_prep = preprocessor.transform(X_test)
+                    
+                    # Exécuter Lazy Predict
+                    clf = LazyClassifier(verbose=0, ignore_warnings=True, custom_metric=None)
+                    models, predictions = clf.fit(X_train_prep, X_test_prep, y_train, y_test)
+                    
+                    # Afficher les résultats
+                    st.success("✅ Analyse terminée avec succès!")
+                    st.dataframe(models, use_container_width=True)
+                    
+                    # Visualiser les performances
+                    try:
+                        plot_df = models.reset_index().rename(columns={'index': 'Model'})
+                        fig = px.bar(
+                            plot_df,
+                            y='Model',
+                            x='Accuracy',
+                            orientation='h',
+                            title="Précision des modèles",
+                            color='Accuracy',
+                            color_continuous_scale='Blues'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Ajouter les recommandations basées sur les résultats
+                        st.markdown("""
+                        <div style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 30px; border-left: 4px solid #2196f3;">
+                            <h3 style="color: #0d47a1; margin-top: 0;">Recommandations basées sur les résultats</h3>
+                            <p>En fonction des performances des modèles, voici nos recommandations :</p>
+                            <ol>
+                                <li><strong>Sélectionnez les 2-3 meilleurs modèles</strong> pour une optimisation plus poussée</li>
+                                <li><strong>Équilibrez précision et interprétabilité</strong> : parfois un modèle légèrement moins précis mais plus interprétable est préférable</li>
+                                <li><strong>Évitez le surajustement</strong> : vérifiez la stabilité des performances avec validation croisée</li>
+                                <li><strong>Évaluez d'autres métriques</strong> comme le F1-Score pour les données déséquilibrées</li>
+                                <li><strong>Optimisez les hyperparamètres</strong> du modèle sélectionné avec GridSearchCV ou RandomizedSearchCV</li>
+                            </ol>
+                            <h4 style="color: #0d47a1; margin-top: 15px;">Prochaines étapes recommandées :</h4>
+                            <ul>
+                                <li>Effectuer une analyse des caractéristiques importantes du modèle le plus performant</li>
+                                <li>Utiliser la validation croisée pour confirmer la robustesse des performances</li>
+                                <li>Calibrer les probabilités pour améliorer l'interprétabilité des prédictions</li>
+                                <li>Explorer l'onglet Random Forest pour une analyse plus détaillée du modèle principal</li>
+                            </ul>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    except Exception as e:
+                        st.error(f"Erreur lors de la visualisation: {str(e)}")
+                
                 except Exception as e:
-                    st.error(f"Erreur lors de la visualisation: {str(e)}")
-            
-            except Exception as e:
-                st.error(f"Erreur lors de l'analyse: {str(e)}")
-                st.info("Essayez d'installer lazypredict: `pip install lazypredict`")
+                    st.error(f"Erreur lors de l'analyse: {str(e)}")
+                    st.info("Essayez d'installer lazypredict: `pip install lazypredict`")
+
 
     with ml_tabs[2]:
         st.header("Comparaison des modèles et métriques d'évaluation")
