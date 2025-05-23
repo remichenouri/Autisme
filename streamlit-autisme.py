@@ -2993,7 +2993,7 @@ def show_aq10_and_prediction():
 
     st.markdown(
         f"""<div class="header-container" style="text-align: center;">
-            <span style="font-size:2.5rem">''📝''</span>
+            <span style="font-size:2.5rem">📝</span>
             <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
         </div>""", unsafe_allow_html=True
     )
