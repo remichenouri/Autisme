@@ -1551,12 +1551,36 @@ def show_data_exploration():
                 st.plotly_chart(fig, use_container_width=True)
 
     with st.expander("🔗 Matrice de Corrélation", expanded=True):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse des Corrélations</h3>
+            <p style="color: #7f8c8d;">Exploration des relations linéaires entre les variables numériques du dataset.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Texte explicatif ajouté
+        st.markdown("""
+        ### 💡 Interprétation de la matrice de corrélation
+        
+        **Comment lire cette matrice :**
+        - **Valeurs proches de +1** : Corrélation positive forte (quand une variable augmente, l'autre aussi)
+        - **Valeurs proches de -1** : Corrélation négative forte (quand une variable augmente, l'autre diminue)  
+        - **Valeurs proches de 0** : Pas de corrélation linéaire
+        - **Couleurs chaudes** (rouge/orange) : Corrélations positives
+        - **Couleurs froides** (bleu) : Corrélations négatives
+        
+        **Points d'attention :**
+        - Les corrélations élevées entre variables peuvent indiquer de la redondance
+        - Une forte corrélation n'implique pas nécessairement une relation causale
+        """)
+        
         try:
             df_corr = df.copy()
             if 'Jaunisse' in df_corr.columns:
                 df_corr = df_corr.drop(columns=['Jaunisse'])
             if 'TSA' in df_corr.columns:
                 df_corr['TSA_num'] = df_corr['TSA'].map({'Yes': 1, 'No': 0})
+                
             categorical_cols = df_corr.select_dtypes(include=['object']).columns
             if not categorical_cols.empty:
                 from sklearn.preprocessing import OneHotEncoder
@@ -1570,187 +1594,229 @@ def show_data_exploration():
             else:
                 df_corr_processed = df_corr.select_dtypes(exclude=['object'])
                 corr_matrix = df_corr_processed.corr(numeric_only=True)
-
-            mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-            fig, ax = plt.subplots(figsize=(14, 12))
-            cmap = sns.diverging_palette(200, 120, as_cmap=True)
-            sns.heatmap(
-                corr_matrix,
-                mask=mask,
-                cmap=cmap,
-                vmax=1.0,
-                vmin=-1.0,
-                center=0,
-                square=True,
-                linewidths=0.8,
-                fmt='.2f',
-                annot=True,
-                annot_kws={"size": 9, "weight": "bold"},
-                cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
-            )
-            plt.title("Matrice de corrélation des variables", fontsize=16, pad=20)
-            plt.xticks(rotation=45, ha='right', fontsize=9)
-            plt.yticks(fontsize=9)
-            plt.tight_layout()
-            st.pyplot(fig)
+    
+            # Matrice réduite et centrée
+            col1, col2, col3 = st.columns([1, 6, 1])  # Centrage de la matrice
+            
+            with col2:
+                mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+                fig, ax = plt.subplots(figsize=(10, 8))  # Taille réduite de 14x12 à 10x8
+                cmap = sns.diverging_palette(200, 120, as_cmap=True)
+                
+                # Sélection des variables les plus importantes pour réduire l'encombrement
+                important_vars = ['Score_A10', 'Age', 'TSA_num'] + [col for col in corr_matrix.columns if 'A' in col and len(col) <= 4][:8]
+                important_vars = [var for var in important_vars if var in corr_matrix.columns]
+                
+                if len(important_vars) > 3:
+                    corr_subset = corr_matrix.loc[important_vars, important_vars]
+                    mask_subset = np.triu(np.ones_like(corr_subset, dtype=bool))
+                    
+                    sns.heatmap(
+                        corr_subset,
+                        mask=mask_subset,
+                        cmap=cmap,
+                        vmax=1.0,
+                        vmin=-1.0,
+                        center=0,
+                        square=True,
+                        linewidths=0.8,
+                        fmt='.2f',
+                        annot=True,
+                        annot_kws={"size": 8, "weight": "bold"},
+                        cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
+                    )
+                else:
+                    sns.heatmap(
+                        corr_matrix,
+                        mask=mask,
+                        cmap=cmap,
+                        vmax=1.0,
+                        vmin=-1.0,
+                        center=0,
+                        square=True,
+                        linewidths=0.8,
+                        fmt='.2f',
+                        annot=True,
+                        annot_kws={"size": 7, "weight": "bold"},
+                        cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
+                    )
+                
+                plt.title("Matrice de corrélation (variables principales)", fontsize=14, pad=15)
+                plt.xticks(rotation=45, ha='right', fontsize=8)
+                plt.yticks(fontsize=8)
+                plt.tight_layout()
+                st.pyplot(fig)
+                
+            # Analyse des corrélations les plus fortes
+            st.markdown("### 🔍 Corrélations les plus significatives")
+            
+            # Extraction des corrélations fortes (hors diagonale)
+            corr_pairs = []
+            for i in range(len(corr_matrix.columns)):
+                for j in range(i+1, len(corr_matrix.columns)):
+                    corr_val = corr_matrix.iloc[i, j]
+                    if abs(corr_val) > 0.3:  # Seuil de corrélation significative
+                        corr_pairs.append({
+                            'Variable 1': corr_matrix.columns[i],
+                            'Variable 2': corr_matrix.columns[j],
+                            'Corrélation': corr_val,
+                            'Force': 'Forte' if abs(corr_val) > 0.7 else 'Modérée' if abs(corr_val) > 0.5 else 'Faible'
+                        })
+            
+            if corr_pairs:
+                corr_df = pd.DataFrame(corr_pairs).sort_values('Corrélation', key=abs, ascending=False)
+                st.dataframe(
+                    corr_df.head(10).style.format({'Corrélation': '{:.3f}'}),
+                    use_container_width=True
+                )
+            else:
+                st.info("Aucune corrélation significative (> 0.3) détectée.")
+                
         except Exception as e:
             st.error(f"Erreur lors du calcul de la matrice de corrélation: {str(e)}")
 
+
     with st.expander("🧪 Tests Statistiques", expanded=True):
+        st.markdown("""
+        <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #3498db; margin-top: 0;">Tests d'association statistique</h4>
+            <p>Évaluation des relations entre variables et diagnostic TSA</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         test_type = st.radio(
             "Choisir le type de test:",
             ["Chi-carré (variables catégorielles)", "Mann-Whitney (variables numériques)"],
             key="stat_test_type"
         )
+        
         if test_type == "Chi-carré (variables catégorielles)":
             from scipy.stats import chi2_contingency
-
+    
             st.markdown("""
-            <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="color: #3498db; margin-top: 0;">Test d'indépendance du Chi-carré</h4>
-                <p>Ce test évalue si deux variables catégorielles sont indépendantes. Un p-value < 0.05 suggère une relation significative entre les variables.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
+            **Test d'indépendance du Chi-carré :** Évalue si deux variables catégorielles sont indépendantes. 
+            Un p-value < 0.05 suggère une relation significative.
+            """)
+    
             df = df.copy()
             categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
-
             aq_columns = [col for col in df.columns if col.startswith('A') and col[1:].isdigit()]
             categorical_cols.extend([col for col in aq_columns if col not in categorical_cols])
-
+    
             if 'TSA' in categorical_cols:
                 categorical_cols.remove('TSA')
-
+    
                 if categorical_cols:
                     cat_var = st.selectbox(
                         "Sélectionner une variable catégorielle:",
                         categorical_cols,
                         key="chi2_var_selector"
                     )
-
+    
                     try:
                         contingency_table = pd.crosstab(df[cat_var], df['TSA'])
-
                         chi2_stat, p_val, dof, expected = chi2_contingency(contingency_table)
-
-                        col1, col2 = st.columns(2)
+    
+                        # Réduction de la largeur avec colonnes optimisées
+                        col1, col2, col3 = st.columns([2, 2, 3])
+                        
                         with col1:
                             st.markdown("### Table de contingence")
-                            st.dataframe(contingency_table.style.set_properties(**{'background-color': 'white'}), use_container_width=True)
-                            st.markdown("### Fréquences relatives (%)")
-                            contingency_percent = contingency_table.div(contingency_table.sum(axis=1), axis=0) * 100
-                            st.dataframe(
-                                contingency_percent.style.format("{:.1f}%"),
-                                use_container_width=True
-                            )
-
+                            st.dataframe(contingency_table, use_container_width=True)
+                            
                         with col2:
                             st.markdown("### Résultats du test")
                             st.metric("Statistique χ²", f"{chi2_stat:.3f}")
                             st.metric("p-value", f"{p_val:.5f}")
                             st.metric("Degrés de liberté", dof)
-
+    
                             if p_val < 0.05:
-                                st.success(f"**Significatif** (p < 0.05) : Il existe une relation significative entre '{cat_var}' et le diagnostic TSA.")
+                                st.success("**Significatif** (p < 0.05)")
                             else:
-                                st.info(f"**Non significatif** (p > 0.05) : Pas de relation significative détectée entre '{cat_var}' et le diagnostic TSA.")
-
-                        st.markdown("### Visualisation de la relation")
-                        fig = px.bar(
-                            contingency_percent.reset_index().melt(id_vars=cat_var),
-                            x=cat_var, y='value', color='TSA',
-                            barmode='group',
-                            color_discrete_map=palette,
-                            labels={'value': 'Pourcentage (%)'},
-                            title=f"Distribution de '{cat_var}' par diagnostic TSA"
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-
+                                st.info("**Non significatif** (p > 0.05)")
+    
+                        with col3:
+                            # Graphique plus compact
+                            contingency_percent = contingency_table.div(contingency_table.sum(axis=1), axis=0) * 100
+                            fig = px.bar(
+                                contingency_percent.reset_index().melt(id_vars=cat_var),
+                                x=cat_var, y='value', color='TSA',
+                                barmode='group',
+                                color_discrete_map=palette,
+                                labels={'value': 'Pourcentage (%)'},
+                                title=f"Distribution par diagnostic"
+                            )
+                            fig.update_layout(height=300)  # Hauteur réduite
+                            st.plotly_chart(fig, use_container_width=True)
+    
                     except Exception as e:
                         st.error(f"Erreur lors du test Chi-carré: {str(e)}")
-                        st.info("Assurez-vous que la variable sélectionnée contient suffisamment de données non-nulles.")
                 else:
-                    st.warning("Aucune variable catégorielle trouvée dans le dataset (en excluant TSA).")
-
-        else:
+                    st.warning("Aucune variable catégorielle trouvée.")
+    
+        else:  # Mann-Whitney
             st.markdown("""
-                <div style="background-color: #f0f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <h4 style="color: #3498db; margin-top: 0;">Test de Mann-Whitney U</h4>
-                    <p>Ce test non-paramétrique compare les distributions de deux groupes indépendants. Un p-value < 0.05 suggère une différence significative entre les groupes.</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-
+            **Test de Mann-Whitney U :** Compare les distributions de deux groupes indépendants. 
+            Un p-value < 0.05 suggère une différence significative.
+            """)
+    
             numeric_cols = df.select_dtypes(include=['float', 'int']).columns.tolist()
             numeric_cols = [col for col in numeric_cols if not (col.startswith('A') and col[1:].isdigit() and len(col) <= 3)]
-
+    
             if 'Score_A10' in numeric_cols:
                 numeric_cols.remove('Score_A10')
                 numeric_cols = ['Score_A10'] + numeric_cols
-
+    
             if numeric_cols:
                 num_var = st.selectbox(
                     "Sélectionner une variable numérique:",
                     numeric_cols,
                     key="mw_var_selector"
-                    )
+                )
+                
                 try:
                     if 'TSA' in df.columns and df['TSA'].nunique() >= 2:
                         yes_group = df[df['TSA'] == 'Yes'][num_var].dropna()
                         no_group = df[df['TSA'] == 'No'][num_var].dropna()
-
+    
                         if len(yes_group) > 0 and len(no_group) > 0:
                             stat, p_val = mannwhitneyu(yes_group, no_group, alternative='two-sided')
-
-                            col1, col2 = st.columns(2)
+    
+                            # Disposition compacte en 3 colonnes
+                            col1, col2, col3 = st.columns([2, 2, 3])
+                            
                             with col1:
-                                st.markdown("### Statistiques descriptives")
-                                group_stats = df.groupby('TSA')[num_var].agg(['count', 'mean', 'std', 'min', 'median', 'max'])
-                                st.dataframe(
-                                    group_stats.style.format("{:.2f}", subset=['mean', 'std', 'min', 'median', 'max']),
-                                    use_container_width=True
-                                    )
-
-                                mean_diff = yes_group.mean() - no_group.mean()
-                                st.metric(
-                                        "Différence des moyennes (TSA - Non TSA)",
-                                    f"{mean_diff:.2f}",
-                                    delta=f"{(mean_diff / no_group.mean()) * 100:.1f}%"
-                                    )
-
+                                st.markdown("### Statistiques")
+                                group_stats = df.groupby('TSA')[num_var].agg(['count', 'mean', 'std']).round(2)
+                                st.dataframe(group_stats, use_container_width=True)
+    
                             with col2:
-                                st.markdown("### Résultats du test")
+                                st.markdown("### Résultats")
                                 st.metric("Statistique U", f"{stat:.1f}")
                                 st.metric("p-value", f"{p_val:.5f}")
-                                st.metric("Taille échantillon (TSA / Non TSA)", f"{len(yes_group)} / {len(no_group)}")
-
+                                
                                 if p_val < 0.05:
-                                    st.success(f"**Significatif** (p < 0.05) : Il existe une différence significative de '{num_var}' entre les groupes TSA et non-TSA.")
+                                    st.success("**Significatif**")
                                 else:
-                                    st.info(f"**Non significatif** (p > 0.05) : Pas de différence significative de '{num_var}' détectée entre les groupes TSA et non-TSA.")
-                            st.markdown("### Visualisation de la comparaison")
-                            fig = px.box(
-                                df.dropna(subset=[num_var]), x='TSA', y=num_var,
-                                color='TSA', color_discrete_map=palette,
-                                points='all', notched=True,
-                                title=f"Comparaison de '{num_var}' entre les groupes TSA et non-TSA"
+                                    st.info("**Non significatif**")
+    
+                            with col3:
+                                # Box plot compact
+                                fig = px.box(
+                                    df.dropna(subset=[num_var]), x='TSA', y=num_var,
+                                    color='TSA', color_discrete_map=palette,
+                                    title=f"Comparaison {num_var}"
                                 )
-                            fig.add_annotation(
-                                x=0.5, y=df[num_var].max() * 0.95,
-                                text=f"p-value = {p_val:.5f}" + (" (significatif)" if p_val < 0.05 else ""),
-                                showarrow=False,
-                                font=dict(size=14, color='red' if p_val < 0.05 else 'gray')
-                                )
-                            st.plotly_chart(fig, use_container_width=True)
+                                fig.update_layout(height=300)  # Hauteur réduite
+                                st.plotly_chart(fig, use_container_width=True)
                         else:
-                            st.warning(f"Impossible de réaliser le test: données insuffisantes pour '{num_var}' dans un ou les deux groupes.")
+                            st.warning("Données insuffisantes pour le test.")
                     else:
-                        st.warning("Pour effectuer ce test, le dataset doit contenir une colonne 'TSA' avec au moins deux groupes distincts.")
+                        st.warning("Dataset doit contenir une colonne 'TSA' avec au moins deux groupes.")
                 except Exception as e:
-                    st.error(f"Erreur lors du test de Mann-Whitney: {str(e)}")
-                    st.info("Assurez-vous que la variable sélectionnée contient suffisamment de données numériques non-nulles.")
+                    st.error(f"Erreur lors du test: {str(e)}")
             else:
-                st.warning("Aucune variable numérique trouvée dans le dataset.")
+                st.warning("Aucune variable numérique trouvée.")
 
     with st.expander("📐 Analyse Factorielle (FAMD)", expanded=True):
         st.markdown("""
