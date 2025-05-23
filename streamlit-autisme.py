@@ -767,7 +767,7 @@ def get_img_with_href(img_url, target_url, as_banner=False):
 
             img = Image.open(BytesIO(response.content))
 
-            max_width = 1200 if as_banner else 800
+            max_width = 700 if as_banner else 700
             if img.width > max_width:
                 ratio = max_width / img.width
                 new_height = int(img.height * ratio)
