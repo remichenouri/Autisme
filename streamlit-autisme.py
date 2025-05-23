@@ -3767,8 +3767,7 @@ def show_aq10_and_prediction():
                         <p style="color: #2c3e50;">enfants de 8 ans présentent un TSA selon les dernières données CDC</p>
                     </div>
                     """, unsafe_allow_html=True)
-
-
+                    
 def show_documentation():
     st.markdown("""
     <div class="header-container">
