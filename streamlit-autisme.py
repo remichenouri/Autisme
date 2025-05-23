@@ -2347,6 +2347,7 @@ def show_ml_analysis():
             </p>
         </div>
         """, unsafe_allow_html=True)
+        
     with ml_tabs[2]:
         st.header("Comparaison détaillée des modèles")
 
