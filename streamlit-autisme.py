@@ -1989,31 +1989,31 @@ def show_data_exploration():
                         
                         # Création du graphique de projection unique
                         fig, ax = plt.subplots(figsize=(6, 4))  # <-- Plus petit
-            coords_array = coords_a10.values
+                        coords_array = coords_a10.values
             
-            if 'TSA' in X_a10.columns:
-                for category in X_a10['TSA'].unique():
-                    mask = (X_a10['TSA'] == category).values
-                    color = "#e74c3c" if category == "Yes" else "#3498db"
-                    ax.scatter(
-                        coords_array[mask, 0],
-                        coords_array[mask, 1],
-                        label=category,
-                        color=color,
-                        alpha=0.7,
-                        s=25
-                    )
-                    ax.legend(title="TSA")
-            
-                    ax.set_xlabel('Composante 1', fontsize=10)
-                    ax.set_ylabel('Composante 2', fontsize=10)
-                    ax.set_title('FAMD centrée Score_A10', fontsize=12)
-                    ax.grid(True, linestyle='--', alpha=0.7)
-                    st.pyplot(fig)
-                    else:
-                        st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
-                except Exception as e:
-                    st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
+                        if 'TSA' in X_a10.columns:
+                            for category in X_a10['TSA'].unique():
+                                mask = (X_a10['TSA'] == category).values
+                                color = "#e74c3c" if category == "Yes" else "#3498db"
+                                ax.scatter(
+                                    coords_array[mask, 0],
+                                    coords_array[mask, 1],
+                                    label=category,
+                                    color=color,
+                                    alpha=0.7,
+                                    s=25
+                                )
+                                ax.legend(title="TSA")
+                        
+                                ax.set_xlabel('Composante 1', fontsize=10)
+                                ax.set_ylabel('Composante 2', fontsize=10)
+                                ax.set_title('FAMD centrée Score_A10', fontsize=12)
+                                ax.grid(True, linestyle='--', alpha=0.7)
+                                st.pyplot(fig)
+                        else:
+                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                    except Exception as e:
+                        st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
                 
                     
             with famd_tabs[3]:
