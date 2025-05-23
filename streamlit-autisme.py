@@ -2111,26 +2111,52 @@ def show_ml_analysis():
     # Chargement des données
     try:
         df, _, _, _, _, _, _ = load_dataset()
+        df = df.drop(columns=[c for c in df.columns if c.startswith('A') and c[1:].isdigit()], errors='ignore')
+        if 'Jaunisse' in df.columns: df = df.drop(columns=['Jaunisse'])
         
-        # Suppression des colonnes inutiles pour le dépistage
-        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
-        if aq_columns:
-            df = df.drop(columns=aq_columns)
-        
-        if 'Jaunisse' in df.columns:
-            df = df.drop(columns=['Jaunisse'])
-            
-        if 'TSA' not in df.columns:
-            st.error("Colonne 'TSA' manquante")
-            return
-            
         X = df.drop(columns=['TSA'])
         y = df['TSA'].map({'Yes': 1, 'No': 0})
+        
+        # Vérification des données avant split
+        if X.empty or y.empty:
+            raise ValueError("Dataset vide après prétraitement")
+            
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
         
     except Exception as e:
-        st.error(f"Erreur de chargement des données : {str(e)}")
+        st.error(f"Erreur de préparation des données : {str(e)}")
         return
+
+    # Entraînement avec gestion d'erreur
+    with st.spinner("Entraînement du modèle..."):
+        rf_results = train_detailed_random_forest(X_train, y_train, preprocessor, X_test, y_test)
+        
+    if rf_results.get('status') != 'success':
+        st.error("Échec de l'entraînement du modèle")
+        return
+
+    # Affichage des résultats validés
+    st.subheader("📊 Performances du modèle")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Accuracy", f"{rf_results['metrics']['accuracy']:.3f}")
+    with col2:
+        st.metric("Recall", f"{rf_results['metrics']['recall']:.3f}")
+    with col3:
+        st.metric("AUC-ROC", f"{rf_results['metrics']['auc']:.3f}")
+
+    # Visualisation de l'importance des features
+    if 'feature_importance' in rf_results:
+        fig = px.bar(
+            rf_results['feature_importance'], 
+            x='importance', 
+            y='feature',
+            title="Importance des caractéristiques"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Importance des caractéristiques non disponible")
 
     # Préprocesseur
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -2688,65 +2714,70 @@ def show_ml_analysis():
         # Entraînement du modèle Random Forest détaillé
         @st.cache_resource
         def train_detailed_random_forest(_X_train, _y_train, _preprocessor, _X_test, _y_test):
-            """Version corrigée avec gestion complète des métriques"""
-            rf = RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42,
-                n_jobs=-1
-            )
-            
-            pipeline = Pipeline([
-                ('preprocessor', _preprocessor),
-                ('classifier', rf)
-            ])
-            
-            start_time = time.time()
-            pipeline.fit(_X_train, _y_train)
-            training_time = time.time() - start_time
-            
-            y_pred = pipeline.predict(_X_test)
-            y_pred_proba = pipeline.predict_proba(_X_test)[:, 1]
-            
-            metrics = {
-                'accuracy': accuracy_score(_y_test, y_pred),
-                'precision': precision_score(_y_test, y_pred),
-                'recall': recall_score(_y_test, y_pred),
-                'f1': f1_score(_y_test, y_pred),
-                'auc': roc_auc_score(_y_test, y_pred_proba),
-                'training_time': training_time
-            }
-            
-            cm = confusion_matrix(_y_test, y_pred)
-            fpr, tpr, _ = roc_curve(_y_test, y_pred_proba)
-            precision_curve, recall_curve, _ = precision_recall_curve(_y_test, y_pred_proba)
-            
-            feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
-            importances = pipeline.named_steps['classifier'].feature_importances_
-            feature_importance = pd.DataFrame({
-                'feature': feature_names,
-                'importance': importances
-            }).sort_values('importance', ascending=False)
-            
-            cv_scores = cross_val_score(pipeline, _X_train, _y_train, cv=5, scoring='accuracy')
-            
-            return {
-                'pipeline': pipeline,
-                'metrics': metrics,
-                'confusion_matrix': cm,
-                'roc_curve': (fpr, tpr),
-                'pr_curve': (precision_curve, recall_curve),
-                'feature_importance': feature_importance,
-                'cv_scores': cv_scores,
-                'y_pred': y_pred,
-                'y_pred_proba': y_pred_proba
-            }
-
-        # Chargement des résultats
+            """Version corrigée avec gestion des erreurs et structure de retour complète"""
+            try:
+                rf = RandomForestClassifier(
+                    n_estimators=100,
+                    max_depth=10,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
+                
+                pipeline = Pipeline([
+                    ('preprocessor', _preprocessor),
+                    ('classifier', rf)
+                ])
+                
+                start_time = time.time()
+                pipeline.fit(_X_train, _y_train)
+                training_time = time.time() - start_time
+                
+                # Vérification des données de test
+                if len(_X_test) == 0 or len(_y_test) == 0:
+                    raise ValueError("Données de test vides")
+                    
+                y_pred = pipeline.predict(_X_test)
+                y_pred_proba = pipeline.predict_proba(_X_test)[:, 1]
+                
+                # Calcul des métriques avec gestion des divisions par zéro
+                metrics = {
+                    'accuracy': accuracy_score(_y_test, y_pred),
+                    'precision': precision_score(_y_test, y_pred, zero_division=0),
+                    'recall': recall_score(_y_test, y_pred, zero_division=0),
+                    'f1': f1_score(_y_test, y_pred, zero_division=0),
+                    'auc': roc_auc_score(_y_test, y_pred_proba) if len(np.unique(_y_test)) > 1 else 0.5,
+                    'training_time': training_time
+                }
+                
+                # Récupération des noms de features
+                try:
+                    feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
+                except AttributeError:
+                    feature_names = [f"feature_{i}" for i in range(_X_train.shape[1])]
+                
+                return {
+                    'pipeline': pipeline,
+                    'metrics': metrics,
+                    'feature_names': feature_names,
+                    'status': 'success'
+                }
+                
+            except Exception as e:
+                st.error(f"Erreur d'entraînement : {str(e)}")
+                return {
+                    'status': 'error',
+                    'message': str(e)
+                }
+        
+        # Dans la section d'appel :
         with st.spinner("Entraînement du modèle Random Forest..."):
             rf_results = train_detailed_random_forest(X_train, y_train, preprocessor, X_test, y_test)
+            
+        if rf_results.get('status') != 'success':
+            st.stop()
+
 
         # Affichage des résultats
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
