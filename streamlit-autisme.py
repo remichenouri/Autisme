@@ -740,9 +740,9 @@ def load_metrics_libraries():
 
 
 @st.cache_data(ttl=86400)
-def get_img_with_href(img_url, target_url, as_banner=False):
+def get_img_with_href_fullscreen(img_url, target_url, as_banner=False):
     """
-    Crée une image cliquable avec redimensionnement intelligent
+    Version adaptée pour affichage plein écran sans scroll
     """
     if "drive.google.com" in img_url and "/d/" in img_url:
         file_id = img_url.split("/d/")[1].split("/")[0]
@@ -754,7 +754,6 @@ def get_img_with_href(img_url, target_url, as_banner=False):
     os.makedirs(cache_dir, exist_ok=True)
 
     try:
-        # Après avoir chargé l'image
         if os.path.exists(cache_path):
             with open(cache_path, "rb") as f:
                 img_data = f.read()
@@ -763,22 +762,27 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             response = requests.get(img_url, timeout=15)
             response.raise_for_status()
             img = Image.open(BytesIO(response.content))
+
+            # NOUVEAU : Redimensionnement pour viewport
+            # Calculer les dimensions optimales pour l'écran
+            max_width = 1200
+            max_height = 650  # Hauteur adaptée au viewport
             
-            # NOUVEAU : Redimensionnement intelligent
-            if as_banner:
-                # Pour les bannières : adapter avec padding
-                img = ImageOps.pad(
-                    img,
-                    (target_width, target_height),
-                    method=Image.LANCZOS,
-                    color=(240, 242, 246),
-                    centering=(0.5, 0.5)
-                )
+            # Conserver les proportions
+            original_ratio = img.width / img.height
+            screen_ratio = max_width / max_height
+            
+            if original_ratio > screen_ratio:
+                # Image plus large : ajuster sur la largeur
+                new_width = max_width
+                new_height = int(max_width / original_ratio)
             else:
-                # Pour les images normales : redimensionnement proportionnel
-                img.thumbnail((target_width, target_height), Image.LANCZOS)
+                # Image plus haute : ajuster sur la hauteur
+                new_height = max_height
+                new_width = int(max_height * original_ratio)
             
-            # Sauvegarder en cache
+            img = img.resize((new_width, new_height), Image.LANCZOS)
+
             buffer = BytesIO()
             img.save(buffer, format="WEBP", quality=85, optimize=True)
             with open(cache_path, "wb") as f:
@@ -787,10 +791,14 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             img_data = buffer.getvalue()
 
         img_str = base64.b64encode(img_data).decode()
-        
-        # Style optimisé
-        style = 'style="width:100%;height:auto;display:block;border-radius:10px;" loading="lazy"'
-        container_style = 'style="width:100%; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
+
+        # Style adapté pour affichage sans scroll
+        if as_banner:
+            style = 'style="width:100%;height:auto;max-height:85vh;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
+        else:
+            style = 'style="width:100%;height:auto;max-height:80vh;display:block;object-fit:contain;margin:0 auto;" loading="lazy"'
+
+        container_style = 'style="width:100%; height:100vh; display:flex; align-items:center; justify-content:center; background-color:white; border-radius:10px; overflow:hidden;"'
         
         if target_url and target_url != "#":
             html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
@@ -800,7 +808,6 @@ def get_img_with_href(img_url, target_url, as_banner=False):
         return html_code
     except Exception as e:
         return f'<div style="text-align:center;padding:20px;background:#f0f2f6;border-radius:10px;"><p>Image non disponible ({str(e)})</p></div>'
-
 
 @st.cache_data(ttl=86400)
 def load_dataset():
