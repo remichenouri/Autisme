@@ -754,6 +754,7 @@ def get_img_with_href(img_url, target_url, as_banner=False):
     os.makedirs(cache_dir, exist_ok=True)
 
     try:
+        # Après avoir chargé l'image
         if os.path.exists(cache_path):
             with open(cache_path, "rb") as f:
                 img_data = f.read()
@@ -762,43 +763,21 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             response = requests.get(img_url, timeout=15)
             response.raise_for_status()
             img = Image.open(BytesIO(response.content))
-
+            
             # NOUVEAU : Redimensionnement intelligent
             if as_banner:
-                target_width = 1024
-                target_height = 600
-                target_ratio = target_width / target_height
+                # Pour les bannières : adapter avec padding
+                img = ImageOps.pad(
+                    img,
+                    (target_width, target_height),
+                    method=Image.LANCZOS,
+                    color=(240, 242, 246),
+                    centering=(0.5, 0.5)
+                )
             else:
-                target_width = 800
-                target_height = 600
-                target_ratio = target_width / target_height
-
-            # Calculer les dimensions optimales
-            original_ratio = img.width / img.height
+                # Pour les images normales : redimensionnement proportionnel
+                img.thumbnail((target_width, target_height), Image.LANCZOS)
             
-            if original_ratio > target_ratio:
-                # Image plus large : ajuster sur la largeur
-                new_width = target_width
-                new_height = int(target_width / original_ratio)
-            else:
-                # Image plus haute : ajuster sur la hauteur
-                new_height = target_height
-                new_width = int(target_height * original_ratio)
-            
-            # Redimensionner l'image
-            img = img.resize((new_width, new_height), Image.LANCZOS)
-            
-            # Créer une image avec padding pour atteindre les dimensions cibles
-            background_color = (240, 242, 246)  # Couleur de fond Streamlit
-            final_img = Image.new('RGB', (target_width, target_height), background_color)
-            
-            # Centrer l'image redimensionnée
-            paste_x = (target_width - new_width) // 2
-            paste_y = (target_height - new_height) // 2
-            final_img.paste(img, (paste_x, paste_y))
-            
-            img = final_img
-
             # Sauvegarder en cache
             buffer = BytesIO()
             img.save(buffer, format="WEBP", quality=85, optimize=True)
@@ -808,17 +787,13 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             img_data = buffer.getvalue()
 
         img_str = base64.b64encode(img_data).decode()
-
-        # Style optimisé pour un affichage complet
-        if as_banner:
-            style = 'style="width:100%;height:auto;display:block;border-radius:10px;" loading="lazy"'
-        else:
-            style = 'style="width:100%;height:auto;display:block;margin:0 auto;" loading="lazy"'
-
+        
+        # Style optimisé
+        style = 'style="width:100%;height:auto;display:block;border-radius:10px;" loading="lazy"'
         container_style = 'style="width:100%; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
         
         if target_url and target_url != "#":
-            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
         else:
             html_code = f'<div {container_style}><img src="data:image/webp;base64,{img_str}" {style}></div>'
 
