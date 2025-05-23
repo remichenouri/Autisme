@@ -2383,11 +2383,7 @@ def show_ml_analysis():
 
         # Graphiques comparatifs
         st.markdown("### 📈 Visualisations comparatives")
-        
-        tab1, tab2 = st.tabs(["Performance vs Temps", "Profil radar"])
-        
-        with tab1:
-            fig_scatter = px.scatter(
+        fig_scatter = px.scatter(
                 lazy_results.reset_index(),
                 x='Time',
                 y='Accuracy',
@@ -2398,46 +2394,8 @@ def show_ml_analysis():
                 labels={'Time': 'Temps (secondes)', 'Accuracy': 'Précision'},
                 color_continuous_scale='Blues'
             )
-            fig_scatter.update_layout(height=500)
-            st.plotly_chart(fig_scatter, use_container_width=True)
-            
-        with tab2:
-            # Graphique radar avec dégradé de bleu
-            fig_radar = go.Figure()
-            
-            blue_gradient = ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3']
-            categories = ['Accuracy', 'Recall', 'F1 Score', 'Vitesse']
-            
-            for i, (model, data) in enumerate(lazy_results.iterrows()):
-                values = [
-                    data['Accuracy'],
-                    data['Recall'],
-                    data['F1 Score'],
-                    1 - (data['Time'] / lazy_results['Time'].max())  # Vitesse normalisée
-                ]
-                values += [values[0]]  # Fermer le radar
-                
-                fig_radar.add_trace(go.Scatterpolar(
-                    r=values,
-                    theta=categories + [categories[0]],
-                    fill='toself',
-                    name=model,
-                    line=dict(color=blue_gradient[i], width=2),
-                    fillcolor=blue_gradient[i],
-                    opacity=0.6
-                ))
-            
-            fig_radar.update_layout(
-                polar=dict(
-                    radialaxis=dict(visible=True, range=[0, 1], gridcolor='lightblue'),
-                    bgcolor='rgba(240, 248, 255, 0.8)'
-                ),
-                showlegend=True,
-                title="Profil de performance multidimensionnel",
-                height=600
-            )
-            
-            st.plotly_chart(fig_radar, use_container_width=True)
+        fig_scatter.update_layout(height=500)
+        st.plotly_chart(fig_scatter, use_container_width=True)
 
         # Pourquoi Random Forest ?
         st.info("""
