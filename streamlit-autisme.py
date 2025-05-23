@@ -2726,8 +2726,16 @@ def show_ml_analysis():
                     title="Top 5 - Répartition de l'influence",
                     color_discrete_sequence=px.colors.sequential.Blues_r
                 )
-                fig_pie.update_traces(textposition='inside', textinfo='percent+label')
-                fig_pie.update_layout(height=300, showlegend=False)
+                fig_pie.update_traces(
+                    textposition='inside', 
+                    textinfo='percent+label',
+                    textfont_size=14  # Augmenter la taille du texte
+                )
+                fig_pie.update_layout(
+                    height=500,  # <-- Nouvelle hauteur : 500px (au lieu de 300px)
+                    showlegend=False,
+                    font=dict(size=14)  # Améliorer la lisibilité du titre
+                )
                 st.plotly_chart(fig_pie, use_container_width=True)
 
     with ml_tabs[3]:
