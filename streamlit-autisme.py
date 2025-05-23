@@ -1862,7 +1862,7 @@ def show_data_exploration():
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
-                    fig, ax = plt.subplots(figsize=(8, 5))  # Réduction de la taille
+                    fig, ax = plt.subplots(figsize=(8, 5))
                     if 'TSA' in X_famd.columns:
                         coordinates_array = coordinates.values
                         for i, category in enumerate(X_famd['TSA'].unique()):
@@ -1874,7 +1874,7 @@ def show_data_exploration():
                                 label=category,
                                 color=color,
                                 alpha=0.6,
-                                s=30  # Points plus petits
+                                s=30
                             )
                         ax.legend(title="TSA")
                     else:
@@ -1903,7 +1903,7 @@ def show_data_exploration():
                         else:
                             column_corr = famd.column_correlations_custom(X_famd)
     
-                        fig, ax = plt.subplots(figsize=(6, 6))  # Réduction de 10x10 à 6x6
+                        fig, ax = plt.subplots(figsize=(6, 6))
                         circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
                         ax.add_artist(circle)
     
@@ -1921,7 +1921,6 @@ def show_data_exploration():
                                 ax.text(x*1.1, y*1.1, var, fontsize=10, color='red', fontweight='bold')
                             elif var in ['TSA', 'Age', 'Genre']:
                                 ax.text(x*1.1, y*1.1, var, fontsize=8, color='green')
-                            # Ne pas afficher toutes les variables pour éviter l'encombrement
     
                         ax.set_xlim(-1.1, 1.1)
                         ax.set_ylim(-1.1, 1.1)
@@ -1985,29 +1984,40 @@ def show_data_exploration():
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
                         
-                        # Création du graphique de projection
-                        fig, ax = plt.subplots(figsize=(6, 4))  # Plus petit
-                        coords_array = coords_a10.values
-    
-                        if 'TSA' in X_a10.columns:
-                            for category in X_a10['TSA'].unique():
-                                mask = (X_a10['TSA'] == category).values
-                                color = "#e74c3c" if category == "Yes" else "#3498db"
-                                ax.scatter(
-                                    coords_array[mask, 0],
-                                    coords_array[mask, 1],
-                                    label=category,
-                                    color=color,
-                                    alpha=0.7,
-                                    s=25
-                                )
-                            ax.legend(title="TSA")
+                        # Disposition en colonnes comme la projection des individus
+                        col1, col2 = st.columns([2, 1])
                         
-                        ax.set_xlabel('Composante 1', fontsize=10)
-                        ax.set_ylabel('Composante 2', fontsize=10)
-                        ax.set_title('FAMD centrée Score_A10', fontsize=12)
-                        ax.grid(True, linestyle='--', alpha=0.7)
-                        st.pyplot(fig)
+                        with col1:
+                            # Création du graphique de projection avec même taille que projection individus
+                            fig, ax = plt.subplots(figsize=(8, 5))
+                            coords_array = coords_a10.values
+    
+                            if 'TSA' in X_a10.columns:
+                                for category in X_a10['TSA'].unique():
+                                    mask = (X_a10['TSA'] == category).values
+                                    color = "#e74c3c" if category == "Yes" else "#3498db"
+                                    ax.scatter(
+                                        coords_array[mask, 0],
+                                        coords_array[mask, 1],
+                                        label=category,
+                                        color=color,
+                                        alpha=0.7,
+                                        s=25
+                                    )
+                                ax.legend(title="TSA")
+                            
+                            ax.set_xlabel('Composante 1', fontsize=10)
+                            ax.set_ylabel('Composante 2', fontsize=10)
+                            ax.set_title('FAMD centrée Score_A10', fontsize=12)
+                            ax.grid(True, linestyle='--', alpha=0.7)
+                            st.pyplot(fig)
+                            
+                        with col2:
+                            st.markdown("### Variance Score A10")
+                            eigenvalues_a10 = famd_a10.eigenvalues_
+                            explained_variance_a10 = eigenvalues_a10 / sum(eigenvalues_a10)
+                            for i, var in enumerate(explained_variance_a10[:3]):
+                                st.metric(f"Composante {i+1}", f"{var:.1%}")
                     else:
                         st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
@@ -2016,7 +2026,7 @@ def show_data_exploration():
             with famd_tabs[3]:
                 st.subheader("Cercle de corrélation Score A10")
                 
-                col1, col2 = st.columns([2, 1])
+                col1, col2 = st.columns([3, 2])
                 
                 with col1:
                     try:
@@ -2028,7 +2038,7 @@ def show_data_exploration():
                                 st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
                                 column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
     
-                            fig, ax = plt.subplots(figsize=(6, 6))  # Réduction de 10x10 à 6x6
+                            fig, ax = plt.subplots(figsize=(6, 6))
                             circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
                             ax.add_artist(circle)
     
