@@ -2610,7 +2610,8 @@ def show_ml_analysis():
 
         # Entraînement du modèle Random Forest détaillé
         @st.cache_resource
-        def train_detailed_random_forest():
+        def train_detailed_random_forest(_X_train, _y_train, _preprocessor):
+            """Version simplifiée et découplée pour le cache"""
             rf = RandomForestClassifier(
                 n_estimators=100,
                 max_depth=10,
@@ -2620,11 +2621,13 @@ def show_ml_analysis():
                 n_jobs=-1
             )
             
-            # Pipeline complet
             pipeline = Pipeline([
-                ('preprocessor', preprocessor),
+                ('preprocessor', _preprocessor),
                 ('classifier', rf)
             ])
+            
+            pipeline.fit(_X_train, _y_train)
+            return pipeline
             
             # Entraînement
             start_time = time.time()
@@ -2679,7 +2682,7 @@ def show_ml_analysis():
 
         # Chargement des résultats
         with st.spinner("Entraînement du modèle Random Forest..."):
-            rf_results = train_detailed_random_forest()
+            rf_results = train_detailed_random_forest(X_train, y_train, preprocessor)
 
         # Affichage des résultats
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
