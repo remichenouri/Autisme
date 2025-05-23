@@ -2097,8 +2097,6 @@ def show_ml_analysis():
     from sklearn.model_selection import cross_val_score, train_test_split, learning_curve
     import time
     import os
-    import joblib
-    import hashlib
 
     # Configuration initiale
     os.environ['TQDM_DISABLE'] = '1'
@@ -2108,77 +2106,29 @@ def show_ml_analysis():
     except Exception:
         pass
 
-    @st.cache_resource
-    def train_detailed_random_forest(_X_train, _y_train, _preprocessor, _X_test, _y_test):
-        try:
-            rf = RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42,
-                n_jobs=-1
-            )
-            
-            pipeline = Pipeline([
-                ('preprocessor', _preprocessor),
-                ('classifier', rf)
-            ])
-            
-            pipeline.fit(_X_train, _y_train)
-            
-            # Calcul des métriques
-            y_pred = pipeline.predict(_X_test)
-            y_proba = pipeline.predict_proba(_X_test)[:,1]
-            
-            return {
-                'pipeline': pipeline,
-                'y_pred': y_pred,
-                'y_proba': y_proba,
-                'status': 'success'
-            }
-        except Exception as e:
-            st.error(f"Erreur d'entraînement : {str(e)}")
-            return {'status': 'error'}
-
-    # Chargement des données
+    # Chargement et préparation des données
     try:
         df, _, _, _, _, _, _ = load_dataset()
-        df = df.drop(columns=[c for c in df.columns if c.startswith('A') and c[1:].isdigit()], errors='ignore')
-        if 'Jaunisse' in df.columns: 
-            df = df.drop(columns=['Jaunisse'])
         
+        # Suppression des colonnes A1-A10 et Jaunisse
+        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+        if aq_columns:
+            df = df.drop(columns=aq_columns)
+        
+        if 'Jaunisse' in df.columns:
+            df = df.drop(columns=['Jaunisse'])
+            
+        if 'TSA' not in df.columns:
+            st.error("Colonne 'TSA' manquante")
+            return
+            
         X = df.drop(columns=['TSA'])
         y = df['TSA'].map({'Yes': 1, 'No': 0})
-        
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
         
     except Exception as e:
-        st.error(f"Erreur de chargement : {str(e)}")
+        st.error(f"Erreur de chargement des données : {str(e)}")
         return
-        
-    # Affichage des résultats validés
-    st.subheader("📊 Performances du modèle")
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Accuracy", f"{rf_results['metrics']['accuracy']:.3f}")
-    with col2:
-        st.metric("Recall", f"{rf_results['metrics']['recall']:.3f}")
-    with col3:
-        st.metric("AUC-ROC", f"{rf_results['metrics']['auc']:.3f}")
-
-    # Visualisation de l'importance des features
-    if 'feature_importance' in rf_results:
-        fig = px.bar(
-            rf_results['feature_importance'], 
-            x='importance', 
-            y='feature',
-            title="Importance des caractéristiques"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("Importance des caractéristiques non disponible")
 
     # Préprocesseur
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
@@ -2210,13 +2160,14 @@ def show_ml_analysis():
     </div>
     """, unsafe_allow_html=True)
 
-    # Onglets optimisés pour le dépistage
+    # Onglets
     ml_tabs = st.tabs([
         "📊 Préprocessing",
         "🚀 Comparaison Rapide", 
         "🌲 Analyse Random Forest",
         "⚙️ Optimisation Dépistage"
     ])
+
 
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
