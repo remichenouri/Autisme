@@ -3243,23 +3243,21 @@ def show_prediction_ia():
             st.markdown("### 💡 Recommandations")
             
             if prediction == 1:
-                st.error(f"""
-                **🚨 Action recommandée :**
+                st.error(f"""**🚨 Action recommandée :**
                 
-                La probabilité de TSA ({proba:.1%}) dépasse le seuil de {threshold:.1%} pour le contexte "{context_name}".
+                La probabilité de TSA ({proba:.1%}) dépasse le seuil de {threshold:.1%} pour le contexte "{context_name}".""")
                 
-                **Prochaines étapes suggérées :**
+                ("""**Prochaines étapes suggérées :**
                 - Consultation avec un professionnel spécialisé
                 - Évaluation clinique approfondie
                 - Mise en place d'un suivi adapté
                 """)
             else:
-                st.success(f""
-                **✅ Résultat rassurant :**
+                st.success(f""" **✅ Résultat rassurant :**
                 
-                La probabilité de TSA ({proba:.1%}) est inférieure au seuil de {threshold:.1%} pour le contexte "{context_name}".
+                La probabilité de TSA ({proba:.1%}) est inférieure au seuil de {threshold:.1%} pour le contexte "{context_name}". "")
                 
-                **Recommandations :**
+                ("""**Recommandations :**
                 - Continuer l'observation du développement
                 - Refaire le test si de nouveaux signaux apparaissent
                 - Maintenir un suivi de routine
