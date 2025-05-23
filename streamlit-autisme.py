@@ -1759,36 +1759,36 @@ def show_data_exploration():
             <p style="color: #7f8c8d;">Réduction de dimensions pour visualiser la structure des données et les relations entre variables.</p>
         </div>
         """, unsafe_allow_html=True)
-
+    
         st.markdown("""
         L'**Analyse Factorielle de Données Mixtes (FAMD)** est une méthode particulièrement adaptée à nos données car elle permet de traiter simultanément:
         - Des variables numériques (comme l'âge, les scores A1-A10)
         - Des variables catégorielles (comme le genre, l'ethnie, les antécédents familiaux)
-
+    
         Cette méthode nous permet de projeter les données sur un plan à deux dimensions pour visualiser les relations entre les variables et les individus.
         """)
-
+    
         try:
             import prince
             from sklearn import utils
             import numpy as np
-
+    
             df_famd = df.copy()
             if 'Jaunisse' in df_famd.columns:
                 df_famd = df_famd.drop(columns=['Jaunisse'])
             df_famd = df_famd.reset_index(drop=True)
-
+    
             class FAMD_Custom(prince.FAMD):
                 """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
                 def transform(self, X):
                     utils.validation.check_is_fitted(self, 's_')
                     return self.row_coordinates(X)
-
+    
                 def column_correlations_custom(self, X):
                     """Méthode personnalisée pour calculer les corrélations des colonnes"""
                     row_pc = self.row_coordinates(X)
                     correlations = {}
-
+    
                     for feature in X.columns:
                         if X[feature].dtype.kind in 'ifc':  
                             corrs = []
@@ -1800,40 +1800,40 @@ def show_data_exploration():
                             means = {}
                             for component in row_pc.columns:
                                 means[component] = []
-
+    
                             for category in X[feature].unique():
                                 mask = (X[feature] == category).values
                                 for component in row_pc.columns:
                                     coord_mean = row_pc.loc[mask, component].mean()
                                     means[component].append(coord_mean)
-
+    
                             max_abs = max(abs(v) for comp_means in means.values() for v in comp_means)
                             if max_abs > 0:  
                                 for component in means:
                                     means[component] = [v/max_abs for v in means[component]]
-
+    
                             corrs = []
                             for component in row_pc.columns:
                                 corrs.append(sum(means[component])/len(means[component]))
                             correlations[feature] = corrs
-
+    
                     return pd.DataFrame(
                         data=[[correlations[feature][i] for feature in X.columns] for i in range(len(row_pc.columns))],
                         columns=X.columns
                     ).T
-
+    
             for col in df_famd.select_dtypes(include=['object']).columns:
                 df_famd[col] = df_famd[col].astype('category')
-
+    
             for col in df_famd.select_dtypes(include=['number']).columns:
                 df_famd[col] = df_famd[col].astype('float64')
-
+    
             df_famd = df_famd.dropna()
             df_famd = df_famd.reset_index(drop=True)
-
+    
             n_components = min(5, min(df_famd.shape) - 1)
             X_famd = df_famd.copy()
-
+    
             famd = FAMD_Custom(
                 n_components=n_components,
                 n_iter=10,
@@ -1842,12 +1842,12 @@ def show_data_exploration():
                 engine='sklearn'
             )
             famd = famd.fit(X_famd)
-
+    
             coordinates = famd.transform(X_famd)
-
+    
             eigenvalues = famd.eigenvalues_
             explained_variance = eigenvalues / sum(eigenvalues)
-
+    
             famd_tabs = st.tabs([
                 "Projection des individus",
                 "Cercle des corrélations",
@@ -1855,14 +1855,14 @@ def show_data_exploration():
                 "Cercle de corrélation Score A10",
                 "Interprétation"
             ])
-
+    
             with famd_tabs[0]:
                 st.subheader("Projection des individus")
                 
                 col1, col2 = st.columns([2, 1])
                 
                 with col1:
-                    fig, ax = plt.subplots(figsize=(8, 5))  # <-- Réduction de la taille
+                    fig, ax = plt.subplots(figsize=(8, 5))  # Réduction de la taille
                     if 'TSA' in X_famd.columns:
                         coordinates_array = coordinates.values
                         for i, category in enumerate(X_famd['TSA'].unique()):
@@ -1874,12 +1874,12 @@ def show_data_exploration():
                                 label=category,
                                 color=color,
                                 alpha=0.6,
-                                s=30  # <-- Points plus petits
+                                s=30  # Points plus petits
                             )
                         ax.legend(title="TSA")
                     else:
                         ax.scatter(coordinates.values[:, 0], coordinates.values[:, 1], alpha=0.7, s=30)
-            
+    
                     ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})')
                     ax.set_ylabel(f'Comp. 2 ({explained_variance[1]:.1%})')
                     ax.set_title('Projection des individus', fontsize=12)
@@ -1890,8 +1890,7 @@ def show_data_exploration():
                     st.markdown("### Variance expliquée")
                     for i, var in enumerate(explained_variance[:3]):
                         st.metric(f"Composante {i+1}", f"{var:.1%}")
-
-
+    
             with famd_tabs[1]:
                 st.subheader("Cercle des corrélations")
                 
@@ -1903,27 +1902,27 @@ def show_data_exploration():
                             column_corr = famd.column_correlations(X_famd)
                         else:
                             column_corr = famd.column_correlations_custom(X_famd)
-            
-                        fig, ax = plt.subplots(figsize=(6, 6))  # <-- Réduction de 10x10 à 6x6
+    
+                        fig, ax = plt.subplots(figsize=(6, 6))  # Réduction de 10x10 à 6x6
                         circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
                         ax.add_artist(circle)
-            
+    
                         ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
                         ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-            
+    
                         for i, var in enumerate(column_corr.index):
                             x = column_corr.iloc[i, 0]
                             y = column_corr.iloc[i, 1]
-            
+    
                             ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-            
+    
                             # Texte plus petit et sélectif
                             if var == 'Score_A10':
                                 ax.text(x*1.1, y*1.1, var, fontsize=10, color='red', fontweight='bold')
                             elif var in ['TSA', 'Age', 'Genre']:
                                 ax.text(x*1.1, y*1.1, var, fontsize=8, color='green')
                             # Ne pas afficher toutes les variables pour éviter l'encombrement
-            
+    
                         ax.set_xlim(-1.1, 1.1)
                         ax.set_ylim(-1.1, 1.1)
                         ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})', fontsize=10)
@@ -1943,8 +1942,7 @@ def show_data_exploration():
                         if var in column_corr.index:
                             contrib = np.sqrt(column_corr.loc[var, 0]**2 + column_corr.loc[var, 1]**2)
                             st.write(f"• **{var}** : {contrib:.3f}")
-
-
+    
             with famd_tabs[2]:
                 st.subheader("FAMD centrée sur Score A10")
                 st.markdown("""
@@ -1987,10 +1985,10 @@ def show_data_exploration():
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
                         
-                        # Création du graphique de projection unique
-                        fig, ax = plt.subplots(figsize=(6, 4))  # <-- Plus petit
+                        # Création du graphique de projection
+                        fig, ax = plt.subplots(figsize=(6, 4))  # Plus petit
                         coords_array = coords_a10.values
-            
+    
                         if 'TSA' in X_a10.columns:
                             for category in X_a10['TSA'].unique():
                                 mask = (X_a10['TSA'] == category).values
@@ -2003,93 +2001,128 @@ def show_data_exploration():
                                     alpha=0.7,
                                     s=25
                                 )
-                                ax.legend(title="TSA")
+                            ax.legend(title="TSA")
                         
-                                ax.set_xlabel('Composante 1', fontsize=10)
-                                ax.set_ylabel('Composante 2', fontsize=10)
-                                ax.set_title('FAMD centrée Score_A10', fontsize=12)
-                                ax.grid(True, linestyle='--', alpha=0.7)
-                                st.pyplot(fig)
-                        else:
-                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
-                    except Exception as e:
-                        st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
-                
-                    
-            with famd_tabs[3]:
-                st.subheader("Cercle de corrélation Score A10")
-                try:
-                    if 'Score_A10' in X_famd.columns:
-                        # Utiliser X_a10 et famd_a10 définis précédemment
-                        if hasattr(famd_a10, 'column_correlations'):
-                            column_corr_a10 = famd_a10.column_correlations(X_a10)
-                        else:
-                            st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
-                            column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
-        
-                        fig, ax = plt.subplots(figsize=(10, 10))
-                        circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
-                        ax.add_artist(circle)
-        
-                        ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
-                        ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-        
-                        for i, var in enumerate(column_corr_a10.index):
-                            x = column_corr_a10.iloc[i, 0]
-                            y = column_corr_a10.iloc[i, 1]
-        
-                            ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-                            
-                            # Mise en évidence du Score_A10
-                            if var == 'Score_A10':
-                                ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
-                            else:
-                                ax.text(x*1.1, y*1.1, var, fontsize=10)
-        
-                        ax.set_xlim(-1.1, 1.1)
-                        ax.set_ylim(-1.1, 1.1)
-                        ax.set_xlabel(f'Composante 1')
-                        ax.set_ylabel(f'Composante 2')
-                        ax.set_title('Cercle des corrélations pour FAMD centrée sur Score_A10')
-                        ax.grid(True, linestyle='--', alpha=0.5)
+                        ax.set_xlabel('Composante 1', fontsize=10)
+                        ax.set_ylabel('Composante 2', fontsize=10)
+                        ax.set_title('FAMD centrée Score_A10', fontsize=12)
+                        ax.grid(True, linestyle='--', alpha=0.7)
                         st.pyplot(fig)
                     else:
                         st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
-                    st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-
+                    st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
+    
+            with famd_tabs[3]:
+                st.subheader("Cercle de corrélation Score A10")
                 
+                col1, col2 = st.columns([2, 1])
+                
+                with col1:
+                    try:
+                        if 'Score_A10' in X_famd.columns:
+                            # Utiliser X_a10 et famd_a10 définis précédemment
+                            if hasattr(famd_a10, 'column_correlations'):
+                                column_corr_a10 = famd_a10.column_correlations(X_a10)
+                            else:
+                                st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
+                                column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
+    
+                            fig, ax = plt.subplots(figsize=(6, 6))  # Réduction de 10x10 à 6x6
+                            circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
+                            ax.add_artist(circle)
+    
+                            ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+                            ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
+    
+                            for i, var in enumerate(column_corr_a10.index):
+                                x = column_corr_a10.iloc[i, 0]
+                                y = column_corr_a10.iloc[i, 1]
+    
+                                ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
+                                
+                                # Mise en évidence du Score_A10
+                                if var == 'Score_A10':
+                                    ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
+                                else:
+                                    ax.text(x*1.1, y*1.1, var, fontsize=10)
+    
+                            ax.set_xlim(-1.1, 1.1)
+                            ax.set_ylim(-1.1, 1.1)
+                            ax.set_xlabel(f'Composante 1', fontsize=10)
+                            ax.set_ylabel(f'Composante 2', fontsize=10)
+                            ax.set_title('Cercle des corrélations Score_A10', fontsize=12)
+                            ax.grid(True, linestyle='--', alpha=0.5)
+                            st.pyplot(fig)
+                        else:
+                            st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
+                    except Exception as e:
+                        st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
+                        
+                with col2:
+                    st.markdown("### Analyse Score A10")
+                    if 'column_corr_a10' in locals():
+                        if 'Score_A10' in column_corr_a10.index:
+                            score_contrib = np.sqrt(column_corr_a10.loc['Score_A10', 0]**2 + column_corr_a10.loc['Score_A10', 1]**2)
+                            st.metric("Contribution Score A10", f"{score_contrib:.3f}")
+                        
+                        st.markdown("**Variables corrélées :**")
+                        for var in column_corr_a10.index:
+                            if var != 'Score_A10':
+                                contrib = np.sqrt(column_corr_a10.loc[var, 0]**2 + column_corr_a10.loc[var, 1]**2)
+                                st.write(f"• {var}: {contrib:.3f}")
+    
             with famd_tabs[4]:
                 st.subheader("Interprétation des résultats")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("### Points clés")
+                    st.write(f"""
+                    • **Variance expliquée** : {explained_variance[0] + explained_variance[1]:.1%}
+                    • **Variables discriminantes** : Score A10, TSA, Age
+                    • **Regroupement TSA** : Patterns identifiables
+                    """)
+                    
+                with col2:
+                    st.markdown("### Composantes principales")
+                    summary_df = pd.DataFrame({
+                        'Composante': [f"Comp. {i+1}" for i in range(min(3, len(eigenvalues)))],
+                        'Variance (%)': (explained_variance[:3] * 100).round(2)
+                    })
+                    st.dataframe(summary_df, use_container_width=True)
+    
                 st.markdown("""
-                ### Points clés de l'analyse FAMD
-
+                ### Analyse détaillée
+    
                 L'analyse factorielle de données mixtes nous permet d'identifier plusieurs tendances importantes:
-
+    
                 1. **Structure des données** : Les deux premières composantes principales expliquent environ {:.1%} de la variance totale, ce qui indique une bonne capture de la structure des données.
-
+    
                 2. **Variables discriminantes** : Les variables qui contribuent le plus à la distinction entre les groupes incluent le Score A10 et d'autres variables démographiques.
-
+    
                 3. **Regroupement des cas TSA** : On observe une tendance au regroupement des cas diagnostiqués TSA dans l'espace factoriel, ce qui suggère des patterns communs dans leurs profils.
-
+    
                 4. **Influence du Score A10** : Le Score A10 montre une corrélation significative avec la première composante principale, confirmant son importance dans le processus diagnostique.
                 """.format(explained_variance[0] + explained_variance[1]))
-
-                st.subheader("Récapitulatif des composantes principales")
-                summary_df = pd.DataFrame({
+    
+                st.subheader("Tableau récapitulatif")
+                summary_complete_df = pd.DataFrame({
                     'Composante': [f"Composante {i+1}" for i in range(len(eigenvalues))],
                     'Valeur propre': eigenvalues,
                     'Variance expliquée (%)': explained_variance * 100,
                     'Variance cumulée (%)': np.cumsum(explained_variance) * 100
                 })
-                st.dataframe(summary_df.style.format({
+                st.dataframe(summary_complete_df.style.format({
                     'Valeur propre': '{:.3f}',
                     'Variance expliquée (%)': '{:.2f}%',
                     'Variance cumulée (%)': '{:.2f}%'
                 }))
-
+    
         except Exception as e:
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
+
 
 def show_ml_analysis():
     import plotly.express as px
