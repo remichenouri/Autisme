@@ -3239,29 +3239,6 @@ def show_prediction_ia():
                 fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_gauge, use_container_width=True)
             
-            # Recommandations
-            st.markdown("### 💡 Recommandations")
-            
-            if prediction == 1:
-                st.error(f"""**🚨 Action recommandée :**
-                
-                La probabilité de TSA ({proba:.1%}) dépasse le seuil de {threshold:.1%} pour le contexte "{context_name}".""")
-                
-                ("""**Prochaines étapes suggérées :**
-                - Consultation avec un professionnel spécialisé
-                - Évaluation clinique approfondie
-                - Mise en place d'un suivi adapté
-                """)
-            else:
-                st.success(f""" **✅ Résultat rassurant :**
-                
-                La probabilité de TSA ({proba:.1%}) est inférieure au seuil de {threshold:.1%} pour le contexte "{context_name}". "")
-                
-                ("""**Recommandations :**
-                - Continuer l'observation du développement
-                - Refaire le test si de nouveaux signaux apparaissent
-                - Maintenir un suivi de routine
-                """)
         
         # Affichage initial avec seuil par défaut
         st.markdown("### 🎯 Prédiction initiale (Dépistage de masse)")
@@ -3384,8 +3361,7 @@ def show_prediction_ia():
         Les résultats doivent toujours être interprétés dans le contexte clinique global du patient.
         </p>
     </div>
-    "", unsafe_allow_html=True)
-
+    """, unsafe_allow_html=True)
                     
 def show_documentation():
     st.markdown("""
