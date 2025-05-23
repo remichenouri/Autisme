@@ -740,9 +740,9 @@ def load_metrics_libraries():
 
 
 @st.cache_data(ttl=86400)
-def get_img_with_href_fullscreen(img_url, target_url, as_banner=False):
+def get_img_with_href(img_url, target_url, as_banner=False):
     """
-    Version adaptée pour affichage plein écran sans scroll
+    Crée une image cliquable avec un lien (ou non cliquable si target_url est None, vide ou '#')
     """
     if "drive.google.com" in img_url and "/d/" in img_url:
         file_id = img_url.split("/d/")[1].split("/")[0]
@@ -761,47 +761,40 @@ def get_img_with_href_fullscreen(img_url, target_url, as_banner=False):
         else:
             response = requests.get(img_url, timeout=15)
             response.raise_for_status()
+
+            if len(response.content) == 0:
+                raise Exception("Contenu vide téléchargé")
+
             img = Image.open(BytesIO(response.content))
 
-            # NOUVEAU : Redimensionnement pour viewport
-            # Calculer les dimensions optimales pour l'écran
-            max_width = 1200
-            max_height = 650  # Hauteur adaptée au viewport
-            
-            # Conserver les proportions
-            original_ratio = img.width / img.height
-            screen_ratio = max_width / max_height
-            
-            if original_ratio > screen_ratio:
-                # Image plus large : ajuster sur la largeur
-                new_width = max_width
-                new_height = int(max_width / original_ratio)
-            else:
-                # Image plus haute : ajuster sur la hauteur
-                new_height = max_height
-                new_width = int(max_height * original_ratio)
-            
-            img = img.resize((new_width, new_height), Image.LANCZOS)
+            max_width = 1200 if as_banner else 800
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height), Image.LANCZOS)
 
             buffer = BytesIO()
             img.save(buffer, format="WEBP", quality=85, optimize=True)
+
             with open(cache_path, "wb") as f:
                 f.write(buffer.getvalue())
+
             buffer.seek(0)
             img_data = buffer.getvalue()
 
         img_str = base64.b64encode(img_data).decode()
 
-        # Style adapté pour affichage sans scroll
+        # Style pour affichage standard
         if as_banner:
-            style = 'style="width:100%;height:auto;max-height:85vh;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
+            style = 'style="width:100%;height:auto;max-height:500px;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
         else:
-            style = 'style="width:100%;height:auto;max-height:80vh;display:block;object-fit:contain;margin:0 auto;" loading="lazy"'
+            style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
-        container_style = 'style="width:100%; height:100vh; display:flex; align-items:center; justify-content:center; background-color:white; border-radius:10px; overflow:hidden;"'
+        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px; text-align:center;"'
         
+        # Ne pas ajouter de lien si target_url est None, vide ou '#'
         if target_url and target_url != "#":
-            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:inline-block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
         else:
             html_code = f'<div {container_style}><img src="data:image/webp;base64,{img_str}" {style}></div>'
 
