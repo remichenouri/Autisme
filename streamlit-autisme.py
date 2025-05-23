@@ -2969,13 +2969,23 @@ def show_ml_analysis():
 
 def show_aq10_and_prediction():
     """
-    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA.
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA avec seuil optimal et cohérence.
     """
     import pandas as pd
     import plotly.express as px
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
     import numpy as np
+
+    def coherent_prediction(aq10_score, ia_probability):
+        """
+        Assure la cohérence entre score AQ-10 et prédiction IA
+        """
+        if aq10_score <= 4 and ia_probability > 0.6:
+            return min(ia_probability * 0.7, 0.9)
+        elif aq10_score >= 7 and ia_probability < 0.4:
+            return max(ia_probability * 1.3, 0.1)
+        return ia_probability
 
     try:
         df, _, _, _, _, _, _ = load_dataset()
@@ -3252,16 +3262,25 @@ def show_aq10_and_prediction():
 
                         user_df = user_df[required_columns]
 
-                        # 3. Effectuer la prédiction
                         prediction_proba = rf_model.predict_proba(user_df)
-
-                        # 4. Récupérer la probabilité de la classe positive (TSA)
                         tsa_probability = prediction_proba[0][1]
-
-                        # 5. Classification et affichage
-                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
-
-                        probability_percentage = int(tsa_probability * 100)
+                    
+                        # Application de la logique de cohérence
+                        adjusted_prob = coherent_prediction(total_score, tsa_probability)
+                        
+                        # Ajustement des bornes et seuil dynamique
+                        adjusted_prob = np.clip(adjusted_prob, 0.0, 1.0)
+                        
+                        # Seuil dynamique basé sur le score AQ-10
+                        dynamic_threshold = 0.65
+                        if total_score >= 7:  # Score AQ-10 élevé
+                            dynamic_threshold *= 0.95  # Seuil plus permissif
+                        elif total_score <= 3:  # Score AQ-10 très bas
+                            dynamic_threshold *= 1.15  # Seuil plus conservateur
+                    
+                        # 5. Classification finale
+                        prediction_class = "TSA probable" if adjusted_prob > dynamic_threshold else "TSA peu probable"
+                        probability_percentage = int(adjusted_prob * 100)
 
                         color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
 
