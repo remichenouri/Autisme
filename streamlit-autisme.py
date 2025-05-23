@@ -785,15 +785,15 @@ def get_img_with_href(img_url, target_url, as_banner=False):
         img_str = base64.b64encode(img_data).decode()
 
         if as_banner:
-            style = 'style="width:100%;height:600px;display:block;object-fit:cover;border-radius:10px;" loading="lazy"'
+            style = 'style="width:100%;height:auto;max-height:600px;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
         else:
             style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
-        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
+        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px; text-align:center;"'
         
         # Ne pas ajouter de lien si target_url est None, vide ou '#'
         if target_url and target_url != "#":
-            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:inline-block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
         else:
             html_code = f'<div {container_style}><img src="data:image/webp;base64,{img_str}" {style}></div>'
 
@@ -4232,7 +4232,7 @@ def show_about_page():
                     <span style="font-size:40px">AB</span>
                 </div>
                 <h4 style="margin:0 0 5px 0; color:#1565c0">Alexandre Bernard</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Data Analyst</p>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
             </div>
 
             <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
@@ -4240,7 +4240,7 @@ def show_about_page():
                     <span style="font-size:40px">RC</span>
                 </div>
                 <h4 style="margin:0 0 5px 0; color:#2e7d32">Rémi Chenouri</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Data Analyst</p>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
             </div>
 
             <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
@@ -4248,7 +4248,7 @@ def show_about_page():
                     <span style="font-size:40px">AI</span>
                 </div>
                 <h4 style="margin:0 0 5px 0; color:#e65100">Ahmed Ibnabasse</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Data Analyst</p>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
             </div>
 
             <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
@@ -4256,7 +4256,7 @@ def show_about_page():
                     <span style="font-size:40px">LS</span>
                 </div>
                 <h4 style="margin:0 0 5px 0; color:#6a1b9a">Laurence Souppayaraza</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Data Analyst</p>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Future Data Analyst</p>
             </div>
         </div>
         """
