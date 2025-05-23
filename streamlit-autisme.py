@@ -2733,66 +2733,7 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
-        # Entraînement du modèle Random Forest détaillé
-        @st.cache_resource
-        def train_detailed_random_forest(_X_train, _y_train, _preprocessor, _X_test, _y_test):
-            """Version corrigée avec gestion des erreurs et structure de retour complète"""
-            try:
-                rf = RandomForestClassifier(
-                    n_estimators=100,
-                    max_depth=10,
-                    min_samples_split=5,
-                    min_samples_leaf=2,
-                    random_state=42,
-                    n_jobs=-1
-                )
-                
-                pipeline = Pipeline([
-                    ('preprocessor', _preprocessor),
-                    ('classifier', rf)
-                ])
-                
-                start_time = time.time()
-                pipeline.fit(_X_train, _y_train)
-                training_time = time.time() - start_time
-                
-                # Vérification des données de test
-                if len(_X_test) == 0 or len(_y_test) == 0:
-                    raise ValueError("Données de test vides")
-                    
-                y_pred = pipeline.predict(_X_test)
-                y_pred_proba = pipeline.predict_proba(_X_test)[:, 1]
-                
-                # Calcul des métriques avec gestion des divisions par zéro
-                metrics = {
-                    'accuracy': accuracy_score(_y_test, y_pred),
-                    'precision': precision_score(_y_test, y_pred, zero_division=0),
-                    'recall': recall_score(_y_test, y_pred, zero_division=0),
-                    'f1': f1_score(_y_test, y_pred, zero_division=0),
-                    'auc': roc_auc_score(_y_test, y_pred_proba) if len(np.unique(_y_test)) > 1 else 0.5,
-                    'training_time': training_time
-                }
-                
-                # Récupération des noms de features
-                try:
-                    feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
-                except AttributeError:
-                    feature_names = [f"feature_{i}" for i in range(_X_train.shape[1])]
-                
-                return {
-                    'pipeline': pipeline,
-                    'metrics': metrics,
-                    'feature_names': feature_names,
-                    'status': 'success'
-                }
-                
-            except Exception as e:
-                st.error(f"Erreur d'entraînement : {str(e)}")
-                return {
-                    'status': 'error',
-                    'message': str(e)
-                }
-
+        
         with st.spinner("Entraînement en cours..."):
             rf_results = train_detailed_random_forest(X_train, y_train, preprocessor, X_test, y_test)
             
