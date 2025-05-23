@@ -1551,36 +1551,12 @@ def show_data_exploration():
                 st.plotly_chart(fig, use_container_width=True)
 
     with st.expander("🔗 Matrice de Corrélation", expanded=True):
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse des Corrélations</h3>
-            <p style="color: #7f8c8d;">Exploration des relations linéaires entre les variables numériques du dataset.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Texte explicatif ajouté
-        st.markdown("""
-        ### 💡 Interprétation de la matrice de corrélation
-        
-        **Comment lire cette matrice :**
-        - **Valeurs proches de +1** : Corrélation positive forte (quand une variable augmente, l'autre aussi)
-        - **Valeurs proches de -1** : Corrélation négative forte (quand une variable augmente, l'autre diminue)  
-        - **Valeurs proches de 0** : Pas de corrélation linéaire
-        - **Couleurs chaudes** (rouge/orange) : Corrélations positives
-        - **Couleurs froides** (bleu) : Corrélations négatives
-        
-        **Points d'attention :**
-        - Les corrélations élevées entre variables peuvent indiquer de la redondance
-        - Une forte corrélation n'implique pas nécessairement une relation causale
-        """)
-        
         try:
             df_corr = df.copy()
             if 'Jaunisse' in df_corr.columns:
                 df_corr = df_corr.drop(columns=['Jaunisse'])
             if 'TSA' in df_corr.columns:
                 df_corr['TSA_num'] = df_corr['TSA'].map({'Yes': 1, 'No': 0})
-                
             categorical_cols = df_corr.select_dtypes(include=['object']).columns
             if not categorical_cols.empty:
                 from sklearn.preprocessing import OneHotEncoder
@@ -1594,84 +1570,29 @@ def show_data_exploration():
             else:
                 df_corr_processed = df_corr.select_dtypes(exclude=['object'])
                 corr_matrix = df_corr_processed.corr(numeric_only=True)
-    
-            # Matrice réduite et centrée
-            col1, col2, col3 = st.columns([1, 6, 1])  # Centrage de la matrice
-            
-            with col2:
-                mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-                fig, ax = plt.subplots(figsize=(10, 8))  # Taille réduite de 14x12 à 10x8
-                cmap = sns.diverging_palette(200, 120, as_cmap=True)
-                
-                # Sélection des variables les plus importantes pour réduire l'encombrement
-                important_vars = ['Score_A10', 'Age', 'TSA_num'] + [col for col in corr_matrix.columns if 'A' in col and len(col) <= 4][:8]
-                important_vars = [var for var in important_vars if var in corr_matrix.columns]
-                
-                if len(important_vars) > 3:
-                    corr_subset = corr_matrix.loc[important_vars, important_vars]
-                    mask_subset = np.triu(np.ones_like(corr_subset, dtype=bool))
-                    
-                    sns.heatmap(
-                        corr_subset,
-                        mask=mask_subset,
-                        cmap=cmap,
-                        vmax=1.0,
-                        vmin=-1.0,
-                        center=0,
-                        square=True,
-                        linewidths=0.8,
-                        fmt='.2f',
-                        annot=True,
-                        annot_kws={"size": 8, "weight": "bold"},
-                        cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
-                    )
-                else:
-                    sns.heatmap(
-                        corr_matrix,
-                        mask=mask,
-                        cmap=cmap,
-                        vmax=1.0,
-                        vmin=-1.0,
-                        center=0,
-                        square=True,
-                        linewidths=0.8,
-                        fmt='.2f',
-                        annot=True,
-                        annot_kws={"size": 7, "weight": "bold"},
-                        cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
-                    )
-                
-                plt.title("Matrice de corrélation (variables principales)", fontsize=14, pad=15)
-                plt.xticks(rotation=45, ha='right', fontsize=8)
-                plt.yticks(fontsize=8)
-                plt.tight_layout()
-                st.pyplot(fig)
-                
-            # Analyse des corrélations les plus fortes
-            st.markdown("### 🔍 Corrélations les plus significatives")
-            
-            # Extraction des corrélations fortes (hors diagonale)
-            corr_pairs = []
-            for i in range(len(corr_matrix.columns)):
-                for j in range(i+1, len(corr_matrix.columns)):
-                    corr_val = corr_matrix.iloc[i, j]
-                    if abs(corr_val) > 0.3:  # Seuil de corrélation significative
-                        corr_pairs.append({
-                            'Variable 1': corr_matrix.columns[i],
-                            'Variable 2': corr_matrix.columns[j],
-                            'Corrélation': corr_val,
-                            'Force': 'Forte' if abs(corr_val) > 0.7 else 'Modérée' if abs(corr_val) > 0.5 else 'Faible'
-                        })
-            
-            if corr_pairs:
-                corr_df = pd.DataFrame(corr_pairs).sort_values('Corrélation', key=abs, ascending=False)
-                st.dataframe(
-                    corr_df.head(10).style.format({'Corrélation': '{:.3f}'}),
-                    use_container_width=True
-                )
-            else:
-                st.info("Aucune corrélation significative (> 0.3) détectée.")
-                
+
+            mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+            fig, ax = plt.subplots(figsize=(14, 12))
+            cmap = sns.diverging_palette(200, 120, as_cmap=True)
+            sns.heatmap(
+                corr_matrix,
+                mask=mask,
+                cmap=cmap,
+                vmax=1.0,
+                vmin=-1.0,
+                center=0,
+                square=True,
+                linewidths=0.8,
+                fmt='.2f',
+                annot=True,
+                annot_kws={"size": 9, "weight": "bold"},
+                cbar_kws={"shrink": 0.8, "label": "Coefficient de corrélation"}
+            )
+            plt.title("Matrice de corrélation des variables", fontsize=16, pad=20)
+            plt.xticks(rotation=45, ha='right', fontsize=9)
+            plt.yticks(fontsize=9)
+            plt.tight_layout()
+            st.pyplot(fig)
         except Exception as e:
             st.error(f"Erreur lors du calcul de la matrice de corrélation: {str(e)}")
 
