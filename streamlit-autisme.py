@@ -767,7 +767,7 @@ def get_img_with_href(img_url, target_url, as_banner=False):
 
             img = Image.open(BytesIO(response.content))
 
-            max_width = 700 if as_banner else 700
+            max_width = 1200 if as_banner else 800
             if img.width > max_width:
                 ratio = max_width / img.width
                 new_height = int(img.height * ratio)
@@ -784,17 +784,16 @@ def get_img_with_href(img_url, target_url, as_banner=False):
 
         img_str = base64.b64encode(img_data).decode()
 
-        # Style pour affichage standard
         if as_banner:
-            style = 'style="width:100%;height:auto;max-height:500px;display:block;object-fit:contain;border-radius:10px;" loading="lazy"'
+            style = 'style="width:100%;height:600px;display:block;object-fit:cover;border-radius:10px;" loading="lazy"'
         else:
             style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
-        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px; text-align:center;"'
+        container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
         
         # Ne pas ajouter de lien si target_url est None, vide ou '#'
         if target_url and target_url != "#":
-            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:inline-block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
+            html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
         else:
             html_code = f'<div {container_style}><img src="data:image/webp;base64,{img_str}" {style}></div>'
 
