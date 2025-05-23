@@ -2967,562 +2967,806 @@ def show_ml_analysis():
         """, unsafe_allow_html=True)
 
 
-def show_prediction_ia():
-    st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🤖</span>
-        <h1 class="app-title">Prédiction par Intelligence Artificielle</h1>
-    </div>
-    """, unsafe_allow_html=True)
+def show_aq10_and_prediction():
+    """
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA.
+    """
+    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import numpy as np
 
-    st.markdown("""
-    <div style="background-color: #e8f4fd; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid #3498db;">
-        <h3 style="color: #2c3e50; margin-top: 0;">🔬 Outil d'aide au dépistage TSA</h3>
-        <p style="color: #34495e; margin-bottom: 0;">
-        Cet outil utilise un modèle d'intelligence artificielle entraîné sur des données cliniques 
-        pour évaluer la probabilité de présence de traits autistiques. Il complète le questionnaire AQ-10 
-        en analysant l'ensemble des caractéristiques personnelles.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Chargement sécurisé des données et du modèle
     try:
         df, _, _, _, _, _, _ = load_dataset()
-        if df.empty:
-            st.error("❌ Impossible de charger les données pour l'entraînement du modèle")
-            return
-            
-        # Vérification de la présence des colonnes nécessaires
-        required_columns = ['TSA', 'Score_A10']
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            st.error(f"❌ Colonnes manquantes dans le dataset : {missing_columns}")
-            return
-            
-        # Entraînement du modèle avec calibrage correct
-        model, preprocessor, feature_names = train_calibrated_model(df)
-        if model is None:
-            st.error("❌ Erreur lors de l'entraînement du modèle")
-            return
-            
+        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+        if aq_columns:
+            df = df.drop(columns=aq_columns)
+
+        if 'Jaunisse' in df.columns:
+            df = df.drop(columns=['Jaunisse'])
+
+            rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
-        st.error(f"❌ Erreur de chargement : {str(e)}")
-        return
+        st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
+        rf_model, preprocessor, feature_names = None, None, None
 
-    # Interface de saisie des données
-    st.subheader("📝 Renseignements personnels")
-    
-    with st.form("prediction_form"):
+    st.markdown(
+        f"""<div class="header-container" style="text-align: center;">
+            <span style="font-size:2.5rem">''📝''</span>
+            <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
+        </div>""", unsafe_allow_html=True
+    )
+
+    image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+    st.markdown("""
+    <p style="text-align: center;">Ce questionnaire aide à évaluer les traits autistiques potentiels. Répondez à toutes les questions puis complétez vos informations personnelles pour obtenir une prédiction par intelligence artificielle.</p>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <style>
+    .result-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(52,152,219,0.1);
+        padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+        margin-top: 28px;
+        margin-bottom: 22px;
+        text-align: center;
+    }
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
+    }
+    .result-card.warning {
+        border-left: 6px solid #e67e22;
+        background: linear-gradient(90deg, #fff6e0 80%, #fff8f2 100%);
+    }
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(90deg, #ffeaea 80%, #fff6f6 100%);
+    }
+    .result-score {
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .result-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #3498db;
+        text-align: center;
+    }
+    .kpi-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 5px 0;
+        text-align: center;
+    }
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    .kpi-comparison {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-top: 5px;
+        text-align: center;
+    }
+    .question-container {
+        text-align: left;
+    }
+    p {
+        text-align: center;
+    }
+    .stButton > button {
+        display: block;
+        margin: 0 auto;
+    }
+    .diagnostic-box {
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Questionnaire AQ-10</p>', unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Répondez aux 10 questions suivantes :</p>", unsafe_allow_html=True)
+
+        form_responses = {}
+
+        for i, q in enumerate(questions):
+            options = list(q["scoring"].keys())
+            question_key = f"aq10_question_{i}"
+
+            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
+
+            selected_response = st.radio(
+                "",
+                options,
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
+            )
+
+            form_responses[question_key] = selected_response
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Informations personnelles</p>', unsafe_allow_html=True)
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
-            age = st.number_input(
-                "Âge", 
-                min_value=1, 
-                max_value=100, 
-                value=25,
-                help="Âge en années"
-            )
-            
-            genre_options = ['Male', 'Female', 'Other'] if 'Genre' in df.columns else ['Male', 'Female']
-            genre = st.selectbox(
-                "Genre", 
-                options=genre_options,
-                help="Genre de la personne"
-            )
-            
-            # Questionnaire AQ-10 intégré
-            st.markdown("### 📋 Questionnaire AQ-10")
-            aq_responses = []
-            
-            # Questions AQ-10 avec formulation correcte
-            aq_questions = [
-                "Je remarque souvent de petits bruits que les autres ne remarquent pas",
-                "Je me concentre généralement davantage sur l'ensemble que sur les petits détails", 
-                "Je trouve facile de faire plusieurs choses en même temps",
-                "S'il y a une interruption, je peux rapidement reprendre ce que je faisais",
-                "Je trouve facile de « lire entre les lignes » quand quelqu'un me parle",
-                "Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer",
-                "Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages",
-                "J'aime collecter des informations sur des catégories de choses",
-                "Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage",
-                "J'ai du mal à comprendre les intentions des gens"
-            ]
-            
-            # Questions avec codage correct (certaines sont inversées)
-            scoring_direction = [1, -1, -1, -1, -1, -1, 1, 1, -1, 1]  # 1 = normal, -1 = inversé
-            
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24, help="Âge de la personne concernée")
+
+            genres = ["Female", "Male"]
+            genre = st.selectbox("Genre", genres)
+
+            ethnies = ["Middle Eastern", "White European", "Asian", "Black", "Hispanic", "Others", "Latino"]
+            ethnicite = st.selectbox("Origine ethnique", ethnies)
+
         with col2:
-            # Affichage des questions AQ-10
-            for i, (question, direction) in enumerate(zip(aq_questions, scoring_direction)):
-                st.markdown(f"**Q{i+1}:** {question}")
-                
-                response = st.radio(
-                    f"Réponse Q{i+1}:",
-                    options=[
-                        ("Pas du tout d'accord", 0),
-                        ("Un peu d'accord", 0), 
-                        ("Assez d'accord", 1),
-                        ("Tout à fait d'accord", 1)
-                    ],
-                    format_func=lambda x: x[0],
-                    key=f"aq_{i+1}",
-                    horizontal=True,
-                    label_visibility="collapsed"
-                )
-                
-                # Application du scoring avec direction
-                if direction == -1:  # Question inversée
-                    score = 1 - response[1]
-                else:  # Question normale
-                    score = response[1]
-                    
-                aq_responses.append(score)
-            
-            # Variables additionnelles si disponibles
-            statut_testeur = st.selectbox(
-                "Qui remplit ce questionnaire ?",
-                options=['Individu', 'Famille', 'Professionnel de santé', 'Autre'],
-                help="Relation avec la personne évaluée"
-            )
-        
-        submitted = st.form_submit_button("🔍 Analyser le profil", use_container_width=True)
-    
-    if submitted:
-        # Calcul du score AQ-10
-        score_aq10 = sum(aq_responses)
-        
-        # Préparation des données pour la prédiction
-        try:
-            # Construction du vecteur de caractéristiques
-            prediction_data = {
-                'Age': age,
-                'Genre': genre,
-                'Score_A10': score_aq10,
-                'Statut_testeur': statut_testeur
-            }
-            
-            # Ajout des réponses individuelles AQ si le modèle les utilise
-            for i, response in enumerate(aq_responses, 1):
-                if f'A{i}' in df.columns:
-                    prediction_data[f'A{i}'] = response
-            
-            # Création du DataFrame pour la prédiction
-            input_df = pd.DataFrame([prediction_data])
-            
-            # Prédiction avec le modèle calibré
-            probability = model.predict_proba(input_df)[0, 1]
-            prediction = model.predict(input_df)[0]
-            
-            # Application de la logique de calibrage corrigée
-            probability_calibrated, classification = apply_calibrated_prediction(
-                score_aq10, probability, age, genre
-            )
-            
-        except Exception as e:
-            st.error(f"❌ Erreur lors de la prédiction : {str(e)}")
-            return
-        
-        # Affichage des résultats avec cohérence améliorée
-        st.markdown("---")
-        st.subheader("📊 Résultats de l'analyse")
-        
-        # Résultat AQ-10
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            # Interprétation clinique du score AQ-10
-            if score_aq10 >= 6:
-                aq_status = "positif"
-                aq_color = "#e74c3c"
-                aq_interpretation = "Score supérieur au seuil clinique de dépistage"
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["No", "Yes"])
+            testeur = st.selectbox("Statut du testeur", ["Professionnel de santé", "Famille", "Enseignant", "Auto-évaluation", "Professionnel", "Médecin", "Autre"])
+
+        submitted = st.form_submit_button("Calculer mon score et obtenir une prédiction", use_container_width=True)
+
+        if submitted:
+            if None in form_responses.values():
+                st.error("⚠️ Veuillez répondre à toutes les questions du questionnaire.")
             else:
-                aq_status = "négatif"  
-                aq_color = "#27ae60"
-                aq_interpretation = "Score en dessous du seuil clinique de dépistage"
-            
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, {aq_color}15, {aq_color}08); 
-                        border-left: 4px solid {aq_color}; padding: 20px; border-radius: 10px;">
-                <h3 style="color: {aq_color}; margin: 0 0 15px 0;">
-                    🧩 Résultat du questionnaire AQ-10
-                </h3>
-                <div style="text-align: center; margin: 20px 0;">
-                    <span style="font-size: 3rem; font-weight: bold; color: {aq_color};">
-                        {score_aq10}/10
-                    </span>
-                </div>
-                <p style="margin: 10px 0; color: #2c3e50;">
-                    <strong>Statut :</strong> Dépistage {aq_status}
-                </p>
-                <p style="margin: 0; font-size: 0.9rem; color: #7f8c8d;">
-                    {aq_interpretation}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            # Prédiction IA calibrée
-            if classification == "TSA très probable":
-                pred_color = "#c0392b"
-            elif classification == "TSA probable":  
-                pred_color = "#e67e22"
-            elif classification == "TSA possible":
-                pred_color = "#f39c12"
-            else:
-                pred_color = "#27ae60"
-                
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, {pred_color}15, {pred_color}08); 
-                        border-left: 4px solid {pred_color}; padding: 20px; border-radius: 10px;">
-                <h3 style="color: {pred_color}; margin: 0 0 15px 0;">
-                    🤖 Prédiction par Intelligence Artificielle
-                </h3>
-                <div style="text-align: center; margin: 20px 0;">
-                    <span style="font-size: 3rem; font-weight: bold; color: {pred_color};">
-                        {probability_calibrated:.0%}
-                    </span>
-                </div>
-                <p style="margin: 10px 0; color: #2c3e50;">
-                    <strong>Classification :</strong> {classification}
-                </p>
-                <p style="margin: 0; font-size: 0.9rem; color: #7f8c8d;">
-                    Probabilité estimée de traits autistiques
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Analyse de cohérence entre AQ-10 et IA
-        st.subheader("🔍 Analyse de cohérence")
-        
-        coherence_analysis = analyze_coherence(score_aq10, probability_calibrated, classification)
-        
-        if coherence_analysis['coherent']:
-            st.success(f"✅ **Résultats cohérents** : {coherence_analysis['message']}")
-        else:
-            st.warning(f"⚠️ **Analyse nuancée** : {coherence_analysis['message']}")
-        
-        # Recommandations personnalisées
-        st.subheader("💡 Recommandations")
-        generate_personalized_recommendations(score_aq10, probability_calibrated, age, genre)
-        
-        # Graphique de visualisation du profil
-        create_profile_visualization(score_aq10, probability_calibrated, aq_responses)
+                total_score = 0
+                scores_individuels = []
 
-@st.cache_resource
-def train_calibrated_model(df):
-    """Entraîne un modèle avec calibrage correct pour la prédiction TSA"""
-    try:
-        load_ml_libraries()
-        
-        # Vérification et nettoyage des données
-        if 'TSA' not in df.columns:
-            st.error("Colonne 'TSA' manquante")
-            return None, None, None
-            
-        # Préparation des variables
-        X = df.drop(columns=['TSA'])
-        
-        # Suppression de la colonne Jaunisse si présente (données peu fiables)
-        if 'Jaunisse' in X.columns:
-            X = X.drop(columns=['Jaunisse'])
-            
-        y = df['TSA'].map({'Yes': 1, 'No': 0})
-        
-        # Identification des types de variables
-        numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
-        categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
-        
-        # Préprocesseur avec gestion des valeurs manquantes
-        from sklearn.impute import SimpleImputer
-        
-        numerical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='median')),
-            ('scaler', StandardScaler())
-        ])
-        
-        categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='constant', fill_value='unknown')),
-            ('onehot', OneHotEncoder(handle_unknown='ignore'))
-        ])
-        
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', numerical_transformer, numerical_cols),
-                ('cat', categorical_transformer, categorical_cols)
-            ],
-            remainder='passthrough'
-        )
-        
-        # Modèle Random Forest optimisé pour le dépistage
-        rf_classifier = RandomForestClassifier(
-            n_estimators=200,
-            max_depth=12,
-            min_samples_split=8,
-            min_samples_leaf=3,
-            max_features='sqrt',
-            bootstrap=True,
-            random_state=42,
-            n_jobs=-1,
-            class_weight='balanced'  # Important pour gérer le déséquilibre des classes
-        )
-        
-        # Pipeline complet
-        pipeline = Pipeline([
-            ('preprocessor', preprocessor),
-            ('classifier', rf_classifier)
-        ])
-        
-        # Division des données
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y
-        )
-        
-        # Entraînement
-        pipeline.fit(X_train, y_train)
-        
-        # Validation des performances
-        y_pred = pipeline.predict(X_test)
-        y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
-        
-        accuracy = accuracy_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        
-        # Vérification de la qualité du modèle
-        if accuracy < 0.85 or recall < 0.80:
-            st.warning(f"⚠️ Performances du modèle sous-optimales (Accuracy: {accuracy:.2%}, Recall: {recall:.2%})")
-        
-        # Noms des caractéristiques
-        try:
-            feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
-        except:
-            feature_names = [f"feature_{i}" for i in range(len(pipeline.named_steps['classifier'].feature_importances_))]
-        
-        return pipeline, preprocessor, feature_names
-        
-    except Exception as e:
-        st.error(f"Erreur lors de l'entraînement du modèle : {str(e)}")
-        return None, None, None
-
-def apply_calibrated_prediction(score_aq10, raw_probability, age, genre):
-    """Applique une logique de calibrage entre le score AQ-10 et la prédiction IA"""
-    
-    # Calibrage basé sur la cohérence clinique
-    
-    # Facteur de correction basé sur l'âge (les jeunes enfants ont des patterns différents)
-    age_factor = 1.0
-    if age < 5:
-        age_factor = 0.8  # Réduction pour les très jeunes enfants
-    elif age > 50:
-        age_factor = 0.9  # Légère réduction pour les adultes plus âgés
-    
-    # Facteur de correction basé sur le genre (biais historique de diagnostic)
-    gender_factor = 1.0
-    if genre == 'Female':
-        gender_factor = 1.1  # Légère augmentation pour compenser le sous-diagnostic historique
-    
-    # Application des facteurs
-    adjusted_probability = raw_probability * age_factor * gender_factor
-    
-    # Calibrage principal basé sur la cohérence avec le score AQ-10
-    if score_aq10 >= 6:  # Score AQ-10 positif
-        # La probabilité IA devrait être élevée
-        if adjusted_probability < 0.6:
-            # Réajustement vers le haut si incohérence
-            calibrated_probability = max(adjusted_probability, 0.65)
-        else:
-            calibrated_probability = adjusted_probability
-    else:  # Score AQ-10 négatif (< 6)
-        # La probabilité IA devrait être modérée à faible
-        if adjusted_probability > 0.7:
-            # Réajustement vers le bas si incohérence
-            calibrated_probability = min(adjusted_probability, 0.45)
-        else:
-            calibrated_probability = adjusted_probability
-    
-    # Application d'un lissage pour éviter les valeurs extrêmes
-    calibrated_probability = np.clip(calibrated_probability, 0.05, 0.95)
-    
-    # Classification basée sur la probabilité calibrée
-    if calibrated_probability >= 0.8:
-        classification = "TSA très probable"
-    elif calibrated_probability >= 0.6:
-        classification = "TSA probable"
-    elif calibrated_probability >= 0.4:
-        classification = "TSA possible"
-    else:
-        classification = "TSA peu probable"
-    
-    return calibrated_probability, classification
-
-def analyze_coherence(score_aq10, probability_ia, classification):
-    """Analyse la cohérence entre le score AQ-10 et la prédiction IA"""
-    
-    # Seuils de cohérence
-    aq_positive = score_aq10 >= 6
-    ia_positive = probability_ia >= 0.5
-    
-    if aq_positive and ia_positive:
-        return {
-            'coherent': True,
-            'message': 'Le questionnaire AQ-10 et l\'analyse IA convergent vers un dépistage positif.'
-        }
-    elif not aq_positive and not ia_positive:
-        return {
-            'coherent': True, 
-            'message': 'Le questionnaire AQ-10 et l\'analyse IA convergent vers un dépistage négatif.'
-        }
-    elif aq_positive and not ia_positive:
-        return {
-            'coherent': False,
-            'message': 'Le questionnaire AQ-10 suggère un dépistage positif, mais l\'IA identifie des facteurs modérateurs. Une évaluation approfondie est recommandée.'
-        }
-    else:  # not aq_positive and ia_positive
-        return {
-            'coherent': False,
-            'message': 'L\'IA identifie des signaux que le questionnaire AQ-10 seul ne capture pas. Cela peut indiquer des traits subtils nécessitant une évaluation spécialisée.'
-        }
-
-def generate_personalized_recommendations(score_aq10, probability_ia, age, genre):
-    """Génère des recommandations personnalisées basées sur les résultats"""
-    
-    # Logique de recommandation basée sur les scores
-    if score_aq10 >= 6 or probability_ia >= 0.6:
-        # Dépistage positif
-        st.error("""
-        **🚨 Dépistage positif - Action recommandée**
-        
-        Les résultats suggèrent la présence de traits autistiques significatifs. Il est fortement recommandé de :
-        
-        • **Consulter un spécialiste** (pédopsychiatre, neurologue, psychologue spécialisé)
-        • **Réaliser une évaluation diagnostique complète** (ADOS-2, ADI-R si nécessaire)
-        • **Ne pas attendre** : l'intervention précoce améliore significativement les résultats
-        """)
-        
-        if age < 6:
-            st.info("👶 **Enfant jeune** : Orientez-vous vers un Centre de Ressources Autisme (CRA) ou un service de développement infantile.")
-        
-    elif probability_ia >= 0.4 or score_aq10 >= 4:
-        # Zone d'incertitude
-        st.warning("""
-        **⚠️ Résultats ambigus - Surveillance recommandée**
-        
-        Les résultats se situent dans une zone d'incertitude. Il est recommandé de :
-        
-        • **Surveiller l'évolution** des comportements sur 3-6 mois
-        • **Refaire le test** si les préoccupations persistent
-        • **Consulter le médecin traitant** pour discuter des observations
-        • **Documenter les comportements** atypiques observés
-        """)
-        
-    else:
-        # Dépistage négatif
-        st.success("""
-        **✅ Dépistage négatif - Situation rassurante**
-        
-        Les résultats ne suggèrent pas la présence de traits autistiques significatifs. Néanmoins :
-        
-        • **Restez attentif** à l'évolution du développement
-        • **N'hésitez pas à refaire le test** si de nouvelles préoccupations apparaissent
-        • **Consultez si nécessaire** pour toute question sur le développement
-        """)
-
-def create_profile_visualization(score_aq10, probability_ia, aq_responses):
-    """Crée une visualisation du profil AQ-10 et de la prédiction IA"""
-    
-    st.subheader("📊 Visualisation du profil")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # Graphique radar des réponses AQ-10
-        categories = [f'Q{i+1}' for i in range(10)]
-        
-        fig_radar = go.Figure()
-        
-        fig_radar.add_trace(go.Scatterpolar(
-            r=aq_responses,
-            theta=categories,
-            fill='toself',
-            name='Profil AQ-10',
-            line_color='#3498db'
-        ))
-        
-        fig_radar.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 1]
-                )),
-            showlegend=False,
-            title="Profil des réponses AQ-10",
-            height=400
-        )
-        
-        st.plotly_chart(fig_radar, use_container_width=True)
-    
-    with col2:
-        # Gauge de comparaison AQ-10 vs IA
-        fig_gauge = go.Figure()
-        
-        # Gauge AQ-10
-        fig_gauge.add_trace(go.Indicator(
-            mode = "gauge+number",
-            value = score_aq10,
-            domain = {'x': [0, 0.5], 'y': [0.5, 1]},
-            title = {'text': "Score AQ-10"},
-            gauge = {
-                'axis': {'range': [0, 10]},
-                'bar': {'color': "#3498db"},
-                'steps': [
-                    {'range': [0, 6], 'color': "lightgray"},
-                    {'range': [6, 10], 'color': "lightcoral"}
-                ],
-                'threshold': {
-                    'line': {'color': "red", 'width': 4},
-                    'thickness': 0.75,
-                    'value': 6
+                for i, q in enumerate(questions):
+                    selected_option = form_responses[f"aq10_question_{i}"]
+                    if selected_option is not None:
+                        score = q["scoring"][selected_option]
+                        total_score += score
+                        scores_individuels.append(score)
+                    else:
+                        scores_individuels.append(0)
+                st.session_state.aq10_total = total_score
+                st.session_state.aq10_responses = scores_individuels
+                user_data = {
+                    'Age': age,
+                    'Genre': genre,
+                    'Ethnie': ethnicite,
+                    'Antecedent_autisme': antecedents,
+                    'Statut_testeur': testeur,
                 }
-            }
-        ))
-        
-        # Gauge IA
-        fig_gauge.add_trace(go.Indicator(
-            mode = "gauge+number",
-            value = probability_ia * 100,
-            domain = {'x': [0.5, 1], 'y': [0.5, 1]},
-            title = {'text': "Prédiction IA (%)"},
-            gauge = {
-                'axis': {'range': [0, 100]},
-                'bar': {'color': "#e74c3c"},
-                'steps': [
-                    {'range': [0, 40], 'color': "lightgray"},
-                    {'range': [40, 60], 'color': "yellow"},
-                    {'range': [60, 100], 'color': "lightcoral"}
-                ],
-                'threshold': {
-                    'line': {'color': "red", 'width': 4},
-                    'thickness': 0.75,
-                    'value': 60
-                }
-            }
-        ))
-        
-        fig_gauge.update_layout(height=400)
-        st.plotly_chart(fig_gauge, use_container_width=True)
 
-# Avertissement final
-st.markdown("""
-<div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
-    <p style="font-size: 0.9rem; margin-bottom: 0;">
-    <strong style="color: #e74c3c;">Avertissement médical :</strong> Cet outil est destiné au dépistage préliminaire uniquement. 
-    Seule une évaluation clinique complète par un professionnel qualifié peut établir un diagnostic. 
-    Ne vous basez jamais uniquement sur ces résultats pour prendre des décisions médicales.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+                for i, score in enumerate(scores_individuels):
+                    user_data[f'A{i+1}'] = score
+
+                user_data['Score_A10'] = total_score
+
+                user_df = pd.DataFrame([user_data])
+
+                if total_score >= 6:
+                    st.markdown(f"""
+                        <div class="result-card warning">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
+                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                        <div class="result-card success">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
+                if rf_model is not None and preprocessor is not None:
+                    try:
+                        # 1. Créer une structure de données cohérente avec celle utilisée pour l'entraînement
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                if col.startswith('A') and col[1:].isdigit():
+                                    idx = int(col[1:]) - 1
+                                    if idx < len(scores_individuels):
+                                        user_df[col] = scores_individuels[idx]
+                                    else:
+                                        user_df[col] = 0
+                                else:
+                                    user_df[col] = 0  # Valeur par défaut
+
+                        column_mapping = {
+                            'Antecedent_autisme': 'Autisme_familial',
+                        }
+                        user_df = user_df.rename(columns=column_mapping)
+
+                        # Ajouter les colonnes manquantes avec des valeurs par défaut
+                        if 'Jaunisse' not in user_df.columns:
+                            user_df['Jaunisse'] = "No"
+
+                        # S'assurer que toutes les colonnes nécessaires existent
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
+                                          'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                user_df[col] = 0  # Valeur par défaut
+
+                        # Réorganiser les colonnes pour correspondre à l'ordre attendu par le modèle
+                        user_df = user_df[required_columns]
+
+                        user_df = user_df[required_columns]
+
+                        # 3. Effectuer la prédiction
+                        prediction_proba = rf_model.predict_proba(user_df)
+
+                        # 4. Récupérer la probabilité de la classe positive (TSA)
+                        tsa_probability = prediction_proba[0][1]
+
+                        # 5. Classification et affichage
+                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
+
+                        probability_percentage = int(tsa_probability * 100)
+
+                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
+
+                        st.markdown(f"""
+                            <div class="result-card {color_class}">
+                                <div class="result-title">Prédiction IA</div>
+                                <div class="result-score">{probability_percentage}%</div>
+                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
+                                <p>Classification: <strong>{prediction_class}</strong></p>
+                            </div>
+
+                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
+                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
+                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                        # Section des KPI personnalisés après la prédiction
+                        st.markdown("""
+                            <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                                Profil détaillé des traits autistiques
+                            </h3>
+                        """, unsafe_allow_html=True)
+
+                        # Calcul des sous-scores par domaine
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100  # Questions liées aux aspects sociaux
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100  # Questions liées à la flexibilité cognitive
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100  # Questions liées à l'attention au détail
+
+                        # Calcul du masking index (plus le score est élevé dans des domaines spécifiques mais pas en social, plus l'indice est élevé)
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)  # Normalisation entre 0 et 100
+
+                        # Définition de seuils pour les indices de sévérité
+                        def severity_color(score, reverse=False):
+                            if reverse:
+                                score = 100 - score
+                            if score < 30:
+                                return "#2ecc71"  # vert
+                            elif score < 60:
+                                return "#f39c12"  # orange
+                            else:
+                                return "#e74c3c"  # rouge
+
+                        # Estimation du risque relatif basé sur le score total et les facteurs de risque
+                        base_risk = 1.0
+                        if total_score >= 6:
+                            base_risk *= 4.5
+                        if antecedents == "Yes":
+                            base_risk *= 2.2
+                        risk_factor = min(10.0, base_risk)  # Plafond à 10x
+
+                        # Affichage des KPI en trois colonnes
+                        col1, col2, col3 = st.columns(3)
+
+                        with col1:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Perception sociale</div>
+                                    <div class="kpi-value" style="color:{severity_color(social_score)};">{social_score:.0f}%</div>
+                                    <div class="kpi-comparison">Difficulté à interpréter les interactions sociales</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col2:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Flexibilité cognitive</div>
+                                    <div class="kpi-value" style="color:{severity_color(cognitive_score)};">{cognitive_score:.0f}%</div>
+                                    <div class="kpi-comparison">Rigidité face au changement et adaptation</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col3:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Attention au détail</div>
+                                    <div class="kpi-value" style="color:{severity_color(detail_score, reverse=True)};">{detail_score:.0f}%</div>
+                                    <div class="kpi-comparison">Focalisation sur les détails spécifiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        # Deuxième rangée de KPI
+                        col4, col5, col6 = st.columns(3)
+
+                        with col4:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Indice de masquage</div>
+                                    <div class="kpi-value" style="color:{severity_color(masking_index, reverse=True)};">{masking_index:.0f}%</div>
+                                    <div class="kpi-comparison">Estimation de la compensation des traits autistiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col5:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Risque relatif</div>
+                                    <div class="kpi-value" style="color:{severity_color(risk_factor*10)};">{risk_factor:.1f}x</div>
+                                    <div class="kpi-comparison">Par rapport à la population générale</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col6:
+                            # Calcul d'un score d'impact fonctionnel estimé
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Impact fonctionnel estimé</div>
+                                    <div class="kpi-value" style="color:{severity_color(impact_score)};">{impact_score:.0f}%</div>
+                                    <div class="kpi-comparison">Niveau d'impact potentiel sur le quotidien</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        # Ajout d'un graphique radar pour visualiser les différentes dimensions
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Profil de sensibilité multidimensionnel
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        # Calcul des scores par dimension
+                        dimensions = [
+                            "Communication sociale",
+                            "Interactions sociales",
+                            "Intérêts restreints",
+                            "Comportements répétitifs",
+                            "Sensibilité sensorielle"
+                        ]
+
+                        # Mapping des questions vers les dimensions (simplifié)
+                        dim_scores = [
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100,  # Communication
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  # Interactions
+                            (scores_individuels[7]) * 100,  # Intérêts
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  # Comportements
+                            (scores_individuels[0]) * 100  # Sensibilité
+                        ]
+
+                        # Création du graphique radar
+                        fig = go.Figure()
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=dim_scores,
+                            theta=dimensions,
+                            fill='toself',
+                            name='Votre profil',
+                            line_color='#3498db',
+                            fillcolor='rgba(52, 152, 219, 0.3)'
+                        ))
+
+                        # Ajouter profil typique TSA pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[80, 75, 70, 65, 85],  # Valeurs typiques pour TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil typique TSA',
+                            line_color='#e74c3c',
+                            fillcolor='rgba(231, 76, 60, 0.1)'
+                        ))
+
+                        # Ajouter profil neurotypique pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[20, 25, 30, 25, 15],  # Valeurs typiques pour non-TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil neurotypique',
+                            line_color='#2ecc71',
+                            fillcolor='rgba(46, 204, 113, 0.1)'
+                        ))
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            title="Comparaison de votre profil avec les profils de référence",
+                            showlegend=True,
+                            height=500,
+                            margin=dict(t=70, b=20)
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        # Ajout des recommandations personnalisées
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Recommandations personnalisées
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        # Définir les recommandations basées sur les scores
+                        recommendations = []
+
+                        if social_score > 50:
+                            recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
+
+                        if cognitive_score > 50:
+                            recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
+
+                        if detail_score > 60:
+                            recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
+
+                        if masking_index > 60:
+                            recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
+
+                        if risk_factor > 3:
+                            recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
+                        else:
+                            recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
+
+                        # Affichage des recommandations
+                        st.markdown("""
+                            <div style="background-color: #eaf7fb; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                        """, unsafe_allow_html=True)
+
+                        for rec in recommendations:
+                            st.markdown(f"""
+                                <p style="margin-bottom: 10px;"><span style="color: #3498db; font-weight: bold;">•</span> {rec}</p>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                            <p style="font-style: italic; margin-top: 15px; color: #7f8c8d; text-align: center;">
+                                Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+
+                        # 6. Affichage du graphique comparatif
+                        st.markdown("### Analyse comparative")
+
+                        fig = go.Figure()
+
+                        if 'Score_A10' in df.columns and 'TSA' in df.columns:
+                            avg_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                            avg_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                        else:
+                            avg_tsa = 7.2  # Valeur moyenne typique
+                            avg_non_tsa = 2.8  # Valeur moyenne typique
+
+                        categories = ['Votre score', 'Moyenne TSA', 'Moyenne non-TSA']
+                        scores = [total_score, avg_tsa, avg_non_tsa]
+                        colors = ['#3498db', '#e74c3c', '#2ecc71']
+
+                        fig.add_trace(go.Bar(
+                            x=categories,
+                            y=scores,
+                            marker_color=colors,
+                            text=scores,
+                            textposition='auto'
+                        ))
+
+                        fig.update_layout(
+                            title='Comparaison de votre score avec les moyennes de référence',
+                            yaxis=dict(
+                                title='Score AQ-10',
+                                range=[0, 10.5]
+                            ),
+                            height=400
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
+                        st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
+                else:
+                    st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
+
+                    st.html("""
+                        <div style="background-color: #f0f7fa; border-left: 4px solid #3498db; padding: 20px; border-radius: 5px; margin: 30px 0; text-align: left;">
+                            <h4 style="color: #3498db; margin-top: 0; text-align: center;">Comment fonctionne cette prédiction ?</h4>
+                            <p style="margin-bottom: 10px; text-align: left;">Cette prédiction est calculée par un algorithme d'<strong>intelligence artificielle</strong> appelé "<em>Random Forest</em>" (forêt aléatoire) qui a été entraîné sur des milliers de cas cliniques.</p>
+
+                            <p style="text-align: left;">L'algorithme prend en compte :</p>
+                            <ul style="text-align: left;">
+                                <li><strong>Vos réponses au questionnaire AQ-10</strong> : chaque question a été validée scientifiquement pour détecter des traits autistiques spécifiques</li>
+                                <li><strong>Vos données démographiques</strong> : âge, genre, origine ethnique</li>
+                                <li><strong>Les antécédents familiaux</strong> : la présence de TSA dans la famille est un facteur important</li>
+                            </ul>
+
+                            <p style="text-align: left;">Le modèle compare ensuite votre profil à tous les cas qu'il a appris et détermine la probabilité que vous présentiez des traits autistiques similaires à ceux diagnostiqués TSA.</p>
+
+                            <p style="font-style: italic; margin-top: 10px; text-align: left;">Ce pourcentage représente le niveau de confiance du modèle dans sa prédiction, pas la "gravité" ou l'"intensité" de l'autisme.</p>
+                        </div>
+                        """)
+
+                    st.html("""
+                        <div style="background-color: #fef9e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <h4 style="color: #f39c12; margin-top: 0;">Limites de cette prédiction</h4>
+                            <p>Ce modèle est un <strong>outil de dépistage</strong>, pas un instrument de diagnostic. Un diagnostic formel de TSA nécessite une évaluation complète par des professionnels de santé qualifiés.</p>
+
+                            <p>Facteurs non pris en compte par ce modèle :</p>
+                            <ul>
+                                <li>Observation directe des comportements sociaux</li>
+                                <li>Développement précoce et historique médical complet</li>
+                                <li>Impact des traits sur la vie quotidienne</li>
+                                <li>Autres conditions médicales ou psychiatriques</li>
+                            </ul>
+                        </div>
+                        """)
+
+                    st.markdown("""
+                        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                            Comparaison avec la population de référence
+                        </h3>
+                        """, unsafe_allow_html=True)
+
+                    mean_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                    mean_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                    overall_mean = df['Score_A10'].mean()
+
+                    percentile = 100 * (df['Score_A10'] <= total_score).mean()
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Percentile</div>
+                                <div class="kpi-value">{percentile:.0f}<sup>ème</sup></div>
+                                <div class="kpi-comparison">Votre score dépasse {percentile:.0f}% de la population testée</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col2:
+                        diff_non_tsa = total_score - mean_non_tsa
+                        color_non_tsa = "#e74c3c" if diff_non_tsa > 0 else "#2ecc71"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe non-TSA</div>
+                                <div class="kpi-value" style="color:{color_non_tsa};">{diff_non_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes sans diagnostic ({mean_non_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col3:
+                        diff_tsa = total_score - mean_tsa
+                        color_tsa = "#2ecc71" if diff_tsa < 0 else "#e74c3c"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe TSA</div>
+                                <div class="kpi-value" style="color:{color_tsa};">{diff_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes avec diagnostic ({mean_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                            Analyse détaillée de vos réponses par question
+                        </h4>
+                        """, unsafe_allow_html=True)
+
+                        categories = [f'Q{i+1}' for i in range(10)]
+                        user_scores = scores_individuels
+
+                        tsa_mean_scores = [df[df['TSA'] == 'Yes'][f'A{i+1}'].mean() for i in range(10)]
+                        non_tsa_mean_scores = [df[df['TSA'] == 'No'][f'A{i+1}'].mean() for i in range(10)]
+
+                        fig = make_subplots(rows=1, cols=3,
+                                        specs=[[{'type': 'polar'}]*3],
+                                        subplot_titles=["Vos réponses", "Profil moyen TSA", "Profil moyen non-TSA"])
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=user_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Vos réponses',
+                                line_color='#2ecc71',
+                                fillcolor='rgba(46, 204, 113, 0.5)'
+                            ),
+                            row=1, col=1
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne TSA',
+                                line_color='#e74c3c',
+                                fillcolor='rgba(231, 76, 60, 0.5)'
+                            ),
+                            row=1, col=2
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=non_tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne non-TSA',
+                                line_color='#3498db',
+                                fillcolor='rgba(52, 152, 219, 0.5)'
+                            ),
+                            row=1, col=3
+                        )
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar2=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar3=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            height=450,
+                            margin=dict(l=80, r=80, t=80, b=50),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(size=12),
+                            showlegend=False
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        with st.expander("🔍 Comprendre la signification des questions"):
+                            st.markdown("""
+                            | Question | Description | Score élevé indique |
+                            |----------|-------------|---------------------|
+                            | Q1 | Perception des petits bruits | ↑ Hypersensibilité auditive |
+                            | Q2 | Focus sur les détails vs l'ensemble | ↑ Attention aux détails |
+                            | Q3 | Capacité à faire plusieurs choses | ↓ Difficultés avec le multitâche |
+                            | Q4 | Reprise d'activité après interruption | ↓ Difficultés avec les transitions |
+                            | Q5 | Compréhension du langage figuré | ↓ Interprétation littérale |
+                            | Q6 | Perception de l'ennui chez autrui | ↓ Difficulté à lire les signaux sociaux |
+                            | Q7 | Compréhension des intentions des personnages | ↑ Difficulté avec la théorie de l'esprit |
+                            | Q8 | Collection d'informations sur des catégories | ↑ Intérêts restreints |
+                            | Q9 | Compréhension des émotions par l'expression | ↓ Difficulté à lire les émotions |
+                            | Q10 | Compréhension des intentions d'autrui | ↑ Difficulté d'interprétation sociale |
+                            """)
+
+                        st.info("⚠️ Ce résultat est une indication basée sur un modèle statistique et ne constitue pas un diagnostic médical. Consultez un professionnel de santé pour une évaluation complète.")
+
+                st.markdown("""
+                <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                    Prévalence du Trouble du Spectre Autistique
+                </h3>
+                """, unsafe_allow_html=True)
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #3498db; margin-bottom: 10px;">Monde</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #3498db; margin: 15px 0;">1 sur 100</div>
+                        <p style="color: #2c3e50;">enfants dans le monde est concerné par un trouble du spectre autistique selon l'OMS</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col2:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #e74c3c; margin-bottom: 10px;">France</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #e74c3c; margin: 15px 0;">~1 million</div>
+                        <p style="color: #2c3e50;">de personnes en France, soit entre 1% et 2% de la population française</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col3:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #2ecc71; margin-bottom: 10px;">États-Unis</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #2ecc71; margin: 15px 0;">1 sur 36</div>
+                        <p style="color: #2c3e50;">enfants de 8 ans présentent un TSA selon les dernières données CDC</p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 def show_documentation():
