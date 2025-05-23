@@ -1060,8 +1060,7 @@ def show_home_page():
     """, unsafe_allow_html=True)
 
     # Conservation de l'image Ghibli sans lien cliquable
-    image_url = "https://drive.google.com/file/d/1Q7YIdKUjcz1ljWcf3FUaLsZKdZQ-IH-I/view?usp=drive_link"
-    #"https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    image_url ="https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
     
     st.markdown("""
