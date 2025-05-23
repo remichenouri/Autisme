@@ -2967,298 +2967,234 @@ def show_ml_analysis():
         """, unsafe_allow_html=True)
 
 
-def show_prediction_ia():
-    """Interface de prédiction par IA avec seuils ajustables"""
-    
-    st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🤖</span>
-        <h1 class="app-title">Prédiction par Intelligence Artificielle</h1>
-    </div>
-    """, unsafe_allow_html=True)
+def show_aq10_and_prediction():
+    """
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA avec seuils ajustables.
+    """
+    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import numpy as np
 
-    # Chargement des données et du modèle
     try:
         df, _, _, _, _, _, _ = load_dataset()
-        
-        # Préparation des données pour l'entraînement
-        if 'TSA' not in df.columns:
-            st.error("❌ Colonne 'TSA' manquante dans le dataset")
-            return
-            
-        # Suppression des colonnes individuelles A1-A10 et Jaunisse
         aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
         if aq_columns:
             df = df.drop(columns=aq_columns)
-        
+
         if 'Jaunisse' in df.columns:
             df = df.drop(columns=['Jaunisse'])
-            
-        X = df.drop(columns=['TSA'])
-        y = df['TSA'].map({'Yes': 1, 'No': 0})
-        
-        # Entraînement du modèle
-        with st.spinner("🔄 Chargement du modèle prédictif..."):
-            trained_model, preprocessor, feature_names = train_advanced_model(df)
-            
-        if trained_model is None:
-            st.error("❌ Erreur lors du chargement du modèle")
-            return
-            
+
+        rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
-        st.error(f"❌ Erreur lors du chargement: {str(e)}")
-        return
+        st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
+        rf_model, preprocessor, feature_names = None, None, None
 
-    st.markdown("""
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px; text-align: center;">
-        <div style="display: flex; justify-content: space-between; color: white;">
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">1. Pré-dépistage</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Application automatique du modèle sur questionnaire initial</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">2. Évaluation</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Entretien structuré si probabilité > 30%</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">3. Orientation</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Vers spécialiste si confirmation des signaux</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">4. Suivi</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Re-test à 6 mois pour cas négatifs persistants</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.title("📝 Test AQ-10 et Prédiction TSA")
 
-    st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-        <p style="font-size: 1.1rem; line-height: 1.6; text-align: center; margin: 0;">
-        Remplissez le formulaire ci-dessous pour obtenir une évaluation préliminaire du risque de TSA. 
-        Cette analyse est basée sur l'intelligence artificielle et ne remplace pas un diagnostic médical professionnel.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("Ce questionnaire aide à évaluer les traits autistiques potentiels. Répondez à toutes les questions puis complétez vos informations personnelles pour obtenir une prédiction par intelligence artificielle.")
 
-    # Interface principale
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("## 📝 Informations personnelles")
-        
-        with st.form("prediction_form"):
-            # Informations de base
-            col_age, col_genre = st.columns(2)
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.subheader("Questionnaire AQ-10")
+        st.write("Répondez aux 10 questions suivantes :")
+
+        form_responses = {}
+
+        for i, q in enumerate(questions):
+            options = list(q["scoring"].keys())
+            question_key = f"aq10_question_{i}"
             
-            with col_age:
-                age = st.number_input(
-                    "Âge", 
-                    min_value=1, 
-                    max_value=100, 
-                    value=24,
-                    help="Âge en années"
-                )
-                
-            with col_genre:
-                genre = st.selectbox(
-                    "Genre",
-                    options=["Female", "Male"],
-                    help="Sélectionnez le genre"
-                )
-            
-            # Antécédents familiaux
-            antecedents_familiaux = st.selectbox(
-                "Antécédents familiaux d'autisme",
-                options=["No", "Yes"],
-                help="Y a-t-il des antécédents familiaux de TSA ?"
+            st.write(q["question"])
+            selected_response = st.radio(
+                "",
+                options,
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
             )
-            
-            # Origine ethnique
-            ethnie = st.selectbox(
-                "Origine ethnique",
-                options=["Middle Eastern", "White-European", "Hispanic", "Asian", "African", "Others", "Native Indian", "Austronesian", "Latino"],
-                help="Sélectionnez l'origine ethnique"
-            )
-            
-            # Statut du testeur
-            statut_testeur = st.selectbox(
-                "Statut du testeur",
-                options=["Professionnel de santé", "Famille", "Individu", "Autres"],
-                help="Qui effectue ce test ?"
-            )
-            
-            # Score A10 (questionnaire AQ-10)
-            st.markdown("### 📊 Score du questionnaire AQ-10")
-            score_a10 = st.slider(
-                "Score A10 (somme des réponses A1 à A10)",
-                min_value=0,
-                max_value=10,
-                value=6,
-                help="Score total obtenu au questionnaire AQ-10 (de 0 à 10)"
-            )
-            
-            # Bouton de soumission
-            submitted = st.form_submit_button(
-                "🎯 Calculer mon score et obtenir une prédiction",
-                use_container_width=True
-            )
-        
-        # Traitement de la prédiction
+            form_responses[question_key] = selected_response
+
+        st.subheader("Informations personnelles")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24)
+            genre = st.selectbox("Genre", ["Female", "Male"])
+            ethnicite = st.selectbox("Origine ethnique", ["Middle Eastern", "White European", "Asian", "Black", "Hispanic", "Others", "Latino"])
+
+        with col2:
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["No", "Yes"])
+            testeur = st.selectbox("Statut du testeur", ["Professionnel de santé", "Famille", "Enseignant", "Auto-évaluation", "Professionnel", "Médecin", "Autre"])
+
+        submitted = st.form_submit_button("Calculer mon score et obtenir une prédiction", use_container_width=True)
+
         if submitted:
-            try:
-                # Préparation des données d'entrée
-                input_data = pd.DataFrame({
-                    'Age': [age],
-                    'Genre': [genre],
-                    'Ethnie': [ethnie],
-                    'Antecedents_familiaux_autisme': [antecedents_familiaux],
-                    'Statut_testeur': [statut_testeur],
-                    'Score_A10': [score_a10]
-                })
+            if None in form_responses.values():
+                st.error("⚠️ Veuillez répondre à toutes les questions du questionnaire.")
+            else:
+                total_score = 0
+                scores_individuels = []
+
+                for i, q in enumerate(questions):
+                    selected_option = form_responses[f"aq10_question_{i}"]
+                    if selected_option is not None:
+                        score = q["scoring"][selected_option]
+                        total_score += score
+                        scores_individuels.append(score)
+                    else:
+                        scores_individuels.append(0)
                 
-                # Prédiction initiale avec seuil par défaut (0.3)
-                prediction_proba = trained_model.predict_proba(input_data)[0, 1]
-                default_threshold = 0.3
-                default_prediction = 1 if prediction_proba >= default_threshold else 0
-                
-                # Stockage dans session state
+                # Stockage en session state
+                st.session_state.aq10_total = total_score
+                st.session_state.aq10_responses = scores_individuels
                 st.session_state.prediction_made = True
-                st.session_state.prediction_proba = prediction_proba
-                st.session_state.input_data = input_data
-                st.session_state.default_prediction = default_prediction
-                st.session_state.default_threshold = default_threshold
                 
-            except Exception as e:
-                st.error(f"❌ Erreur lors de la prédiction: {str(e)}")
-                return
+                user_data = {
+                    'Age': age,
+                    'Genre': genre,
+                    'Ethnie': ethnicite,
+                    'Antecedent_autisme': antecedents,
+                    'Statut_testeur': testeur,
+                }
 
-    with col2:
-        # Panneau d'information
-        st.markdown("""
-        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
-            <h3 style="color: #3498db; margin-top: 0;">ℹ️ À propos du test</h3>
-            <p style="font-size: 0.9rem; line-height: 1.5;">
-            <strong>Durée :</strong> 2-3 minutes<br>
-            <strong>Précision :</strong> ~95%<br>
-            <strong>Base :</strong> 5000+ cas analysés<br>
-            <strong>Validation :</strong> Études internationales
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div style="background-color: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-top: 20px;">
-            <h4 style="color: #e65100; margin-top: 0;">⚠️ Avertissement</h4>
-            <p style="font-size: 0.9rem; line-height: 1.5;">
-            Cet outil est une aide au dépistage et ne remplace pas :
-            </p>
-            <ul style="font-size: 0.9rem; padding-left: 20px;">
-                <li>Une évaluation clinique complète</li>
-                <li>Un diagnostic professionnel</li>
-                <li>L'expertise médicale</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+                for i, score in enumerate(scores_individuels):
+                    user_data[f'A{i+1}'] = score
 
-    # Affichage des résultats si une prédiction a été faite
+                user_data['Score_A10'] = total_score
+                user_df = pd.DataFrame([user_data])
+
+                # Affichage du score AQ-10
+                if total_score >= 6:
+                    st.error(f"**Résultat AQ-10: {total_score}/10** - Dépistage positif. Un suivi professionnel est recommandé.")
+                else:
+                    st.success(f"**Résultat AQ-10: {total_score}/10** - Score en dessous du seuil de dépistage.")
+
+                # Prédiction IA
+                st.subheader("🤖 Prédiction par intelligence artificielle")
+                
+                if rf_model is not None and preprocessor is not None:
+                    try:
+                        # Préparation des données
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                if col.startswith('A') and col[1:].isdigit():
+                                    idx = int(col[1:]) - 1
+                                    if idx < len(scores_individuels):
+                                        user_df[col] = scores_individuels[idx]
+                                    else:
+                                        user_df[col] = 0
+                                else:
+                                    user_df[col] = 0
+
+                        column_mapping = {'Antecedent_autisme': 'Autisme_familial'}
+                        user_df = user_df.rename(columns=column_mapping)
+
+                        if 'Jaunisse' not in user_df.columns:
+                            user_df['Jaunisse'] = "No"
+
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
+                                          'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                user_df[col] = 0
+
+                        user_df = user_df[required_columns]
+
+                        # Prédiction
+                        prediction_proba = rf_model.predict_proba(user_df)
+                        tsa_probability = prediction_proba[0][1]
+                        
+                        # Stockage de la probabilité
+                        st.session_state.prediction_proba = tsa_probability
+                        st.session_state.default_threshold = 0.3
+
+                        # Fonction pour afficher les résultats selon le seuil
+                        def display_prediction_results(proba, threshold, context_name):
+                            prediction = 1 if proba >= threshold else 0
+                            probability_percentage = int(proba * 100)
+                            
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                if prediction == 1:
+                                    st.error(f"**Résultat: POSITIF**\nSignaux détectés")
+                                else:
+                                    st.success(f"**Résultat: NÉGATIF**\nSignaux non détectés")
+                            
+                            with col2:
+                                st.metric("🎯 Probabilité TSA", f"{proba:.1%}", f"Seuil: {threshold:.1%}")
+                                st.metric("📊 Contexte", context_name)
+                            
+                            with col3:
+                                # Gauge de probabilité
+                                fig_gauge = go.Figure(go.Indicator(
+                                    mode="gauge+number",
+                                    value=proba*100,
+                                    domain={'x': [0, 1], 'y': [0, 1]},
+                                    title={'text': "Risque TSA (%)"},
+                                    gauge={
+                                        'axis': {'range': [0, 100]},
+                                        'bar': {'color': "#e74c3c" if prediction == 1 else "#2ecc71"},
+                                        'steps': [
+                                            {'range': [0, threshold*100], 'color': "lightgray"},
+                                            {'range': [threshold*100, 100], 'color': "rgba(231, 76, 60, 0.3)"}
+                                        ],
+                                        'threshold': {
+                                            'line': {'color': "red", 'width': 4},
+                                            'thickness': 0.75,
+                                            'value': threshold * 100
+                                        }
+                                    }
+                                ))
+                                fig_gauge.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=20))
+                                st.plotly_chart(fig_gauge, use_container_width=True)
+                            
+                        
+
+                        # Affichage initial avec seuil par défaut (0.3)
+                        st.markdown("### 🎯 Prédiction initiale (Dépistage de masse)")
+                        display_prediction_results(tsa_probability, 0.3, "Dépistage de masse")
+
+                    except Exception as e:
+                        st.error(f"Erreur lors de la prédiction: {str(e)}")
+
+    # Section d'ajustement des seuils (uniquement si une prédiction a été faite)
     if hasattr(st.session_state, 'prediction_made') and st.session_state.prediction_made:
         
         st.markdown("---")
-        st.markdown("## 📊 Résultats de l'analyse")
+        st.subheader("🎯 Recommandations par contexte d'utilisation")
         
-        # Affichage de la prédiction par défaut
-        prediction_proba = st.session_state.prediction_proba
-        default_prediction = st.session_state.default_prediction
-        default_threshold = st.session_state.default_threshold
+        st.info("Modifiez le seuil de détection selon votre contexte d'utilisation pour obtenir une analyse plus précise.")
         
-        # Fonction pour afficher les résultats selon le seuil
-        def display_prediction_results(proba, threshold, context_name):
-            prediction = 1 if proba >= threshold else 0
-            confidence = proba if prediction == 1 else 1 - proba
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                if prediction == 1:
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; text-align: center;">
-                        <h3 style="margin: 0; font-size: 1.3rem;">⚠️ Résultat : POSITIF</h3>
-                        <p style="margin: 10px 0 0 0; font-size: 1rem;">Signaux détectés</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 20px; border-radius: 15px; text-align: center;">
-                        <h3 style="margin: 0; font-size: 1.3rem;">✅ Résultat : NÉGATIF</h3>
-                        <p style="margin: 10px 0 0 0; font-size: 1rem;">Signaux non détectés</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-            with col2:
-                st.metric(
-                    "🎯 Probabilité TSA",
-                    f"{proba:.1%}",
-                    f"Seuil: {threshold:.1%}"
-                )
-                st.metric(
-                    "🔒 Niveau de confiance",
-                    f"{confidence:.1%}",
-                    f"Contexte: {context_name}"
-                )
-            
-            with col3:
-                # Gauge de probabilité
-                fig_gauge = go.Figure(go.Indicator(
-                    mode = "gauge+number",
-                    value = proba * 100,
-                    domain = {'x': [0, 1], 'y': [0, 1]},
-                    title = {'text': f"Risque TSA (%)"},
-                    gauge = {
-                        'axis': {'range': [0, 100]},
-                        'bar': {'color': "#e74c3c" if prediction == 1 else "#2ecc71"},
-                        'steps': [
-                            {'range': [0, threshold*100], 'color': "lightgray"},
-                            {'range': [threshold*100, 100], 'color': "rgba(231, 76, 60, 0.3)"}
-                        ],
-                        'threshold': {
-                            'line': {'color': "red", 'width': 4},
-                            'thickness': 0.75,
-                            'value': threshold * 100
-                        }
-                    }
-                ))
-                fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
-                st.plotly_chart(fig_gauge, use_container_width=True)
-            
-        
-        
-        # Affichage initial avec seuil par défaut
-        st.markdown("### 🎯 Prédiction initiale (Dépistage de masse)")
-        display_prediction_results(prediction_proba, default_threshold, "Dépistage de masse")
-        
-        st.markdown("---")
-        
-        # Options pour changer le contexte/seuil
-        st.markdown("### ⚙️ Ajuster l'analyse selon le contexte")
-        
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <p style="margin: 0; font-size: 1rem; color: #34495e;">
-            Modifiez le seuil de détection selon votre contexte d'utilisation pour obtenir une analyse plus précise.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Sélection du nouveau contexte
+        # Sélection du contexte
         context_choice = st.radio(
             "📋 Choisissez le contexte d'analyse :",
             options=[
@@ -3317,19 +3253,59 @@ def show_prediction_ia():
         
         # Bouton pour recalculer avec le nouveau seuil
         if st.button("🔄 Recalculer avec le nouveau contexte", use_container_width=True):
+            prediction_proba = st.session_state.prediction_proba
+            
+            # Fonction pour afficher les résultats (reprise de la fonction définie plus haut)
+            def display_prediction_results_adjusted(proba, threshold, context_name):
+                prediction = 1 if proba >= threshold else 0
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    if prediction == 1:
+                        st.error(f"**Résultat: POSITIF**\nSignaux détectés")
+                    else:
+                        st.success(f"**Résultat: NÉGATIF**\nSignaux non détectés")
+                
+                with col2:
+                    st.metric("🎯 Probabilité TSA", f"{proba:.1%}", f"Seuil: {threshold:.1%}")
+                    st.metric("📊 Contexte", context_name)
+                
+                with col3:
+                    fig_gauge = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=proba*100,
+                        domain={'x': [0, 1], 'y': [0, 1]},
+                        title={'text': "Risque TSA (%)"},
+                        gauge={
+                            'axis': {'range': [0, 100]},
+                            'bar': {'color': "#e74c3c" if prediction == 1 else "#2ecc71"},
+                            'steps': [
+                                {'range': [0, threshold*100], 'color': "lightgray"},
+                                {'range': [threshold*100, 100], 'color': "rgba(231, 76, 60, 0.3)"}
+                            ],
+                            'threshold': {
+                                'line': {'color': "red", 'width': 4},
+                                'thickness': 0.75,
+                                'value': threshold * 100
+                            }
+                        }
+                    ))
+                    fig_gauge.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=20))
+                    st.plotly_chart(fig_gauge, use_container_width=True)
+            
             st.markdown(f"### 📊 Résultat ajusté - {selected_context}")
-            display_prediction_results(prediction_proba, selected_threshold, selected_context)
+            display_prediction_results_adjusted(prediction_proba, selected_threshold, selected_context)
             
             # Comparaison avec le résultat initial
-            st.markdown("---")
             st.markdown("### 📈 Comparaison des résultats")
             
-            initial_pred = 1 if prediction_proba >= default_threshold else 0
+            initial_pred = 1 if prediction_proba >= 0.3 else 0
             new_pred = 1 if prediction_proba >= selected_threshold else 0
             
             comparison_df = pd.DataFrame({
                 'Contexte': ['Dépistage de masse', selected_context],
-                'Seuil': [f"{default_threshold:.1%}", f"{selected_threshold:.1%}"],
+                'Seuil': ['30%', f'{selected_threshold:.0%}'],
                 'Prédiction': ['POSITIF' if initial_pred == 1 else 'NÉGATIF', 
                               'POSITIF' if new_pred == 1 else 'NÉGATIF'],
                 'Probabilité': [f"{prediction_proba:.1%}", f"{prediction_proba:.1%}"]
@@ -3344,25 +3320,21 @@ def show_prediction_ia():
                 Le changement de contexte a modifié la classification de {'NÉGATIF vers POSITIF' if new_pred == 1 else 'POSITIF vers NÉGATIF'}.
                 Cela illustre l'importance du choix du seuil selon l'utilisation prévue.
                 """)
-    
-    # Avertissement final
-    st.markdown("---")
-    st.markdown("""
-    <div style="margin-top: 30px; padding: 20px; border-radius: 10px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
-        <h4 style="color: #e74c3c; margin-top: 0;">⚠️ Avertissement important</h4>
-        <p style="font-size: 1rem;">
-        <strong>Ce modèle est un outil d'aide au dépistage précoce et ne remplace en aucun cas :</strong>
-        </p>
-        <ul style="margin-left: 20px; font-size: 0.95rem;">
-            <li>Une évaluation clinique complète par un professionnel qualifié</li>
-            <li>Les outils de diagnostic standardisés (ADOS, ADI-R, etc.)</li>
-            <li>L'expertise clinique et l'anamnèse détaillée</li>
-        </ul>
-        <p style="font-style: italic; margin-top: 15px; font-size: 0.95rem;">
-        Les résultats doivent toujours être interprétés dans le contexte clinique global du patient.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+
+        # Avertissement final
+        st.markdown("---")
+        st.error("""
+        **⚠️ Avertissement important**
+        
+        **Ce modèle est un outil d'aide au dépistage précoce et ne remplace en aucun cas :**
+        
+        - Une évaluation clinique complète par un professionnel qualifié
+        - Les outils de diagnostic standardisés (ADOS, ADI-R, etc.)
+        - L'expertise clinique et l'anamnèse détaillée
+        
+        *Les résultats doivent toujours être interprétés dans le contexte clinique global du patient.*
+        """)
+
                     
 def show_documentation():
     st.markdown("""
