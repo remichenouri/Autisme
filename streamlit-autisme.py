@@ -2216,29 +2216,187 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
-        # Simulation des résultats
-        models_data = {
-            "RandomForest": {"Accuracy": 0.956, "Recall": 0.96, "Time": 0.38},
-            "LGBM": {"Accuracy": 0.963, "Recall": 0.95, "Time": 0.17},
-            "XGBoost": {"Accuracy": 0.955, "Recall": 0.94, "Time": 0.17}
-        }
-        df_models = pd.DataFrame(models_data).T
+        # Simulation des résultats Lazy Predict
+        @st.cache_data(ttl=3600)
+        def get_enhanced_lazy_predict_results():
+            models_data = {
+                "LGBMClassifier": {"Accuracy": 0.963, "Balanced Accuracy": 0.962, "ROC AUC": 0.981, "F1 Score": 0.963, "Time Taken": 0.17},
+                "RandomForestClassifier": {"Accuracy": 0.956, "Balanced Accuracy": 0.956, "ROC AUC": 0.978, "F1 Score": 0.956, "Time Taken": 0.38},
+                "XGBClassifier": {"Accuracy": 0.956, "Balanced Accuracy": 0.955, "ROC AUC": 0.976, "F1 Score": 0.955, "Time Taken": 0.17},
+                "ExtraTreesClassifier": {"Accuracy": 0.951, "Balanced Accuracy": 0.951, "ROC AUC": 0.974, "F1 Score": 0.951, "Time Taken": 0.69},
+                "GradientBoostingClassifier": {"Accuracy": 0.948, "Balanced Accuracy": 0.947, "ROC AUC": 0.972, "F1 Score": 0.947, "Time Taken": 0.52},
+                "BaggingClassifier": {"Accuracy": 0.945, "Balanced Accuracy": 0.944, "ROC AUC": 0.968, "F1 Score": 0.944, "Time Taken": 0.19},
+                "LogisticRegression": {"Accuracy": 0.932, "Balanced Accuracy": 0.931, "ROC AUC": 0.965, "F1 Score": 0.931, "Time Taken": 0.08},
+                "SVC": {"Accuracy": 0.928, "Balanced Accuracy": 0.927, "ROC AUC": 0.962, "F1 Score": 0.927, "Time Taken": 0.31},
+                "KNeighborsClassifier": {"Accuracy": 0.921, "Balanced Accuracy": 0.920, "ROC AUC": 0.954, "F1 Score": 0.920, "Time Taken": 0.12},
+                "DecisionTreeClassifier": {"Accuracy": 0.889, "Balanced Accuracy": 0.888, "ROC AUC": 0.888, "F1 Score": 0.888, "Time Taken": 0.06}
+            }
+            
+            return pd.DataFrame(models_data).T
 
-        fig = px.bar(
-            df_models.reset_index(),
-            x='index', 
-            y='Recall',
-            color='Time',
-            title="Performance comparative pour le dépistage",
-            labels={'index': 'Modèle', 'Recall': 'Sensibilité'}
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        lazy_results = get_enhanced_lazy_predict_results()
+        
+        # Affichage du tableau stylisé
+        def style_lazy_dataframe(df):
+            return df.style.background_gradient(
+                cmap='Blues', 
+                subset=['Accuracy', 'Balanced Accuracy', 'ROC AUC', 'F1 Score']
+            ).background_gradient(
+                cmap='Blues_r',
+                subset=['Time Taken']
+            ).format({
+                'Accuracy': '{:.3f}',
+                'Balanced Accuracy': '{:.3f}',
+                'ROC AUC': '{:.3f}',
+                'F1 Score': '{:.3f}',
+                'Time Taken': '{:.2f}s'
+            })
 
-        st.info("""
-        **Pourquoi choisir Random Forest ?**
-        - Meilleur équilibre sensibilité/spécificité (Recall: 0.96 vs 0.95 pour LGBM)
-        - Interprétation clinique directe via l'importance des caractéristiques
-        - Robustesse aux données manquantes et bruitées
+        st.markdown("### 📊 Résultats de Lazy Predict")
+        st.dataframe(style_lazy_dataframe(lazy_results), use_container_width=True, height=400)
+
+        # Modification image 294 : Top 3 des modèles amélioré sans analyse d'efficacité
+        st.markdown("### 🏆 Top 3 des modèles pour le dépistage")
+        
+        top_3 = lazy_results.nlargest(3, 'Accuracy')
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            model_name = "LGBMClassifier"
+            row = top_3.loc[model_name]
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🥇</div>
+                <h3 style="color: white; margin: 0; font-size: 1.2rem;">{model_name}</h3>
+                <hr style="border-color: rgba(255,255,255,0.3); margin: 15px 0;">
+                <div style="color: white;">
+                    <p style="margin: 5px 0; font-size: 1.1rem;"><strong>Précision: {row['Accuracy']:.1%}</strong></p>
+                    <p style="margin: 5px 0;">AUC-ROC: {row['ROC AUC']:.1%}</p>
+                    <p style="margin: 5px 0;">F1-Score: {row['F1 Score']:.1%}</p>
+                    <p style="margin: 5px 0;">Temps: {row['Time Taken']:.2f}s</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col2:
+            model_name = "RandomForestClassifier"
+            row = top_3.loc[model_name]
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1e40af, #60a5fa); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🥈</div>
+                <h3 style="color: white; margin: 0; font-size: 1.2rem;">{model_name}</h3>
+                <hr style="border-color: rgba(255,255,255,0.3); margin: 15px 0;">
+                <div style="color: white;">
+                    <p style="margin: 5px 0; font-size: 1.1rem;"><strong>Précision: {row['Accuracy']:.1%}</strong></p>
+                    <p style="margin: 5px 0;">AUC-ROC: {row['ROC AUC']:.1%}</p>
+                    <p style="margin: 5px 0;">F1-Score: {row['F1 Score']:.1%}</p>
+                    <p style="margin: 5px 0;">Temps: {row['Time Taken']:.2f}s</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col3:
+            model_name = "XGBClassifier"
+            row = top_3.loc[model_name]
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #1d4ed8, #93c5fd); padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <div style="font-size: 2rem; margin-bottom: 10px;">🥉</div>
+                <h3 style="color: white; margin: 0; font-size: 1.2rem;">{model_name}</h3>
+                <hr style="border-color: rgba(255,255,255,0.3); margin: 15px 0;">
+                <div style="color: white;">
+                    <p style="margin: 5px 0; font-size: 1.1rem;"><strong>Précision: {row['Accuracy']:.1%}</strong></p>
+                    <p style="margin: 5px 0;">AUC-ROC: {row['ROC AUC']:.1%}</p>
+                    <p style="margin: 5px 0;">F1-Score: {row['F1 Score']:.1%}</p>
+                    <p style="margin: 5px 0;">Temps: {row['Time Taken']:.2f}s</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Modification image 245 : Graphiques de comparaison simplifiés
+        st.markdown("### 📈 Visualisations comparatives")
+        
+        tab1, tab2 = st.tabs(["Performance vs Temps", "Profil radar"])
+        
+        with tab1:
+            fig_scatter = px.scatter(
+                lazy_results.reset_index(),
+                x='Time Taken',
+                y='Accuracy',
+                size='ROC AUC',
+                color='F1 Score',
+                hover_name='index',
+                title="Performance vs Temps d'exécution",
+                labels={'Time Taken': 'Temps (secondes)', 'Accuracy': 'Précision'},
+                color_continuous_scale='Blues'
+            )
+            fig_scatter.update_layout(height=500)
+            st.plotly_chart(fig_scatter, use_container_width=True)
+            
+        with tab2:
+            # Modification image 360 : Graphique radar avec dégradé de bleu
+            top_5_models = lazy_results.head(5)
+            
+            fig_radar = go.Figure()
+            
+            # Couleurs en dégradé de bleu selon l'esthétique du site
+            blue_gradient = ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3']
+            
+            categories = ['Accuracy', 'F1 Score', 'ROC AUC', 'Balanced Accuracy', 'Vitesse']
+            
+            for i, (model, data) in enumerate(top_5_models.iterrows()):
+                values = [
+                    data['Accuracy'],
+                    data['F1 Score'],
+                    data['ROC AUC'],
+                    data['Balanced Accuracy'],
+                    1 - (data['Time Taken'] / top_5_models['Time Taken'].max())  # Vitesse normalisée
+                ]
+                values += [values[0]]  # Fermer le radar
+                
+                fig_radar.add_trace(go.Scatterpolar(
+                    r=values,
+                    theta=categories + [categories[0]],
+                    fill='toself',
+                    name=model,
+                    line=dict(color=blue_gradient[i], width=2),
+                    fillcolor=blue_gradient[i],
+                    opacity=0.6
+                ))
+            
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 1],
+                        gridcolor='lightblue',
+                        gridwidth=1
+                    ),
+                    bgcolor='rgba(240, 248, 255, 0.8)'
+                ),
+                showlegend=True,
+                title="Profil de performance multidimensionnel",
+                height=600,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)'
+            )
+            
+            st.plotly_chart(fig_radar, use_container_width=True)
+
+        # Interprétation
+        st.markdown("""
+        ### 🎯 Interprétation des résultats
+        
+        **Points clés observés :**
+        
+        1. **LGBMClassifier en tête** : Excellent compromis entre performance (96.3%) et rapidité (0.17s)
+        2. **Random Forest très proche** : Performance similaire mais plus lent, très stable
+        3. **XGBoost performant** : Bon équilibre performance/temps, très populaire en compétition
+        
+        **Recommandations :**
+        - Pour la **production** : LGBMClassifier ou XGBoost
+        - Pour l'**interprétabilité** : Random Forest
+        - Pour la **rapidité** : LGBMClassifier
         """)
 
     with ml_tabs[2]:
@@ -2290,20 +2448,124 @@ def show_ml_analysis():
         with col3:
             st.metric("AUC-ROC", f"{roc_auc_score(y_test, y_proba):.3f}", "Performance discriminante")
 
-        # Importance des caractéristiques
+        # Modification image 307 : Graphique plus révélateur pour l'importance des features
+        st.subheader("🔍 Facteurs de risque dans le dépistage")
+        
         feature_importance = pd.DataFrame({
             'feature': model.named_steps['preprocessor'].get_feature_names_out(),
             'importance': model.named_steps['classifier'].feature_importances_
         }).sort_values('importance', ascending=False).head(10)
 
-        fig = px.bar(
-            feature_importance,
-            x='importance',
-            y='feature',
-            title="Facteurs de risque principaux",
-            labels={'importance': 'Importance relative', 'feature': 'Caractéristique'}
+        # Graphique combiné plus informatif
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            # Graphique en barres horizontales avec gradient et annotations
+            fig = px.bar(
+                feature_importance,
+                x='importance',
+                y='feature',
+                orientation='h',
+                title="Impact des variables sur la prédiction",
+                labels={'importance': 'Score d\'importance', 'feature': 'Variable'},
+                color='importance',
+                color_continuous_scale='Blues',
+                text='importance'
+            )
+            
+            fig.update_traces(
+                texttemplate='%{text:.3f}', 
+                textposition='outside',
+                hovertemplate='<b>%{y}</b><br>Importance: %{x:.3f}<extra></extra>'
+            )
+            fig.update_layout(
+                height=500,
+                yaxis={'categoryorder': 'total ascending'},
+                showlegend=False,
+                xaxis_title="Score d'importance relatif",
+                yaxis_title=""
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            # Graphique circulaire pour montrer la répartition
+            fig_pie = px.pie(
+                feature_importance.head(5),
+                values='importance',
+                names='feature',
+                title="Top 5 - Répartition de l'influence",
+                color_discrete_sequence=px.colors.sequential.Blues_r
+            )
+            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pie.update_layout(height=400, showlegend=False)
+            st.plotly_chart(fig_pie, use_container_width=True)
+        
+        # Analyse détaillée avec indicateurs visuels
+        st.markdown("### 💡 Analyse approfondie des facteurs")
+        
+        top_feature = feature_importance.iloc[0]
+        second_feature = feature_importance.iloc[1] if len(feature_importance) > 1 else None
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.success(f"""
+            **🎯 Facteur principal : {top_feature['feature']}**
+            
+            - Score d'importance : **{top_feature['importance']:.3f}**
+            - Contribution : **{(top_feature['importance']/feature_importance['importance'].sum())*100:.1f}%** du modèle
+            - Impact : Déterminant majeur dans la prédiction
+            """)
+            
+        with col2:
+            if second_feature is not None:
+                st.info(f"""
+                **📊 Facteur secondaire : {second_feature['feature']}**
+                
+                - Score d'importance : **{second_feature['importance']:.3f}**
+                - Contribution : **{(second_feature['importance']/feature_importance['importance'].sum())*100:.1f}%** du modèle
+                - Impact : Complément important au diagnostic
+                """)
+
+        # Graphique de cumul d'importance
+        st.subheader("📈 Importance cumulative des variables")
+        
+        feature_importance['cumulative'] = feature_importance['importance'].cumsum()
+        feature_importance['cumulative_pct'] = (feature_importance['cumulative'] / feature_importance['importance'].sum()) * 100
+        
+        fig_cumul = go.Figure()
+        
+        # Barres d'importance
+        fig_cumul.add_trace(go.Bar(
+            x=feature_importance['feature'],
+            y=feature_importance['importance'],
+            name='Importance individuelle',
+            marker_color='lightblue',
+            yaxis='y'
+        ))
+        
+        # Ligne cumulative
+        fig_cumul.add_trace(go.Scatter(
+            x=feature_importance['feature'],
+            y=feature_importance['cumulative_pct'],
+            mode='lines+markers',
+            name='Cumul (%)',
+            line=dict(color='darkblue', width=3),
+            marker=dict(size=8),
+            yaxis='y2'
+        ))
+        
+        fig_cumul.update_layout(
+            title="Analyse de Pareto - Importance des variables",
+            xaxis_title="Variables",
+            yaxis=dict(title="Score d'importance", side="left"),
+            yaxis2=dict(title="Pourcentage cumulé", side="right", overlaying="y"),
+            height=500,
+            xaxis_tickangle=-45
         )
-        st.plotly_chart(fig, use_container_width=True)
+        
+        st.plotly_chart(fig_cumul, use_container_width=True)
 
     with ml_tabs[3]:
         st.header("Optimisation du processus de dépistage")
@@ -2324,11 +2586,41 @@ def show_ml_analysis():
         
         y_pred_adjusted = (y_proba >= threshold).astype(int)
         
-        st.markdown(f"""
-        **Impact du seuil à {threshold} :**
-        - ✅ Vrais positifs augmentés de {(recall_score(y_test, y_pred_adjusted) - recall_score(y_test, y_pred)):.1%}
-        - ⚠️ Faux positifs augmentés de {(1 - balanced_accuracy_score(y_test, y_pred_adjusted) - (1 - balanced_accuracy_score(y_test, y_pred))):.1%}
-        """)
+        # Métriques ajustées
+        adjusted_recall = recall_score(y_test, y_pred_adjusted)
+        adjusted_precision = precision_score(y_test, y_pred_adjusted)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("Sensibilité ajustée", f"{adjusted_recall:.1%}")
+            st.metric("Précision ajustée", f"{adjusted_precision:.1%}")
+            
+        with col2:
+            # Graphique de l'impact du seuil
+            fig_gauge = go.Figure(go.Indicator(
+                mode = "gauge+number+delta",
+                value = adjusted_recall * 100,
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                title = {'text': "Sensibilité (%)"},
+                delta = {'reference': recall_score(y_test, y_pred) * 100},
+                gauge = {
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "darkblue"},
+                    'steps': [
+                        {'range': [0, 50], 'color': "lightgray"},
+                        {'range': [50, 80], 'color': "yellow"},
+                        {'range': [80, 100], 'color': "lightgreen"}
+                    ],
+                    'threshold': {
+                        'line': {'color': "red", 'width': 4},
+                        'thickness': 0.75,
+                        'value': 90
+                    }
+                }
+            ))
+            fig_gauge.update_layout(height=300)
+            st.plotly_chart(fig_gauge, use_container_width=True)
 
         # Protocole de dépistage
         st.subheader("📋 Protocole recommandé")
@@ -2339,6 +2631,33 @@ def show_ml_analysis():
         4. **Suivi** : Re-test à 6 mois pour les cas négatifs persistants
         """)
 
+        # Matrice de performance selon le seuil
+        st.subheader("📊 Impact du seuil sur les performances")
+        
+        thresholds = np.linspace(0.1, 0.9, 9)
+        metrics_by_threshold = []
+        
+        for t in thresholds:
+            y_pred_t = (y_proba >= t).astype(int)
+            metrics_by_threshold.append({
+                'Seuil': t,
+                'Sensibilité': recall_score(y_test, y_pred_t),
+                'Précision': precision_score(y_test, y_pred_t, zero_division=0),
+                'F1-Score': f1_score(y_test, y_pred_t, zero_division=0)
+            })
+        
+        df_thresholds = pd.DataFrame(metrics_by_threshold)
+        
+        fig_threshold = px.line(
+            df_thresholds,
+            x='Seuil',
+            y=['Sensibilité', 'Précision', 'F1-Score'],
+            title="Évolution des métriques selon le seuil",
+            color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
+        )
+        fig_threshold.update_layout(height=400)
+        st.plotly_chart(fig_threshold, use_container_width=True)
+
         # Avertissement important
         st.markdown("""
         <div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
@@ -2347,148 +2666,6 @@ def show_ml_analysis():
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
-    with ml_tabs[2]:
-        st.header("Comparaison détaillée des modèles")
-
-        st.markdown("""
-        <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse comparative approfondie</h3>
-            <p style="color: #34495e;">
-            Cette section compare en détail les 5 meilleurs algorithmes identifiés par Lazy Predict 
-            selon différents critères de performance et d'applicabilité clinique.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Données pour la comparaison détaillée
-        top_5_models = lazy_results.head(5)
-        
-        # Graphiques de comparaison avancés
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "Métriques globales", 
-            "Analyse ROC", 
-            "Matrice de performance", 
-            "Recommandations cliniques"
-        ])
-        
-        with tab1:
-            st.subheader("Comparaison des métriques principales")
-            
-            # Graphique en barres groupées
-            metrics_comparison = top_5_models[['Accuracy', 'F1 Score', 'ROC AUC']].reset_index()
-            metrics_melted = metrics_comparison.melt(
-                id_vars='index', 
-                var_name='Métrique', 
-                value_name='Score'
-            )
-            
-            fig_grouped = px.bar(
-                metrics_melted,
-                x='index',
-                y='Score',
-                color='Métrique',
-                barmode='group',
-                title="Comparaison des métriques de performance",
-                labels={'index': 'Modèle', 'Score': 'Score de performance'},
-                color_discrete_sequence=['#3498db', '#2ecc71', '#e74c3c']
-            )
-            fig_grouped.update_layout(height=500, xaxis_tickangle=-45)
-            st.plotly_chart(fig_grouped, use_container_width=True)
-            
-            # Graphique radar
-            st.subheader("Profil de performance (graphique radar)")
-            
-            fig_radar = go.Figure()
-            
-            for model in top_5_models.index:
-                fig_radar.add_trace(go.Scatterpolar(
-                    r=[
-                        top_5_models.loc[model, 'Accuracy'],
-                        top_5_models.loc[model, 'F1 Score'],
-                        top_5_models.loc[model, 'ROC AUC'],
-                        top_5_models.loc[model, 'Balanced Accuracy'],
-                        1 - (top_5_models.loc[model, 'Time Taken'] / top_5_models['Time Taken'].max())  # Vitesse normalisée
-                    ],
-                    theta=['Accuracy', 'F1 Score', 'ROC AUC', 'Balanced Accuracy', 'Vitesse'],
-                    fill='toself',
-                    name=model
-                ))
-            
-            fig_radar.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                        visible=True,
-                        range=[0, 1]
-                    )),
-                showlegend=True,
-                title="Profil de performance multidimensionnel",
-                height=600
-            )
-            st.plotly_chart(fig_radar, use_container_width=True)
-
-        with tab2:
-            st.subheader("Analyse des courbes ROC simulées")
-            
-            # Simulation de courbes ROC pour illustration
-            np.random.seed(42)
-            
-            fig_roc = go.Figure()
-            
-            # Courbe de référence (ligne diagonale)
-            fig_roc.add_trace(go.Scatter(
-                x=[0, 1], y=[0, 1],
-                mode='lines',
-                line=dict(dash='dash', color='gray'),
-                name='Référence (AUC = 0.5)'
-            ))
-            
-            colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6']
-            
-            for i, (model, row) in enumerate(top_5_models.iterrows()):
-                # Simulation d'une courbe ROC basée sur l'AUC réel
-                auc_score = row['ROC AUC']
-                
-                # Génération de points pour une courbe ROC plausible
-                n_points = 100
-                fpr = np.linspace(0, 1, n_points)
-                
-                # Simulation d'une courbe cohérente avec l'AUC
-                base_tpr = fpr + (auc_score - 0.5) * 2 * (1 - fpr) * fpr * 4
-                noise = np.random.normal(0, 0.02, n_points) * (auc_score - 0.5)
-                tpr = np.clip(base_tpr + noise, 0, 1)
-                
-                # S'assurer que la courbe est monotone croissante
-                for j in range(1, len(tpr)):
-                    if tpr[j] < tpr[j-1]:
-                        tpr[j] = tpr[j-1]
-                
-                fig_roc.add_trace(go.Scatter(
-                    x=fpr,
-                    y=tpr,
-                    mode='lines',
-                    name=f'{model} (AUC = {auc_score:.3f})',
-                    line=dict(color=colors[i], width=3)
-                ))
-            
-            fig_roc.update_layout(
-                title='Courbes ROC comparatives',
-                xaxis_title='Taux de Faux Positifs',
-                yaxis_title='Taux de Vrais Positifs',
-                width=800,
-                height=600,
-                showlegend=True
-            )
-            
-            st.plotly_chart(fig_roc, use_container_width=True)
-            
-            st.info("""
-            💡 **Interprétation des courbes ROC :**
-            
-            - **Plus la courbe est proche du coin supérieur gauche**, meilleure est la performance
-            - **L'aire sous la courbe (AUC)** résume la performance : 1.0 = parfait, 0.5 = aléatoire
-            - **LGBMClassifier** montre la meilleure courbe avec AUC = 0.981
-            """)
 
         with tab3:
             st.subheader("Matrice de performance détaillée")
