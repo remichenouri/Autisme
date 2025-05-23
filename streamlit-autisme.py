@@ -4081,55 +4081,6 @@ def show_documentation():
               </div>
               """, unsafe_allow_html=True)
 
-        st.markdown("""
-          <div style="margin-top:20px; background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
-              <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Performance des Modèles</h4>
-              <div style="overflow-x:auto; margin-top:10px">
-                  <table style="width:100%; border-collapse:collapse; text-align:center">
-                      <thead>
-                          <tr style="background:#fff3e0">
-                              <th style="padding:8px; border-bottom:2px solid #ffcc80">Modèle</th>
-                              <th style="padding:8px; border-bottom:2px solid #ffcc80">Accuracy</th>
-                              <th style="padding:8px; border-bottom:2px solid #ffcc80">Precision</th>
-                              <th style="padding:8px; border-bottom:2px solid #ffcc80">Recall</th>
-                              <th style="padding:8px; border-bottom:2px solid #ffcc80">F1 Score</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          <tr style="background:#fff">
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2"><strong>Random Forest</strong></td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.97</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.97</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                          </tr>
-                          <tr style="background:#fafafa">
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2"><strong>LightGBM</strong></td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.97</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                          </tr>
-                          <tr style="background:#fff">
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2"><strong>XGBoost</strong></td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.95</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.96</td>
-                          </tr>
-                          <tr style="background:#fafafa">
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2"><strong>Logistic Regression</strong></td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.83</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.84</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.82</td>
-                              <td style="padding:8px; border-bottom:1px solid #ffe0b2">0.83</td>
-                          </tr>
-                      </tbody>
-                  </table>
-              </div>
-          </div>
-          """, unsafe_allow_html=True)
-
     with st.expander("📝 Références Techniques", expanded=True):
         st.markdown("""
         <div style="border-left:4px solid #9c27b0; padding-left:15px; margin-bottom:20px">
