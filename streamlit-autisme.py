@@ -2967,401 +2967,806 @@ def show_ml_analysis():
         """, unsafe_allow_html=True)
 
 
-def show_prediction_ia():
-    """Interface de prédiction par IA avec seuils ajustables"""
-    
-    st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🤖</span>
-        <h1 class="app-title">Prédiction par Intelligence Artificielle</h1>
-    </div>
-    """, unsafe_allow_html=True)
+def show_aq10_and_prediction():
+    """
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA.
+    """
+    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import numpy as np
 
-    # Chargement des données et du modèle
     try:
         df, _, _, _, _, _, _ = load_dataset()
-        
-        # Préparation des données pour l'entraînement
-        if 'TSA' not in df.columns:
-            st.error("❌ Colonne 'TSA' manquante dans le dataset")
-            return
-            
-        # Suppression des colonnes individuelles A1-A10 et Jaunisse
         aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
         if aq_columns:
             df = df.drop(columns=aq_columns)
-        
+
         if 'Jaunisse' in df.columns:
             df = df.drop(columns=['Jaunisse'])
-            
-        X = df.drop(columns=['TSA'])
-        y = df['TSA'].map({'Yes': 1, 'No': 0})
-        
-        # Entraînement du modèle
-        with st.spinner("🔄 Chargement du modèle prédictif..."):
-            trained_model, preprocessor, feature_names = train_advanced_model(df)
-            
-        if trained_model is None:
-            st.error("❌ Erreur lors du chargement du modèle")
-            return
-            
+
+            rf_model, preprocessor, feature_names = train_advanced_model(df)
     except Exception as e:
-        st.error(f"❌ Erreur lors du chargement: {str(e)}")
-        return
+        st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
+        rf_model, preprocessor, feature_names = None, None, None
+
+    st.markdown(
+        f"""<div class="header-container" style="text-align: center;">
+            <span style="font-size:2.5rem">''📝''</span>
+            <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
+        </div>""", unsafe_allow_html=True
+    )
+
+    image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px; text-align: center;">
-        <div style="display: flex; justify-content: space-between; color: white;">
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">1. Pré-dépistage</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Application automatique du modèle sur questionnaire initial</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">2. Évaluation</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Entretien structuré si probabilité > 30%</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">3. Orientation</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Vers spécialiste si confirmation des signaux</p>
-                </div>
-            </div>
-            <div style="flex: 1; padding: 10px;">
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
-                    <h3 style="margin: 0; font-size: 1.1rem;">4. Suivi</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Re-test à 6 mois pour cas négatifs persistants</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <p style="text-align: center;">Ce questionnaire aide à évaluer les traits autistiques potentiels. Répondez à toutes les questions puis complétez vos informations personnelles pour obtenir une prédiction par intelligence artificielle.</p>
     """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-        <p style="font-size: 1.1rem; line-height: 1.6; text-align: center; margin: 0;">
-        Remplissez le formulaire ci-dessous pour obtenir une évaluation préliminaire du risque de TSA. 
-        Cette analyse est basée sur l'intelligence artificielle et ne remplace pas un diagnostic médical professionnel.
-        </p>
-    </div>
+    <style>
+    .result-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(52,152,219,0.1);
+        padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+        margin-top: 28px;
+        margin-bottom: 22px;
+        text-align: center;
+    }
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
+    }
+    .result-card.warning {
+        border-left: 6px solid #e67e22;
+        background: linear-gradient(90deg, #fff6e0 80%, #fff8f2 100%);
+    }
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(90deg, #ffeaea 80%, #fff6f6 100%);
+    }
+    .result-score {
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .result-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #3498db;
+        text-align: center;
+    }
+    .kpi-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 5px 0;
+        text-align: center;
+    }
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    .kpi-comparison {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-top: 5px;
+        text-align: center;
+    }
+    .question-container {
+        text-align: left;
+    }
+    p {
+        text-align: center;
+    }
+    .stButton > button {
+        display: block;
+        margin: 0 auto;
+    }
+    .diagnostic-box {
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    </style>
     """, unsafe_allow_html=True)
 
-    # Interface principale
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("## 📝 Informations personnelles")
-        
-        with st.form("prediction_form"):
-            # Informations de base
-            col_age, col_genre = st.columns(2)
-            
-            with col_age:
-                age = st.number_input(
-                    "Âge", 
-                    min_value=1, 
-                    max_value=100, 
-                    value=24,
-                    help="Âge en années"
-                )
-                
-            with col_genre:
-                genre = st.selectbox(
-                    "Genre",
-                    options=["Female", "Male"],
-                    help="Sélectionnez le genre"
-                )
-            
-            # Antécédents familiaux
-            antecedents_familiaux = st.selectbox(
-                "Antécédents familiaux d'autisme",
-                options=["No", "Yes"],
-                help="Y a-t-il des antécédents familiaux de TSA ?"
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Questionnaire AQ-10</p>', unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Répondez aux 10 questions suivantes :</p>", unsafe_allow_html=True)
+
+        form_responses = {}
+
+        for i, q in enumerate(questions):
+            options = list(q["scoring"].keys())
+            question_key = f"aq10_question_{i}"
+
+            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
+
+            selected_response = st.radio(
+                "",
+                options,
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
             )
-            
-            # Origine ethnique
-            ethnie = st.selectbox(
-                "Origine ethnique",
-                options=["Middle Eastern", "White-European", "Hispanic", "Asian", "African", "Others", "Native Indian", "Austronesian", "Latino"],
-                help="Sélectionnez l'origine ethnique"
-            )
-            
-            # Statut du testeur
-            statut_testeur = st.selectbox(
-                "Statut du testeur",
-                options=["Professionnel de santé", "Famille", "Individu", "Autres"],
-                help="Qui effectue ce test ?"
-            )
-            
-            # Score A10 (questionnaire AQ-10)
-            st.markdown("### 📊 Score du questionnaire AQ-10")
-            score_a10 = st.slider(
-                "Score A10 (somme des réponses A1 à A10)",
-                min_value=0,
-                max_value=10,
-                value=6,
-                help="Score total obtenu au questionnaire AQ-10 (de 0 à 10)"
-            )
-            
-            # Bouton de soumission
-            submitted = st.form_submit_button(
-                "🎯 Calculer mon score et obtenir une prédiction",
-                use_container_width=True
-            )
-        
-        # Traitement de la prédiction
+
+            form_responses[question_key] = selected_response
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Informations personnelles</p>', unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24, help="Âge de la personne concernée")
+
+            genres = ["Female", "Male"]
+            genre = st.selectbox("Genre", genres)
+
+            ethnies = ["Middle Eastern", "White European", "Asian", "Black", "Hispanic", "Others", "Latino"]
+            ethnicite = st.selectbox("Origine ethnique", ethnies)
+
+        with col2:
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["No", "Yes"])
+            testeur = st.selectbox("Statut du testeur", ["Professionnel de santé", "Famille", "Enseignant", "Auto-évaluation", "Professionnel", "Médecin", "Autre"])
+
+        submitted = st.form_submit_button("Calculer mon score et obtenir une prédiction", use_container_width=True)
+
         if submitted:
-            try:
-                # Préparation des données d'entrée
-                input_data = pd.DataFrame({
-                    'Age': [age],
-                    'Genre': [genre],
-                    'Ethnie': [ethnie],
-                    'Antecedents_familiaux_autisme': [antecedents_familiaux],
-                    'Statut_testeur': [statut_testeur],
-                    'Score_A10': [score_a10]
-                })
-                
-                # Prédiction initiale avec seuil par défaut (0.3)
-                prediction_proba = trained_model.predict_proba(input_data)[0, 1]
-                default_threshold = 0.3
-                default_prediction = 1 if prediction_proba >= default_threshold else 0
-                
-                # Stockage dans session state
-                st.session_state.prediction_made = True
-                st.session_state.prediction_proba = prediction_proba
-                st.session_state.input_data = input_data
-                st.session_state.default_prediction = default_prediction
-                st.session_state.default_threshold = default_threshold
-                
-            except Exception as e:
-                st.error(f"❌ Erreur lors de la prédiction: {str(e)}")
-                return
+            if None in form_responses.values():
+                st.error("⚠️ Veuillez répondre à toutes les questions du questionnaire.")
+            else:
+                total_score = 0
+                scores_individuels = []
 
-    with col2:
-        # Panneau d'information
-        st.markdown("""
-        <div style="background-color: #f0f7ff; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
-            <h3 style="color: #3498db; margin-top: 0;">ℹ️ À propos du test</h3>
-            <p style="font-size: 0.9rem; line-height: 1.5;">
-            <strong>Durée :</strong> 2-3 minutes<br>
-            <strong>Précision :</strong> ~95%<br>
-            <strong>Base :</strong> 5000+ cas analysés<br>
-            <strong>Validation :</strong> Études internationales
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div style="background-color: #fff3e0; padding: 20px; border-radius: 10px; border-left: 4px solid #ff9800; margin-top: 20px;">
-            <h4 style="color: #e65100; margin-top: 0;">⚠️ Avertissement</h4>
-            <p style="font-size: 0.9rem; line-height: 1.5;">
-            Cet outil est une aide au dépistage et ne remplace pas :
-            </p>
-            <ul style="font-size: 0.9rem; padding-left: 20px;">
-                <li>Une évaluation clinique complète</li>
-                <li>Un diagnostic professionnel</li>
-                <li>L'expertise médicale</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+                for i, q in enumerate(questions):
+                    selected_option = form_responses[f"aq10_question_{i}"]
+                    if selected_option is not None:
+                        score = q["scoring"][selected_option]
+                        total_score += score
+                        scores_individuels.append(score)
+                    else:
+                        scores_individuels.append(0)
+                st.session_state.aq10_total = total_score
+                st.session_state.aq10_responses = scores_individuels
+                user_data = {
+                    'Age': age,
+                    'Genre': genre,
+                    'Ethnie': ethnicite,
+                    'Antecedent_autisme': antecedents,
+                    'Statut_testeur': testeur,
+                }
 
-    # Affichage des résultats si une prédiction a été faite
-    if hasattr(st.session_state, 'prediction_made') and st.session_state.prediction_made:
-        
-        st.markdown("---")
-        st.markdown("## 📊 Résultats de l'analyse")
-        
-        # Affichage de la prédiction par défaut
-        prediction_proba = st.session_state.prediction_proba
-        default_prediction = st.session_state.default_prediction
-        default_threshold = st.session_state.default_threshold
-        
-        # Fonction pour afficher les résultats selon le seuil
-        def display_prediction_results(proba, threshold, context_name):
-            prediction = 1 if proba >= threshold else 0
-            confidence = proba if prediction == 1 else 1 - proba
-            
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                if prediction == 1:
+                for i, score in enumerate(scores_individuels):
+                    user_data[f'A{i+1}'] = score
+
+                user_data['Score_A10'] = total_score
+
+                user_df = pd.DataFrame([user_data])
+
+                if total_score >= 6:
                     st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 15px; text-align: center;">
-                        <h3 style="margin: 0; font-size: 1.3rem;">⚠️ Résultat : POSITIF</h3>
-                        <p style="margin: 10px 0 0 0; font-size: 1rem;">Signaux détectés</p>
-                    </div>
+                        <div class="result-card warning">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
+                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
+                        </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
-                    <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 20px; border-radius: 15px; text-align: center;">
-                        <h3 style="margin: 0; font-size: 1.3rem;">✅ Résultat : NÉGATIF</h3>
-                        <p style="margin: 10px 0 0 0; font-size: 1rem;">Signaux non détectés</p>
+                        <div class="result-card success">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
+                if rf_model is not None and preprocessor is not None:
+                    try:
+                        # 1. Créer une structure de données cohérente avec celle utilisée pour l'entraînement
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                if col.startswith('A') and col[1:].isdigit():
+                                    idx = int(col[1:]) - 1
+                                    if idx < len(scores_individuels):
+                                        user_df[col] = scores_individuels[idx]
+                                    else:
+                                        user_df[col] = 0
+                                else:
+                                    user_df[col] = 0  # Valeur par défaut
+
+                        column_mapping = {
+                            'Antecedent_autisme': 'Autisme_familial',
+                        }
+                        user_df = user_df.rename(columns=column_mapping)
+
+                        # Ajouter les colonnes manquantes avec des valeurs par défaut
+                        if 'Jaunisse' not in user_df.columns:
+                            user_df['Jaunisse'] = "No"
+
+                        # S'assurer que toutes les colonnes nécessaires existent
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
+                                          'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                user_df[col] = 0  # Valeur par défaut
+
+                        # Réorganiser les colonnes pour correspondre à l'ordre attendu par le modèle
+                        user_df = user_df[required_columns]
+
+                        user_df = user_df[required_columns]
+
+                        # 3. Effectuer la prédiction
+                        prediction_proba = rf_model.predict_proba(user_df)
+
+                        # 4. Récupérer la probabilité de la classe positive (TSA)
+                        tsa_probability = prediction_proba[0][1]
+
+                        # 5. Classification et affichage
+                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
+
+                        probability_percentage = int(tsa_probability * 100)
+
+                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
+
+                        st.markdown(f"""
+                            <div class="result-card {color_class}">
+                                <div class="result-title">Prédiction IA</div>
+                                <div class="result-score">{probability_percentage}%</div>
+                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
+                                <p>Classification: <strong>{prediction_class}</strong></p>
+                            </div>
+
+                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
+                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
+                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                        # Section des KPI personnalisés après la prédiction
+                        st.markdown("""
+                            <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                                Profil détaillé des traits autistiques
+                            </h3>
+                        """, unsafe_allow_html=True)
+
+                        # Calcul des sous-scores par domaine
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100  # Questions liées aux aspects sociaux
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100  # Questions liées à la flexibilité cognitive
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100  # Questions liées à l'attention au détail
+
+                        # Calcul du masking index (plus le score est élevé dans des domaines spécifiques mais pas en social, plus l'indice est élevé)
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)  # Normalisation entre 0 et 100
+
+                        # Définition de seuils pour les indices de sévérité
+                        def severity_color(score, reverse=False):
+                            if reverse:
+                                score = 100 - score
+                            if score < 30:
+                                return "#2ecc71"  # vert
+                            elif score < 60:
+                                return "#f39c12"  # orange
+                            else:
+                                return "#e74c3c"  # rouge
+
+                        # Estimation du risque relatif basé sur le score total et les facteurs de risque
+                        base_risk = 1.0
+                        if total_score >= 6:
+                            base_risk *= 4.5
+                        if antecedents == "Yes":
+                            base_risk *= 2.2
+                        risk_factor = min(10.0, base_risk)  # Plafond à 10x
+
+                        # Affichage des KPI en trois colonnes
+                        col1, col2, col3 = st.columns(3)
+
+                        with col1:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Perception sociale</div>
+                                    <div class="kpi-value" style="color:{severity_color(social_score)};">{social_score:.0f}%</div>
+                                    <div class="kpi-comparison">Difficulté à interpréter les interactions sociales</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col2:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Flexibilité cognitive</div>
+                                    <div class="kpi-value" style="color:{severity_color(cognitive_score)};">{cognitive_score:.0f}%</div>
+                                    <div class="kpi-comparison">Rigidité face au changement et adaptation</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col3:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Attention au détail</div>
+                                    <div class="kpi-value" style="color:{severity_color(detail_score, reverse=True)};">{detail_score:.0f}%</div>
+                                    <div class="kpi-comparison">Focalisation sur les détails spécifiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        # Deuxième rangée de KPI
+                        col4, col5, col6 = st.columns(3)
+
+                        with col4:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Indice de masquage</div>
+                                    <div class="kpi-value" style="color:{severity_color(masking_index, reverse=True)};">{masking_index:.0f}%</div>
+                                    <div class="kpi-comparison">Estimation de la compensation des traits autistiques</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col5:
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Risque relatif</div>
+                                    <div class="kpi-value" style="color:{severity_color(risk_factor*10)};">{risk_factor:.1f}x</div>
+                                    <div class="kpi-comparison">Par rapport à la population générale</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        with col6:
+                            # Calcul d'un score d'impact fonctionnel estimé
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                                <div class="kpi-card">
+                                    <div class="kpi-title">Impact fonctionnel estimé</div>
+                                    <div class="kpi-value" style="color:{severity_color(impact_score)};">{impact_score:.0f}%</div>
+                                    <div class="kpi-comparison">Niveau d'impact potentiel sur le quotidien</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+
+                        # Ajout d'un graphique radar pour visualiser les différentes dimensions
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Profil de sensibilité multidimensionnel
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        # Calcul des scores par dimension
+                        dimensions = [
+                            "Communication sociale",
+                            "Interactions sociales",
+                            "Intérêts restreints",
+                            "Comportements répétitifs",
+                            "Sensibilité sensorielle"
+                        ]
+
+                        # Mapping des questions vers les dimensions (simplifié)
+                        dim_scores = [
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100,  # Communication
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  # Interactions
+                            (scores_individuels[7]) * 100,  # Intérêts
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  # Comportements
+                            (scores_individuels[0]) * 100  # Sensibilité
+                        ]
+
+                        # Création du graphique radar
+                        fig = go.Figure()
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=dim_scores,
+                            theta=dimensions,
+                            fill='toself',
+                            name='Votre profil',
+                            line_color='#3498db',
+                            fillcolor='rgba(52, 152, 219, 0.3)'
+                        ))
+
+                        # Ajouter profil typique TSA pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[80, 75, 70, 65, 85],  # Valeurs typiques pour TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil typique TSA',
+                            line_color='#e74c3c',
+                            fillcolor='rgba(231, 76, 60, 0.1)'
+                        ))
+
+                        # Ajouter profil neurotypique pour comparaison
+                        fig.add_trace(go.Scatterpolar(
+                            r=[20, 25, 30, 25, 15],  # Valeurs typiques pour non-TSA (à ajuster)
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil neurotypique',
+                            line_color='#2ecc71',
+                            fillcolor='rgba(46, 204, 113, 0.1)'
+                        ))
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            title="Comparaison de votre profil avec les profils de référence",
+                            showlegend=True,
+                            height=500,
+                            margin=dict(t=70, b=20)
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        # Ajout des recommandations personnalisées
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Recommandations personnalisées
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        # Définir les recommandations basées sur les scores
+                        recommendations = []
+
+                        if social_score > 50:
+                            recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
+
+                        if cognitive_score > 50:
+                            recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
+
+                        if detail_score > 60:
+                            recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
+
+                        if masking_index > 60:
+                            recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
+
+                        if risk_factor > 3:
+                            recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
+                        else:
+                            recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
+
+                        # Affichage des recommandations
+                        st.markdown("""
+                            <div style="background-color: #eaf7fb; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                        """, unsafe_allow_html=True)
+
+                        for rec in recommendations:
+                            st.markdown(f"""
+                                <p style="margin-bottom: 10px;"><span style="color: #3498db; font-weight: bold;">•</span> {rec}</p>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                            <p style="font-style: italic; margin-top: 15px; color: #7f8c8d; text-align: center;">
+                                Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+
+                        # 6. Affichage du graphique comparatif
+                        st.markdown("### Analyse comparative")
+
+                        fig = go.Figure()
+
+                        if 'Score_A10' in df.columns and 'TSA' in df.columns:
+                            avg_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                            avg_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                        else:
+                            avg_tsa = 7.2  # Valeur moyenne typique
+                            avg_non_tsa = 2.8  # Valeur moyenne typique
+
+                        categories = ['Votre score', 'Moyenne TSA', 'Moyenne non-TSA']
+                        scores = [total_score, avg_tsa, avg_non_tsa]
+                        colors = ['#3498db', '#e74c3c', '#2ecc71']
+
+                        fig.add_trace(go.Bar(
+                            x=categories,
+                            y=scores,
+                            marker_color=colors,
+                            text=scores,
+                            textposition='auto'
+                        ))
+
+                        fig.update_layout(
+                            title='Comparaison de votre score avec les moyennes de référence',
+                            yaxis=dict(
+                                title='Score AQ-10',
+                                range=[0, 10.5]
+                            ),
+                            height=400
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
+                        st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
+                else:
+                    st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
+
+                    st.html("""
+                        <div style="background-color: #f0f7fa; border-left: 4px solid #3498db; padding: 20px; border-radius: 5px; margin: 30px 0; text-align: left;">
+                            <h4 style="color: #3498db; margin-top: 0; text-align: center;">Comment fonctionne cette prédiction ?</h4>
+                            <p style="margin-bottom: 10px; text-align: left;">Cette prédiction est calculée par un algorithme d'<strong>intelligence artificielle</strong> appelé "<em>Random Forest</em>" (forêt aléatoire) qui a été entraîné sur des milliers de cas cliniques.</p>
+
+                            <p style="text-align: left;">L'algorithme prend en compte :</p>
+                            <ul style="text-align: left;">
+                                <li><strong>Vos réponses au questionnaire AQ-10</strong> : chaque question a été validée scientifiquement pour détecter des traits autistiques spécifiques</li>
+                                <li><strong>Vos données démographiques</strong> : âge, genre, origine ethnique</li>
+                                <li><strong>Les antécédents familiaux</strong> : la présence de TSA dans la famille est un facteur important</li>
+                            </ul>
+
+                            <p style="text-align: left;">Le modèle compare ensuite votre profil à tous les cas qu'il a appris et détermine la probabilité que vous présentiez des traits autistiques similaires à ceux diagnostiqués TSA.</p>
+
+                            <p style="font-style: italic; margin-top: 10px; text-align: left;">Ce pourcentage représente le niveau de confiance du modèle dans sa prédiction, pas la "gravité" ou l'"intensité" de l'autisme.</p>
+                        </div>
+                        """)
+
+                    st.html("""
+                        <div style="background-color: #fef9e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <h4 style="color: #f39c12; margin-top: 0;">Limites de cette prédiction</h4>
+                            <p>Ce modèle est un <strong>outil de dépistage</strong>, pas un instrument de diagnostic. Un diagnostic formel de TSA nécessite une évaluation complète par des professionnels de santé qualifiés.</p>
+
+                            <p>Facteurs non pris en compte par ce modèle :</p>
+                            <ul>
+                                <li>Observation directe des comportements sociaux</li>
+                                <li>Développement précoce et historique médical complet</li>
+                                <li>Impact des traits sur la vie quotidienne</li>
+                                <li>Autres conditions médicales ou psychiatriques</li>
+                            </ul>
+                        </div>
+                        """)
+
+                    st.markdown("""
+                        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                            Comparaison avec la population de référence
+                        </h3>
+                        """, unsafe_allow_html=True)
+
+                    mean_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                    mean_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                    overall_mean = df['Score_A10'].mean()
+
+                    percentile = 100 * (df['Score_A10'] <= total_score).mean()
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Percentile</div>
+                                <div class="kpi-value">{percentile:.0f}<sup>ème</sup></div>
+                                <div class="kpi-comparison">Votre score dépasse {percentile:.0f}% de la population testée</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col2:
+                        diff_non_tsa = total_score - mean_non_tsa
+                        color_non_tsa = "#e74c3c" if diff_non_tsa > 0 else "#2ecc71"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe non-TSA</div>
+                                <div class="kpi-value" style="color:{color_non_tsa};">{diff_non_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes sans diagnostic ({mean_non_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col3:
+                        diff_tsa = total_score - mean_tsa
+                        color_tsa = "#2ecc71" if diff_tsa < 0 else "#e74c3c"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe TSA</div>
+                                <div class="kpi-value" style="color:{color_tsa};">{diff_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes avec diagnostic ({mean_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                            Analyse détaillée de vos réponses par question
+                        </h4>
+                        """, unsafe_allow_html=True)
+
+                        categories = [f'Q{i+1}' for i in range(10)]
+                        user_scores = scores_individuels
+
+                        tsa_mean_scores = [df[df['TSA'] == 'Yes'][f'A{i+1}'].mean() for i in range(10)]
+                        non_tsa_mean_scores = [df[df['TSA'] == 'No'][f'A{i+1}'].mean() for i in range(10)]
+
+                        fig = make_subplots(rows=1, cols=3,
+                                        specs=[[{'type': 'polar'}]*3],
+                                        subplot_titles=["Vos réponses", "Profil moyen TSA", "Profil moyen non-TSA"])
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=user_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Vos réponses',
+                                line_color='#2ecc71',
+                                fillcolor='rgba(46, 204, 113, 0.5)'
+                            ),
+                            row=1, col=1
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne TSA',
+                                line_color='#e74c3c',
+                                fillcolor='rgba(231, 76, 60, 0.5)'
+                            ),
+                            row=1, col=2
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=non_tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne non-TSA',
+                                line_color='#3498db',
+                                fillcolor='rgba(52, 152, 219, 0.5)'
+                            ),
+                            row=1, col=3
+                        )
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar2=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar3=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            height=450,
+                            margin=dict(l=80, r=80, t=80, b=50),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(size=12),
+                            showlegend=False
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        with st.expander("🔍 Comprendre la signification des questions"):
+                            st.markdown("""
+                            | Question | Description | Score élevé indique |
+                            |----------|-------------|---------------------|
+                            | Q1 | Perception des petits bruits | ↑ Hypersensibilité auditive |
+                            | Q2 | Focus sur les détails vs l'ensemble | ↑ Attention aux détails |
+                            | Q3 | Capacité à faire plusieurs choses | ↓ Difficultés avec le multitâche |
+                            | Q4 | Reprise d'activité après interruption | ↓ Difficultés avec les transitions |
+                            | Q5 | Compréhension du langage figuré | ↓ Interprétation littérale |
+                            | Q6 | Perception de l'ennui chez autrui | ↓ Difficulté à lire les signaux sociaux |
+                            | Q7 | Compréhension des intentions des personnages | ↑ Difficulté avec la théorie de l'esprit |
+                            | Q8 | Collection d'informations sur des catégories | ↑ Intérêts restreints |
+                            | Q9 | Compréhension des émotions par l'expression | ↓ Difficulté à lire les émotions |
+                            | Q10 | Compréhension des intentions d'autrui | ↑ Difficulté d'interprétation sociale |
+                            """)
+
+                        st.info("⚠️ Ce résultat est une indication basée sur un modèle statistique et ne constitue pas un diagnostic médical. Consultez un professionnel de santé pour une évaluation complète.")
+
+                st.markdown("""
+                <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                    Prévalence du Trouble du Spectre Autistique
+                </h3>
+                """, unsafe_allow_html=True)
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #3498db; margin-bottom: 10px;">Monde</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #3498db; margin: 15px 0;">1 sur 100</div>
+                        <p style="color: #2c3e50;">enfants dans le monde est concerné par un trouble du spectre autistique selon l'OMS</p>
                     </div>
                     """, unsafe_allow_html=True)
-            
-            with col2:
-                st.metric(
-                    "🎯 Probabilité TSA",
-                    f"{proba:.1%}",
-                    f"Seuil: {threshold:.1%}"
-                )
-                st.metric(
-                    "🔒 Niveau de confiance",
-                    f"{confidence:.1%}",
-                    f"Contexte: {context_name}"
-                )
-            
-            with col3:
-                # Gauge de probabilité
-                fig_gauge = go.Figure(go.Indicator(
-                    mode = "gauge+number",
-                    value = proba * 100,
-                    domain = {'x': [0, 1], 'y': [0, 1]},
-                    title = {'text': f"Risque TSA (%)"},
-                    gauge = {
-                        'axis': {'range': [0, 100]},
-                        'bar': {'color': "#e74c3c" if prediction == 1 else "#2ecc71"},
-                        'steps': [
-                            {'range': [0, threshold*100], 'color': "lightgray"},
-                            {'range': [threshold*100, 100], 'color': "rgba(231, 76, 60, 0.3)"}
-                        ],
-                        'threshold': {
-                            'line': {'color': "red", 'width': 4},
-                            'thickness': 0.75,
-                            'value': threshold * 100
-                        }
-                    }
-                ))
-                fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=40, b=20))
-                st.plotly_chart(fig_gauge, use_container_width=True)
-            
-        
-        # Affichage initial avec seuil par défaut
-        st.markdown("### 🎯 Prédiction initiale (Dépistage de masse)")
-        display_prediction_results(prediction_proba, default_threshold, "Dépistage de masse")
-        
-        st.markdown("---")
-        
-        # Options pour changer le contexte/seuil
-        st.markdown("### ⚙️ Ajuster l'analyse selon le contexte")
-        
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <p style="margin: 0; font-size: 1rem; color: #34495e;">
-            Modifiez le seuil de détection selon votre contexte d'utilisation pour obtenir une analyse plus précise.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Sélection du nouveau contexte
-        context_choice = st.radio(
-            "📋 Choisissez le contexte d'analyse :",
-            options=[
-                "🔍 Dépistage de masse (seuil: 30%)",
-                "👨‍⚕️ Consultation spécialisée (seuil: 50%)", 
-                "🔬 Recherche clinique (seuil: 70%)"
-            ],
-            index=0,
-            help="Chaque contexte utilise un seuil différent pour optimiser la détection"
-        )
-        
-        # Mapping des contextes aux seuils
-        context_mapping = {
-            "🔍 Dépistage de masse (seuil: 30%)": (0.3, "Dépistage de masse"),
-            "👨‍⚕️ Consultation spécialisée (seuil: 50%)": (0.5, "Consultation spécialisée"),
-            "🔬 Recherche clinique (seuil: 70%)": (0.7, "Recherche clinique")
-        }
-        
-        selected_threshold, selected_context = context_mapping[context_choice]
-        
-        # Affichage des caractéristiques du contexte sélectionné
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if "Dépistage de masse" in context_choice:
-                st.info("""
-                **🔍 Dépistage de masse**
-                
-                - Seuil : **30%**
-                - Priorité : Sensibilité maximale
-                - Objectif : Ne manquer aucun cas
-                - Usage : Screening population
-                """)
-            
-        with col2:
-            if "Consultation spécialisée" in context_choice:
-                st.success("""
-                **👨‍⚕️ Consultation spécialisée**
-                
-                - Seuil : **50%**
-                - Priorité : Équilibre optimal
-                - Objectif : Aide au diagnostic
-                - Usage : Cabinet médical
-                """)
-                
-        with col3:
-            if "Recherche clinique" in context_choice:
-                st.warning("""
-                **🔬 Recherche clinique**
-                
-                - Seuil : **70%**
-                - Priorité : Précision élevée
-                - Objectif : Cohortes homogènes
-                - Usage : Études scientifiques
-                """)
-        
-        # Bouton pour recalculer avec le nouveau seuil
-        if st.button("🔄 Recalculer avec le nouveau contexte", use_container_width=True):
-            st.markdown(f"### 📊 Résultat ajusté - {selected_context}")
-            display_prediction_results(prediction_proba, selected_threshold, selected_context)
-            
-            # Comparaison avec le résultat initial
-            st.markdown("---")
-            st.markdown("### 📈 Comparaison des résultats")
-            
-            initial_pred = 1 if prediction_proba >= default_threshold else 0
-            new_pred = 1 if prediction_proba >= selected_threshold else 0
-            
-            comparison_df = pd.DataFrame({
-                'Contexte': ['Dépistage de masse', selected_context],
-                'Seuil': [f"{default_threshold:.1%}", f"{selected_threshold:.1%}"],
-                'Prédiction': ['POSITIF' if initial_pred == 1 else 'NÉGATIF', 
-                              'POSITIF' if new_pred == 1 else 'NÉGATIF'],
-                'Probabilité': [f"{prediction_proba:.1%}", f"{prediction_proba:.1%}"]
-            })
-            
-            st.dataframe(comparison_df, use_container_width=True)
-            
-            if initial_pred != new_pred:
-                st.info(f"""
-                **📝 Changement de prédiction détecté :**
-                
-                Le changement de contexte a modifié la classification de {'NÉGATIF vers POSITIF' if new_pred == 1 else 'POSITIF vers NÉGATIF'}.
-                Cela illustre l'importance du choix du seuil selon l'utilisation prévue.
-                """)
-    
-    # Avertissement final
-    st.markdown("---")
-    st.markdown("""
-    <div style="margin-top: 30px; padding: 20px; border-radius: 10px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
-        <h4 style="color: #e74c3c; margin-top: 0;">⚠️ Avertissement important</h4>
-        <p style="font-size: 1rem;">
-        <strong>Ce modèle est un outil d'aide au dépistage précoce et ne remplace en aucun cas :</strong>
-        </p>
-        <ul style="margin-left: 20px; font-size: 0.95rem;">
-            <li>Une évaluation clinique complète par un professionnel qualifié</li>
-            <li>Les outils de diagnostic standardisés (ADOS, ADI-R, etc.)</li>
-            <li>L'expertise clinique et l'anamnèse détaillée</li>
-        </ul>
-        <p style="font-style: italic; margin-top: 15px; font-size: 0.95rem;">
-        Les résultats doivent toujours être interprétés dans le contexte clinique global du patient.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+
+                with col2:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #e74c3c; margin-bottom: 10px;">France</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #e74c3c; margin: 15px 0;">~1 million</div>
+                        <p style="color: #2c3e50;">de personnes en France, soit entre 1% et 2% de la population française</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col3:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #2ecc71; margin-bottom: 10px;">États-Unis</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #2ecc71; margin: 15px 0;">1 sur 36</div>
+                        <p style="color: #2c3e50;">enfants de 8 ans présentent un TSA selon les dernières données CDC</p>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
 def show_documentation():
     st.markdown("""
