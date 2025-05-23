@@ -2687,8 +2687,8 @@ def show_ml_analysis():
 
         # Entraînement du modèle Random Forest détaillé
         @st.cache_resource
-        def train_detailed_random_forest(_X_train, _y_train, _preprocessor):
-            """Version simplifiée et découplée pour le cache"""
+        def train_detailed_random_forest(_X_train, _y_train, _preprocessor, _X_test, _y_test):
+            """Version corrigée avec gestion complète des métriques"""
             rf = RandomForestClassifier(
                 n_estimators=100,
                 max_depth=10,
@@ -2703,38 +2703,26 @@ def show_ml_analysis():
                 ('classifier', rf)
             ])
             
-            pipeline.fit(_X_train, _y_train)
-            return pipeline
-            
-            # Entraînement
             start_time = time.time()
-            pipeline.fit(X_train, y_train)
+            pipeline.fit(_X_train, _y_train)
             training_time = time.time() - start_time
             
-            # Prédictions
-            y_pred = pipeline.predict(X_test)
-            y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
+            y_pred = pipeline.predict(_X_test)
+            y_pred_proba = pipeline.predict_proba(_X_test)[:, 1]
             
-            # Métriques
             metrics = {
-                'accuracy': accuracy_score(y_test, y_pred),
-                'precision': precision_score(y_test, y_pred),
-                'recall': recall_score(y_test, y_pred),
-                'f1': f1_score(y_test, y_pred),
-                'auc': roc_auc_score(y_test, y_pred_proba),
+                'accuracy': accuracy_score(_y_test, y_pred),
+                'precision': precision_score(_y_test, y_pred),
+                'recall': recall_score(_y_test, y_pred),
+                'f1': f1_score(_y_test, y_pred),
+                'auc': roc_auc_score(_y_test, y_pred_proba),
                 'training_time': training_time
             }
             
-            # Matrice de confusion
-            cm = confusion_matrix(y_test, y_pred)
+            cm = confusion_matrix(_y_test, y_pred)
+            fpr, tpr, _ = roc_curve(_y_test, y_pred_proba)
+            precision_curve, recall_curve, _ = precision_recall_curve(_y_test, y_pred_proba)
             
-            # Courbe ROC
-            fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
-            
-            # Courbe Precision-Recall
-            precision_curve, recall_curve, _ = precision_recall_curve(y_test, y_pred_proba)
-            
-            # Importance des features
             feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
             importances = pipeline.named_steps['classifier'].feature_importances_
             feature_importance = pd.DataFrame({
@@ -2742,8 +2730,7 @@ def show_ml_analysis():
                 'importance': importances
             }).sort_values('importance', ascending=False)
             
-            # Validation croisée
-            cv_scores = cross_val_score(pipeline, X_train, y_train, cv=5, scoring='accuracy')
+            cv_scores = cross_val_score(pipeline, _X_train, _y_train, cv=5, scoring='accuracy')
             
             return {
                 'pipeline': pipeline,
@@ -2759,7 +2746,7 @@ def show_ml_analysis():
 
         # Chargement des résultats
         with st.spinner("Entraînement du modèle Random Forest..."):
-            rf_results = train_detailed_random_forest(X_train, y_train, preprocessor)
+            rf_results = train_detailed_random_forest(X_train, y_train, preprocessor, X_test, y_test)
 
         # Affichage des résultats
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
