@@ -1857,79 +1857,92 @@ def show_data_exploration():
             ])
 
             with famd_tabs[0]:
-                st.subheader("Projection des individus sur les axes principaux")
-                st.markdown("""
-                Ce graphique montre la projection des individus selon les deux axes principaux extraits de la FAMD.
-                Les points sont colorés selon le diagnostic TSA (rouge pour présent, bleu pour absent).
-                """)
+                st.subheader("Projection des individus")
+                
+                col1, col2 = st.columns([2, 1])
+                
+                with col1:
+                    fig, ax = plt.subplots(figsize=(8, 5))  # <-- Réduction de la taille
+                    if 'TSA' in X_famd.columns:
+                        coordinates_array = coordinates.values
+                        for i, category in enumerate(X_famd['TSA'].unique()):
+                            mask_array = (X_famd['TSA'] == category).values
+                            color = "#e74c3c" if category == "Yes" else "#3498db"
+                            ax.scatter(
+                                coordinates_array[mask_array, 0],
+                                coordinates_array[mask_array, 1],
+                                label=category,
+                                color=color,
+                                alpha=0.6,
+                                s=30  # <-- Points plus petits
+                            )
+                        ax.legend(title="TSA")
+                    else:
+                        ax.scatter(coordinates.values[:, 0], coordinates.values[:, 1], alpha=0.7, s=30)
+            
+                    ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})')
+                    ax.set_ylabel(f'Comp. 2 ({explained_variance[1]:.1%})')
+                    ax.set_title('Projection des individus', fontsize=12)
+                    ax.grid(True, linestyle='--', alpha=0.7)
+                    st.pyplot(fig)
+                    
+                with col2:
+                    st.markdown("### Variance expliquée")
+                    for i, var in enumerate(explained_variance[:3]):
+                        st.metric(f"Composante {i+1}", f"{var:.1%}")
 
-                fig, ax = plt.subplots(figsize=(10, 8))
-                if 'TSA' in X_famd.columns:
-                    coordinates_array = coordinates.values
-                    for i, category in enumerate(X_famd['TSA'].unique()):
-                        mask_array = (X_famd['TSA'] == category).values
-                        color = "#e74c3c" if category == "Yes" else "#3498db"
-                        ax.scatter(
-                            coordinates_array[mask_array, 0],
-                            coordinates_array[mask_array, 1],
-                            label=category,
-                            color=color,
-                            alpha=0.6
-                        )
-                    ax.legend(title="Diagnostic TSA")
-                else:
-                    ax.scatter(coordinates.values[:, 0], coordinates.values[:, 1], alpha=0.7)
-
-                ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.2%} variance expliquée)')
-                ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.2%} variance expliquée)')
-                ax.set_title('Projection des individus sur les deux premières composantes')
-                ax.grid(True, linestyle='--', alpha=0.7)
-                st.pyplot(fig)
 
             with famd_tabs[1]:
                 st.subheader("Cercle des corrélations")
-                st.markdown("""
-                Le cercle des corrélations met en évidence les variables qui contribuent le plus à la formation des axes factoriels.
-                Plus une variable est éloignée du centre, plus sa contribution est importante.
-                """)
-
-                try:
-                    if hasattr(famd, 'column_correlations'):
-                        column_corr = famd.column_correlations(X_famd)
-                    else:
-                        st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
-                        column_corr = famd.column_correlations_custom(X_famd)
-
-                    fig, ax = plt.subplots(figsize=(10, 10))
-                    circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
-                    ax.add_artist(circle)
-
-                    ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
-                    ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-
-                    for i, var in enumerate(column_corr.index):
-                        x = column_corr.iloc[i, 0]
-                        y = column_corr.iloc[i, 1]
-
-                        ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-
-                        if var == 'Score_A10':
-                            ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
-                        elif var in ['Ethnie', 'Statut_testeur', 'TSA', 'Age']:
-                            ax.text(x*1.1, y*1.1, var, fontsize=10, color='green')
+                
+                col1, col2 = st.columns([3, 2])
+                
+                with col1:
+                    try:
+                        if hasattr(famd, 'column_correlations'):
+                            column_corr = famd.column_correlations(X_famd)
                         else:
-                            ax.text(x*1.1, y*1.1, var, fontsize=8)
-
-                    ax.set_xlim(-1.1, 1.1)
-                    ax.set_ylim(-1.1, 1.1)
-                    ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.2%})')
-                    ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.2%})')
-                    ax.set_title('Cercle des corrélations des variables')
-                    ax.grid(True, linestyle='--', alpha=0.5)
-                    st.pyplot(fig)
-                except Exception as e:
-                    st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-                    st.info("Essayez d'installer une version antérieure de prince: `pip install prince==0.7.1`")
+                            column_corr = famd.column_correlations_custom(X_famd)
+            
+                        fig, ax = plt.subplots(figsize=(6, 6))  # <-- Réduction de 10x10 à 6x6
+                        circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
+                        ax.add_artist(circle)
+            
+                        ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+                        ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
+            
+                        for i, var in enumerate(column_corr.index):
+                            x = column_corr.iloc[i, 0]
+                            y = column_corr.iloc[i, 1]
+            
+                            ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
+            
+                            # Texte plus petit et sélectif
+                            if var == 'Score_A10':
+                                ax.text(x*1.1, y*1.1, var, fontsize=10, color='red', fontweight='bold')
+                            elif var in ['TSA', 'Age', 'Genre']:
+                                ax.text(x*1.1, y*1.1, var, fontsize=8, color='green')
+                            # Ne pas afficher toutes les variables pour éviter l'encombrement
+            
+                        ax.set_xlim(-1.1, 1.1)
+                        ax.set_ylim(-1.1, 1.1)
+                        ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})', fontsize=10)
+                        ax.set_ylabel(f'Comp. 2 ({explained_variance[1]:.1%})', fontsize=10)
+                        ax.set_title('Cercle des corrélations', fontsize=12)
+                        ax.grid(True, linestyle='--', alpha=0.5)
+                        st.pyplot(fig)
+                        
+                    except Exception as e:
+                        st.warning(f"Impossible de générer le cercle : {str(e)}")
+                        
+                with col2:
+                    st.markdown("### Variables principales")
+                    st.write("Variables les plus contributives :")
+                    key_vars = ['Score_A10', 'TSA', 'Age', 'Genre']
+                    for var in key_vars:
+                        if var in column_corr.index:
+                            contrib = np.sqrt(column_corr.loc[var, 0]**2 + column_corr.loc[var, 1]**2)
+                            st.write(f"• **{var}** : {contrib:.3f}")
 
 
             with famd_tabs[2]:
@@ -1975,29 +1988,28 @@ def show_data_exploration():
                         coords_a10 = famd_a10.transform(X_a10)
                         
                         # Création du graphique de projection unique
-                        fig, ax = plt.subplots(figsize=(10, 8))
-                        coords_array = coords_a10.values
-                        
-                        if 'TSA' in X_a10.columns:
-                            for category in X_a10['TSA'].unique():
-                                mask = (X_a10['TSA'] == category).values
-                                color = "#e74c3c" if category == "Yes" else "#3498db"
-                                ax.scatter(
-                                    coords_array[mask, 0],
-                                    coords_array[mask, 1],
-                                    label=category,
-                                    color=color,
-                                    alpha=0.7
-                                )
-                            ax.legend(title="Diagnostic TSA")
-                        else:
-                            ax.scatter(coords_array[:, 0], coords_array[:, 1], alpha=0.7)
-                            
-                        ax.set_xlabel('Composante 1')
-                        ax.set_ylabel('Composante 2')
-                        ax.set_title('FAMD centrée sur Score_A10')
-                        ax.grid(True, linestyle='--', alpha=0.7)
-                        st.pyplot(fig)
+                        fig, ax = plt.subplots(figsize=(6, 4))  # <-- Plus petit
+            coords_array = coords_a10.values
+            
+            if 'TSA' in X_a10.columns:
+                for category in X_a10['TSA'].unique():
+                    mask = (X_a10['TSA'] == category).values
+                    color = "#e74c3c" if category == "Yes" else "#3498db"
+                    ax.scatter(
+                        coords_array[mask, 0],
+                        coords_array[mask, 1],
+                        label=category,
+                        color=color,
+                        alpha=0.7,
+                        s=25
+                    )
+                    ax.legend(title="TSA")
+            
+                    ax.set_xlabel('Composante 1', fontsize=10)
+                    ax.set_ylabel('Composante 2', fontsize=10)
+                    ax.set_title('FAMD centrée Score_A10', fontsize=12)
+                    ax.grid(True, linestyle='--', alpha=0.7)
+                    st.pyplot(fig)
                     else:
                         st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
