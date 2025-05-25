@@ -4302,16 +4302,14 @@ def show_documentation():
             <ol style="line-height: 1.8; color: #2c3e50;">
                 <li><strong>Réciprocité sociocommunicative</strong> : Difficultés dans les échanges sociaux</li>
                 <li><strong>Communication non verbale</strong> : Utilisation atypique du contact visuel, expressions faciales</li>
-                <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li>
-            </ol>
+                <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li></ol>
             
             <h4 style="color: #2ecc71; margin-top: 25px;">B. Comportements répétitifs et intérêts restreints</h4>
             <ol style="line-height: 1.8; color: #2c3e50;">
                 <li><strong>Stéréotypies motrices</strong> : Mouvements répétitifs, écholalie</li>
                 <li><strong>Rigidité</strong> : Insistance sur la similitude, routines inflexibles</li>
                 <li><strong>Intérêts spécialisés</strong> : Fixations sur des objets ou sujets particuliers</li>
-                <li><strong>Sensibilités sensorielles</strong> : Hyper ou hypo-réactivité sensorielle</li>
-            </ol>
+                <li><strong>Sensibilités sensorielles</strong> : Hyper ou hypo-réactivité sensorielle</li></ol>
         </div>
         """, unsafe_allow_html=True)
 
