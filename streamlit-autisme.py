@@ -3077,6 +3077,28 @@ def show_aq10_and_prediction():
         border-left-color: #f39c12;
         background: linear-gradient(135deg, #fff8f0 0%, #fff3e0 100%);
     }
+    /* Ajouts pour les visualisations */
+    .plotly-chart {
+        margin: 20px 0;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .subplot-title {
+        font-size: 1.1rem !important;
+        color: #2c3e50 !important;
+    }
+    
+    /* Amélioration responsive */
+    @media (max-width: 768px) {
+        .kpi-card {
+            margin: 10px 0;
+        }
+        
+        .plotly-chart {
+            height: 300px !important;
+        }
+    }
     .kpi-card {
         background: white;
         border-radius: 12px;
@@ -3336,6 +3358,207 @@ def show_aq10_and_prediction():
                                 </p>
                             </div>
                             """, unsafe_allow_html=True)
+                        # Après la section de prédiction IA, avant les recommandations
+                        st.markdown("### 📈 Profil détaillé des traits autistiques")
+                        
+                        # Calcul des sous-scores
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)
+                        risk_factor = min(10.0, (total_score/6) * (1.5 if antecedents == "Oui" else 1))
+                        
+                        def severity_color(score):
+                            if score < 30: return "#2ecc71"
+                            elif score < 60: return "#f39c12"
+                            else: return "#e74c3c"
+                        
+                        # Première ligne de KPI
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">👥 Perception sociale</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(social_score)};">
+                                    {social_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Difficulté à interpréter les interactions sociales
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🧠 Flexibilité cognitive</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(cognitive_score)};">
+                                    {cognitive_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Rigidité face au changement
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🔍 Attention aux détails</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-detail_score)};">
+                                    {detail_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Focalisation sur les spécificités
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        # Après la section de prédiction IA, avant les recommandations
+                        st.markdown("### 📈 Profil détaillé des traits autistiques")
+                        
+                        # Calcul des sous-scores
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)
+                        risk_factor = min(10.0, (total_score/6) * (1.5 if antecedents == "Oui" else 1))
+                        
+                        def severity_color(score):
+                            if score < 30: return "#2ecc71"
+                            elif score < 60: return "#f39c12"
+                            else: return "#e74c3c"
+                        
+                        # Première ligne de KPI
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">👥 Perception sociale</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(social_score)};">
+                                    {social_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Difficulté à interpréter les interactions sociales
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🧠 Flexibilité cognitive</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(cognitive_score)};">
+                                    {cognitive_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Rigidité face au changement
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🔍 Attention aux détails</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-detail_score)};">
+                                    {detail_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Focalisation sur les spécificités
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        # Deuxième ligne de KPI
+                        col4, col5, col6 = st.columns(3)
+                        
+                        with col4:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🎭 Indice de masquage</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-masking_index)};">
+                                    {masking_index:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Compensation sociale estimée
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col5:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">⚠️ Risque relatif</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(risk_factor*10)};">
+                                    {risk_factor:.1f}x
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Par rapport à la population générale
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col6:
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">📉 Impact fonctionnel</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(impact_score)};">
+                                    {impact_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Sur la vie quotidienne
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        # Deuxième ligne de KPI
+                        col4, col5, col6 = st.columns(3)
+                        
+                        with col4:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🎭 Indice de masquage</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-masking_index)};">
+                                    {masking_index:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Compensation sociale estimée
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col5:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">⚠️ Risque relatif</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(risk_factor*10)};">
+                                    {risk_factor:.1f}x
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Par rapport à la population générale
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col6:
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">📉 Impact fonctionnel</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(impact_score)};">
+                                    {impact_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Sur la vie quotidienne
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
 
                         # Recommandations personnalisées
                         st.markdown("### 💡 Recommandations personnalisées")
@@ -3374,6 +3597,82 @@ def show_aq10_and_prediction():
                         st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
                 else:
                     st.warning("⚠️ Le modèle de prédiction n'est pas disponible actuellement.")
+                # Après les KPI, avant les recommandations
+                st.markdown("""
+                <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                    Profil de sensibilité multidimensionnel
+                </h4>
+                """, unsafe_allow_html=True)
+                
+                dimensions = [
+                    "Communication sociale", "Interactions sociales", 
+                    "Intérêts restreints", "Comportements répétitifs",
+                    "Sensibilité sensorielle"
+                ]
+                
+                fig = make_subplots(rows=1, cols=3, specs=[[{'type': 'polar'}]*3],
+                                    subplot_titles=["Vos réponses", "Moyenne TSA", "Moyenne non-TSA"])
+                
+                # Ajout des données
+                fig.add_trace(go.Scatterpolar(
+                    r=scores_individuels,
+                    theta=dimensions,
+                    fill='toself',
+                    name='Votre profil',
+                    line_color='#3498db'
+                ), 1, 1)
+                
+                fig.add_trace(go.Scatterpolar(
+                    r=[0.8, 0.75, 0.7, 0.65, 0.85],
+                    theta=dimensions,
+                    fill='toself',
+                    name='Moyenne TSA',
+                    line_color='#e74c3c'
+                ), 1, 2)
+                
+                fig.add_trace(go.Scatterpolar(
+                    r=[0.2, 0.25, 0.3, 0.25, 0.15],
+                    theta=dimensions,
+                    fill='toself',
+                    name='Moyenne non-TSA',
+                    line_color='#2ecc71'
+                ), 1, 3)
+                
+                fig.update_layout(
+                    polar=dict(radialaxis=dict(visible=True, range=[0,1])),
+                    height=400,
+                    showlegend=False,
+                    margin=dict(l=50, r=50)
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                # Après le radar chart
+                st.markdown("""
+                <div class="explanation-box">
+                    <h4 style="color: #2c3e50; text-align: center; margin-bottom: 20px;">
+                        📌 Analyse comparative avec les données de référence
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="kpi-card">
+                            <h5>Percentile populationnel</h5>
+                            <div class="kpi-value" style="color: #3498db;">{percentile:.0f}%</div>
+                            <p>Votre score est supérieur à {percentile:.0f}% de la population</p>
+                        </div>
+                        <div class="kpi-card">
+                            <h5>Écart avec la moyenne TSA</h5>
+                            <div class="kpi-value" style="color: #e74c3c;">{ecart_tsa:+.1f}</div>
+                            <p>Différence avec le score moyen du groupe TSA</p>
+                        </div>
+                        <div class="kpi-card">
+                            <h5>Écart avec la moyenne générale</h5>
+                            <div class="kpi-value" style="color: #2ecc71;">{ecrat_general:+.1f}</div>
+                            <p>Différence avec la population neurotypique</p>
+                        </div>
+                    </div>
+                </div>
+                """.format(percentile=85, ecart_tsa=2.3, ecrat_general=4.1), unsafe_allow_html=True)
+
+
 
                 # Section informative sur le modèle
                 st.markdown("""
