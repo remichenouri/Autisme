@@ -4242,66 +4242,65 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # SECTION ÉQUIPE - Équipe du Projet avec centrage parfait
-st.markdown("""
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            padding: 30px; border-radius: 15px; margin: 30px 0;">
-    <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
-        👥 Équipe du Projet
-    </h2>
-    <div style="max-width: 1000px; margin: 0 auto;">
-        <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 30px;">
-            Ce projet a été réalisé par une équipe de futurs data analysts passionnés par l'innovation en santé digitale.
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
-                        text-align: center; backdrop-filter: blur(10px); 
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
-                <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
-                           display: flex; align-items: center; justify-content: center; height: auto;">
-                    Rémi CHENOURI
-                </h4>
-                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
-                          text-align: center;">Futur Data Analyst</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
-                        text-align: center; backdrop-filter: blur(10px); 
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
-                <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
-                           display: flex; align-items: center; justify-content: center; height: auto;">
-                    Alexandre BERNARD
-                </h4>
-                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
-                          text-align: center;">Futur Data Analyst</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
-                        text-align: center; backdrop-filter: blur(10px); 
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
-                <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
-                           display: flex; align-items: center; justify-content: center; height: auto;">
-                    Laurence SOUPPARAZAYA
-                </h4>
-                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
-                          text-align: center;">Future Data Analyst</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
-                        text-align: center; backdrop-filter: blur(10px); 
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
-                <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
-                           display: flex; align-items: center; justify-content: center; height: auto;">
-                    Ahmed IBNABASSE
-                </h4>
-                <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
-                          text-align: center;">Future Data Analyst</p>
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 30px; border-radius: 15px; margin: 30px 0;">
+        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
+            👥 Équipe du Projet
+        </h2>
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 30px;">
+                Ce projet a été réalisé par une équipe de futurs data analysts passionnés par l'innovation en santé digitale.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
+                            text-align: center; backdrop-filter: blur(10px); 
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
+                               display: flex; align-items: center; justify-content: center; height: auto;">
+                        Rémi CHENOURI
+                    </h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
+                              text-align: center;">Futur Data Analyst</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
+                            text-align: center; backdrop-filter: blur(10px); 
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
+                               display: flex; align-items: center; justify-content: center; height: auto;">
+                        Alexandre BERNARD
+                    </h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
+                              text-align: center;">Futur Data Analyst</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
+                            text-align: center; backdrop-filter: blur(10px); 
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
+                               display: flex; align-items: center; justify-content: center; height: auto;">
+                        Laurence SOUPPARAZAYA
+                    </h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
+                              text-align: center;">Future Data Analyst</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; 
+                            text-align: center; backdrop-filter: blur(10px); 
+                            display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem; text-align: center; 
+                               display: flex; align-items: center; justify-content: center; height: auto;">
+                        Ahmed IBNABASSE
+                    </h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem; 
+                              text-align: center;">Future Data Analyst</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 
     # Remerciements avec design sophistiqué
