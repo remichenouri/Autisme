@@ -102,7 +102,7 @@ def set_custom_theme():
     else:
         custom_theme = """
         <style>
-        /* ================ Variables Globales Optimisées ================ */
+        /* ================ Variables Globales ================ */
         :root {
             --primary: #2c3e50 !important;
             --secondary: #3498db !important;
@@ -113,10 +113,11 @@ def set_custom_theme():
             --text-primary: #2c3e50 !important;
             --text-secondary: #6c757d !important;
             --sidebar-width-collapsed: 60px !important;
-            --sidebar-width-expanded: 240px !important;
-            --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            --sidebar-width-expanded: 80px !important;
+            --sidebar-transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             --shadow-light: 0 2px 8px rgba(0,0,0,0.08) !important;
             --shadow-medium: 0 4px 16px rgba(0,0,0,0.12) !important;
+            --shadow-glow: 0 0 20px rgba(52, 152, 219, 0.3) !important;
         }
 
         /* ================ Structure Principale ================ */
@@ -124,26 +125,26 @@ def set_custom_theme():
             background-color: var(--background) !important;
         }
 
-        /* ================ Sidebar Compacte et Professionnelle ================ */
+        /* ================ Sidebar Moderne avec Dégradés ================ */
         [data-testid="stSidebar"] {
-            /* Dimensions optimisées */
-            width: var(--sidebar-width-collapsed) !important;
-            min-width: var(--sidebar-width-collapsed) !important;
-            max-width: var(--sidebar-width-collapsed) !important;
-            height: 100vh !important;
-            
-            /* Position fixe */
+            /* Position et dimensions */
             position: fixed !important;
             left: 0 !important;
             top: 0 !important;
+            height: 100vh !important;
             z-index: 999999 !important;
             
-            /* Style moderne */
-            background: var(--sidebar-bg) !important;
-            border-right: 1px solid var(--sidebar-border) !important;
-            box-shadow: var(--shadow-light) !important;
+            /* Largeur par défaut */
+            width: var(--sidebar-width-collapsed) !important;
+            min-width: var(--sidebar-width-collapsed) !important;
+            max-width: var(--sidebar-width-collapsed) !important;
             
-            /* Élimination du défilement */
+            /* Style moderne avec dégradé */
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+            border: none !important;
+            box-shadow: var(--shadow-medium) !important;
+            
+            /* Masquer le contenu par défaut */
             overflow: hidden !important;
             padding: 0 !important;
             
@@ -156,160 +157,138 @@ def set_custom_theme():
             width: var(--sidebar-width-expanded) !important;
             min-width: var(--sidebar-width-expanded) !important;
             max-width: var(--sidebar-width-expanded) !important;
-            box-shadow: var(--shadow-medium) !important;
-            overflow-y: auto !important;
+            box-shadow: var(--shadow-glow) !important;
         }
 
-        /* Contenu interne optimisé */
+        /* ================ Masquage Complet du Contenu Textuel ================ */
         [data-testid="stSidebar"] > div {
-            width: var(--sidebar-width-expanded) !important;
-            padding: 12px 8px !important;
-            height: 100vh !important;
-            overflow: hidden !important;
-        }
-
-        [data-testid="stSidebar"]:hover > div {
-            overflow-y: auto !important;
-            padding: 16px 12px !important;
-        }
-
-        /* ================ Masquage des Barres de Défilement ================ */
-        [data-testid="stSidebar"]::-webkit-scrollbar,
-        [data-testid="stSidebar"] > div::-webkit-scrollbar {
-            width: 0px !important;
-            background: transparent !important;
-        }
-
-        [data-testid="stSidebar"] > div {
-            -ms-overflow-style: none !important;
-            scrollbar-width: none !important;
-        }
-
-        /* ================ En-tête Professionnel ================ */
-        [data-testid="stSidebar"] h2 {
-            font-size: 0 !important;
-            margin: 0 0 20px 0 !important;
-            padding: 12px 0 !important;
-            border-bottom: 1px solid var(--sidebar-border) !important;
-            text-align: center !important;
-            transition: all 0.3s ease !important;
-            position: relative !important;
-            height: 60px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-
-        /* Icône en mode réduit */
-        [data-testid="stSidebar"] h2::before {
-            content: "🧩" !important;
-            font-size: 28px !important;
-            display: block !important;
-            margin: 0 !important;
-        }
-
-        /* Texte complet au survol */
-        [data-testid="stSidebar"]:hover h2 {
-            font-size: 1.4rem !important;
-            color: var(--primary) !important;
-            font-weight: 600 !important;
-        }
-
-        [data-testid="stSidebar"]:hover h2::before {
-            font-size: 20px !important;
-            margin-right: 8px !important;
-        }
-
-        /* ================ Options de Navigation Modernisées ================ */
-        [data-testid="stSidebar"] .stRadio {
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        [data-testid="stSidebar"] .stRadio > div {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 4px !important;
-            padding: 0 !important;
-        }
-
-        [data-testid="stSidebar"] .stRadio label {
-            display: flex !important;
-            align-items: center !important;
-            padding: 10px 6px !important;
-            margin: 0 !important;
-            border-radius: 8px !important;
-            transition: all 0.3s ease !important;
-            cursor: pointer !important;
-            position: relative !important;
-            height: 44px !important;
-            overflow: hidden !important;
-            background: transparent !important;
-        }
-
-        /* Icônes centrées en mode réduit */
-        [data-testid="stSidebar"] .stRadio label > div:first-child {
             display: none !important;
         }
 
-        [data-testid="stSidebar"] .stRadio label span {
-            font-size: 0 !important;
-            transition: all 0.3s ease !important;
-            width: 100% !important;
-            text-align: center !important;
-            position: relative !important;
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] .stRadio,
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] input {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
         }
 
-        /* Affichage des icônes uniquement */
-        [data-testid="stSidebar"] .stRadio label span::before {
-            font-size: 22px !important;
-            display: block !important;
-            width: 100% !important;
-            text-align: center !important;
-        }
-
-        /* Mapping des icônes pour chaque option */
-        [data-testid="stSidebar"] .stRadio label:nth-child(1) span::before { content: "🏠" !important; }
-        [data-testid="stSidebar"] .stRadio label:nth-child(2) span::before { content: "🔍" !important; }
-        [data-testid="stSidebar"] .stRadio label:nth-child(3) span::before { content: "🧠" !important; }
-        [data-testid="stSidebar"] .stRadio label:nth-child(4) span::before { content: "🤖" !important; }
-        [data-testid="stSidebar"] .stRadio label:nth-child(5) span::before { content: "📚" !important; }
-        [data-testid="stSidebar"] .stRadio label:nth-child(6) span::before { content: "ℹ️" !important; }
-
-        /* Mode étendu - affichage du texte */
-        [data-testid="stSidebar"]:hover .stRadio label span {
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            text-align: left !important;
-            padding-left: 12px !important;
-        }
-
-        [data-testid="stSidebar"]:hover .stRadio label span::before {
-            font-size: 18px !important;
+        /* ================ Création de Zones Colorées Interactives ================ */
+        [data-testid="stSidebar"]::before {
+            content: '' !important;
             position: absolute !important;
-            left: -8px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            width: auto !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 1000000 !important;
+            pointer-events: none !important;
         }
 
-        /* Effets de survol */
-        [data-testid="stSidebar"] .stRadio label:hover {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
-            transform: translateX(3px) !important;
-            box-shadow: var(--shadow-light) !important;
+        /* Zones de navigation avec dégradés */
+        [data-testid="stSidebar"]::after {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: 
+                linear-gradient(180deg, 
+                    /* Zone 1 - Accueil */
+                    #ff6b6b 0%, #ff8e53 16.66%,
+                    /* Zone 2 - Exploration */
+                    #4ecdc4 16.66%, #44a08d 33.32%,
+                    /* Zone 3 - Analyse ML */
+                    #a8edea 33.32%, #fed6e3 49.98%,
+                    /* Zone 4 - Prédiction */
+                    #667eea 49.98%, #764ba2 66.64%,
+                    /* Zone 5 - Documentation */
+                    #f093fb 66.64%, #f5576c 83.3%,
+                    /* Zone 6 - À propos */
+                    #4facfe 83.3%, #00f2fe 100%
+                ) !important;
+            z-index: 1000001 !important;
+            opacity: 0.9 !important;
+            transition: var(--sidebar-transition) !important;
         }
 
-        /* Option sélectionnée */
-        [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
-            background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
-            color: white !important;
-            box-shadow: var(--shadow-medium) !important;
+        /* Effet de brillance au survol */
+        [data-testid="stSidebar"]:hover::after {
+            opacity: 1 !important;
+            filter: brightness(1.1) saturate(1.2) !important;
         }
 
-        [data-testid="stSidebar"] .stRadio label[data-checked="true"]:hover {
-            background: linear-gradient(135deg, #2980b9, var(--secondary)) !important;
-            transform: translateX(5px) !important;
+        /* ================ Zones Interactives Invisibles ================ */
+        [data-testid="stSidebar"] .nav-zone {
+            position: absolute !important;
+            width: 100% !important;
+            height: 16.66% !important;
+            z-index: 1000002 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+        }
+
+        [data-testid="stSidebar"] .nav-zone:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        /* Positionnement des zones */
+        [data-testid="stSidebar"] .nav-zone:nth-child(1) { top: 0% !important; }
+        [data-testid="stSidebar"] .nav-zone:nth-child(2) { top: 16.66% !important; }
+        [data-testid="stSidebar"] .nav-zone:nth-child(3) { top: 33.32% !important; }
+        [data-testid="stSidebar"] .nav-zone:nth-child(4) { top: 49.98% !important; }
+        [data-testid="stSidebar"] .nav-zone:nth-child(5) { top: 66.64% !important; }
+        [data-testid="stSidebar"] .nav-zone:nth-child(6) { top: 83.3% !important; }
+
+        /* ================ Indicateur de Position Active ================ */
+        [data-testid="stSidebar"] .active-indicator {
+            position: absolute !important;
+            right: 0 !important;
+            width: 4px !important;
+            height: 16.66% !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+            transition: all 0.3s ease !important;
+            border-radius: 2px 0 0 2px !important;
+            z-index: 1000003 !important;
+        }
+
+        /* ================ Animation de Pulsation ================ */
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: var(--shadow-medium) !important; 
+            }
+            50% { 
+                box-shadow: var(--shadow-glow) !important; 
+            }
+        }
+
+        [data-testid="stSidebar"]:hover {
+            animation: pulse-glow 2s ease-in-out infinite !important;
+        }
+
+        /* ================ Motif Géométrique en Overlay ================ */
+        [data-testid="stSidebar"]::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255,255,255,0.05) 10px,
+                    rgba(255,255,255,0.05) 20px
+                ) !important;
+            z-index: 1000000 !important;
+            pointer-events: none !important;
         }
 
         /* ================ Contenu Principal Adaptatif ================ */
@@ -320,47 +299,54 @@ def set_custom_theme():
             transition: var(--sidebar-transition) !important;
         }
 
-        /* ================ Indicateur Visuel Subtil ================ */
-        [data-testid="stSidebar"]::after {
-            content: "›" !important;
-            position: absolute !important;
-            right: 6px !important;
+        /* ================ Tooltip Informationnel ================ */
+        .sidebar-tooltip {
+            position: fixed !important;
+            left: calc(var(--sidebar-width-collapsed) + 20px) !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
-            font-size: 12px !important;
-            color: var(--text-secondary) !important;
-            opacity: 0.5 !important;
-            transition: all 0.3s ease !important;
-            font-weight: bold !important;
-        }
-
-        [data-testid="stSidebar"]:hover::after {
+            background: rgba(0, 0, 0, 0.8) !important;
+            color: white !important;
+            padding: 12px 16px !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
             opacity: 0 !important;
-            transform: translateY(-50%) translateX(10px) !important;
+            visibility: hidden !important;
+            transition: all 0.3s ease !important;
+            z-index: 1000004 !important;
+            pointer-events: none !important;
+            backdrop-filter: blur(10px) !important;
         }
 
-        /* ================ Zone de Trigger Invisible ================ */
-        .sidebar-trigger-zone {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 10px !important;
-            height: 100vh !important;
-            z-index: 999998 !important;
-            background: transparent !important;
+        .sidebar-tooltip.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .sidebar-tooltip::before {
+            content: '' !important;
+            position: absolute !important;
+            left: -8px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            border: 8px solid transparent !important;
+            border-right-color: rgba(0, 0, 0, 0.8) !important;
         }
 
         /* ================ Responsive Design ================ */
         @media (max-width: 768px) {
             [data-testid="stSidebar"] {
                 transform: translateX(-100%) !important;
+                width: 70px !important;
+                min-width: 70px !important;
+                max-width: 70px !important;
             }
             
             [data-testid="stSidebar"]:hover {
                 transform: translateX(0) !important;
-                width: 280px !important;
-                min-width: 280px !important;
-                max-width: 280px !important;
+                width: 90px !important;
+                min-width: 90px !important;
+                max-width: 90px !important;
             }
             
             .main .block-container {
@@ -368,39 +354,36 @@ def set_custom_theme():
                 max-width: 100vw !important;
                 padding: 1rem !important;
             }
-            
-            .sidebar-trigger-zone {
-                width: 15px !important;
-            }
         }
 
-        /* ================ Améliorations Générales ================ */
-        .stButton > button {
-            background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
-            color: white !important;
-            border-radius: 8px !important;
-            border: none !important;
-            padding: 10px 20px !important;
-            font-weight: 500 !important;
-            transition: all 0.3s ease !important;
-            box-shadow: var(--shadow-light) !important;
+        /* ================ Zone de Trigger Étendue ================ */
+        .sidebar-trigger-zone {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 15px !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            background: transparent !important;
         }
 
-        .stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: var(--shadow-medium) !important;
-            background: linear-gradient(135deg, #2980b9, var(--secondary)) !important;
-        }
-
-        /* Suppression des alertes indésirables */
+        /* ================ Suppression des Éléments Indésirables ================ */
         .stAlert, [data-testid="stAlert"] {
             border: none !important;
             background: transparent !important;
         }
+
+        /* Masquage des barres de défilement */
+        [data-testid="stSidebar"]::-webkit-scrollbar {
+            width: 0px !important;
+        }
+
+        [data-testid="stSidebar"] *::-webkit-scrollbar {
+            width: 0px !important;
+        }
         </style>
 
         <script>
-        // Script JavaScript optimisé
         document.addEventListener('DOMContentLoaded', function() {
             // Créer la zone de trigger si elle n'existe pas
             if (!document.querySelector('.sidebar-trigger-zone')) {
@@ -408,50 +391,99 @@ def set_custom_theme():
                 triggerZone.className = 'sidebar-trigger-zone';
                 document.body.appendChild(triggerZone);
             }
-            
+
+            // Créer le tooltip informatif
+            if (!document.querySelector('.sidebar-tooltip')) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'sidebar-tooltip';
+                tooltip.textContent = 'Navigation - Cliquez pour accéder aux sections';
+                document.body.appendChild(tooltip);
+            }
+
             const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            const tooltip = document.querySelector('.sidebar-tooltip');
             const triggerZone = document.querySelector('.sidebar-trigger-zone');
             
-            if (sidebar && triggerZone) {
-                let isExpanded = false;
+            if (sidebar && tooltip && triggerZone) {
                 let hoverTimeout;
                 
-                function expandSidebar() {
+                function showTooltip() {
                     clearTimeout(hoverTimeout);
-                    isExpanded = true;
-                    sidebar.style.overflow = 'visible';
+                    tooltip.classList.add('show');
                 }
                 
-                function collapseSidebar() {
+                function hideTooltip() {
                     hoverTimeout = setTimeout(() => {
-                        isExpanded = false;
-                        sidebar.style.overflow = 'hidden';
-                    }, 200);
+                        tooltip.classList.remove('show');
+                    }, 300);
                 }
                 
-                // Gestion des événements
+                // Gestion des événements pour le tooltip
                 [sidebar, triggerZone].forEach(element => {
-                    element.addEventListener('mouseenter', expandSidebar);
-                    element.addEventListener('mouseleave', collapseSidebar);
+                    element.addEventListener('mouseenter', showTooltip);
+                    element.addEventListener('mouseleave', hideTooltip);
                 });
-                
-                // Attribution des états pour les options sélectionnées
-                const observer = new MutationObserver(() => {
-                    const radioLabels = sidebar.querySelectorAll('.stRadio label');
-                    radioLabels.forEach(label => {
-                        const input = label.querySelector('input[type="radio"]');
-                        if (input && input.checked) {
-                            label.setAttribute('data-checked', 'true');
-                        } else {
-                            label.setAttribute('data-checked', 'false');
+
+                // Créer des zones cliquables invisibles
+                const navLabels = [
+                    'Accueil', 'Exploration des Données', 'Analyse ML', 
+                    'Prédiction par IA', 'Documentation', 'À propos'
+                ];
+
+                // Supprimer les anciennes zones si elles existent
+                sidebar.querySelectorAll('.nav-zone').forEach(zone => zone.remove());
+
+                // Créer les nouvelles zones
+                navLabels.forEach((label, index) => {
+                    const zone = document.createElement('div');
+                    zone.className = 'nav-zone';
+                    zone.style.top = `${index * 16.66}%`;
+                    zone.setAttribute('data-nav-index', index);
+                    zone.setAttribute('title', label);
+                    
+                    zone.addEventListener('click', function() {
+                        // Simuler le clic sur l'option radio correspondante
+                        const radioInputs = document.querySelectorAll('[data-testid="stSidebar"] input[type="radio"]');
+                        if (radioInputs[index]) {
+                            radioInputs[index].click();
                         }
+                        
+                        // Feedback visuel
+                        zone.style.background = 'rgba(255, 255, 255, 0.3)';
+                        setTimeout(() => {
+                            zone.style.background = '';
+                        }, 200);
                     });
+
+                    zone.addEventListener('mouseenter', function() {
+                        tooltip.textContent = label;
+                        showTooltip();
+                    });
+
+                    sidebar.appendChild(zone);
                 });
-                
-                observer.observe(sidebar, { 
-                    childList: true, 
+
+                // Indicateur de position active
+                const activeIndicator = document.createElement('div');
+                activeIndicator.className = 'active-indicator';
+                sidebar.appendChild(activeIndicator);
+
+                // Observer pour détecter l'option active
+                const observer = new MutationObserver(() => {
+                    const checkedInput = sidebar.querySelector('input[type="radio"]:checked');
+                    if (checkedInput) {
+                        const radioInputs = Array.from(sidebar.querySelectorAll('input[type="radio"]'));
+                        const activeIndex = radioInputs.indexOf(checkedInput);
+                        if (activeIndex !== -1) {
+                            activeIndicator.style.top = `${activeIndex * 16.66}%`;
+                        }
+                    }
+                });
+
+                observer.observe(sidebar, {
+                    childList: true,
                     subtree: true,
-                    attributes: true 
+                    attributes: true
                 });
             }
         });
@@ -462,6 +494,7 @@ def set_custom_theme():
             f.write(custom_theme)
 
     st.markdown(custom_theme, unsafe_allow_html=True)
+
 
 def show_navigation_menu():
     """Menu de navigation optimisé et professionnel"""
