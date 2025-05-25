@@ -4788,18 +4788,18 @@ def show_documentation():
                 </div>
                 """, unsafe_allow_html=True)
         
-            st.markdown("### Répartition des coûts :", unsafe_allow_html=True)
-    
-            st.markdown("""
-            <div style="line-height: 1.8; color: #2c3e50; padding-left: 20px; background: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 10px;">
-                <ul style="margin: 0; padding: 0; list-style-type: disc;">
-                    <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
-                    <li><strong>Services de santé</strong> : 15-25%</li>
-                    <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
-                    <li><strong>Services sociaux</strong> : 10-15%</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("### 💰 Répartition des coûts :")
+
+            # Utiliser st.html() au lieu de st.markdown() avec unsafe_allow_html
+            st.html("""
+            <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px; font-size: 1.05rem;">
+                <li><strong style="color: #27ae60;">Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
+                <li><strong style="color: #27ae60;">Services de santé</strong> : 15-25%</li>
+                <li><strong style="color: #27ae60;">Perte de productivité familiale</strong> : 20-30%</li>
+                <li><strong style="color: #27ae60;">Services sociaux</strong> : 10-15%</li>
+            </ul>
+            """)
+
 
     with doc_tabs[4]:
         # Guides cliniques
