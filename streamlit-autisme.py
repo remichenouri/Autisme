@@ -1342,170 +1342,159 @@ def show_home_page():
 
 
 def show_data_exploration():
-    import plotly.express as px
-    import plotly.graph_objects as go
-    import pandas as pd
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    from scipy.stats import chi2_contingency, mannwhitneyu
+    # Styles CSS pour l'harmonisation avec la page d'accueil
+    st.markdown(f"""
+    <style>
+        :root {{
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --background: #f8f9fa;
+            --text-primary: #2c3e50;
+        }}
 
-    df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
+        .exploration-header {{
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            padding: 40px 25px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            text-align: center;
+        }}
+
+        .info-card-modern {{
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }}
+
+        .info-card-modern:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }}
+
+        .card-title {{
+            color: var(--primary);
+            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # En-tête harmonisé
     st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
-            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
-    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
-               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-        🔍 Exploration des Données TSA
-    </h1>
-    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
-              max-width: 800px; margin: 0 auto; line-height: 1.6;">
-        Une approche moderne et scientifique pour le dépistage précoce
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    <div class="exploration-header">
+        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+            🔍 Exploration des Données TSA
+        </h1>
+        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
+            Analyse interactive des données de dépistage
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if 'expanders_initialized' not in st.session_state:
-        st.session_state.expanders_initialized = {
-            'structure': True,
-            'valeurs_manquantes': True,
-            'pipeline': True,
-            'variables_cles': True,
-            'questionnaire': True,
-            'composite': True,
-            'statistiques': True,
-            'correlation': True,
-            'famd': True
-        }
+    # Chargement des données
+    df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
 
-    with st.expander("📂 Structure des Données", expanded=True):
+    # Section Structure des Données
+    with st.container():
         st.markdown("""
-            <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
-                <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
-                <ul style="padding-left:20px">
-                    <li>'📁' <strong>Dataset 1:</strong> <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
-                    <li>'📁' <strong>Dataset 2:</strong> <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
-                    <li>'📁' <strong>Dataset 3:</strong> <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
-                    <li>'📁' <strong>Dataset 4:</strong> <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
-                    <li>'📁' <strong>Dataset 5:</strong> <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+        <div class="info-card-modern">
+            <h2 class="card-title">📂 Structure des Données</h2>
+            <div style="margin-top: 20px;">
+        """, unsafe_allow_html=True)
+        
         tab_main, tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "Dataset Final", "Dataset 1", "Dataset 2", "Dataset 3", "Dataset 4", "Dataset 5"
         ])
-
+        
         with tab_main:
-            st.caption("Dataset Final")
             st.dataframe(df.head(5), use_container_width=True)
         with tab1:
-            st.caption("Dataset 1")
             st.dataframe(df_ds1.head(5), use_container_width=True)
         with tab2:
-            st.caption("Dataset 2")
             st.dataframe(df_ds2.head(5), use_container_width=True)
         with tab3:
-            st.caption("Dataset 3")
             st.dataframe(df_ds3.head(5), use_container_width=True)
         with tab4:
-            st.caption("Dataset 4")
             st.dataframe(df_ds4.head(5), use_container_width=True)
         with tab5:
-            st.caption("Dataset 5")
             st.dataframe(df_ds5.head(5), use_container_width=True)
 
-    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
-            <p style="color: #7f8c8d;">Processus automatisé pour préparer les données à l'analyse.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            st.markdown("""
-            <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <h4 style="color: #3498db; margin-top: 0;">Étapes de Transformation</h4>
-                <ol style="padding-left: 20px; color: #2c3e50;">
-                    <li><b>Uniformisation</b> des colonnes</li>
-                    <li><b>Typage</b> des variables</li>
-                    <li><b>Gestion</b> des valeurs manquantes</li>
-                    <li><b>Encodage</b> catégoriel</li>
-                    <li><b>Normalisation</b> des échelles</li>
-                </ol>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            avant_tab, apres_tab = st.tabs(["Avant Nettoyage", "Après Nettoyage"])
-            with avant_tab:
-                raw_data_sample = pd.DataFrame({
-                    'A10_Score': [7, 5, None, 3],
-                    'Age_Years': [29, None, 'unknown', 383],
-                    'asd_traits': ['yes', 'no', 'no', 'yes']
-                })
-                st.dataframe(raw_data_sample.style.highlight_null(color='#ffcdd2'), use_container_width=True)
-            with apres_tab:
-                clean_data_sample = pd.DataFrame({
-                    'A10': [7, 5, 4, 3],
-                    'Age': [29, 35, 42, 38],
-                    'TSA': ['Yes', 'No', 'No', 'Yes'],
-                    'Statut_testeur': ['Famille', 'Famille', 'Famille', 'Famille']
-                })
-                st.dataframe(clean_data_sample, use_container_width=True)
-                metrics_col1, metrics_col2 = st.columns(2)
-                with metrics_col1:
-                    st.metric("Réduction des valeurs manquantes", "92%", "10% → 0.8%")
-                with metrics_col2:
-                    st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
-                pass
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
-    with st.expander("📉 Analyse des Valeurs Manquantes", expanded=True):
+    # Section Analyse des Valeurs Manquantes
+    with st.container():
         st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse des Valeurs Manquantes</h3>
-            <p style="color: #7f8c8d;">Visualisation et quantification des données manquantes dans le jeu de données.</p>
-        </div>
+        <div class="info-card-modern">
+            <h2 class="card-title">🧼 Nettoyage des Données</h2>
+            <div style="margin-top: 20px;">
         """, unsafe_allow_html=True)
+        
         missing_percent = (df.isnull().sum() / len(df)) * 100
         missing_info = pd.DataFrame({
             'Colonne': missing_percent.index,
             'Pourcentage': missing_percent.values
-        })
-        missing_info = missing_info[missing_info['Pourcentage'] > 0].sort_values('Pourcentage', ascending=False)
-        if not missing_info.empty:
-            col1, col2 = st.columns([3, 2])
-            with col1:
-                fig = px.bar(
-                    missing_info,
-                    x='Pourcentage',
-                    y='Colonne',
-                    orientation='h',
-                    title="Pourcentage de valeurs manquantes par colonne",
-                    color='Pourcentage',
-                    color_continuous_scale=px.colors.sequential.Blues,
-                    text='Pourcentage'
-                )
-                fig.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
-                fig.update_layout(
-                    height=400,
-                    xaxis_title="Pourcentage (%)",
-                    yaxis_title="",
-                    coloraxis_showscale=False,
-                    margin=dict(l=20, r=20, t=40, b=20),
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            with col2:
-                st.metric(
-                    "Nombre de colonnes avec valeurs manquantes",
-                    missing_info.shape[0],
-                    delta=f"{missing_info.shape[0]/df.shape[1]:.1%} des colonnes"
-                )
-                st.markdown("### Détail des valeurs manquantes")
-                st.dataframe(missing_info, use_container_width=True)
-                total_missing = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
-                st.info(f"Taux global de données manquantes : {total_missing:.2f}%")
-        else:
-            st.success("✅ Aucune valeur manquante détectée dans le jeu de données.")
+        }).sort_values('Pourcentage', ascending=False)
+        
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            fig = px.bar(missing_info, x='Pourcentage', y='Colonne', orientation='h', 
+                        color='Pourcentage', color_continuous_scale='Blues')
+            st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            st.dataframe(missing_info, use_container_width=True)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # Section Statistiques
+    with st.container():
+        st.markdown("""
+        <div class="info-card-modern">
+            <h2 class="card-title">📈 Métriques Clés</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Nombre total d'échantillons", len(df))
+        with col2:
+            st.metric("Âge moyen", f"{df['Age'].mean():.1f} ans")
+        with col3:
+            tsa_percent = df['TSA'].value_counts(normalize=True).get('Yes', 0) * 100
+            st.metric("Prévalence TSA", f"{tsa_percent:.1f}%")
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # Personnalisation des graphiques
+    px.defaults.color_discrete_sequence = ["#3498db", "#2ecc71"]
+    px.defaults.color_continuous_scale = px.colors.sequential.Blues
+
+    # Section Visualisations interactives
+    with st.container():
+        st.markdown("""
+        <div class="info-card-modern">
+            <h2 class="card-title">📊 Analyse Interactive</h2>
+            <div style="margin-top: 20px;">
+        """, unsafe_allow_html=True)
+        
+        selected_var = st.selectbox("Choisir une variable à analyser", df.columns.drop('TSA'))
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            fig = px.histogram(df, x=selected_var, color='TSA', barmode='group')
+            st.plotly_chart(fig, use_container_width=True)
+        with col2:
+            stats = df[selected_var].describe().to_frame().T
+            st.dataframe(stats, use_container_width=True)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
 
 
     with st.expander("📈 Statistiques du Dataset Final", expanded=True):
