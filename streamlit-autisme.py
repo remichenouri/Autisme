@@ -4543,7 +4543,7 @@ def main():
         st.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
         pages = [
             "🏠 Accueil",
-            "🔍 Exploration des Données",
+            "🔍 Exploration",
             "🧠 Analyse ML",
             "🤖 Prédiction par IA",
             "📚 Documentation",
@@ -4559,7 +4559,7 @@ def main():
 
     if "🏠 Accueil" in selection:
         show_home_page()
-    elif "🔍 Exploration des Données" in selection:
+    elif "🔍 Exploration" in selection:
         show_data_exploration()
     elif "🧠 Analyse ML" in selection:
         show_ml_analysis()
