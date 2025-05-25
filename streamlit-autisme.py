@@ -1403,70 +1403,46 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Section "Le spectre autistique" améliorée et centrée
+    # Section "Le spectre autistique" avec HTML corrigé
+    st.markdown("## 🌈 Le spectre autistique")
+    
+    # HTML simple et correct
     st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🌈 Le spectre autistique
-    </h2>
+    <div style="background-color: white; padding: 25px; border-radius: 15px; 
+               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
+        <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50;">
+            L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, 
+            reflétant la grande variabilité des manifestations.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
-
-    # Conteneur centré pour le contenu
-    col1, col2, col3 = st.columns([1, 10, 1])
+    
+    # Niveaux avec colonnes Streamlit
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: #e8f4fd; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4 style="color: #2980b9; margin: 0;">Niveau 1</h4>
+            <p style="color: #34495e; margin: 8px 0 0 0;">Nécessite un soutien</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div class="info-card-modern">
-            <p style="font-size: 1.1rem; line-height: 1.7; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
-                L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, reflétant la
-                grande variabilité des manifestations. Cette conception reconnaît que :
-            </p>
-            
-            <div style="background: #f8fcff; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <ul style="padding-left: 25px; line-height: 1.8; color: #34495e;">
-                    <li><strong>Chaque personne autiste</strong> présente un profil unique de forces et de défis</li>
-                    <li><strong>Les manifestations</strong> varient en intensité et en expression</li>
-                    <li><strong>Les niveaux de soutien</strong> nécessaires peuvent différer considérablement</li>
-                </ul>
-            </div>
-            
-            <p style="font-size: 1.1rem; line-height: 1.7; margin: 25px 0; text-align: center; color: #2c3e50;">
-                <strong>Le DSM-5 définit trois niveaux de soutien nécessaire :</strong>
-            </p>
+        <div style="background: #fff3e0; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4 style="color: #e67e22; margin: 0;">Niveau 2</h4>
+            <p style="color: #8b4513; margin: 8px 0 0 0;">Nécessite un soutien important</p>
         </div>
         """, unsafe_allow_html=True)
-
-        # Niveaux de soutien avec design moderne
-        niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
-
-        with niveau_col1:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #3498db; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #2980b9; margin: 0; font-size: 1.1rem;">Niveau 1</h4>
-                <p style="color: #34495e; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with niveau_col2:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #f39c12; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #e67e22; margin: 0; font-size: 1.1rem;">Niveau 2</h4>
-                <p style="color: #8b4513; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien important</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with niveau_col3:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #ffebee, #ffcdd2); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #e74c3c; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #c0392b; margin: 0; font-size: 1.1rem;">Niveau 3</h4>
-                <p style="color: #8b0000; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien très important</p>
-            </div>
-            """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: #ffebee; padding: 20px; border-radius: 12px; text-align: center;">
+            <h4 style="color: #c0392b; margin: 0;">Niveau 3</h4>
+            <p style="color: #8b0000; margin: 8px 0 0 0;">Nécessite un soutien très important</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Section contexte du projet améliorée
     st.markdown("""
