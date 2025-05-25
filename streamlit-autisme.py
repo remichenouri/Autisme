@@ -4736,47 +4736,7 @@ def show_documentation():
         fig_countries.update_layout(height=400)
         st.plotly_chart(fig_countries, use_container_width=True)
 
-        st.markdown("### 💰 Impact Économique")
-        
-        st.markdown("""
-        <style>
-        /* Styles pour la grille de statistiques */
-        .statistics-grid {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .stat-card {
-            flex: 1 1 200px;
-            padding: 20px;
-            border-radius: 15px;
-            color: white;
-            text-align: center;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        # Utilisation de st.columns() pour une disposition en grille
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown(
-                """
-                <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
-                    <h3 style="margin: 0 0 10px 0; font-size: 2rem;">268 Md$</h3>
-                    <p style="margin: 0;">États-Unis<br>(2020)</p>
-                </div>
-                """, unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown(
-                """
-                <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                    <h3 style="margin: 0 0 10px 0; font-size: 2rem;">32 Md£</h3>
-                    <p style="margin: 0;">Royaume-Uni<br>(2019)</p>
-                </div>
-                """, unsafe_allow_html=True)
-        
+
 
     with doc_tabs[4]:
         # Guides cliniques
