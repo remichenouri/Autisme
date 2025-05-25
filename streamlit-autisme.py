@@ -93,14 +93,34 @@ def initialize_session_state():
         st.session_state.data_exploration_expanded = True
 
 def show_navigation_menu_optimized():
-    """Menu de navigation optimisé sans défilement"""
+    """Menu de navigation optimisé sans barre de défilement"""
     
-    # Titre compact
+    # CSS spécifique pour la navigation
+    st.markdown("""
+    <style>
+    /* Titre de navigation compact */
+    .nav-title {
+        text-align: center;
+        padding: 15px 10px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        border-radius: 10px;
+        color: white;
+    }
+    
+    /* Conteneur de navigation sans défilement */
+    .nav-container {
+        height: calc(100vh - 120px);
+        overflow: hidden;
+        padding-right: 5px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Titre compact avec gradient
     st.sidebar.markdown("""
-    <div style="text-align: center; padding: 10px; margin-bottom: 15px;">
-        <h2 style="color: #3498db; margin: 0; font-size: 1.3rem;">
-            🧩 Navigation
-        </h2>
+    <div class="nav-title">
+        <h2 style="margin: 0; font-size: 1.4rem;">🧩 Navigation</h2>
     </div>
     """, unsafe_allow_html=True)
     
@@ -114,16 +134,18 @@ def show_navigation_menu_optimized():
         "ℹ️ À propos"
     ]
     
+    # Initialisation de l'état
     if 'tool_choice' not in st.session_state:
         st.session_state.tool_choice = options[0]
     
-    # Menu radio compact
-    choice = st.sidebar.radio(
-        "",
-        options,
-        key="nav_choice",
-        label_visibility="collapsed"
-    )
+    # Menu radio dans un conteneur sans défilement
+    with st.sidebar.container():
+        choice = st.radio(
+            "",
+            options,
+            key="nav_choice",
+            label_visibility="collapsed"
+        )
     
     return choice
 
@@ -145,6 +167,207 @@ def set_custom_theme():
             --background: #f0f2f6;
             --card-bg: white;
             --text: #2c3e50;
+        }
+        [data-testid="stSidebar"]::-webkit-scrollbar,
+        [data-testid="stSidebarContent"]::-webkit-scrollbar,
+        [data-testid="stSidebar"] *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        [data-testid="stSidebar"] div[role="radiogroup"] {
+    margin: 10px 0 !important;
+    padding: 0 !important;
+}
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 1rem !important;
+            margin-bottom: 8px !important;
+            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            transition: all 0.2s ease !important;
+            display: block !important;
+            width: calc(100% - 30px) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            box-sizing: border-box !important;
+        }
+        /* Masquage complet des barres de défilement sidebar */
+        [data-testid="stSidebar"]::-webkit-scrollbar,
+        [data-testid="stSidebarContent"]::-webkit-scrollbar,
+        [data-testid="stSidebar"] *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
+        [data-testid="stSidebar"],
+        [data-testid="stSidebarContent"],
+        [data-testid="stSidebar"] * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        /* Configuration sidebar fixe */
+        [data-testid="stSidebar"] {
+            background-color: #f5f7fa !important;
+            border-right: 2px solid #3498db !important;
+            width: 300px !important;
+            min-width: 300px !important;
+            max-width: 300px !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            height: 100vh !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 999 !important;
+        }
+        
+        [data-testid="stSidebarContent"] {
+            width: 100% !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 15px !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Correction du débordement du contenu principal */
+        .main .block-container {
+            padding-left: 320px !important;
+            padding-right: 20px !important;
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+            max-width: none !important;
+            width: calc(100vw - 340px) !important;
+            margin-left: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        [data-testid="stAppViewContainer"] {
+            margin-left: 300px !important;
+            width: calc(100vw - 300px) !important;
+            background-color: #f0f2f6 !important;
+            min-height: 100vh !important;
+        }
+        
+        /* Optimisation navigation */
+        [data-testid="stSidebar"] div[role="radiogroup"] label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 1rem !important;
+            margin-bottom: 8px !important;
+            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            border: none !important;
+            transition: all 0.2s ease !important;
+            display: block !important;
+            width: calc(100% - 30px) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            box-sizing: border-box !important;
+        }
+        
+        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+            background-color: #e3f2fd !important;
+            transform: translateX(3px) !important;
+        }
+        
+        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
+            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
+            color: #1976d2 !important;
+            font-weight: 600 !important;
+            border-left: 4px solid #3498db !important;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main .block-container {
+                padding-left: 20px !important;
+                width: calc(100vw - 40px) !important;
+            }
+            
+            [data-testid="stAppViewContainer"] {
+                margin-left: 0 !important;
+                width: 100vw !important;
+            }
+            
+            [data-testid="stSidebar"] {
+                width: 280px !important;
+                min-width: 280px !important;
+                max-width: 280px !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+            }
+            
+            [data-testid="stSidebar"]:hover,
+            [data-testid="stSidebar"]:focus-within {
+                transform: translateX(0) !important;
+            }
+        }
+        
+        /* === STYLES EXISTANTS CONSERVÉS === */
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --background: #f0f2f6;
+            --card-bg: white;
+            --text: #2c3e50;
+        }
+        
+        /* État hover et sélectionné */
+        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+            background-color: #e3f2fd !important;
+            transform: translateX(3px) !important;
+        }
+        
+        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
+            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
+            color: #1976d2 !important;
+            font-weight: 600 !important;
+            border-left: 4px solid #3498db !important;
+        }
+        /* Masquage pour Firefox */
+        [data-testid="stSidebar"],
+        [data-testid="stSidebarContent"],
+        [data-testid="stSidebar"] * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        /* Configuration avancée de la sidebar */
+        [data-testid="stSidebar"] {
+            background-color: #f5f7fa !important;
+            border-right: 2px solid #3498db !important;
+            width: 300px !important;
+            min-width: 300px !important;
+            max-width: 300px !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            height: 100vh !important;
+            z-index: 999 !important;
+        }
+        
+        /* Conteneur de la sidebar */
+        [data-testid="stSidebarContent"] {
+            width: 100% !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 10px 15px !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Masquage spécifique pour les éléments internes */
+        [data-testid="stSidebar"] .stMarkdown,
+        [data-testid="stSidebar"] .streamlit-expanderHeader,
+        [data-testid="stSidebar"] div[role="radiogroup"] {
+            overflow: visible !important;
         }
 
         /* Styles généraux du conteneur */
