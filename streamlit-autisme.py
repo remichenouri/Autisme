@@ -1436,8 +1436,8 @@ def show_data_exploration():
         with tab5:
             st.caption("Dataset 5")
             st.dataframe(df_ds5.head(5), use_container_width=True)
-
-    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):*
+            
+    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
         st.markdown("""
         <div class="section-title">Pipeline de Nettoyage</div>""")
         st.markdown("""
