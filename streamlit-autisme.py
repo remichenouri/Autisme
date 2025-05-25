@@ -185,6 +185,22 @@ def set_custom_theme():
         div[data-baseweb="base-input"] {
             border: none !important;
         }
+        /* Masquer le code HTML qui s'affiche comme texte */
+        .stMarkdown pre,
+        .stMarkdown code[class*="language-"],
+        .stMarkdown .highlight,
+        .stMarkdown .hljs {
+            display: none !important;
+        }
+        
+        /* Assurer l'affichage normal du contenu */
+        .stMarkdown p,
+        .stMarkdown div,
+        .stMarkdown ul,
+        .stMarkdown li {
+            display: block !important;
+            background: transparent !important;
+        }
         
         .css-1d391kg {
             border: none !important;
