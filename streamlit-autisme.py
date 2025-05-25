@@ -206,6 +206,84 @@ def set_custom_theme():
             border: none !important;
             background: transparent !important;
         }
+        /* Masquer la barre de défilement de la sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #f5f7fa !important;
+        border-right: none !important;
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        overflow: hidden !important; /* Masquer le débordement */
+    }
+    
+    [data-testid="stSidebarContent"] {
+        width: 100% !important;
+        overflow: hidden !important; /* Masquer la barre de défilement */
+        background-color: #f5f7fa !important;
+        border: none !important;
+        height: 100vh !important; /* Hauteur pleine */
+        padding-right: 0 !important;
+    }
+    
+    /* Masquer spécifiquement les barres de défilement */
+    [data-testid="stSidebar"]::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    [data-testid="stSidebarContent"]::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    /* Pour Firefox */
+    [data-testid="stSidebar"] {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    [data-testid="stSidebarContent"] {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    /* Optimiser l'affichage du contenu */
+    [data-testid="stSidebar"] > div:first-child {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
+    
+    /* Améliorer l'espacement des éléments de navigation */
+    [data-testid="stSidebar"] div[role="radiogroup"] {
+        margin: 10px 0 !important;
+        padding: 0 15px !important;
+    }
+    
+    [data-testid="stSidebar"] div[role="radiogroup"] label {
+        color: #2c3e50 !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        margin-bottom: 8px !important;
+        padding: 10px 15px !important;
+        border-radius: 8px !important;
+        border: none !important;
+        transition: all 0.2s ease !important;
+        display: block !important;
+        white-space: nowrap !important; /* Éviter le retour à la ligne */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Navigation plus compacte */
+    [data-testid="stSidebar"] .stMarkdown {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Titre de navigation centré */
+    [data-testid="stSidebar"] h2 {
+        text-align: center !important;
+        margin: 15px 0 !important;
+        padding: 10px !important;
+        font-size: 1.4rem !important;
+    }
         /* Corrections spécifiques pour la navigation */
         [data-testid="stSidebar"] {
             background-color: #f5f7fa !important;
@@ -2884,7 +2962,7 @@ def show_ml_analysis():
                 colorscale='Blues',
                 text=cm,
                 texttemplate="%{text}",
-                textfont={"size": 24, "color": "white"},
+                textfont={"size": 24, "color": "black"},
                 hoverongaps=False,
                 showscale=True
             ))
