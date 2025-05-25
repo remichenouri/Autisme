@@ -956,22 +956,11 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 def show_home_page():
     """Page d'accueil améliorée avec design moderne et responsive"""
     
-    # CSS spécifique pour corriger les problèmes d'affichage
+    # CSS spécifique corrigé - SUPPRIMER les règles conflictuelles
     st.markdown("""
     <style>
-    /* Corrections pour la navigation sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #f5f7fa !important;
-        border-right: none !important;
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-    }
-    /* 
-    [data-testid="stSidebar"] > div {
-        border-right: none !important;
-        background-color: #f5f7fa !important;
-    }
+    /* Suppression des règles CSS conflictuelles pour la sidebar */
+    /* NE PAS redéfinir les propriétés de [data-testid="stSidebar"] */
     
     /* Suppression des barres bleues indésirables */
     .stAlert, [data-testid="stAlert"] {
