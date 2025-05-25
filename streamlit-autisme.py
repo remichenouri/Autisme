@@ -182,6 +182,37 @@ def set_custom_theme():
             border: none !important;
             background: transparent !important;
         }
+
+        /* Correction de l'affichage HTML brut */
+        .stMarkdown code {
+            background-color: transparent !important;
+            color: inherit !important;
+            padding: 0 !important;
+            border: none !important;
+            font-family: inherit !important;
+            font-size: inherit !important;
+        }
+        
+        /* Masquer le code HTML qui s'affiche */
+        .stMarkdown pre {
+            display: none !important;
+        }
+        
+        /* Correction de la surbrillance bleue */
+        .stMarkdown .highlight {
+            background-color: transparent !important;
+            color: inherit !important;
+        }
+        
+        /* Éliminer les blocs de code indésirables */
+        .stMarkdown .language-html {
+            display: none !important;
+        }
+        
+        .stMarkdown .hljs {
+            background: transparent !important;
+            color: inherit !important;
+        }
         /* Masquer la barre de défilement de la sidebar */
     [data-testid="stSidebar"] {
         background-color: #f5f7fa !important;
