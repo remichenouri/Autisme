@@ -4293,23 +4293,24 @@ def show_documentation():
             </div>
             """, unsafe_allow_html=True)
 
-        # Critères diagnostiques actuels
         st.markdown("### 🎯 Critères Diagnostiques DSM-5 (2013)")
-        
+
         st.markdown("""
-        <div class="doc-section">
-            <h4 style="color: #3498db;">A. Déficits persistants dans la communication sociale</h4>
-            <ol style="line-height: 1.8; color: #2c3e50;">
+        <div class="doc-section" style="margin-bottom: 30px;">
+            <h4 style="color: #3498db; margin-top: 20px;">A. Déficits persistants dans la communication sociale</h4>
+            <ul style="line-height: 1.8; color: #2c3e50; list-style-type: disc; padding-left: 20px;">
                 <li><strong>Réciprocité sociocommunicative</strong> : Difficultés dans les échanges sociaux</li>
                 <li><strong>Communication non verbale</strong> : Utilisation atypique du contact visuel, expressions faciales</li>
-                <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li></ol>
-            
+                <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li>
+            </ul>
+        
             <h4 style="color: #2ecc71; margin-top: 25px;">B. Comportements répétitifs et intérêts restreints</h4>
-            <ol style="line-height: 1.8; color: #2c3e50;">
+            <ul style="line-height: 1.8; color: #2c3e50; list-style-type: disc; padding-left: 20px;">
                 <li><strong>Stéréotypies motrices</strong> : Mouvements répétitifs, écholalie</li>
                 <li><strong>Rigidité</strong> : Insistance sur la similitude, routines inflexibles</li>
                 <li><strong>Intérêts spécialisés</strong> : Fixations sur des objets ou sujets particuliers</li>
-                <li><strong>Sensibilités sensorielles</strong> : Hyper ou hypo-réactivité sensorielle</li></ol>
+                <li><strong>Sensibilités sensorielles</strong> : Hyper ou hypo-réactivité sensorielle</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
 
