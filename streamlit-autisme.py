@@ -1439,7 +1439,7 @@ def show_data_exploration():
 
     with st.expander("🧼 Pipeline de Nettoyage", expanded=True):*
         st.markdown("""
-        <div class="section-title">Pipeline de Nettoyage</div>
+        <div class="section-title">Pipeline de Nettoyage</div>""")
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
