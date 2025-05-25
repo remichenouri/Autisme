@@ -467,7 +467,7 @@ def set_custom_theme():
     st.markdown(custom_theme, unsafe_allow_html=True)
 
 def set_enhanced_navigation_theme():
-    """Thème esthétique amélioré pour la barre de navigation"""
+    """Thème esthétique amélioré pour la barre de navigation sans barres de défilement"""
     
     enhanced_css = """
     <style>
@@ -490,7 +490,9 @@ def set_enhanced_navigation_theme():
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
     }
 
-    /* ================ Barre latérale avec design moderne ================ */
+    /* ================ SUPPRESSION COMPLÈTE DES BARRES DE DÉFILEMENT ================ */
+    
+    /* Masquer toutes les barres de défilement dans la sidebar */
     [data-testid="stSidebar"] {
         /* Fond avec dégradé élégant */
         background: var(--primary-gradient) !important;
@@ -511,41 +513,88 @@ def set_enhanced_navigation_theme():
         /* Transitions fluides */
         transition: var(--transition-smooth) !important;
         
-        /* Gestion du défilement */
-        overflow-y: auto !important;
+        /* SUPPRESSION TOTALE DES BARRES DE DÉFILEMENT */
+        overflow: hidden !important;
         overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        scrollbar-width: none !important; /* Firefox */
+        -ms-overflow-style: none !important; /* Internet Explorer 10+ */
     }
 
-    /* État étendu avec animation */
+    /* Suppression barres de défilement WebKit (Chrome, Safari, Edge) */
+    [data-testid="stSidebar"]::-webkit-scrollbar {
+        display: none !important;
+        width: 0px !important;
+        height: 0px !important;
+        background: transparent !important;
+    }
+
+    [data-testid="stSidebar"]::-webkit-scrollbar-track {
+        display: none !important;
+    }
+
+    [data-testid="stSidebar"]::-webkit-scrollbar-thumb {
+        display: none !important;
+    }
+
+    [data-testid="stSidebar"]::-webkit-scrollbar-corner {
+        display: none !important;
+    }
+
+    /* État étendu avec animation SANS défilement */
     [data-testid="stSidebar"]:hover {
         width: 280px !important;
         min-width: 280px !important;
         max-width: 280px !important;
         box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4) !important;
         transform: translateX(2px) !important;
+        
+        /* S'assurer qu'il n'y a pas de défilement même en mode étendu */
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
     }
 
-    /* ================ Contenu de la sidebar avec effets ================ */
+    /* ================ Contenu de la sidebar avec effets SANS débordement ================ */
     [data-testid="stSidebar"] > div {
-        width: 280px !important;
-        padding: 20px 15px !important;
+        width: 270px !important; /* Légèrement plus petit pour éviter le débordement */
+        padding: 15px 10px !important; /* Padding réduit */
+        height: 100vh !important;
+        box-sizing: border-box !important;
+        
+        /* Empêcher tout débordement */
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
     }
 
-    /* ================ Titre avec style élégant ================ */
+    /* Container principal pour éviter débordement */
+    [data-testid="stSidebar"] .element-container {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ================ Titre avec style élégant SANS débordement ================ */
     [data-testid="stSidebar"] h2 {
         color: var(--text-light) !important;
         font-size: 0 !important;
         text-align: center !important;
-        margin-bottom: 30px !important;
+        margin-bottom: 20px !important; /* Marge réduite */
         transition: var(--transition-smooth) !important;
         position: relative !important;
-        padding: 15px 0 !important;
+        padding: 10px 0 !important; /* Padding réduit */
+        
+        /* Empêcher débordement du titre */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        max-width: 100% !important;
     }
 
     /* Icône du titre en mode réduit */
     [data-testid="stSidebar"] h2::before {
         content: "🧩" !important;
-        font-size: 28px !important;
+        font-size: 24px !important;
         display: block !important;
         position: absolute !important;
         left: 50% !important;
@@ -557,49 +606,67 @@ def set_enhanced_navigation_theme():
 
     /* Animation du titre au survol */
     [data-testid="stSidebar"]:hover h2 {
-        font-size: 1.4rem !important;
+        font-size: 1.2rem !important; /* Taille réduite */
         font-weight: 600 !important;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-        letter-spacing: 0.5px !important;
+        letter-spacing: 0.3px !important; /* Espacement réduit */
+        
+        /* Gérer le débordement du texte */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     [data-testid="stSidebar"]:hover h2::before {
         position: static !important;
         transform: none !important;
-        margin-right: 12px !important;
+        margin-right: 8px !important; /* Marge réduite */
         display: inline !important;
     }
 
-    /* ================ Description élégante ================ */
+    /* ================ Description élégante SANS débordement ================ */
     [data-testid="stSidebar"] p {
         color: rgba(255, 255, 255, 0.9) !important;
         font-size: 0 !important;
         text-align: center !important;
-        margin-bottom: 25px !important;
+        margin-bottom: 15px !important; /* Marge réduite */
         opacity: 0 !important;
         transition: var(--transition-smooth) !important;
-        line-height: 1.5 !important;
+        line-height: 1.3 !important; /* Line-height réduite */
+        
+        /* Empêcher débordement */
+        max-width: 100% !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
     }
 
     [data-testid="stSidebar"]:hover p {
-        font-size: 14px !important;
+        font-size: 12px !important; /* Taille réduite */
         opacity: 1 !important;
         transform: translateY(0) !important;
+        
+        /* Gérer débordement du texte */
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
-    /* ================ Options radio avec design moderne ================ */
+    /* ================ Options radio avec design moderne SANS débordement ================ */
     [data-testid="stSidebar"] .stRadio > div {
         display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
-        padding: 0 5px !important;
+        gap: 8px !important; /* Gap réduit */
+        padding: 0 3px !important; /* Padding réduit */
+        max-width: 100% !important;
+        overflow: hidden !important;
     }
 
     [data-testid="stSidebar"] .stRadio label {
         /* Structure de base */
         display: flex !important;
         align-items: center !important;
-        padding: 15px 12px !important;
+        padding: 12px 8px !important; /* Padding réduit */
         margin: 0 !important;
         
         /* Style visuel */
@@ -612,145 +679,95 @@ def set_enhanced_navigation_theme():
         transition: var(--transition-smooth) !important;
         cursor: pointer !important;
         position: relative !important;
+        
+        /* EMPÊCHER TOUT DÉBORDEMENT */
         overflow: hidden !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         
         /* Typographie */
         color: var(--text-light) !important;
         font-weight: 500 !important;
         text-decoration: none !important;
+        white-space: nowrap !important;
     }
 
-    /* Effet de survol spectaculaire */
+    /* Effet de survol spectaculaire SANS débordement */
     [data-testid="stSidebar"] .stRadio label:hover {
         background: rgba(255, 255, 255, 0.25) !important;
         border-color: rgba(255, 255, 255, 0.4) !important;
-        transform: translateX(8px) scale(1.02) !important;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+        transform: translateX(5px) scale(1.01) !important; /* Transformation réduite */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important; /* Ombre réduite */
     }
 
-    /* Animation d'onde au clic */
-    [data-testid="stSidebar"] .stRadio label::before {
-        content: '' !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: 0 !important;
-        height: 0 !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        border-radius: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        transition: width 0.6s, height 0.6s !important;
-        z-index: -1 !important;
-    }
-
-    [data-testid="stSidebar"] .stRadio label:active::before {
-        width: 300px !important;
-        height: 300px !important;
-    }
-
-    /* Style des emojis/icônes */
+    /* Style des emojis/icônes SANS débordement */
     [data-testid="stSidebar"] .stRadio label span {
         font-size: 0 !important;
         transition: var(--transition-smooth) !important;
         position: relative !important;
         display: flex !important;
         align-items: center !important;
+        
+        /* Empêcher débordement */
+        max-width: 100% !important;
+        overflow: hidden !important;
         white-space: nowrap !important;
+        text-overflow: ellipsis !important;
     }
 
     /* Affichage des emojis en mode réduit */
     [data-testid="stSidebar"] .stRadio label span::before {
-        font-size: 22px !important;
+        font-size: 18px !important; /* Taille réduite */
         margin-right: 0 !important;
         transition: var(--transition-smooth) !important;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
     }
 
-    /* Affichage du texte au survol */
+    /* Affichage du texte au survol SANS débordement */
     [data-testid="stSidebar"]:hover .stRadio label span {
-        font-size: 15px !important;
+        font-size: 13px !important; /* Taille réduite */
         font-weight: 500 !important;
+        
+        /* Gérer débordement */
+        max-width: 200px !important; /* Largeur max */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
 
     [data-testid="stSidebar"]:hover .stRadio label span::before {
-        margin-right: 15px !important;
+        margin-right: 8px !important; /* Marge réduite */
     }
 
-    /* ================ Option sélectionnée avec style spécial ================ */
-    [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
-        background: var(--success-gradient) !important;
-        border-color: rgba(255, 255, 255, 0.6) !important;
-        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4) !important;
-        transform: translateX(5px) !important;
+    /* ================ Masquage complet de toutes les barres de défilement ================ */
+    
+    /* Pour tous les éléments dans la sidebar */
+    [data-testid="stSidebar"] * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
     }
 
-    [data-testid="stSidebar"] .stRadio label[data-checked="true"]::after {
-        content: '✓' !important;
-        position: absolute !important;
-        right: 10px !important;
-        font-size: 16px !important;
-        color: var(--text-light) !important;
-        opacity: 0 !important;
-        transition: var(--transition-smooth) !important;
-    }
-
-    [data-testid="stSidebar"]:hover .stRadio label[data-checked="true"]::after {
-        opacity: 1 !important;
-    }
-
-    /* ================ Indicateur de déploiement animé ================ */
-    [data-testid="stSidebar"]::after {
-        content: "→" !important;
-        position: absolute !important;
-        right: 15px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        font-size: 18px !important;
-        color: rgba(255, 255, 255, 0.7) !important;
-        transition: var(--transition-smooth) !important;
-        animation: pulse-arrow 2s infinite !important;
-    }
-
-    [data-testid="stSidebar"]:hover::after {
-        opacity: 0 !important;
-        transform: translateY(-50%) translateX(20px) !important;
-    }
-
-    @keyframes pulse-arrow {
-        0%, 100% { opacity: 0.4; transform: translateY(-50%) translateX(0); }
-        50% { opacity: 1; transform: translateY(-50%) translateX(5px); }
-    }
-
-    /* ================ Séparateur décoratif ================ */
-    [data-testid="stSidebar"]::before {
-        content: '' !important;
-        position: absolute !important;
-        bottom: 30px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 40px !important;
-        height: 3px !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        border-radius: 2px !important;
-        transition: var(--transition-smooth) !important;
-    }
-
-    [data-testid="stSidebar"]:hover::before {
-        width: 80% !important;
-        background: rgba(255, 255, 255, 0.5) !important;
-    }
-
-    /* ================ Masquage de la barre de défilement ================ */
-    [data-testid="stSidebar"]::-webkit-scrollbar {
+    [data-testid="stSidebar"] *::-webkit-scrollbar {
+        display: none !important;
         width: 0px !important;
-        background: transparent !important;
+        height: 0px !important;
+    }
+
+    /* Éléments spécifiques qui peuvent causer des défilements */
+    [data-testid="stSidebar"] .stRadio,
+    [data-testid="stSidebar"] .stRadio > div,
+    [data-testid="stSidebar"] .stRadio label,
+    [data-testid="stSidebar"] .element-container {
+        overflow: hidden !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* ================ Adaptation du contenu principal ================ */
     .main .block-container {
-        margin-left: 90px !important;
+        margin-left: 85px !important; /* Marge légèrement augmentée */
         padding: 2rem !important;
-        max-width: calc(100vw - 110px) !important;
+        max-width: calc(100vw - 100px) !important;
         transition: var(--transition-smooth) !important;
         background: rgba(255, 255, 255, 0.9) !important;
         border-radius: 20px 0 0 0 !important;
@@ -774,13 +791,12 @@ def set_enhanced_navigation_theme():
         }
     }
 
-    /* ================ Améliorations typographiques ================ */
-    h1, h2, h3 {
-        background: var(--primary-gradient) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-weight: 700 !important;
+    /* ================ Option sélectionnée avec style spécial ================ */
+    [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
+        background: var(--success-gradient) !important;
+        border-color: rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4) !important;
+        transform: translateX(3px) !important; /* Transformation réduite */
     }
 
     /* ================ Boutons avec style cohérent ================ */
@@ -800,59 +816,23 @@ def set_enhanced_navigation_theme():
         box-shadow: var(--shadow-medium) !important;
     }
     </style>
-    
-    <script>
-    // JavaScript pour améliorer l'interactivité
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        
-        if (sidebar) {
-            // Ajouter des attributs data-emoji pour les options
-            const radioLabels = sidebar.querySelectorAll('.stRadio label span');
-            const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
-            
-            radioLabels.forEach((label, index) => {
-                if (emojis[index]) {
-                    label.parentElement.setAttribute('data-emoji', emojis[index]);
-                    label.style.setProperty('--emoji', `"${emojis[index]}"`);
-                    label.setAttribute('data-emoji', emojis[index]);
-                }
-            });
-            
-            // Ajouter des effets sonores visuels
-            const labels = sidebar.querySelectorAll('.stRadio label');
-            labels.forEach(label => {
-                label.addEventListener('mouseenter', function() {
-                    this.style.setProperty('--hover-scale', '1.05');
-                });
-                
-                label.addEventListener('mouseleave', function() {
-                    this.style.setProperty('--hover-scale', '1');
-                });
-            });
-            
-            // Tooltips en mode réduit
-            sidebar.setAttribute('title', '✨ Survolez pour découvrir le menu');
-        }
-    });
-    </script>
     """
     
     st.markdown(enhanced_css, unsafe_allow_html=True)
 
 def show_enhanced_navigation_menu():
-    """Menu de navigation avec design esthétique amélioré"""
+    """Menu de navigation avec design esthétique amélioré et sans barres de défilement"""
     
     # Titre avec emoji
-    st.markdown("## 🧩 Autisme - Navigation")
-    st.markdown("Choisissez un outil :")
+    st.markdown("## 🧩 Navigation")
+    st.markdown("Choisir un outil :")
 
     # Options avec emojis distinctifs
     options = [
         "🏠 Accueil",
-        "🔍 Exploration des Données", 
+        "🔍 Exploration", 
         "🧠 Analyse ML",
-        "🤖 Prédiction par IA",
+        "🤖 Prédiction IA",
         "📚 Documentation",
         "ℹ️ À propos"
     ]
@@ -861,31 +841,6 @@ def show_enhanced_navigation_menu():
         st.session_state.tool_choice = "🏠 Accueil"
 
     current_index = options.index(st.session_state.tool_choice)
-
-    # CSS spécifique pour les emojis
-    st.markdown("""
-    <style>
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="🏠"]::before { content: "🏠" !important; }
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="🔍"]::before { content: "🔍" !important; }
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="🧠"]::before { content: "🧠" !important; }
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="🤖"]::before { content: "🤖" !important; }
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="📚"]::before { content: "📚" !important; }
-    [data-testid="stSidebar"] .stRadio label span[data-emoji="ℹ️"]::before { content: "ℹ️" !important; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    tool_choice = st.radio(
-        "",
-        options,
-        label_visibility="collapsed",
-        index=current_index
-    )
-
-    if tool_choice != st.session_state.tool_choice:
-        st.session_state.tool_choice = tool_choice
-        st.rerun()
-
-    return tool_choice
 
 set_custom_theme()
 
@@ -1721,11 +1676,19 @@ def show_data_exploration():
     df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
 
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🔍</span>
-        <h1 class="app-title">Exploration des Données TSA</h1>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 60px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        🔍 Exploration des Données TSA
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Analyse interactive et visualisation des données de dépistage
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
 
     if 'expanders_initialized' not in st.session_state:
         st.session_state.expanders_initialized = {
@@ -2702,13 +2665,19 @@ def show_ml_analysis():
         verbose_feature_names_out=False
     )
 
-    # Interface utilisateur
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🧠</span>
-        <h1 class="app-title">Outil de Dépistage TSA par Machine Learning</h1>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 60px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        🧠 Outil de Dépistage TSA par Machine Learning
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Intelligence artificielle pour l'aide au diagnostic précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
@@ -2982,45 +2951,42 @@ def show_ml_analysis():
                 )
 
         with rf_tabs[1]:
-            st.subheader("🔍 Matrice de confusion")
-
-            cm = rf_results['confusion_matrix']
-
-            fig_cm = go.Figure(data=go.Heatmap(
-                z=cm,
-                x=['Prédit: Non-TSA', 'Prédit: TSA'],
-                y=['Réel: Non-TSA', 'Réel: TSA'],
-                colorscale='Blues',
-                text=cm,
-                texttemplate="%{text}",
-                textfont={"size": 24, "color": "white"},
-                hoverongaps=False,
-                showscale=True
-            ))
-
-            fig_cm.update_layout(
-                title="Matrice de confusion - Random Forest",
-                xaxis_title="Prédiction du modèle",
-                yaxis_title="Réalité terrain",
-                height=500,
-                font_size=14
-            )
-
-            st.plotly_chart(fig_cm, use_container_width=True)
-
-            if len(cm.ravel()) == 4:
+                st.subheader("🔍 Matrice de confusion")
+        
+                cm = rf_results['confusion_matrix']  # Correction ici
+                
+                # Créer la visualisation de la matrice de confusion
+                fig_cm = px.imshow(
+                    cm,
+                    text_auto=True,
+                    aspect="auto",
+                    title="Matrice de Confusion",
+                    labels=dict(x="Prédiction", y="Réel"),
+                    x=['Non-TSA', 'TSA'],
+                    y=['Non-TSA', 'TSA'],
+                    color_continuous_scale='Blues'
+                )
+                
+                fig_cm.update_layout(
+                    xaxis_title="Prédiction",
+                    yaxis_title="Réel",
+                    height=400
+                )
+                
+                st.plotly_chart(fig_cm, use_container_width=True)
+                
+                # Interprétation de la matrice
                 tn, fp, fn, tp = cm.ravel()
-
-                col1, col2, col3 = st.columns(3)
-
+                
+                col1, col2 = st.columns(2)
+                
                 with col1:
-                    st.metric("✅ Vrais Positifs", tp, "Cas TSA correctement identifiés")
-                    st.metric("✅ Vrais Négatifs", tn, "Cas normaux correctement identifiés")
-
+                    st.metric("Vrais Positifs (TP)", tp)
+                    st.metric("Vrais Négatifs (TN)", tn)
+                    
                 with col2:
-                    st.metric("❌ Faux Positifs", fp, "Fausses alertes")
-                    st.metric("❌ Faux Négatifs", fn, "Cas TSA manqués")
-
+                    st.metric("Faux Positifs (FP)", fp)
+                    st.metric("Faux Négatifs (FN)", fn)
                 with col3:
                     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
                     npv = tn / (tn + fn) if (tn + fn) > 0 else 0
