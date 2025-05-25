@@ -93,38 +93,233 @@ def initialize_session_state():
         st.session_state.data_exploration_expanded = True
 
 def show_navigation_menu():
-    st.markdown("## Autisme - Navigation")
-
-    st.markdown("Choisissez un outil :")
-
-
-    options = ["🏠 Accueil",
-             "🔍 Exploration des Données",
-             "🧠 Analyse ML",
-             "🤖 Prédiction par IA",
-             "📚 Documentation",
-             "ℹ️ À propos"]
-
-
-    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+    """Menu de navigation moderne avec animation hover"""
+    
+    # CSS pour la navigation moderne expandable
+    st.markdown("""
+    <style>
+    /* Navigation moderne expandable */
+    [data-testid="stSidebar"] {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%) !important;
+        border: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        overflow: hidden !important;
+        z-index: 999 !important;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Expansion au hover */
+    [data-testid="stSidebar"]:hover {
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        box-shadow: 4px 0 30px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* Contenu de la sidebar */
+    [data-testid="stSidebarContent"] {
+        background: transparent !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    /* Logo/Titre compact */
+    .nav-logo {
+        background: rgba(255,255,255,0.1);
+        margin: 10px;
+        padding: 15px 10px;
+        border-radius: 15px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .nav-logo:hover {
+        background: rgba(255,255,255,0.2);
+        transform: scale(1.02);
+    }
+    
+    .logo-icon {
+        font-size: 2rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    .logo-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease 0.1s;
+        white-space: nowrap;
+    }
+    
+    [data-testid="stSidebar"]:hover .logo-text {
+        opacity: 1;
+    }
+    
+    /* Items de navigation */
+    .nav-item {
+        margin: 5px 10px;
+        padding: 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .nav-item:hover {
+        background: rgba(255,255,255,0.15);
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .nav-item.active {
+        background: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.3);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .nav-icon {
+        font-size: 1.5rem;
+        color: white;
+        margin-right: 15px;
+        transition: transform 0.3s ease;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .nav-item:hover .nav-icon {
+        transform: scale(1.1);
+    }
+    
+    .nav-text {
+        color: white;
+        font-weight: 500;
+        font-size: 0.95rem;
+        opacity: 0;
+        transition: opacity 0.3s ease 0.1s;
+        white-space: nowrap;
+    }
+    
+    [data-testid="stSidebar"]:hover .nav-text {
+        opacity: 1;
+    }
+    
+    /* Effet de brillance au hover */
+    .nav-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .nav-item:hover::before {
+        left: 100%;
+    }
+    
+    /* Masquer les éléments Streamlit par défaut */
+    [data-testid="stSidebar"] .stRadio > div {
+        display: none !important;
+    }
+    
+    /* Responsive - mobile */
+    @media (max-width: 768px) {
+        [data-testid="stSidebar"] {
+            width: 70px !important;
+            min-width: 70px !important;
+        }
+        
+        [data-testid="stSidebar"]:hover {
+            width: 250px !important;
+            min-width: 250px !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Interface utilisateur moderne
+    st.sidebar.markdown("""
+    <div class="nav-logo">
+        <div class="logo-icon">🧩</div>
+        <div class="logo-text">Autisme TSA</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Options de navigation avec icônes modernes
+    options = [
+        {"key": "🏠 Accueil", "icon": "🏠", "text": "Accueil"},
+        {"key": "🔍 Exploration des Données", "icon": "🔍", "text": "Exploration"},
+        {"key": "🧠 Analyse ML", "icon": "🧠", "text": "Analyse ML"},
+        {"key": "🤖 Prédiction par IA", "icon": "🤖", "text": "Prédiction IA"},
+        {"key": "📚 Documentation", "icon": "📚", "text": "Documentation"},
+        {"key": "ℹ️ À propos", "icon": "ℹ️", "text": "À propos"}
+    ]
+    
+    # État de session pour le choix actuel
+    if 'tool_choice' not in st.session_state:
         st.session_state.tool_choice = "🏠 Accueil"
-
-    current_index = options.index(st.session_state.tool_choice)
-
-
-    tool_choice = st.radio(
+    
+    # Création des éléments de navigation personnalisés
+    nav_html = ""
+    for option in options:
+        is_active = "active" if st.session_state.tool_choice == option["key"] else ""
+        nav_html += f"""
+        <div class="nav-item {is_active}" onclick="selectNavItem('{option['key']}')">
+            <div class="nav-icon">{option['icon']}</div>
+            <div class="nav-text">{option['text']}</div>
+        </div>
+        """
+    
+    st.sidebar.markdown(nav_html, unsafe_allow_html=True)
+    
+    # JavaScript pour la gestion des clics
+    st.sidebar.markdown("""
+    <script>
+    function selectNavItem(choice) {
+        // Simuler un clic sur le radio button correspondant
+        const radioButtons = parent.document.querySelectorAll('input[type="radio"]');
+        for (let radio of radioButtons) {
+            if (radio.value === choice) {
+                radio.click();
+                break;
+            }
+        }
+    }
+    </script>
+    """, unsafe_allow_html=True)
+    
+    # Radio buttons cachés pour la fonctionnalité Streamlit
+    current_index = next((i for i, opt in enumerate(options) if opt["key"] == st.session_state.tool_choice), 0)
+    
+    tool_choice = st.sidebar.radio(
         "",
-        options,
-        label_visibility="collapsed",
+        [opt["key"] for opt in options],
         index=current_index,
-        extended=True
+        label_visibility="collapsed",
+        key="nav_radio_hidden"
     )
-
+    
+    # Mise à jour de l'état si changement
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
-
+        st.experimental_rerun()
+    
     return tool_choice
-
+    
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
@@ -632,6 +827,94 @@ def set_custom_theme():
 
 set_custom_theme()
 
+def set_modern_navigation_theme():
+    """CSS additionnel pour adapter le contenu principal à la navigation moderne"""
+    
+    st.markdown("""
+    <style>
+    /* Adaptation du contenu principal */
+    .main .block-container {
+        padding-left: 2rem !important;
+        transition: padding-left 0.3s ease !important;
+        max-width: none !important;
+    }
+    
+    /* Animation du contenu lors de l'expansion de la sidebar */
+    .main {
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    /* Indicateur de navigation mobile */
+    .nav-indicator {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: none;
+    }
+    
+    .nav-indicator:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .nav-indicator {
+            display: block;
+        }
+        
+        .main .block-container {
+            padding-left: 1rem !important;
+        }
+    }
+    
+    /* Animation des cartes lors du hover de la navigation */
+    .info-card, .result-card, .kpi-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    
+    /* Amélioration des tooltips */
+    .nav-item {
+        position: relative;
+    }
+    
+    .nav-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        margin-left: 10px;
+        z-index: 1000;
+    }
+    
+    [data-testid="stSidebar"]:not(:hover) .nav-item:hover::after {
+        opacity: 1;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Appeler cette fonction après set_custom_theme()
+set_modern_navigation_theme()
+
+
 def load_visualization_libraries():
     global plt, px, go, sns
 
@@ -1086,182 +1369,374 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         return None
 
 def show_home_page():
+    """Page d'accueil améliorée avec design moderne et responsive"""
+    
+    # CSS spécifique pour corriger les problèmes d'affichage
     st.markdown("""
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
-        <h1 style="color: white; text-align: center; font-size: 2.5rem;">Comprendre les Troubles du Spectre Autistique</h1>
-        <p style="color: white; text-align: center; font-size: 1.2rem;">Une approche moderne et scientifique</p>
-    </div>
+    <style>
+    /* Corrections pour la navigation sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #f5f7fa !important;
+        border-right: none !important;
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+    }
+    
+    [data-testid="stSidebar"] > div {
+        border-right: none !important;
+        background-color: #f5f7fa !important;
+    }
+    
+    /* Suppression des barres bleues indésirables */
+    .stAlert, [data-testid="stAlert"] {
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    /* Amélioration du contenu principal */
+    .main .block-container {
+        padding-top: 1rem !important;
+        max-width: 1200px !important;
+    }
+    
+    /* Style pour les cartes d'information */
+    .info-card-modern {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid #3498db;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .info-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    /* Timeline responsive */
+    .timeline-container {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        margin: 25px 0;
+        overflow-x: auto;
+    }
+    
+    .timeline-item {
+        min-width: 160px;
+        text-align: center;
+        margin: 0 15px;
+        flex-shrink: 0;
+    }
+    
+    .timeline-year {
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.95rem;
+    }
+    
+    .timeline-text {
+        margin-top: 12px;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        line-height: 1.4;
+    }
+    </style>
     """, unsafe_allow_html=True)
-
-    # Conservation de l'image Ghibli sans lien cliquable
-    image_url ="https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
-    st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
-
+    
+    # En-tête principal amélioré
     st.markdown("""
-    <div style="padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
-        <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2rem;">Qu'est-ce que l'autisme?</h2>
-        <p style="font-size: 1.2rem; line-height: 1.6; text-align: justify; max-width: 800px; margin: 0 auto;">
-        Les Troubles du Spectre Autistique (TSA) sont des conditions neurodéveloppementales qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des différences dans la communication sociale, les interactions sociales et par des comportements ou intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de niveaux de fonctionnement.
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
+                padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
+                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+            🧩 Comprendre les Troubles du Spectre Autistique
+        </h1>
+        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
+                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
+            Une approche moderne et scientifique pour le dépistage précoce
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Évolution de la compréhension de l'autisme</h2>
+    # Image Ghibli (conservée)
+    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
 
-    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; overflow-x: auto;">
-        <div style="display: flex; justify-content: space-between; min-width: 650px;">
-            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1943</div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">Leo Kanner décrit l'autisme infantile</div>
+    # Section "Qu'est-ce que l'autisme ?" améliorée
+    st.markdown("""
+    <div class="info-card-modern">
+        <h2 style="color: #3498db; margin-bottom: 25px; font-size: 2.2rem; text-align: center;">
+            🔬 Qu'est-ce que l'autisme ?
+        </h2>
+        <p style="font-size: 1.2rem; line-height: 1.8; text-align: justify; 
+                  max-width: 900px; margin: 0 auto; color: #2c3e50;">
+            Les <strong>Troubles du Spectre Autistique (TSA)</strong> sont des conditions neurodéveloppementales 
+            qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des 
+            différences dans la communication sociale, les interactions sociales et par des comportements ou 
+            intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de 
+            niveaux de fonctionnement.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Timeline de l'évolution améliorée
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        📅 Évolution de la compréhension de l'autisme
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="timeline-container">
+        <div style="display: flex; justify-content: space-between; min-width: 700px;">
+            <div class="timeline-item">
+                <div class="timeline-year">1943</div>
+                <div class="timeline-text">Leo Kanner décrit l'autisme infantile</div>
             </div>
-            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1980</div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">L'autisme dans le DSM-III</div>
+            <div class="timeline-item">
+                <div class="timeline-year">1980</div>
+                <div class="timeline-text">L'autisme entre dans le DSM-III</div>
             </div>
-            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">2013</div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">Le DSM-5 introduit les TSA</div>
+            <div class="timeline-item">
+                <div class="timeline-year">2013</div>
+                <div class="timeline-text">Le DSM-5 introduit les TSA</div>
             </div>
-            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
-                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">Aujourd'hui</div>
-                <div style="margin-top: 10px; font-size: 0.9rem;">Approche neurodiversité</div>
+            <div class="timeline-item">
+                <div class="timeline-year">Aujourd'hui</div>
+                <div class="timeline-text">Approche neurodiversité</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Rectangle du spectre autistique recentré (image 265)
-    st.markdown("## Le spectre autistique", unsafe_allow_html=True)
+    # Section "Le spectre autistique" améliorée et centrée
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        🌈 Le spectre autistique
+    </h2>
+    """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+    # Conteneur centré pour le contenu
+    col1, col2, col3 = st.columns([1, 10, 1])
+    
+    with col2:
+        st.markdown("""
+        <div class="info-card-modern">
+            <p style="font-size: 1.1rem; line-height: 1.7; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
+                L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, reflétant la
+                grande variabilité des manifestations. Cette conception reconnaît que :
+            </p>
+            
+            <div style="background: #f8fcff; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <ul style="padding-left: 25px; line-height: 1.8; color: #34495e;">
+                    <li><strong>Chaque personne autiste</strong> présente un profil unique de forces et de défis</li>
+                    <li><strong>Les manifestations</strong> varient en intensité et en expression</li>
+                    <li><strong>Les niveaux de soutien</strong> nécessaires peuvent différer considérablement</li>
+                </ul>
+            </div>
+            
+            <p style="font-size: 1.1rem; line-height: 1.7; margin: 25px 0; text-align: center; color: #2c3e50;">
+                <strong>Le DSM-5 définit trois niveaux de soutien nécessaire :</strong>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    with col2:  # Utilisation de la colonne centrale pour centrer le contenu
-        st.write("""
-        L'autisme est aujourd'hui compris comme un **spectre** de conditions, reflétant la
-        grande variabilité des manifestations. Cette conception reconnaît que:
-
-        * Chaque personne autiste présente un profil unique de forces et de défis
-        * Les manifestations varient en intensité et en expression
-        * Les niveaux de soutien nécessaires peuvent différer considérablement
-        """)
-
-        st.write("Le DSM-5 définit trois niveaux de soutien nécessaire:")
-
+        # Niveaux de soutien avec design moderne
         niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
 
         with niveau_col1:
-            st.info("**Niveau 1**\n\nNécessite un soutien")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
+                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
+                       border-left: 4px solid #3498db; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="color: #2980b9; margin: 0; font-size: 1.1rem;">Niveau 1</h4>
+                <p style="color: #34495e; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien</p>
+            </div>
+            """, unsafe_allow_html=True)
 
         with niveau_col2:
-            st.info("**Niveau 2**\n\nNécessite un soutien important")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); 
+                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
+                       border-left: 4px solid #f39c12; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="color: #e67e22; margin: 0; font-size: 1.1rem;">Niveau 2</h4>
+                <p style="color: #8b4513; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien important</p>
+            </div>
+            """, unsafe_allow_html=True)
 
         with niveau_col3:
-            st.info("**Niveau 3**\n\nNécessite un soutien très important")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #ffebee, #ffcdd2); 
+                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
+                       border-left: 4px solid #e74c3c; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="color: #c0392b; margin: 0; font-size: 1.1rem;">Niveau 3</h4>
+                <p style="color: #8b0000; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien très important</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    # Section "Contexte du projet" (ajoutée depuis le rapport)
-    st.markdown("## Contexte du projet", unsafe_allow_html=True)
+    # Section contexte du projet améliorée
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        📊 Contexte du projet
+    </h2>
+    """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
-
+    col1, col2, col3 = st.columns([1, 10, 1])
+    
     with col2:
-        st.write("""
-        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des **Troubles du Spectre de l'Autisme (TSA)**.
-        L'autisme n'est pas une maladie mais une **différence neurologique** affectant le fonctionnement du cerveau.
+        st.markdown("""
+        <div class="info-card-modern">
+            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #2c3e50;">
+                Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
+                <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
+                mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
+            </p>
+            
+            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
+                Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
+                5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
+                pour identifier les facteurs associés à la présence d'un TSA.
+            </p>
+            
+            <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin: 25px 0;">
+                <h4 style="color: #2c3e50; margin-top: 0;">📈 Prévalence de l'autisme :</h4>
+                <ul style="padding-left: 25px; line-height: 1.6; color: #34495e;">
+                    <li><strong>1 à 2%</strong> de la population mondiale est concernée</li>
+                    <li>En France, environ <strong>700 000 personnes</strong> sont concernées</li>
+                    <li>Ratio historique garçons/filles d'environ <strong>4:1</strong> (aujourd'hui remis en question)</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 5000 personnes de différentes origines
-        (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) pour identifier les facteurs associés à la présence d'un TSA.
+    # Section "À qui s'adresse ce projet" moderne
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        🎯 À qui s'adresse ce projet
+    </h2>
+    """, unsafe_allow_html=True)
 
-        L'objectif est de construire des modèles prédictifs capables d'assister dans l'évaluation de la présence d'un TSA
-        en fonction des caractéristiques individuelles, tout en offrant une compréhension claire et accessible de ce qu'est
-        l'autisme pour tous les publics.
-        """)
-
-        st.write("""
-        📊 **Prévalence de l'autisme:**
-        * 1 à 2% de la population mondiale est concernée
-        * En France, environ 700 000 personnes sont concernées
-        * Ratio historique garçons/filles d'environ 4:1 (aujourd'hui remis en question)
-        """)
-
-    # Section "À qui s'adresse ce projet" (ajoutée depuis le rapport)
-    st.markdown("## À qui s'adresse ce projet", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
-
+    col1, col2, col3 = st.columns([1, 10, 1])
+    
     with col2:
+        # Grille 2x2 pour les publics cibles
         col_a, col_b = st.columns(2)
 
         with col_a:
-            st.info("### Chercheurs en santé et psychologie\nUne analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer des tendances cliniques dans le domaine des TSA.")
-            st.warning("### Familles et particuliers\nOutils d'auto-évaluation et d'information pour répondre aux questions ou suspicions de TSA et faciliter l'orientation.")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
+                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
+                       border-left: 4px solid #3498db;">
+                <h4 style="color: #2980b9; margin-top: 0;">🔬 Chercheurs en santé</h4>
+                <p style="color: #34495e; line-height: 1.6; font-size: 0.95rem;">
+                    Analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer 
+                    des tendances cliniques dans le domaine des TSA.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); 
+                       border-radius: 15px; padding: 25px; height: 180px;
+                       border-left: 4px solid #ffa726;">
+                <h4 style="color: #f57c00; margin-top: 0;">👨‍👩‍👧‍👦 Familles et particuliers</h4>
+                <p style="color: #bf360c; line-height: 1.6; font-size: 0.95rem;">
+                    Outils d'auto-évaluation et d'information pour répondre aux questions 
+                    ou suspicions de TSA et faciliter l'orientation.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col_b:
-            st.success("### Professionnels de santé\nDes résultats exploitables permettant d'améliorer le dépistage et la prise en charge des personnes avec TSA.")
-            st.error("### Décideurs publics\nDonnées et analyses pouvant informer les politiques publiques et orienter les décisions de financement pour les services aux personnes avec TSA.")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); 
+                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
+                       border-left: 4px solid #4caf50;">
+                <h4 style="color: #388e3c; margin-top: 0;">🩺 Professionnels de santé</h4>
+                <p style="color: #2e7d32; line-height: 1.6; font-size: 0.95rem;">
+                    Résultats exploitables permettant d'améliorer le dépistage et la prise 
+                    en charge des personnes avec TSA.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd9); 
+                       border-radius: 15px; padding: 25px; height: 180px;
+                       border-left: 4px solid #e91e63;">
+                <h4 style="color: #c2185b; margin-top: 0;">🏛️ Décideurs publics</h4>
+                <p style="color: #ad1457; line-height: 1.6; font-size: 0.95rem;">
+                    Données et analyses pouvant informer les politiques publiques et orienter 
+                    les décisions de financement.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.write("""
-        Notre plateforme facilite la compréhension des TSA pour tous ces publics grâce à des visualisations claires
-        et des explications vulgarisées. Les outils de prédiction peuvent aider à une détection précoce, facilitant
-        ainsi une prise en charge adaptée et personnalisée.
-        """)
-
+    # Section "Accompagnement et soutien" améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Accompagnement et soutien</h2>
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        🤝 Accompagnement et soutien
+    </h2>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
-    with col1:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 10px; height: 300px;">
-            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Intervention précoce</h3>
-            <ul style="padding-left: 20px; margin-top: 15px;">
-                <li>Programmes de stimulation</li>
-                <li>Accompagnement parental</li>
-                <li>Thérapies comportementales</li>
-                <li>Approches sensorimotrices</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+    support_cards = [
+        {
+            "title": "🌱 Intervention précoce",
+            "items": ["Programmes de stimulation", "Accompagnement parental", "Thérapies comportementales", "Approches sensorimotrices"],
+            "gradient": "linear-gradient(135deg, #3498db, #2980b9)"
+        },
+        {
+            "title": "📚 Approches éducatives", 
+            "items": ["Méthodes structurées", "Soutien à l'inclusion", "Aménagements adaptés", "Programmes individualisés"],
+            "gradient": "linear-gradient(135deg, #2ecc71, #27ae60)"
+        },
+        {
+            "title": "👥 Suivi multidisciplinaire",
+            "items": ["Orthophonie", "Ergothérapie", "Psychomotricité", "Soutien psychologique"],
+            "gradient": "linear-gradient(135deg, #9b59b6, #8e44ad)"
+        }
+    ]
 
-    with col2:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 20px; border-radius: 10px; height: 300px;">
-            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Approches éducatives</h3>
-            <ul style="padding-left: 20px; margin-top: 15px;">
-                <li>Méthodes structurées</li>
-                <li>Soutien à l'inclusion</li>
-                <li>Aménagements adaptés</li>
-                <li>Programmes individualisés</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+    for i, (card, col) in enumerate(zip(support_cards, [col1, col2, col3])):
+        with col:
+            items_html = "".join([f"<li>{item}</li>" for item in card['items']])
+            st.markdown(f"""
+            <div style="background: {card['gradient']}; color: white; 
+                       padding: 25px; border-radius: 15px; height: 280px; 
+                       box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
+                <h3 style="border-bottom: 2px solid rgba(255,255,255,0.3); 
+                          padding-bottom: 12px; margin-bottom: 20px; font-size: 1.3rem;">
+                    {card['title']}
+                </h3>
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    {items_html}
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
-    with col3:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 10px; height: 300px;">
-            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Suivi multidisciplinaire</h3>
-            <ul style="padding-left: 20px; margin-top: 15px;">
-                <li>Orthophonie</li>
-                <li>Ergothérapie</li>
-                <li>Psychomotricité</li>
-                <li>Soutien psychologique</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
+    # Section "Caractéristiques principales" améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Caractéristiques principales</h2>
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        🧠 Caractéristiques principales
+    </h2>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
-        <div style="background-color: #f2f6f9; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
-            <h3 style="color: #3498db;">Communication sociale</h3>
-            <ul style="line-height: 1.6;">
+        <div class="info-card-modern" style="border-left-color: #3498db;">
+            <h3 style="color: #3498db; margin-bottom: 20px;">💬 Communication sociale</h3>
+            <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
                 <li>Différences dans la communication non verbale</li>
                 <li>Défis dans les interactions sociales</li>
                 <li>Interprétation littérale du langage</li>
@@ -1272,9 +1747,9 @@ def show_home_page():
 
     with col2:
         st.markdown("""
-        <div style="background-color: #f2f9f5; padding: 20px; border-radius: 10px; border-left: 4px solid #2ecc71;">
-            <h3 style="color: #2ecc71;">Comportements et intérêts</h3>
-            <ul style="line-height: 1.6;">
+        <div class="info-card-modern" style="border-left-color: #2ecc71;">
+            <h3 style="color: #2ecc71; margin-bottom: 20px;">🔄 Comportements et intérêts</h3>
+            <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
                 <li>Intérêts spécifiques et intenses</li>
                 <li>Attachement aux routines</li>
                 <li>Mouvements répétitifs</li>
@@ -1283,31 +1758,41 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-    # Rectangle "Notre approche" recentré sans liens cliquables (image 291)
-    st.markdown("## Notre approche", unsafe_allow_html=True)
+    # Section "Notre approche" finale
+    st.markdown("""
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
+        🚀 Notre approche
+    </h2>
+    """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
-
+    col1, col2, col3 = st.columns([1, 10, 1])
+    
     with col2:
-        # Création d'un conteneur avec dégradé de couleur pour la section "Notre approche"
         st.markdown("""
-        <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 30px; border-radius: 15px; margin-top: 0px; text-align: center; color: white;">
-            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
-            Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
+        <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
+                   padding: 35px; border-radius: 20px; text-align: center; color: white;
+                   box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);">
+            <p style="font-size: 1.3rem; max-width: 800px; margin: 0 auto; line-height: 1.7;">
+                Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle 
+                pour améliorer la détection précoce et l'accompagnement des personnes autistes, 
+                dans une vision respectueuse de la neurodiversité.
             </p>
-            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
-
         </div>
         """, unsafe_allow_html=True)
 
-    # Avertissement professionnel
+    # Avertissement final stylisé
     st.markdown("""
-    <div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
-        <p style="font-size: 0.9rem;">
-        <strong style="color: #e74c3c;">Avertissement :</strong> Les informations présentées sur cette plateforme sont à titre informatif uniquement. Elles ne remplacent pas l'avis médical professionnel.
+    <div style="margin: 40px 0 30px 0; padding: 20px; border-radius: 12px; 
+               border-left: 4px solid #e74c3c; background: linear-gradient(135deg, #fff5f5, #ffebee);
+               box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1);">
+        <p style="font-size: 1rem; color: #c0392b; text-align: center; margin: 0; line-height: 1.6;">
+            <strong style="color: #e74c3c;">⚠️ Avertissement :</strong> 
+            Les informations présentées sur cette plateforme sont à titre informatif uniquement. 
+            Elles ne remplacent pas l'avis médical professionnel.
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
 def show_data_exploration():
