@@ -3027,7 +3027,7 @@ def show_aq10_and_prediction():
 
     st.markdown(
         f"""<div class="header-container" style="text-align: center;">
-            <span style="font-size:2.5rem">''📝''</span>
+            <span style="font-size:2.5rem">📝</span>
             <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
         </div>""", unsafe_allow_html=True
     )
@@ -3036,7 +3036,17 @@ def show_aq10_and_prediction():
     st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
 
     st.markdown("""
-    <p style="text-align: center;">Ce questionnaire aide à évaluer les traits autistiques potentiels. Répondez à toutes les questions puis complétez vos informations personnelles pour obtenir une prédiction par intelligence artificielle.</p>
+    <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
+                border-radius: 15px; padding: 25px; margin: 30px 0; 
+                border-left: 5px solid #3498db;">
+        <h3 style="color: #2c3e50; text-align: center; margin-top: 0;">
+            🤖 À propos de cette évaluation
+        </h3>
+        <p style="color: #2c3e50; line-height: 1.6; text-align: center;">
+            Ce questionnaire validé scientifiquement combine l'auto-évaluation AQ-10 avec un modèle d'intelligence artificielle 
+            entraîné sur plus de <strong>5 000 cas cliniques internationaux</strong>.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
@@ -3068,6 +3078,61 @@ def show_aq10_and_prediction():
         color: #3498db;
         margin-bottom: 0.5rem;
         text-align: center;
+    }
+    .custom-submit-button {
+    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 15px 30px !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+    }
+
+    .custom-submit-button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
+    }
+    
+    .custom-submit-button:active {
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3) !important;
+    }
+    
+    /* Amélioration du container du bouton */
+    .stForm > div:last-child {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
+    
+    /* Style pour le bouton Streamlit par défaut si custom ne fonctionne pas */
+    div[data-testid="stForm"] button[kind="formSubmit"] {
+        background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 15px 30px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        min-height: 50px !important;
+    }
+    
+    div[data-testid="stForm"] button[kind="formSubmit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
     }
     .result-title {
         font-size: 1.6rem;
@@ -3179,24 +3244,41 @@ def show_aq10_and_prediction():
             form_responses[question_key] = selected_response
             st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('<p class="questionnaire-title" style="text-align: center;">Informations personnelles</p>', unsafe_allow_html=True)
+        st.markdown("### 👤 Informations personnelles")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            age = st.number_input("Âge", min_value=2, max_value=99, value=24, help="Âge de la personne concernée")
-
-            genres = ["Female", "Male"]
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24)
+            genres = ["Féminin", "Masculin"]
             genre = st.selectbox("Genre", genres)
 
-            ethnies = ["Middle Eastern", "White European", "Asian", "Black", "Hispanic", "Others", "Latino"]
-            ethnicite = st.selectbox("Origine ethnique", ethnies)
-
         with col2:
-            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["No", "Yes"])
-            testeur = st.selectbox("Statut du testeur", ["Professionnel de santé", "Famille", "Enseignant", "Auto-évaluation", "Professionnel", "Médecin", "Autre"])
+            ethnies = ["Européen", "Asiatique", "Africain", "Hispanique", "Moyen-Orient", "Autre"]
+            ethnicite = st.selectbox("Origine ethnique", ethnies)
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["Non", "Oui"])
 
-        submitted = st.form_submit_button("Calculer mon score et obtenir une prédiction", use_container_width=True)
+        testeur = st.selectbox("Qui remplit ce questionnaire ?", 
+                              ["Moi-même", "Parent/Famille", "Professionnel de santé", "Enseignant", "Autre"])
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
+                    border-radius: 12px; padding: 20px; margin: 25px 0; text-align: center;
+                    border-left: 4px solid #3498db;">
+            <h4 style="color: #2c3e50; margin-top: 0;">🎯 Prêt pour l'évaluation ?</h4>
+            <p style="color: #34495e; margin-bottom: 15px;">
+                Assurez-vous d'avoir répondu à toutes les questions avant de continuer.
+            </p>
+            <p style="color: #7f8c8d; font-size: 0.9rem; margin: 0;">
+                L'analyse prendra quelques secondes pour traiter vos réponses.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        submitted = st.form_submit_button(
+            "🔬 Calculer mon score et obtenir une prédiction", 
+            use_container_width=True,
+            type="primary"
+        )
 
         if submitted:
             if None in form_responses.values():
