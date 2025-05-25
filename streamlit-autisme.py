@@ -1352,13 +1352,19 @@ def show_data_exploration():
     from scipy.stats import chi2_contingency, mannwhitneyu
 
     df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
-
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🔍</span>
-        <h1 class="app-title">Exploration des Données TSA</h1>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        🔍 Exploration des Données TSA
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
     if 'expanders_initialized' not in st.session_state:
         st.session_state.expanders_initialized = {
@@ -2334,14 +2340,19 @@ def show_ml_analysis():
         remainder='passthrough',
         verbose_feature_names_out=False
     )
-
-    # Interface utilisateur
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">🧠</span>
-        <h1 class="app-title">Outil de Dépistage TSA par Machine Learning</h1>
-    </div>
-    """, unsafe_allow_html=True)
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        🧠 Outil de Dépistage TSA par Machine Learning
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
@@ -3035,12 +3046,19 @@ def show_aq10_and_prediction():
         st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
         rf_model, preprocessor, feature_names = None, None, None
 
-    st.markdown(
-        f"""<div class="header-container" style="text-align: center;">
-            <span style="font-size:2.5rem">📝</span>
-            <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
-        </div>""", unsafe_allow_html=True
-    )
+    st.markdown("""
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        📝 Test AQ-10 et Prédiction TSA
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
     image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
     st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
@@ -3911,12 +3929,19 @@ def show_aq10_and_prediction():
                     
 def show_documentation():
     st.markdown("""
-    <div class="header-container">
-        <span style="font-size:2.5rem">📚</span>
-        <h1 class="app-title">Documentation</h1>
-    </div>
-    """, unsafe_allow_html=True)
-
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        📚 Documentation
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
+    
     new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
     st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
 
