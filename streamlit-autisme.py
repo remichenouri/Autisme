@@ -1186,7 +1186,44 @@ def show_home_page():
         min-width: 280px !important;
         max-width: 280px !important;
     }
+    /* Masquer complètement le code HTML qui s'affiche comme texte */
+    .stMarkdown pre,
+    .stMarkdown code[class*="language-"],
+    .stMarkdown .highlight,
+    .stMarkdown .hljs,
+    .stMarkdown .hljs-string,
+    .stMarkdown .hljs-tag {
+        display: none !important;
+    }
     
+    /* Masquer les blocs de code avec coloration syntaxique */
+    .stMarkdown div[class*="highlight"] {
+        display: none !important;
+    }
+    
+    /* Assurer l'affichage normal du contenu */
+    .stMarkdown p,
+    .stMarkdown div:not([class*="highlight"]),
+    .stMarkdown ul,
+    .stMarkdown li,
+    .stMarkdown h1,
+    .stMarkdown h2,
+    .stMarkdown h3,
+    .stMarkdown strong {
+        display: block !important;
+        background: transparent !important;
+        color: inherit !important;
+    }
+    
+    /* Correction spécifique pour les problèmes de rendu HTML */
+    .stMarkdown {
+        overflow: hidden !important;
+    }
+    
+    /* Masquer les éléments avec du code HTML visible */
+    .stMarkdown *[style*="font-size: 1.1rem"] {
+        display: block !important;
+    }
     [data-testid="stSidebar"] > div {
         border-right: none !important;
         background-color: #f5f7fa !important;
@@ -1353,39 +1390,46 @@ def show_home_page():
     with niveau_col3:
         st.error("**Niveau 3**\n\nNécessite un soutien très important")
 
-    # Section "Contexte du projet" avec HTML simplifié
-    st.markdown("## 📊 Contexte du projet")
+    # Section "Contexte du projet" corrigée avec composants natifs
+st.header("📊 Contexte du projet")
+
+# Utiliser un container natif au lieu du HTML
+with st.container():
+    st.write("""
+    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
+    **Troubles du Spectre de l'Autisme (TSA)**. L'autisme n'est pas une maladie 
+    mais une **différence neurologique** affectant le fonctionnement du cerveau.
+    """)
     
-    st.markdown("""
-    <div style="background-color: white; padding: 25px; border-radius: 15px; 
-               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
-        <p style="font-size: 1.1rem; line-height: 1.8; color: #2c3e50; margin-bottom: 20px;">
-            Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
-            <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
-            mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
-        </p>
-        
-        <p style="font-size: 1.1rem; line-height: 1.8; color: #2c3e50; margin-bottom: 25px;">
-            Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
-            5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
-            pour identifier les facteurs associés à la présence d'un TSA.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("### 📈 Prévalence de l'autisme")
-    
-    # Utiliser les colonnes Streamlit avec des composants natifs
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.info("**1-2%**\n\nPopulation mondiale concernée")
-    
-    with col2:
-        st.info("**700 000**\n\nPersonnes en France")
-    
-    with col3:
-        st.info("**4:1**\n\nRatio historique garçons/filles")
+    st.write("""
+    Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 
+    5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
+    pour identifier les facteurs associés à la présence d'un TSA.
+    """)
+
+# Section prévalence avec métriques natives
+st.subheader("📈 Prévalence de l'autisme")
+
+# Utiliser les composants info natifs Streamlit
+st.info("""
+**Données clés sur l'autisme :**
+
+• **1 à 2%** de la population mondiale est concernée
+• En France, environ **700 000 personnes** sont concernées  
+• Ratio historique garçons/filles d'environ **4:1** (aujourd'hui remis en question)
+""")
+
+# Alternative avec métriques si vous préférez
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Population mondiale", "1-2%", "700 000 en France")
+
+with col2:
+    st.metric("Participants étudiés", "5000+", "Origines diverses")
+
+with col3:
+    st.metric("Ratio historique", "4:1", "En évolution")
     
 
     # Section "À qui s'adresse ce projet" moderne
