@@ -471,7 +471,7 @@ def show_navigation_menu():
     # Options optimisées avec icônes cohérentes
     options = [
         "🏠 Accueil",
-        "🔍 Exploration des Données", 
+        "🔍 Exploration", 
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
