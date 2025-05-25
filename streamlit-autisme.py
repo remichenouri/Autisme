@@ -92,39 +92,6 @@ def initialize_session_state():
 
         st.session_state.data_exploration_expanded = True
 
-def show_navigation_menu():
-    st.markdown("## Autisme - Navigation")
-
-    st.markdown("Choisissez un outil :")
-
-
-    options = ["🏠 Accueil",
-             "🔍 Exploration des Données",
-             "🧠 Analyse ML",
-             "🤖 Prédiction par IA",
-             "📚 Documentation",
-             "ℹ️ À propos"]
-
-
-    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
-        st.session_state.tool_choice = "🏠 Accueil"
-
-    current_index = options.index(st.session_state.tool_choice)
-
-
-    tool_choice = st.radio(
-        "",
-        options,
-        label_visibility="collapsed",
-        index=current_index,
-        extended=True
-    )
-
-    if tool_choice != st.session_state.tool_choice:
-        st.session_state.tool_choice = tool_choice
-
-    return tool_choice
-
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
@@ -142,7 +109,9 @@ def set_custom_theme():
             --background: #f0f2f6 !important;
             --card-bg: white !important;
             --text: #2c3e50 !important;
-            --sidebar-width: 280px !important;
+            --sidebar-width-collapsed: 70px !important;
+            --sidebar-width-expanded: 280px !important;
+            --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
         /* ================ Structure Principale ================ */
@@ -150,149 +119,248 @@ def set_custom_theme():
             background-color: var(--background) !important;
         }
 
-        /* Pour tous les navigateurs - Masquage de la barre de défilement sidebar */
+        /* ================ Zone de Trigger pour le Survol ================ */
+        .sidebar-trigger-zone {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 15px !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            background: transparent !important;
+            cursor: pointer !important;
+        }
+
+        /* ================ Barre Latérale Déployable ================ */
         [data-testid="stSidebar"] {
-            /* Existant */
-            width: var(--sidebar-width) !important;
-            min-width: var(--sidebar-width) !important;
-            max-width: var(--sidebar-width) !important;
+            /* Position et dimensions */
+            width: var(--sidebar-width-collapsed) !important;
+            min-width: var(--sidebar-width-collapsed) !important;
+            max-width: var(--sidebar-width-collapsed) !important;
             position: fixed !important;
             height: 100vh !important;
+            z-index: 999999 !important;
+            
+            /* Style visuel */
             background-color: #f5f7fa !important;
             border-right: 2px solid var(--primary) !important;
             padding-top: 1rem !important;
             
-            /* Amélioration du défilement */
+            /* Gestion du défilement */
             overflow-y: auto !important;
             overflow-x: hidden !important;
             
-            /* Masquage cross-browser des barres de défilement */
-            scrollbar-width: none !important; /* Firefox */
-            -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+            /* Transition fluide */
+            transition: var(--sidebar-transition) !important;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
         }
-        
-        /* WebKit browsers (Chrome, Safari, Edge moderne) */
+
+        /* État étendu au survol de la sidebar OU de la zone trigger */
+        [data-testid="stSidebar"]:hover,
+        .sidebar-trigger-zone:hover + [data-testid="stSidebar"],
+        [data-testid="stSidebar"].expanded {
+            width: var(--sidebar-width-expanded) !important;
+            min-width: var(--sidebar-width-expanded) !important;
+            max-width: var(--sidebar-width-expanded) !important;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.15) !important;
+        }
+
+        /* Masquage de la barre de défilement */
         [data-testid="stSidebar"]::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
+            width: 0px !important;
+            background: transparent !important;
         }
-        
-        /* Solution alternative pour les navigateurs récalcitrants */
+
+        /* Contenu de la sidebar */
         [data-testid="stSidebar"] > div {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
-        }
-        
-        [data-testid="stSidebar"] > div::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-        }
-        
-        /* Gestion spécifique du contenu de la sidebar */
-        [data-testid="stSidebar"] .block-container {
-            padding-right: 0 !important;
-            margin-right: 0 !important;
-        }
-        
-        /* Éviter les débordements horizontaux */
-        [data-testid="stSidebar"] * {
-            max-width: 100% !important;
-            box-sizing: border-box !important;
+            width: var(--sidebar-width-expanded) !important;
+            padding: 0 15px !important;
         }
 
-        /* ================ Contenu Principal ================ */
-        .main .block-container {
-            margin-left: calc(var(--sidebar-width) + 20px) !important;
-            padding: 2rem !important;
-            max-width: calc(100vw - var(--sidebar-width) - 40px) !important;
-            transition: margin-left 0.3s ease !important;
+        /* ================ Animation du Contenu ================ */
+        /* Masquer le texte par défaut */
+        [data-testid="stSidebar"] .element-container {
+            opacity: 0 !important;
+            transition: opacity 0.3s ease 0.1s !important;
         }
 
-        /* ================ Défilement fluide ================ */
-        [data-testid="stSidebar"] {
-            scroll-behavior: smooth !important;
+        /* Afficher le texte au survol */
+        [data-testid="stSidebar"]:hover .element-container,
+        [data-testid="stSidebar"].expanded .element-container {
+            opacity: 1 !important;
         }
-        
-        /* Padding adaptatif pour éviter le débordement */
+
+        /* Style spécial pour le titre en mode réduit */
+        [data-testid="stSidebar"] h2 {
+            font-size: 0 !important;
+            transition: font-size 0.3s ease !important;
+            position: relative !important;
+        }
+
+        [data-testid="stSidebar"] h2::before {
+            content: "🧩" !important;
+            font-size: 24px !important;
+            position: absolute !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            top: 0 !important;
+        }
+
+        [data-testid="stSidebar"]:hover h2,
+        [data-testid="stSidebar"].expanded h2 {
+            font-size: 1.5rem !important;
+        }
+
+        [data-testid="stSidebar"]:hover h2::before,
+        [data-testid="stSidebar"].expanded h2::before {
+            position: static !important;
+            transform: none !important;
+            margin-right: 10px !important;
+        }
+
+        /* ================ Style des Options Radio ================ */
         [data-testid="stSidebar"] .stRadio > div {
-            padding-right: 10px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
         }
-        
-        /* Espacement des éléments de navigation */
-        [data-testid="stSidebar"] label {
-            margin-bottom: 8px !important;
-            padding: 12px 15px !important;
+
+        [data-testid="stSidebar"] .stRadio label {
+            display: flex !important;
+            align-items: center !important;
+            padding: 12px 8px !important;
+            margin: 2px 0 !important;
             border-radius: 8px !important;
-            transition: background-color 0.2s ease !important;
-        }
-        
-        /* ================ Responsive - Sidebar cachée sur mobile ================ */
-        @media (max-width: 768px) {
-            [data-testid="stSidebar"] {
-                transform: translateX(-100%) !important;
-                transition: transform 0.3s ease !important;
-                overflow: hidden !important; /* Empêche tout défilement sur mobile */
-            }
-            
-            /* Réaffichage via bouton hamburger natif Streamlit */
-            [data-testid="stSidebar"][data-expanded="true"] {
-                transform: translateX(0) !important;
-                overflow-y: auto !important;
-                scrollbar-width: none !important;
-            }
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
         }
 
-        /* ================ Typographie ================ */
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--text) !important;
-            font-family: 'Segoe UI', sans-serif !important;
-            margin-bottom: 1rem !important;
-        }
-
-        /* ================ Composants Communs ================ */
-        /* Cartes */
-        .info-card {
-            background: var(--card-bg) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-            border-left: 4px solid var(--primary) !important;
-            transition: transform 0.3s ease !important;
-        }
-
-        /* Boutons */
-        .stButton > button {
-            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
-            color: white !important;
-            border-radius: 30px !important;
+        /* Mode réduit : afficher seulement l'emoji */
+        [data-testid="stSidebar"] .stRadio label span {
+            font-size: 0 !important;
             transition: all 0.3s ease !important;
         }
 
-        /* Formulaire */
-        div[data-baseweb="base-input"] {
-            border-radius: 8px !important;
-            border: 1px solid #dfe4ea !important;
-            transition: border-color 0.3s ease !important;
+        [data-testid="stSidebar"] .stRadio label span::before {
+            content: attr(data-emoji) !important;
+            font-size: 20px !important;
+            display: inline-block !important;
+            width: 100% !important;
+            text-align: center !important;
+        }
+
+        /* Mode étendu : afficher le texte complet */
+        [data-testid="stSidebar"]:hover .stRadio label span,
+        [data-testid="stSidebar"].expanded .stRadio label span {
+            font-size: 14px !important;
+        }
+
+        [data-testid="stSidebar"]:hover .stRadio label span::before,
+        [data-testid="stSidebar"].expanded .stRadio label span::before {
+            width: auto !important;
+            text-align: left !important;
+            margin-right: 10px !important;
+        }
+
+        /* Effet hover sur les options */
+        [data-testid="stSidebar"] .stRadio label:hover {
+            background-color: #eaf2f8 !important;
+            transform: translateX(5px) !important;
+        }
+
+        /* Option sélectionnée */
+        [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
+            background-color: #d4edda !important;
+            border-left: 3px solid var(--primary) !important;
+        }
+
+        /* ================ Contenu Principal Adaptatif ================ */
+        .main .block-container {
+            margin-left: calc(var(--sidebar-width-collapsed) + 20px) !important;
+            padding: 2rem !important;
+            max-width: calc(100vw - var(--sidebar-width-collapsed) - 40px) !important;
+            transition: var(--sidebar-transition) !important;
+        }
+
+        /* ================ Indicateur Visuel ================ */
+        [data-testid="stSidebar"]::after {
+            content: "→" !important;
+            position: absolute !important;
+            right: 5px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 16px !important;
+            color: var(--primary) !important;
+            opacity: 0.6 !important;
+            transition: all 0.3s ease !important;
+            animation: pulse 2s infinite !important;
+        }
+
+        [data-testid="stSidebar"]:hover::after,
+        [data-testid="stSidebar"].expanded::after {
+            opacity: 0 !important;
+            transform: translateY(-50%) translateX(10px) !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        /* ================ Styles pour les titres avec centrage ================ */
+        .centered-title {
+            color: #3498db !important;
+            margin: 45px 0 30px 0 !important;
+            text-align: center !important;
+            font-size: 2.2rem !important;
+            font-weight: 600 !important;
+        }
+
+        /* ================ Cartes d'information avec espacement amélioré ================ */
+        .info-card-modern {
+            background: white !important;
+            border-radius: 15px !important;
+            padding: 30px !important;
+            margin: 35px 0 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+            border-left: 4px solid #3498db !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        }
+
+        .info-card-modern:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        /* ================ Timeline responsive ================ */
+        .timeline-container {
+            background-color: #f8f9fa !important;
+            padding: 25px !important;
+            border-radius: 15px !important;
+            margin: 40px 0 !important;
+            overflow-x: auto !important;
         }
 
         /* ================ Responsive Design ================ */
         @media (max-width: 1200px) {
-            [data-testid="stSidebar"] {
-                width: 260px !important;
-                min-width: 260px !important;
-            }
-            
             .main .block-container {
-                margin-left: 280px !important;
-                max-width: calc(100vw - 300px) !important;
+                margin-left: calc(var(--sidebar-width-collapsed) + 10px) !important;
+                max-width: calc(100vw - var(--sidebar-width-collapsed) - 20px) !important;
             }
         }
 
         @media (max-width: 768px) {
             [data-testid="stSidebar"] {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+            }
+            
+            [data-testid="stSidebar"]:hover,
+            .sidebar-trigger-zone:hover + [data-testid="stSidebar"] {
+                transform: translateX(0) !important;
             }
             
             .main .block-container {
@@ -300,46 +368,554 @@ def set_custom_theme():
                 max-width: 100vw !important;
                 padding: 1rem !important;
             }
+            
+            .sidebar-trigger-zone {
+                width: 20px !important;
+            }
         }
 
         /* ================ Corrections Spécifiques ================ */
-        /* Alignement vertical des éléments */
-        [data-testid="stVerticalBlock"] {
-            gap: 0.5rem !important;
-            align-items: stretch !important;
-        }
-
-        /* Suppression des bordures indésirables */
-        .stAlert, [data-testid="stAlert"],
-        .stMarkdown, [data-testid="column"] {
+        .stAlert, [data-testid="stAlert"] {
             border: none !important;
             background: transparent !important;
         }
 
-        /* Uniformisation des espacements */
-        .element-container {
-            margin-bottom: 1rem !important;
-            padding: 0.5rem !important;
+        /* ================ Boutons ================ */
+        .stButton > button {
+            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
+            color: white !important;
+            border-radius: 30px !important;
+            transition: all 0.3s ease !important;
+            border: none !important;
+            padding: 12px 24px !important;
+            font-weight: 600 !important;
         }
 
-        /* ================ États Interactifs ================ */
-        [data-testid="stSidebar"] label:hover {
-            background: #eaf2f8 !important;
-            cursor: pointer !important;
+        .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
         }
 
-        .info-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        /* ================ Uniformisation des espacements ================ */
+        h2 {
+            color: #3498db !important;
+            margin: 45px 0 25px 0 !important;
+            text-align: center !important;
+            font-size: 2.2rem !important;
+            font-weight: 600 !important;
+        }
+
+        .section-container {
+            margin: 50px 0 !important;
+            padding: 0 20px !important;
         }
         </style>
-        """
-        st.markdown(custom_theme, unsafe_allow_html=True)
 
+        <script>
+        // Script JavaScript pour améliorer l'interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            // Créer la zone de trigger
+            const triggerZone = document.createElement('div');
+            triggerZone.className = 'sidebar-trigger-zone';
+            document.body.appendChild(triggerZone);
+            
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            
+            if (sidebar) {
+                // Ajouter des attributs data-emoji aux labels
+                const radioLabels = sidebar.querySelectorAll('.stRadio label span');
+                const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
+                
+                radioLabels.forEach((label, index) => {
+                    if (emojis[index]) {
+                        label.setAttribute('data-emoji', emojis[index]);
+                    }
+                });
+                
+                // Gestion du survol avec JavaScript pour plus de contrôle
+                let hoverTimeout;
+                
+                function expandSidebar() {
+                    clearTimeout(hoverTimeout);
+                    sidebar.classList.add('expanded');
+                }
+                
+                function collapseSidebar() {
+                    hoverTimeout = setTimeout(() => {
+                        sidebar.classList.remove('expanded');
+                    }, 300); // Délai avant fermeture
+                }
+                
+                // Events sur la zone trigger
+                triggerZone.addEventListener('mouseenter', expandSidebar);
+                triggerZone.addEventListener('mouseleave', collapseSidebar);
+                
+                // Events sur la sidebar
+                sidebar.addEventListener('mouseenter', expandSidebar);
+                sidebar.addEventListener('mouseleave', collapseSidebar);
+                
+                // Tooltips pour le mode réduit
+                sidebar.setAttribute('title', 'Survolez pour déployer le menu');
+            }
+        });
+        </script>
+        """
+        
         with open(css_path, 'w') as f:
             f.write(custom_theme)
 
     st.markdown(custom_theme, unsafe_allow_html=True)
+
+def show_navigation_menu():
+    """Menu de navigation avec support pour la sidebar déployable"""
+    st.markdown("## 🧩 Autisme - Navigation")
+    st.markdown("Choisissez un outil :")
+
+    # Options avec emojis pour l'affichage réduit
+    options = [
+        "🏠 Accueil",
+        "🔍 Exploration des Données", 
+        "🧠 Analyse ML",
+        "🤖 Prédiction par IA",
+        "📚 Documentation",
+        "ℹ️ À propos"
+    ]
+
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+        st.session_state.tool_choice = "🏠 Accueil"
+
+    current_index = options.index(st.session_state.tool_choice)
+
+    tool_choice = st.radio(
+        "",
+        options,
+        label_visibility="collapsed",
+        index=current_index
+    )
+
+    if tool_choice != st.session_state.tool_choice:
+        st.session_state.tool_choice = tool_choice
+
+    return tool_choice
+def set_enhanced_navigation_theme():
+    """Thème esthétique amélioré pour la barre de navigation"""
+    
+    enhanced_css = """
+    <style>
+    /* ================ Variables CSS pour la cohérence ================ */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+        --accent-color: #667eea !important;
+        --text-light: #ffffff !important;
+        --text-dark: #2c3e50 !important;
+        --shadow-light: 0 4px 15px rgba(102, 126, 234, 0.2) !important;
+        --shadow-medium: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        --border-radius: 12px !important;
+    }
+
+    /* ================ Structure générale améliorée ================ */
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    }
+
+    /* ================ Barre latérale avec design moderne ================ */
+    [data-testid="stSidebar"] {
+        /* Fond avec dégradé élégant */
+        background: var(--primary-gradient) !important;
+        
+        /* Dimensions et positionnement */
+        width: 70px !important;
+        min-width: 70px !important;
+        max-width: 70px !important;
+        position: fixed !important;
+        height: 100vh !important;
+        z-index: 999999 !important;
+        
+        /* Style visuel avancé */
+        border: none !important;
+        box-shadow: var(--shadow-medium) !important;
+        backdrop-filter: blur(10px) !important;
+        
+        /* Transitions fluides */
+        transition: var(--transition-smooth) !important;
+        
+        /* Gestion du défilement */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* État étendu avec animation */
+    [data-testid="stSidebar"]:hover {
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4) !important;
+        transform: translateX(2px) !important;
+    }
+
+    /* ================ Contenu de la sidebar avec effets ================ */
+    [data-testid="stSidebar"] > div {
+        width: 280px !important;
+        padding: 20px 15px !important;
+    }
+
+    /* ================ Titre avec style élégant ================ */
+    [data-testid="stSidebar"] h2 {
+        color: var(--text-light) !important;
+        font-size: 0 !important;
+        text-align: center !important;
+        margin-bottom: 30px !important;
+        transition: var(--transition-smooth) !important;
+        position: relative !important;
+        padding: 15px 0 !important;
+    }
+
+    /* Icône du titre en mode réduit */
+    [data-testid="stSidebar"] h2::before {
+        content: "🧩" !important;
+        font-size: 28px !important;
+        display: block !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        transition: var(--transition-smooth) !important;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)) !important;
+    }
+
+    /* Animation du titre au survol */
+    [data-testid="stSidebar"]:hover h2 {
+        font-size: 1.4rem !important;
+        font-weight: 600 !important;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    [data-testid="stSidebar"]:hover h2::before {
+        position: static !important;
+        transform: none !important;
+        margin-right: 12px !important;
+        display: inline !important;
+    }
+
+    /* ================ Description élégante ================ */
+    [data-testid="stSidebar"] p {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-size: 0 !important;
+        text-align: center !important;
+        margin-bottom: 25px !important;
+        opacity: 0 !important;
+        transition: var(--transition-smooth) !important;
+        line-height: 1.5 !important;
+    }
+
+    [data-testid="stSidebar"]:hover p {
+        font-size: 14px !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+
+    /* ================ Options radio avec design moderne ================ */
+    [data-testid="stSidebar"] .stRadio > div {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 0 5px !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio label {
+        /* Structure de base */
+        display: flex !important;
+        align-items: center !important;
+        padding: 15px 12px !important;
+        margin: 0 !important;
+        
+        /* Style visuel */
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: var(--border-radius) !important;
+        backdrop-filter: blur(5px) !important;
+        
+        /* Transitions et curseur */
+        transition: var(--transition-smooth) !important;
+        cursor: pointer !important;
+        position: relative !important;
+        overflow: hidden !important;
+        
+        /* Typographie */
+        color: var(--text-light) !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+    }
+
+    /* Effet de survol spectaculaire */
+    [data-testid="stSidebar"] .stRadio label:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateX(8px) scale(1.02) !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    /* Animation d'onde au clic */
+    [data-testid="stSidebar"] .stRadio label::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 0 !important;
+        height: 0 !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        transition: width 0.6s, height 0.6s !important;
+        z-index: -1 !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio label:active::before {
+        width: 300px !important;
+        height: 300px !important;
+    }
+
+    /* Style des emojis/icônes */
+    [data-testid="stSidebar"] .stRadio label span {
+        font-size: 0 !important;
+        transition: var(--transition-smooth) !important;
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        white-space: nowrap !important;
+    }
+
+    /* Affichage des emojis en mode réduit */
+    [data-testid="stSidebar"] .stRadio label span::before {
+        font-size: 22px !important;
+        margin-right: 0 !important;
+        transition: var(--transition-smooth) !important;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
+    }
+
+    /* Affichage du texte au survol */
+    [data-testid="stSidebar"]:hover .stRadio label span {
+        font-size: 15px !important;
+        font-weight: 500 !important;
+    }
+
+    [data-testid="stSidebar"]:hover .stRadio label span::before {
+        margin-right: 15px !important;
+    }
+
+    /* ================ Option sélectionnée avec style spécial ================ */
+    [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
+        background: var(--success-gradient) !important;
+        border-color: rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4) !important;
+        transform: translateX(5px) !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio label[data-checked="true"]::after {
+        content: '✓' !important;
+        position: absolute !important;
+        right: 10px !important;
+        font-size: 16px !important;
+        color: var(--text-light) !important;
+        opacity: 0 !important;
+        transition: var(--transition-smooth) !important;
+    }
+
+    [data-testid="stSidebar"]:hover .stRadio label[data-checked="true"]::after {
+        opacity: 1 !important;
+    }
+
+    /* ================ Indicateur de déploiement animé ================ */
+    [data-testid="stSidebar"]::after {
+        content: "→" !important;
+        position: absolute !important;
+        right: 15px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        font-size: 18px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        transition: var(--transition-smooth) !important;
+        animation: pulse-arrow 2s infinite !important;
+    }
+
+    [data-testid="stSidebar"]:hover::after {
+        opacity: 0 !important;
+        transform: translateY(-50%) translateX(20px) !important;
+    }
+
+    @keyframes pulse-arrow {
+        0%, 100% { opacity: 0.4; transform: translateY(-50%) translateX(0); }
+        50% { opacity: 1; transform: translateY(-50%) translateX(5px); }
+    }
+
+    /* ================ Séparateur décoratif ================ */
+    [data-testid="stSidebar"]::before {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 30px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 40px !important;
+        height: 3px !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 2px !important;
+        transition: var(--transition-smooth) !important;
+    }
+
+    [data-testid="stSidebar"]:hover::before {
+        width: 80% !important;
+        background: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    /* ================ Masquage de la barre de défilement ================ */
+    [data-testid="stSidebar"]::-webkit-scrollbar {
+        width: 0px !important;
+        background: transparent !important;
+    }
+
+    /* ================ Adaptation du contenu principal ================ */
+    .main .block-container {
+        margin-left: 90px !important;
+        padding: 2rem !important;
+        max-width: calc(100vw - 110px) !important;
+        transition: var(--transition-smooth) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 20px 0 0 0 !important;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* ================ Responsive design ================ */
+    @media (max-width: 768px) {
+        [data-testid="stSidebar"] {
+            transform: translateX(-100%) !important;
+        }
+        
+        [data-testid="stSidebar"]:hover {
+            transform: translateX(0) !important;
+        }
+        
+        .main .block-container {
+            margin-left: 0 !important;
+            max-width: 100vw !important;
+            border-radius: 0 !important;
+        }
+    }
+
+    /* ================ Améliorations typographiques ================ */
+    h1, h2, h3 {
+        background: var(--primary-gradient) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        font-weight: 700 !important;
+    }
+
+    /* ================ Boutons avec style cohérent ================ */
+    .stButton > button {
+        background: var(--primary-gradient) !important;
+        color: var(--text-light) !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+        box-shadow: var(--shadow-light) !important;
+        transition: var(--transition-smooth) !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    </style>
+    
+    <script>
+    // JavaScript pour améliorer l'interactivité
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+        
+        if (sidebar) {
+            // Ajouter des attributs data-emoji pour les options
+            const radioLabels = sidebar.querySelectorAll('.stRadio label span');
+            const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
+            
+            radioLabels.forEach((label, index) => {
+                if (emojis[index]) {
+                    label.parentElement.setAttribute('data-emoji', emojis[index]);
+                    label.style.setProperty('--emoji', `"${emojis[index]}"`);
+                    label.setAttribute('data-emoji', emojis[index]);
+                }
+            });
+            
+            // Ajouter des effets sonores visuels
+            const labels = sidebar.querySelectorAll('.stRadio label');
+            labels.forEach(label => {
+                label.addEventListener('mouseenter', function() {
+                    this.style.setProperty('--hover-scale', '1.05');
+                });
+                
+                label.addEventListener('mouseleave', function() {
+                    this.style.setProperty('--hover-scale', '1');
+                });
+            });
+            
+            // Tooltips en mode réduit
+            sidebar.setAttribute('title', '✨ Survolez pour découvrir le menu');
+        }
+    });
+    </script>
+    """
+    
+    st.markdown(enhanced_css, unsafe_allow_html=True)
+
+def show_enhanced_navigation_menu():
+    """Menu de navigation avec design esthétique amélioré"""
+    
+    # Titre avec emoji
+    st.markdown("## 🧩 Autisme - Navigation")
+
+    # Options avec emojis distinctifs
+    options = [
+        "🏠 Accueil",
+        "🔍 Exploration des Données", 
+        "🧠 Analyse ML",
+        "🤖 Prédiction par IA",
+        "📚 Documentation",
+        "ℹ️ À propos"
+    ]
+
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+        st.session_state.tool_choice = "🏠 Accueil"
+
+    current_index = options.index(st.session_state.tool_choice)
+
+    # CSS spécifique pour les emojis
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="🏠"]::before { content: "🏠" !important; }
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="🔍"]::before { content: "🔍" !important; }
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="🧠"]::before { content: "🧠" !important; }
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="🤖"]::before { content: "🤖" !important; }
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="📚"]::before { content: "📚" !important; }
+    [data-testid="stSidebar"] .stRadio label span[data-emoji="ℹ️"]::before { content: "ℹ️" !important; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    tool_choice = st.radio(
+        "",
+        options,
+        label_visibility="collapsed",
+        index=current_index
+    )
+
+    if tool_choice != st.session_state.tool_choice:
+        st.session_state.tool_choice = tool_choice
+        st.rerun()
+
+    return tool_choice
 
 set_custom_theme()
 
