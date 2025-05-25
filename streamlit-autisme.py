@@ -318,6 +318,75 @@ def set_custom_theme():
             transform: translateY(-5px);
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
+        /* Correction pour les sections info sans bordures bleues */
+        .stInfo, [data-testid="stAlert"] {
+            border: none !important;
+            border-left: 4px solid #3498db !important; /* Bordure gauche uniquement */
+            background-color: #f8f9fa !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Suppression des bordures sur les conteneurs de colonnes */
+        [data-testid="column"] {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Amélioration des messages d'info/success/warning */
+        .stSuccess {
+            border: none !important;
+            border-left: 4px solid #2ecc71 !important;
+            background-color: #f1f8e9 !important;
+        }
+        
+        .stWarning {
+            border: none !important;
+            border-left: 4px solid #f39c12 !important;
+            background-color: #fef9e7 !important;
+        }
+
+        /* Correction de la sidebar - remplacer la section problématique */
+        [data-testid="stSidebar"] {
+            background-color: #f5f7fa !important;
+            border-right: none !important; /* Supprimer la bordure bleue */
+            padding-top: 2rem;
+            width: 250px !important;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1); /* Ombre subtile au lieu de bordure */
+        }
+        
+        [data-testid="stSidebarContent"] {
+            width: 100%;
+            overflow: auto;
+            background-color: #f5f7fa !important;
+            border: none !important; /* Éliminer toute bordure */
+        }
+        
+        /* Amélioration des labels radio sans bordures bleues */
+        [data-testid="stSidebar"] div[role="radiogroup"] label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+            margin-bottom: 8px !important;
+            padding: 8px 12px !important;
+            border-radius: 8px;
+            border: none !important; /* Supprimer les bordures */
+            background: transparent !important;
+            transition: background-color 0.2s ease;
+        }
+        
+        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+            background-color: #e3f2fd !important;
+        }
+        
+        /* État sélectionné sans barre bleue */
+        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
+            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
+            color: #1976d2 !important;
+            font-weight: 600 !important;
+            border: none !important;
+        }
+        
+
 
         .card-title {
             color: var(--primary);
