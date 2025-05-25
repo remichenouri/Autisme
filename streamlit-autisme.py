@@ -1186,44 +1186,7 @@ def show_home_page():
         min-width: 280px !important;
         max-width: 280px !important;
     }
-    /* Masquer complètement le code HTML qui s'affiche comme texte */
-    .stMarkdown pre,
-    .stMarkdown code[class*="language-"],
-    .stMarkdown .highlight,
-    .stMarkdown .hljs,
-    .stMarkdown .hljs-string,
-    .stMarkdown .hljs-tag {
-        display: none !important;
-    }
-    
-    /* Masquer les blocs de code avec coloration syntaxique */
-    .stMarkdown div[class*="highlight"] {
-        display: none !important;
-    }
-    
-    /* Assurer l'affichage normal du contenu */
-    .stMarkdown p,
-    .stMarkdown div:not([class*="highlight"]),
-    .stMarkdown ul,
-    .stMarkdown li,
-    .stMarkdown h1,
-    .stMarkdown h2,
-    .stMarkdown h3,
-    .stMarkdown strong {
-        display: block !important;
-        background: transparent !important;
-        color: inherit !important;
-    }
-    
-    /* Correction spécifique pour les problèmes de rendu HTML */
-    .stMarkdown {
-        overflow: hidden !important;
-    }
-    
-    /* Masquer les éléments avec du code HTML visible */
-    .stMarkdown *[style*="font-size: 1.1rem"] {
-        display: block !important;
-    }
+    /* 
     [data-testid="stSidebar"] > div {
         border-right: none !important;
         background-color: #f5f7fa !important;
