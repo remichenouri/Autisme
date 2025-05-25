@@ -150,6 +150,7 @@ def show_navigation_menu_optimized():
     return choice
 
 def set_custom_theme():
+    """Définit le thème personnalisé de l'application avec CSS optimisé"""
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
 
@@ -157,10 +158,9 @@ def set_custom_theme():
         with open(css_path, 'r') as f:
             custom_theme = f.read()
     else:
-
         custom_theme = """
         <style>
-        /* Variables globales */
+        /* =========== VARIABLES GLOBALES =========== */
         :root {
             --primary: #3498db;
             --secondary: #2ecc71;
@@ -168,6 +168,41 @@ def set_custom_theme():
             --card-bg: white;
             --text: #2c3e50;
         }
+
+        /* =========== CONFIGURATION GENERALE =========== */
+        [data-testid="stAppViewContainer"] {
+            background-color: var(--background);
+            margin-left: 300px !important;
+            width: calc(100vw - 300px) !important;
+            min-height: 100vh !important;
+        }
+
+        /* =========== SIDEBAR OPTIMISEE =========== */
+        [data-testid="stSidebar"] {
+            background-color: #f5f7fa !important;
+            border-right: 2px solid var(--primary) !important;
+            width: 300px !important;
+            min-width: 300px !important;
+            max-width: 300px !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            height: 100vh !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 999 !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        [data-testid="stSidebarContent"] {
+            width: 100% !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 15px !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Masquage des barres de défilement */
         [data-testid="stSidebar"]::-webkit-scrollbar,
         [data-testid="stSidebarContent"]::-webkit-scrollbar,
         [data-testid="stSidebar"] *::-webkit-scrollbar {
@@ -175,13 +210,22 @@ def set_custom_theme():
             width: 0 !important;
             height: 0 !important;
         }
+
+        [data-testid="stSidebar"],
+        [data-testid="stSidebarContent"],
+        [data-testid="stSidebar"] * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        /* =========== ELEMENTS DE NAVIGATION =========== */
         [data-testid="stSidebar"] div[role="radiogroup"] {
-    margin: 10px 0 !important;
-    padding: 0 !important;
-}
+            margin: 10px 0 !important;
+            padding: 0 !important;
+        }
 
         [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
+            color: var(--text) !important;
             font-weight: 500 !important;
             font-size: 1rem !important;
             margin-bottom: 8px !important;
@@ -196,47 +240,20 @@ def set_custom_theme():
             text-overflow: ellipsis !important;
             box-sizing: border-box !important;
         }
-        /* Masquage complet des barres de défilement sidebar */
-        [data-testid="stSidebar"]::-webkit-scrollbar,
-        [data-testid="stSidebarContent"]::-webkit-scrollbar,
-        [data-testid="stSidebar"] *::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+            background-color: #e3f2fd !important;
+            transform: translateX(3px) !important;
         }
-        
-        [data-testid="stSidebar"],
-        [data-testid="stSidebarContent"],
-        [data-testid="stSidebar"] * {
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
+
+        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
+            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
+            color: #1976d2 !important;
+            font-weight: 600 !important;
+            border-left: 4px solid var(--primary) !important;
         }
-        
-        /* Configuration sidebar fixe */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa !important;
-            border-right: 2px solid #3498db !important;
-            width: 300px !important;
-            min-width: 300px !important;
-            max-width: 300px !important;
-            overflow: hidden !important;
-            position: fixed !important;
-            height: 100vh !important;
-            top: 0 !important;
-            left: 0 !important;
-            z-index: 999 !important;
-        }
-        
-        [data-testid="stSidebarContent"] {
-            width: 100% !important;
-            height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            padding: 15px !important;
-            box-sizing: border-box !important;
-        }
-        
-        /* Correction du débordement du contenu principal */
+
+        /* =========== CONTENU PRINCIPAL =========== */
         .main .block-container {
             padding-left: 320px !important;
             padding-right: 20px !important;
@@ -247,45 +264,25 @@ def set_custom_theme():
             margin-left: 0 !important;
             box-sizing: border-box !important;
         }
-        
-        [data-testid="stAppViewContainer"] {
-            margin-left: 300px !important;
-            width: calc(100vw - 300px) !important;
-            background-color: #f0f2f6 !important;
-            min-height: 100vh !important;
-        }
-        
-        /* Optimisation navigation */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-            margin-bottom: 8px !important;
-            padding: 12px 15px !important;
-            border-radius: 8px !important;
-            border: none !important;
-            transition: all 0.2s ease !important;
-            display: block !important;
-            width: calc(100% - 30px) !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            box-sizing: border-box !important;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background-color: #e3f2fd !important;
-            transform: translateX(3px) !important;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
-            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
-            color: #1976d2 !important;
+
+        /* =========== ELEMENTS INTERACTIFS =========== */
+        div[role="radiogroup"] input[type="radio"]:checked + div {
+            background-color: var(--primary) !important;
+            color: white !important;
+            border-color: #2980b9 !important;
             font-weight: 600 !important;
-            border-left: 4px solid #3498db !important;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4) !important;
         }
-        
-        /* Responsive design */
+
+        .stButton > button {
+            width: 100%;
+            padding: 0.8rem 1rem !important;
+            font-size: 1.1rem !important;
+            margin-top: 1rem;
+            transition: all 0.3s ease !important;
+        }
+
+        /* =========== RESPONSIVE DESIGN =========== */
         @media (max-width: 768px) {
             .main .block-container {
                 padding-left: 20px !important;
@@ -302,7 +299,6 @@ def set_custom_theme():
                 min-width: 280px !important;
                 max-width: 280px !important;
                 transform: translateX(-100%) !important;
-                transition: transform 0.3s ease !important;
             }
             
             [data-testid="stSidebar"]:hover,
@@ -310,593 +306,11 @@ def set_custom_theme():
                 transform: translateX(0) !important;
             }
         }
-        
-        /* === STYLES EXISTANTS CONSERVÉS === */
-        :root {
-            --primary: #3498db;
-            --secondary: #2ecc71;
-            --background: #f0f2f6;
-            --card-bg: white;
-            --text: #2c3e50;
-        }
-        
-        /* État hover et sélectionné */
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background-color: #e3f2fd !important;
-            transform: translateX(3px) !important;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
-            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
-            color: #1976d2 !important;
-            font-weight: 600 !important;
-            border-left: 4px solid #3498db !important;
-        }
-        /* Masquage pour Firefox */
-        [data-testid="stSidebar"],
-        [data-testid="stSidebarContent"],
-        [data-testid="stSidebar"] * {
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
-        }
-        
-        /* Configuration avancée de la sidebar */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa !important;
-            border-right: 2px solid #3498db !important;
-            width: 300px !important;
-            min-width: 300px !important;
-            max-width: 300px !important;
-            overflow: hidden !important;
-            position: fixed !important;
-            height: 100vh !important;
-            z-index: 999 !important;
-        }
-        
-        /* Conteneur de la sidebar */
-        [data-testid="stSidebarContent"] {
-            width: 100% !important;
-            height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            padding: 10px 15px !important;
-            box-sizing: border-box !important;
-        }
-        
-        /* Masquage spécifique pour les éléments internes */
-        [data-testid="stSidebar"] .stMarkdown,
-        [data-testid="stSidebar"] .streamlit-expanderHeader,
-        [data-testid="stSidebar"] div[role="radiogroup"] {
-            overflow: visible !important;
-        }
 
-        /* Styles généraux du conteneur */
-        [data-testid="stAppViewContainer"] {
-            background-color: var(--background);
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--text);
-            font-weight: 600;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        /* Suppression des bordures bleues sur les conteneurs */
+        /* =========== CORRECTIONS VISUELLES =========== */
         .stAlert, [data-testid="stAlert"] {
             border: none !important;
             background: transparent !important;
-        }
-        
-        /* Suppression des barres bleues sur les info boxes */
-        .stInfo {
-            border: none !important;
-            border-left: 4px solid #3498db !important;
-            background-color: #f8f9fa !important;
-            border-radius: 8px !important;
-        }
-        
-        /* Suppression des bordures sur les colonnes */
-        [data-testid="column"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        /* Suppression des bordures sur les conteneurs de markdown */
-        .stMarkdown {
-            border: none !important;
-            background: transparent !important;
-        }
-
-        /* Correction de l'affichage HTML brut */
-        .stMarkdown code {
-            background-color: transparent !important;
-            color: inherit !important;
-            padding: 0 !important;
-            border: none !important;
-            font-family: inherit !important;
-            font-size: inherit !important;
-        }
-        
-        /* Masquer le code HTML qui s'affiche */
-        .stMarkdown pre {
-            display: none !important;
-        }
-        
-        /* Correction de la surbrillance bleue */
-        .stMarkdown .highlight {
-            background-color: transparent !important;
-            color: inherit !important;
-        }
-        
-        /* Éliminer les blocs de code indésirables */
-        .stMarkdown .language-html {
-            display: none !important;
-        }
-        
-        .stMarkdown .hljs {
-            background: transparent !important;
-            color: inherit !important;
-        }
-        /* Masquer la barre de défilement de la sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #f5f7fa !important;
-        border-right: none !important;
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-        overflow: hidden !important; /* Masquer le débordement */
-    }
-    
-    [data-testid="stSidebarContent"] {
-        width: 100% !important;
-        overflow: hidden !important; /* Masquer la barre de défilement */
-        background-color: #f5f7fa !important;
-        border: none !important;
-        height: 100vh !important; /* Hauteur pleine */
-        padding-right: 0 !important;
-    }
-    
-    /* Masquer spécifiquement les barres de défilement */
-    [data-testid="stSidebar"]::-webkit-scrollbar {
-        display: none !important;
-    }
-    
-    [data-testid="stSidebarContent"]::-webkit-scrollbar {
-        display: none !important;
-    }
-    
-    /* Pour Firefox */
-    [data-testid="stSidebar"] {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-    }
-    
-    [data-testid="stSidebarContent"] {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-    }
-    
-    /* Optimiser l'affichage du contenu */
-    [data-testid="stSidebar"] > div:first-child {
-        overflow: hidden !important;
-        height: 100vh !important;
-    }
-    
-    /* Améliorer l'espacement des éléments de navigation */
-    [data-testid="stSidebar"] div[role="radiogroup"] {
-        margin: 10px 0 !important;
-        padding: 0 15px !important;
-    }
-    
-    [data-testid="stSidebar"] div[role="radiogroup"] label {
-        color: #2c3e50 !important;
-        font-weight: 500 !important;
-        font-size: 1rem !important;
-        margin-bottom: 8px !important;
-        padding: 10px 15px !important;
-        border-radius: 8px !important;
-        border: none !important;
-        transition: all 0.2s ease !important;
-        display: block !important;
-        white-space: nowrap !important; /* Éviter le retour à la ligne */
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-    
-    /* Navigation plus compacte */
-    [data-testid="stSidebar"] .stMarkdown {
-        margin-bottom: 10px !important;
-    }
-    
-    /* Titre de navigation centré */
-    [data-testid="stSidebar"] h2 {
-        text-align: center !important;
-        margin: 15px 0 !important;
-        padding: 10px !important;
-        font-size: 1.4rem !important;
-    }
-        /* Corrections spécifiques pour la navigation */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa !important;
-            border-right: none !important;
-            width: 280px !important;
-            min-width: 280px !important;
-            max-width: 280px !important;
-        }
-        
-        [data-testid="stSidebar"] > div {
-            border-right: none !important;
-            background-color: #f5f7fa !important;
-        }
-        
-        [data-testid="stSidebarContent"] {
-            width: 100% !important;
-            overflow: auto !important;
-            background-color: #f5f7fa !important;
-            border: none !important;
-        }
-        
-        /* Suppression des barres bleues sur toute l'application */
-        .stAlert, [data-testid="stAlert"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        [data-testid="column"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        .stMarkdown {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        /* Amélioration du menu de navigation */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-            margin-bottom: 8px !important;
-            padding: 10px 15px !important;
-            border-radius: 8px !important;
-            border: none !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background-color: #e3f2fd !important;
-            transform: translateX(3px) !important;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
-            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
-            color: #1976d2 !important;
-            font-weight: 600 !important;
-            border: none !important;
-        }
-        /* Élimination des barres bleues sur les éléments de base */
-        div[data-baseweb="base-input"] {
-            border: none !important;
-        }
-        
-        .css-1d391kg {
-            border: none !important;
-        }
-
-        /* Correction de la navigation - SOLUTION PRINCIPALE */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa;
-            border-right: 2px solid var(--primary);
-            padding-top: 2rem;
-            width: 250px !important; /* Largeur augmentée */
-        }
-        [data-testid="stSidebar"] label {
-        margin-bottom: 14px !important;
-        padding: 8px 12px !important;
-        border-radius: 8px;
-        transition: background 0.2s;
-        }
-        [data-testid="stSidebar"] label:hover {
-            background: #eaf2f8 !important;
-        }
-        .sidebar-title {
-            margin-bottom: 2rem !important;
-        }... /* Assurer que le contenu est correctement dimensionné */
-        [data-testid="stSidebarContent"] {
-            width: 100%;
-            overflow: auto;
-            background-color: #f5f7fa !important;
-        }
-
-        /* Amélioration du texte dans la sidebar */
-        [data-testid="stSidebar"] label,
-        [data-testid="stSidebar"] div,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] span {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-        }
-
-        /* Amélioration spécifique pour les expanders */
-        [data-testid="stSidebar"] .streamlit-expanderHeader {
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-            hyphens: auto !important;
-            padding-right: 10px !important;
-        }
-
-        /* Titre de la sidebar plus visible */
-        .sidebar-title {
-            font-size: 1.5rem;
-            color: #3498db;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 0.5rem;
-        }
-
-        /* Amélioration pour le menu de radiobuttons */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            margin-bottom: 5px !important;
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            line-height: 1.4 !important;
-            padding: 5px 10px !important;
-            display: block !important;
-            width: 100% !important;
-        }
-
-        .sidebar .sidebar-content {
-            background-color: #f5f7fa !important;
-            border-right: 2px solid #3498db !important;
-        }
-
-        .sidebar .sidebar-content .streamlit-expanderHeader,
-        .sidebar .sidebar-content label,
-        .sidebar .sidebar-content div,
-        .sidebar .sidebar-content p,
-        .sidebar .sidebar-content span {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-        }
-
-        .sidebar .sidebar-content label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-        }
-
-        /* Styles des cartes et conteneurs */
-        .header-container {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            padding: 1.5rem;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-
-        .app-title {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin-left: 1rem;
-        }
-
-        .puzzle-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 2.2rem;
-            color: var(--primary);
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .puzzle-icon {
-            font-size: 2.2rem;
-        }
-
-        .main .block-container {
-            padding-top: 0.7rem !important;
-            padding-bottom: 0.7rem !important;
-        }
-
-        [data-testid="stVerticalBlock"] {
-            gap: 0.5rem !important;
-        }
-
-        .element-container {
-            margin-bottom: 0.5rem !important;
-        }
-
-        .css-1544g2n.e1fqkh3o4 {
-            padding-top: 2rem !important;
-            padding-bottom: 0.5rem !important;
-        }
-
-        /* Styles des info-cards */
-        .info-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem !important;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-top: 5px solid var(--primary);
-            margin-bottom: 10px !important;
-        }
-
-        .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-title {
-            color: var(--primary);
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 0.5rem;
-        }
-        div[role="radiogroup"] input[type="radio"]:checked + div {
-        background-color: #3498db !important;
-        color: white !important;
-        border-color: #2980b9 !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4) !important;
-    }
-
-        /* Styles des questions et formulaires */
-        .question-container {
-            background-color: white;
-            padding: 12px 15px !important;
-            border-radius: 12px;
-            margin-bottom: 12px !important;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--primary);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .question-container:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .question-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .questionnaire-title {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        /* Styles des radiobuttons */
-        div[role="radiogroup"] {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px !important;
-            margin-top: 10px;
-            margin-bottom: 15px !important;
-        }
-
-        div[role="radiogroup"] label {
-        color: #2c3e50 !important;  /* Texte foncé */
-        padding-right: 15px !important;
-        margin-bottom: 5px !important;
-        font-weight: 500 !important;
-        font-size: 1rem !important;
-        white-space: normal !important;
-        overflow-wrap: break-word !important;
-        line-height: 1.4 !important;
-        padding: 5px 10px !important;
-        display: block !important;
-        width: 100% !important;
-    }
-
-
-        div[role="radiogroup"] label > div:first-child {
-            display: none !important;
-        }
-
-        input[type="radio"] + div {
-            background: #f5f7fa !important;
-            color: var(--text);
-            border-radius: 38px !important;
-            padding: 10px 20px !important;
-            border: 1px solid #dfe4ea;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }... input[type="radio"] + div:hover {
-            background: #e9f0ff !important;
-            border-color: var(--primary);
-            transform: translateY(-1px);
-        }
-
-        /* Styles des boutons et CTA */
-        .cta-button {
-            background: linear-gradient(135deg, var(--primary), #2980b9);
-            color: white;
-            padding: 0.9rem 1.5rem;
-            border-radius: 30px;
-            font-weight: bold;
-            text-align: center;
-            display: inline-block;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-            width: 80%;
-        }
-
-        .cta-button:hover {
-            background: linear-gradient(135deg, #2980b9, var(--primary));
-            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .stButton > button {
-            width: 100%;
-            padding: 0.8rem 1rem !important;
-            font-size: 1.1rem !important;
-            margin-top: 1rem;
-        }
-
-        /* Styles des expanders et tabs */
-        .streamlit-expanderHeader {
-            background-color: #f5f7fa;
-            border-radius: 8px;
-            font-weight: 600;
-            padding: 10px 15px !important;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s ease;
-        }
-
-        .streamlit-expanderHeader:hover {
-            background-color: #eef1f5;
-            transform: translateX(2px);
-        }
-
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 2px;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            height: 40px;
-            white-space: pre-wrap;
-            background-color: #f5f7fa;
-            border-radius: 5px 5px 0 0;
-            gap: 1px;
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background-color: var(--primary) !important;
-            color: white !important;
-        }
-
-        /* Styles divers */
-        [data-testid="stDataFrame"] {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         [data-testid="stMetricValue"] {
@@ -905,125 +319,26 @@ def set_custom_theme():
             font-size: 1.2rem;
         }
 
-        [data-testid="stMetricDelta"] {
-            font-size: 0.9rem;
-        }
-
-        div[data-baseweb="select"] > div {
+        .stDataFrame {
             border-radius: 8px;
-            background-color: white;
-            transition: all 0.2s ease;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        div[data-baseweb="select"] > div:hover {
-            border-color: var(--primary);
-        }
-
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            overflow-x: auto;
-            max-width: 100%;
-            font-size: 0.9rem;
-            color: #2c3e50;
-        }
-
-        .structure-donnees pre {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            border: 1px solid #d0d0d0;
-            line-height: 1.6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .footer {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            text-align: center;
-            border-top: 2px solid #3498db;
-            margin-top: 2rem;
-            border-radius: 10px;
-        }
-
-        .sidebar .sidebar-content .streamlit-expanderHeader {
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-            hyphens: auto !important;
-            padding-right: 10px !important;
-        }
-
-        .sidebar .sidebar-content label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-        }
-
-        .sidebar .sidebar-content div[role="radiogroup"] label {
-            padding-right: 15px !important;
-            margin-bottom: 5px !important;
-            display: block !important;
-            width: 100% !important;
-        }
-
-        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-            width: 320px;
-            min-width: 320px;
-        }
-        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-            width: 320px;
-            min-width: 320px;
-        }
-
-
-        [data-testid="stSidebar"] .css-1wvake5,
-        [data-testid="stSidebar"] .css-1v0mbdj,
-        [data-testid="stSidebar"] label {
-            white-space: normal !important;
-            word-break: break-word !important;
-            font-size: 1.1rem !important;
-            font-weight: 500 !important;
-            padding: 8px 14px !important;
-            margin-bottom: 10px !important;
-            border-radius: 8px;
-            color: #2c3e50 !important;
-            background: none !important;
-            transition: background 0.2s;
-            display: block;
-        }
-
-
-        [data-testid="stSidebar"] .css-1wvake5[aria-checked="true"],
-        [data-testid="stSidebar"] .css-1v0mbdj[aria-checked="true"],
-        [data-testid="stSidebar"] label[data-selected="true"] {
-            background: linear-gradient(90deg, #eaf6fb 60%, #e0f7fa 100%) !important;
-            color: #0077b6 !important;
-        }... [data-testid="stSidebar"] svg {
-            margin-right: 10px;
-            vertical-align: middle;
+        /* =========== OPTIMISATION PERFORMANCE =========== */
+        [data-testid="stSidebar"] * {
+            will-change: transform;
+            backface-visibility: hidden;
         }
         </style>
         """
-        st.markdown(custom_theme, unsafe_allow_html=True)
-
+        
+        # Sauvegarde du CSS optimisé
         with open(css_path, 'w') as f:
             f.write(custom_theme)
-
+    
+    # Application du thème
     st.markdown(custom_theme, unsafe_allow_html=True)
-
-set_custom_theme()
 
 def load_visualization_libraries():
     global plt, px, go, sns
