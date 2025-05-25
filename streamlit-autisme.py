@@ -229,7 +229,7 @@ def set_custom_theme():
 
         .sidebar .sidebar-content {
             background-color: #f5f7fa !important;
-            border-right: 2px solid #3498db !important;
+             border-right: none !important; /* Supprimer la bordure bleue */
         }
 
         .sidebar .sidebar-content .streamlit-expanderHeader,
