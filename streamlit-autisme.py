@@ -92,6 +92,39 @@ def initialize_session_state():
 
         st.session_state.data_exploration_expanded = True
 
+def show_navigation_menu():
+    st.markdown("## Autisme - Navigation")
+
+    st.markdown("Choisissez un outil :")
+
+
+    options = ["🏠 Accueil",
+             "🔍 Exploration des Données",
+             "🧠 Analyse ML",
+             "🤖 Prédiction par IA",
+             "📚 Documentation",
+             "ℹ️ À propos"]
+
+
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+        st.session_state.tool_choice = "🏠 Accueil"
+
+    current_index = options.index(st.session_state.tool_choice)
+
+
+    tool_choice = st.radio(
+        "",
+        options,
+        label_visibility="collapsed",
+        index=current_index,
+        extended=True
+    )
+
+    if tool_choice != st.session_state.tool_choice:
+        st.session_state.tool_choice = tool_choice
+
+    return tool_choice
+
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
@@ -109,9 +142,7 @@ def set_custom_theme():
             --background: #f0f2f6 !important;
             --card-bg: white !important;
             --text: #2c3e50 !important;
-            --sidebar-width-collapsed: 70px !important;
-            --sidebar-width-expanded: 280px !important;
-            --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            --sidebar-width: 280px !important;
         }
 
         /* ================ Structure Principale ================ */
@@ -119,248 +150,149 @@ def set_custom_theme():
             background-color: var(--background) !important;
         }
 
-        /* ================ Zone de Trigger pour le Survol ================ */
-        .sidebar-trigger-zone {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 15px !important;
-            height: 100vh !important;
-            z-index: 999998 !important;
-            background: transparent !important;
-            cursor: pointer !important;
-        }
-
-        /* ================ Barre Latérale Déployable ================ */
+        /* Pour tous les navigateurs - Masquage de la barre de défilement sidebar */
         [data-testid="stSidebar"] {
-            /* Position et dimensions */
-            width: var(--sidebar-width-collapsed) !important;
-            min-width: var(--sidebar-width-collapsed) !important;
-            max-width: var(--sidebar-width-collapsed) !important;
+            /* Existant */
+            width: var(--sidebar-width) !important;
+            min-width: var(--sidebar-width) !important;
+            max-width: var(--sidebar-width) !important;
             position: fixed !important;
             height: 100vh !important;
-            z-index: 999999 !important;
-            
-            /* Style visuel */
             background-color: #f5f7fa !important;
             border-right: 2px solid var(--primary) !important;
             padding-top: 1rem !important;
             
-            /* Gestion du défilement */
+            /* Amélioration du défilement */
             overflow-y: auto !important;
             overflow-x: hidden !important;
             
-            /* Transition fluide */
-            transition: var(--sidebar-transition) !important;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
+            /* Masquage cross-browser des barres de défilement */
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important; /* Internet Explorer 10+ */
         }
-
-        /* État étendu au survol de la sidebar OU de la zone trigger */
-        [data-testid="stSidebar"]:hover,
-        .sidebar-trigger-zone:hover + [data-testid="stSidebar"],
-        [data-testid="stSidebar"].expanded {
-            width: var(--sidebar-width-expanded) !important;
-            min-width: var(--sidebar-width-expanded) !important;
-            max-width: var(--sidebar-width-expanded) !important;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.15) !important;
-        }
-
-        /* Masquage de la barre de défilement */
+        
+        /* WebKit browsers (Chrome, Safari, Edge moderne) */
         [data-testid="stSidebar"]::-webkit-scrollbar {
-            width: 0px !important;
-            background: transparent !important;
+            display: none !important;
+            width: 0 !important;
         }
-
-        /* Contenu de la sidebar */
+        
+        /* Solution alternative pour les navigateurs récalcitrants */
         [data-testid="stSidebar"] > div {
-            width: var(--sidebar-width-expanded) !important;
-            padding: 0 15px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        [data-testid="stSidebar"] > div::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+        }
+        
+        /* Gestion spécifique du contenu de la sidebar */
+        [data-testid="stSidebar"] .block-container {
+            padding-right: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Éviter les débordements horizontaux */
+        [data-testid="stSidebar"] * {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
-        /* ================ Animation du Contenu ================ */
-        /* Masquer le texte par défaut */
-        [data-testid="stSidebar"] .element-container {
-            opacity: 0 !important;
-            transition: opacity 0.3s ease 0.1s !important;
-        }
-
-        /* Afficher le texte au survol */
-        [data-testid="stSidebar"]:hover .element-container,
-        [data-testid="stSidebar"].expanded .element-container {
-            opacity: 1 !important;
-        }
-
-        /* Style spécial pour le titre en mode réduit */
-        [data-testid="stSidebar"] h2 {
-            font-size: 0 !important;
-            transition: font-size 0.3s ease !important;
-            position: relative !important;
-        }
-
-        [data-testid="stSidebar"] h2::before {
-            content: "🧩" !important;
-            font-size: 24px !important;
-            position: absolute !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            top: 0 !important;
-        }
-
-        [data-testid="stSidebar"]:hover h2,
-        [data-testid="stSidebar"].expanded h2 {
-            font-size: 1.5rem !important;
-        }
-
-        [data-testid="stSidebar"]:hover h2::before,
-        [data-testid="stSidebar"].expanded h2::before {
-            position: static !important;
-            transform: none !important;
-            margin-right: 10px !important;
-        }
-
-        /* ================ Style des Options Radio ================ */
-        [data-testid="stSidebar"] .stRadio > div {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 8px !important;
-        }
-
-        [data-testid="stSidebar"] .stRadio label {
-            display: flex !important;
-            align-items: center !important;
-            padding: 12px 8px !important;
-            margin: 2px 0 !important;
-            border-radius: 8px !important;
-            transition: all 0.3s ease !important;
-            cursor: pointer !important;
-            position: relative !important;
-            overflow: hidden !important;
-            white-space: nowrap !important;
-        }
-
-        /* Mode réduit : afficher seulement l'emoji */
-        [data-testid="stSidebar"] .stRadio label span {
-            font-size: 0 !important;
-            transition: all 0.3s ease !important;
-        }
-
-        [data-testid="stSidebar"] .stRadio label span::before {
-            content: attr(data-emoji) !important;
-            font-size: 20px !important;
-            display: inline-block !important;
-            width: 100% !important;
-            text-align: center !important;
-        }
-
-        /* Mode étendu : afficher le texte complet */
-        [data-testid="stSidebar"]:hover .stRadio label span,
-        [data-testid="stSidebar"].expanded .stRadio label span {
-            font-size: 14px !important;
-        }
-
-        [data-testid="stSidebar"]:hover .stRadio label span::before,
-        [data-testid="stSidebar"].expanded .stRadio label span::before {
-            width: auto !important;
-            text-align: left !important;
-            margin-right: 10px !important;
-        }
-
-        /* Effet hover sur les options */
-        [data-testid="stSidebar"] .stRadio label:hover {
-            background-color: #eaf2f8 !important;
-            transform: translateX(5px) !important;
-        }
-
-        /* Option sélectionnée */
-        [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
-            background-color: #d4edda !important;
-            border-left: 3px solid var(--primary) !important;
-        }
-
-        /* ================ Contenu Principal Adaptatif ================ */
+        /* ================ Contenu Principal ================ */
         .main .block-container {
-            margin-left: calc(var(--sidebar-width-collapsed) + 20px) !important;
+            margin-left: calc(var(--sidebar-width) + 20px) !important;
             padding: 2rem !important;
-            max-width: calc(100vw - var(--sidebar-width-collapsed) - 40px) !important;
-            transition: var(--sidebar-transition) !important;
+            max-width: calc(100vw - var(--sidebar-width) - 40px) !important;
+            transition: margin-left 0.3s ease !important;
         }
 
-        /* ================ Indicateur Visuel ================ */
-        [data-testid="stSidebar"]::after {
-            content: "→" !important;
-            position: absolute !important;
-            right: 5px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            font-size: 16px !important;
-            color: var(--primary) !important;
-            opacity: 0.6 !important;
-            transition: all 0.3s ease !important;
-            animation: pulse 2s infinite !important;
+        /* ================ Défilement fluide ================ */
+        [data-testid="stSidebar"] {
+            scroll-behavior: smooth !important;
+        }
+        
+        /* Padding adaptatif pour éviter le débordement */
+        [data-testid="stSidebar"] .stRadio > div {
+            padding-right: 10px !important;
+        }
+        
+        /* Espacement des éléments de navigation */
+        [data-testid="stSidebar"] label {
+            margin-bottom: 8px !important;
+            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            transition: background-color 0.2s ease !important;
+        }
+        
+        /* ================ Responsive - Sidebar cachée sur mobile ================ */
+        @media (max-width: 768px) {
+            [data-testid="stSidebar"] {
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+                overflow: hidden !important; /* Empêche tout défilement sur mobile */
+            }
+            
+            /* Réaffichage via bouton hamburger natif Streamlit */
+            [data-testid="stSidebar"][data-expanded="true"] {
+                transform: translateX(0) !important;
+                overflow-y: auto !important;
+                scrollbar-width: none !important;
+            }
         }
 
-        [data-testid="stSidebar"]:hover::after,
-        [data-testid="stSidebar"].expanded::after {
-            opacity: 0 !important;
-            transform: translateY(-50%) translateX(10px) !important;
+        /* ================ Typographie ================ */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text) !important;
+            font-family: 'Segoe UI', sans-serif !important;
+            margin-bottom: 1rem !important;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        /* ================ Styles pour les titres avec centrage ================ */
-        .centered-title {
-            color: #3498db !important;
-            margin: 45px 0 30px 0 !important;
-            text-align: center !important;
-            font-size: 2.2rem !important;
-            font-weight: 600 !important;
-        }
-
-        /* ================ Cartes d'information avec espacement amélioré ================ */
-        .info-card-modern {
-            background: white !important;
-            border-radius: 15px !important;
-            padding: 30px !important;
-            margin: 35px 0 !important;
+        /* ================ Composants Communs ================ */
+        /* Cartes */
+        .info-card {
+            background: var(--card-bg) !important;
+            border-radius: 12px !important;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-            border-left: 4px solid #3498db !important;
-            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            border-left: 4px solid var(--primary) !important;
+            transition: transform 0.3s ease !important;
         }
 
-        .info-card-modern:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        /* Boutons */
+        .stButton > button {
+            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
+            color: white !important;
+            border-radius: 30px !important;
+            transition: all 0.3s ease !important;
         }
 
-        /* ================ Timeline responsive ================ */
-        .timeline-container {
-            background-color: #f8f9fa !important;
-            padding: 25px !important;
-            border-radius: 15px !important;
-            margin: 40px 0 !important;
-            overflow-x: auto !important;
+        /* Formulaire */
+        div[data-baseweb="base-input"] {
+            border-radius: 8px !important;
+            border: 1px solid #dfe4ea !important;
+            transition: border-color 0.3s ease !important;
         }
 
         /* ================ Responsive Design ================ */
         @media (max-width: 1200px) {
+            [data-testid="stSidebar"] {
+                width: 260px !important;
+                min-width: 260px !important;
+            }
+            
             .main .block-container {
-                margin-left: calc(var(--sidebar-width-collapsed) + 10px) !important;
-                max-width: calc(100vw - var(--sidebar-width-collapsed) - 20px) !important;
+                margin-left: 280px !important;
+                max-width: calc(100vw - 300px) !important;
             }
         }
 
         @media (max-width: 768px) {
             [data-testid="stSidebar"] {
-                transform: translateX(-100%) !important;
-                transition: transform 0.3s ease !important;
-            }
-            
-            [data-testid="stSidebar"]:hover,
-            .sidebar-trigger-zone:hover + [data-testid="stSidebar"] {
-                transform: translateX(0) !important;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
             }
             
             .main .block-container {
@@ -368,479 +300,46 @@ def set_custom_theme():
                 max-width: 100vw !important;
                 padding: 1rem !important;
             }
-            
-            .sidebar-trigger-zone {
-                width: 20px !important;
-            }
         }
 
         /* ================ Corrections Spécifiques ================ */
-        .stAlert, [data-testid="stAlert"] {
+        /* Alignement vertical des éléments */
+        [data-testid="stVerticalBlock"] {
+            gap: 0.5rem !important;
+            align-items: stretch !important;
+        }
+
+        /* Suppression des bordures indésirables */
+        .stAlert, [data-testid="stAlert"],
+        .stMarkdown, [data-testid="column"] {
             border: none !important;
             background: transparent !important;
         }
 
-        /* ================ Boutons ================ */
-        .stButton > button {
-            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
-            color: white !important;
-            border-radius: 30px !important;
-            transition: all 0.3s ease !important;
-            border: none !important;
-            padding: 12px 24px !important;
-            font-weight: 600 !important;
+        /* Uniformisation des espacements */
+        .element-container {
+            margin-bottom: 1rem !important;
+            padding: 0.5rem !important;
         }
 
-        .stButton > button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        /* ================ États Interactifs ================ */
+        [data-testid="stSidebar"] label:hover {
+            background: #eaf2f8 !important;
+            cursor: pointer !important;
         }
 
-        /* ================ Uniformisation des espacements ================ */
-        h2 {
-            color: #3498db !important;
-            margin: 45px 0 25px 0 !important;
-            text-align: center !important;
-            font-size: 2.2rem !important;
-            font-weight: 600 !important;
-        }
-
-        .section-container {
-            margin: 50px 0 !important;
-            padding: 0 20px !important;
+        .info-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
         }
         </style>
-
-        <script>
-        // Script JavaScript pour améliorer l'interaction
-        document.addEventListener('DOMContentLoaded', function() {
-            // Créer la zone de trigger
-            const triggerZone = document.createElement('div');
-            triggerZone.className = 'sidebar-trigger-zone';
-            document.body.appendChild(triggerZone);
-            
-            const sidebar = document.querySelector('[data-testid="stSidebar"]');
-            
-            if (sidebar) {
-                // Ajouter des attributs data-emoji aux labels
-                const radioLabels = sidebar.querySelectorAll('.stRadio label span');
-                const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
-                
-                radioLabels.forEach((label, index) => {
-                    if (emojis[index]) {
-                        label.setAttribute('data-emoji', emojis[index]);
-                    }
-                });
-                
-                // Gestion du survol avec JavaScript pour plus de contrôle
-                let hoverTimeout;
-                
-                function expandSidebar() {
-                    clearTimeout(hoverTimeout);
-                    sidebar.classList.add('expanded');
-                }
-                
-                function collapseSidebar() {
-                    hoverTimeout = setTimeout(() => {
-                        sidebar.classList.remove('expanded');
-                    }, 300); // Délai avant fermeture
-                }
-                
-                // Events sur la zone trigger
-                triggerZone.addEventListener('mouseenter', expandSidebar);
-                triggerZone.addEventListener('mouseleave', collapseSidebar);
-                
-                // Events sur la sidebar
-                sidebar.addEventListener('mouseenter', expandSidebar);
-                sidebar.addEventListener('mouseleave', collapseSidebar);
-                
-                // Tooltips pour le mode réduit
-                sidebar.setAttribute('title', 'Survolez pour déployer le menu');
-            }
-        });
-        </script>
         """
-        
+        st.markdown(custom_theme, unsafe_allow_html=True)
+
         with open(css_path, 'w') as f:
             f.write(custom_theme)
 
     st.markdown(custom_theme, unsafe_allow_html=True)
-
-def set_enhanced_navigation_theme():
-    """Thème esthétique amélioré pour la barre de navigation sans barres de défilement"""
-    
-    enhanced_css = """
-    <style>
-    /* ================ Variables CSS pour la cohérence ================ */
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
-        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
-        --accent-color: #667eea !important;
-        --text-light: #ffffff !important;
-        --text-dark: #2c3e50 !important;
-        --shadow-light: 0 4px 15px rgba(102, 126, 234, 0.2) !important;
-        --shadow-medium: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
-        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        --border-radius: 12px !important;
-    }
-
-    /* ================ Structure générale améliorée ================ */
-    [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-    }
-
-    /* ================ SUPPRESSION COMPLÈTE DES BARRES DE DÉFILEMENT ================ */
-    
-    /* Masquer toutes les barres de défilement dans la sidebar */
-    [data-testid="stSidebar"] {
-        /* Fond avec dégradé élégant */
-        background: var(--primary-gradient) !important;
-        
-        /* Dimensions et positionnement */
-        width: 70px !important;
-        min-width: 70px !important;
-        max-width: 70px !important;
-        position: fixed !important;
-        height: 100vh !important;
-        z-index: 999999 !important;
-        
-        /* Style visuel avancé */
-        border: none !important;
-        box-shadow: var(--shadow-medium) !important;
-        backdrop-filter: blur(10px) !important;
-        
-        /* Transitions fluides */
-        transition: var(--transition-smooth) !important;
-        
-        /* SUPPRESSION TOTALE DES BARRES DE DÉFILEMENT */
-        overflow: hidden !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
-        scrollbar-width: none !important; /* Firefox */
-        -ms-overflow-style: none !important; /* Internet Explorer 10+ */
-    }
-
-    /* Suppression barres de défilement WebKit (Chrome, Safari, Edge) */
-    [data-testid="stSidebar"]::-webkit-scrollbar {
-        display: none !important;
-        width: 0px !important;
-        height: 0px !important;
-        background: transparent !important;
-    }
-
-    [data-testid="stSidebar"]::-webkit-scrollbar-track {
-        display: none !important;
-    }
-
-    [data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-        display: none !important;
-    }
-
-    [data-testid="stSidebar"]::-webkit-scrollbar-corner {
-        display: none !important;
-    }
-
-    /* État étendu avec animation SANS défilement */
-    [data-testid="stSidebar"]:hover {
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4) !important;
-        transform: translateX(2px) !important;
-        
-        /* S'assurer qu'il n'y a pas de défilement même en mode étendu */
-        overflow: hidden !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
-    }
-
-    /* ================ Contenu de la sidebar avec effets SANS débordement ================ */
-    [data-testid="stSidebar"] > div {
-        width: 270px !important; /* Légèrement plus petit pour éviter le débordement */
-        padding: 15px 10px !important; /* Padding réduit */
-        height: 100vh !important;
-        box-sizing: border-box !important;
-        
-        /* Empêcher tout débordement */
-        overflow: hidden !important;
-        overflow-x: hidden !important;
-        overflow-y: hidden !important;
-    }
-
-    /* Container principal pour éviter débordement */
-    [data-testid="stSidebar"] .element-container {
-        max-width: 100% !important;
-        overflow: hidden !important;
-        box-sizing: border-box !important;
-    }
-
-    /* ================ Titre avec style élégant SANS débordement ================ */
-    [data-testid="stSidebar"] h2 {
-        color: var(--text-light) !important;
-        font-size: 0 !important;
-        text-align: center !important;
-        margin-bottom: 20px !important; /* Marge réduite */
-        transition: var(--transition-smooth) !important;
-        position: relative !important;
-        padding: 10px 0 !important; /* Padding réduit */
-        
-        /* Empêcher débordement du titre */
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        max-width: 100% !important;
-    }
-
-    /* Icône du titre en mode réduit */
-    [data-testid="stSidebar"] h2::before {
-        content: "🧩" !important;
-        font-size: 24px !important;
-        display: block !important;
-        position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        transition: var(--transition-smooth) !important;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)) !important;
-    }
-
-    /* Animation du titre au survol */
-    [data-testid="stSidebar"]:hover h2 {
-        font-size: 1.2rem !important; /* Taille réduite */
-        font-weight: 600 !important;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-        letter-spacing: 0.3px !important; /* Espacement réduit */
-        
-        /* Gérer le débordement du texte */
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-
-    [data-testid="stSidebar"]:hover h2::before {
-        position: static !important;
-        transform: none !important;
-        margin-right: 8px !important; /* Marge réduite */
-        display: inline !important;
-    }
-
-    /* ================ Description élégante SANS débordement ================ */
-    [data-testid="stSidebar"] p {
-        color: rgba(255, 255, 255, 0.9) !important;
-        font-size: 0 !important;
-        text-align: center !important;
-        margin-bottom: 15px !important; /* Marge réduite */
-        opacity: 0 !important;
-        transition: var(--transition-smooth) !important;
-        line-height: 1.3 !important; /* Line-height réduite */
-        
-        /* Empêcher débordement */
-        max-width: 100% !important;
-        overflow: hidden !important;
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
-    }
-
-    [data-testid="stSidebar"]:hover p {
-        font-size: 12px !important; /* Taille réduite */
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-        
-        /* Gérer débordement du texte */
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-
-    /* ================ Options radio avec design moderne SANS débordement ================ */
-    [data-testid="stSidebar"] .stRadio > div {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 8px !important; /* Gap réduit */
-        padding: 0 3px !important; /* Padding réduit */
-        max-width: 100% !important;
-        overflow: hidden !important;
-    }
-
-    [data-testid="stSidebar"] .stRadio label {
-        /* Structure de base */
-        display: flex !important;
-        align-items: center !important;
-        padding: 12px 8px !important; /* Padding réduit */
-        margin: 0 !important;
-        
-        /* Style visuel */
-        background: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: var(--border-radius) !important;
-        backdrop-filter: blur(5px) !important;
-        
-        /* Transitions et curseur */
-        transition: var(--transition-smooth) !important;
-        cursor: pointer !important;
-        position: relative !important;
-        
-        /* EMPÊCHER TOUT DÉBORDEMENT */
-        overflow: hidden !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        
-        /* Typographie */
-        color: var(--text-light) !important;
-        font-weight: 500 !important;
-        text-decoration: none !important;
-        white-space: nowrap !important;
-    }
-
-    /* Effet de survol spectaculaire SANS débordement */
-    [data-testid="stSidebar"] .stRadio label:hover {
-        background: rgba(255, 255, 255, 0.25) !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
-        transform: translateX(5px) scale(1.01) !important; /* Transformation réduite */
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important; /* Ombre réduite */
-    }
-
-    /* Style des emojis/icônes SANS débordement */
-    [data-testid="stSidebar"] .stRadio label span {
-        font-size: 0 !important;
-        transition: var(--transition-smooth) !important;
-        position: relative !important;
-        display: flex !important;
-        align-items: center !important;
-        
-        /* Empêcher débordement */
-        max-width: 100% !important;
-        overflow: hidden !important;
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
-    }
-
-    /* Affichage des emojis en mode réduit */
-    [data-testid="stSidebar"] .stRadio label span::before {
-        font-size: 18px !important; /* Taille réduite */
-        margin-right: 0 !important;
-        transition: var(--transition-smooth) !important;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) !important;
-    }
-
-    /* Affichage du texte au survol SANS débordement */
-    [data-testid="stSidebar"]:hover .stRadio label span {
-        font-size: 13px !important; /* Taille réduite */
-        font-weight: 500 !important;
-        
-        /* Gérer débordement */
-        max-width: 200px !important; /* Largeur max */
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-
-    [data-testid="stSidebar"]:hover .stRadio label span::before {
-        margin-right: 8px !important; /* Marge réduite */
-    }
-
-    /* ================ Masquage complet de toutes les barres de défilement ================ */
-    
-    /* Pour tous les éléments dans la sidebar */
-    [data-testid="stSidebar"] * {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
-    }
-
-    [data-testid="stSidebar"] *::-webkit-scrollbar {
-        display: none !important;
-        width: 0px !important;
-        height: 0px !important;
-    }
-
-    /* Éléments spécifiques qui peuvent causer des défilements */
-    [data-testid="stSidebar"] .stRadio,
-    [data-testid="stSidebar"] .stRadio > div,
-    [data-testid="stSidebar"] .stRadio label,
-    [data-testid="stSidebar"] .element-container {
-        overflow: hidden !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* ================ Adaptation du contenu principal ================ */
-    .main .block-container {
-        margin-left: 85px !important; /* Marge légèrement augmentée */
-        padding: 2rem !important;
-        max-width: calc(100vw - 100px) !important;
-        transition: var(--transition-smooth) !important;
-        background: rgba(255, 255, 255, 0.9) !important;
-        border-radius: 20px 0 0 0 !important;
-        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    /* ================ Responsive design ================ */
-    @media (max-width: 768px) {
-        [data-testid="stSidebar"] {
-            transform: translateX(-100%) !important;
-        }
-        
-        [data-testid="stSidebar"]:hover {
-            transform: translateX(0) !important;
-        }
-        
-        .main .block-container {
-            margin-left: 0 !important;
-            max-width: 100vw !important;
-            border-radius: 0 !important;
-        }
-    }
-
-    /* ================ Option sélectionnée avec style spécial ================ */
-    [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
-        background: var(--success-gradient) !important;
-        border-color: rgba(255, 255, 255, 0.6) !important;
-        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4) !important;
-        transform: translateX(3px) !important; /* Transformation réduite */
-    }
-
-    /* ================ Boutons avec style cohérent ================ */
-    .stButton > button {
-        background: var(--primary-gradient) !important;
-        color: var(--text-light) !important;
-        border: none !important;
-        border-radius: 25px !important;
-        padding: 12px 24px !important;
-        font-weight: 600 !important;
-        box-shadow: var(--shadow-light) !important;
-        transition: var(--transition-smooth) !important;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: var(--shadow-medium) !important;
-    }
-    </style>
-    """
-    
-    st.markdown(enhanced_css, unsafe_allow_html=True)
-
-def show_enhanced_navigation_menu():
-    """Menu de navigation avec design esthétique amélioré et sans barres de défilement"""
-    
-    # Titre avec emoji
-    st.markdown("## 🧩 Navigation")
-    st.markdown("Choisir un outil :")
-
-    # Options avec emojis distinctifs
-    options = [
-        "🏠 Accueil",
-        "🔍 Exploration", 
-        "🧠 Analyse ML",
-        "🤖 Prédiction IA",
-        "📚 Documentation",
-        "ℹ️ À propos"
-    ]
-
-    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
-        st.session_state.tool_choice = "🏠 Accueil"
-
-    current_index = options.index(st.session_state.tool_choice)
 
 set_custom_theme()
 
@@ -1300,23 +799,89 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 def show_home_page():
     """Page d'accueil améliorée avec design moderne et responsive"""
     
-    # CSS spécifique pour corriger les problèmes d'affichage et ajouter l'aération
+    # CSS spécifique pour corriger les problèmes d'affichage
     st.markdown("""
     <style>
-    /* Corrections pour la navigation sidebar - déjà gérées dans le thème principal */
+    /* Corrections pour la navigation sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #f5f7fa !important;
+        border-right: none !important;
+        width: 280px !important;
+        min-width: 280px !important;
+        max-width: 280px !important;
+    }
+    /* 
+    [data-testid="stSidebar"] > div {
+        border-right: none !important;
+        background-color: #f5f7fa !important;
+    }
+    
+    /* Suppression des barres bleues indésirables */
+    .stAlert, [data-testid="stAlert"] {
+        border: none !important;
+        background: transparent !important;
+    }
     
     /* Amélioration du contenu principal */
     .main .block-container {
         padding-top: 1rem !important;
         max-width: 1200px !important;
     }
+    
+    /* Style pour les cartes d'information */
+    .info-card-modern {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 15px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid #3498db;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .info-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    /* Timeline responsive */
+    .timeline-container {
+        background-color: #f8f9fa;
+        padding: 25px;
+        border-radius: 15px;
+        margin: 25px 0;
+        overflow-x: auto;
+    }
+    
+    .timeline-item {
+        min-width: 160px;
+        text-align: center;
+        margin: 0 15px;
+        flex-shrink: 0;
+    }
+    
+    .timeline-year {
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 0.95rem;
+    }
+    
+    .timeline-text {
+        margin-top: 12px;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        line-height: 1.4;
+    }
     </style>
     """, unsafe_allow_html=True)
     
-    # En-tête principal amélioré avec centrage
+    # En-tête principal amélioré
     st.markdown("""
     <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-                padding: 40px 25px; border-radius: 20px; margin-bottom: 60px; text-align: center;">
+                padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
         <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
                    text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
             🧩 Comprendre les Troubles du Spectre Autistique
@@ -1332,15 +897,12 @@ def show_home_page():
     image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
 
-    # Section "Qu'est-ce que l'autisme ?" avec titre centré et aération
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
-        🔬 Qu'est-ce que l'autisme ?
-    </h2>
-    """, unsafe_allow_html=True)
-    
+    # Section "Qu'est-ce que l'autisme ?" améliorée
     st.markdown("""
     <div class="info-card-modern">
+        <h2 style="color: #3498db; margin-bottom: 25px; font-size: 2.2rem; text-align: center;">
+            🔬 Qu'est-ce que l'autisme ?
+        </h2>
         <p style="font-size: 1.2rem; line-height: 1.8; text-align: justify; 
                   max-width: 900px; margin: 0 auto; color: #2c3e50;">
             Les <strong>Troubles du Spectre Autistique (TSA)</strong> sont des conditions neurodéveloppementales 
@@ -1352,9 +914,9 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Timeline de l'évolution avec titre centré et espacement amélioré
+    # Timeline de l'évolution améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
         📅 Évolution de la compréhension de l'autisme
     </h2>
     """, unsafe_allow_html=True)
@@ -1382,16 +944,12 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Section "Le spectre autistique" avec titre centré
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
-        🌈 Le spectre autistique
-    </h2>
-    """, unsafe_allow_html=True)
+   # Section "Le spectre autistique" avec HTML simplifié
+    st.markdown("## 🌈 Le spectre autistique")
     
     st.markdown("""
-    <div style="background-color: white; padding: 30px; border-radius: 15px; 
-               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db; margin: 35px 0;">
+    <div style="background-color: white; padding: 25px; border-radius: 15px; 
+               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
         <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50; margin-bottom: 20px;">
             L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, 
             reflétant la grande variabilité des manifestations.
@@ -1405,15 +963,7 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # Sous-section avec titre centré et espacement
-    st.markdown("""
-    <h3 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 1.8rem;">
-        Les trois niveaux de soutien du DSM-5 :
-    </h3>
-    """, unsafe_allow_html=True)
-    
-    # Espacement avant les colonnes
-    st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+    st.markdown("### Les trois niveaux de soutien du DSM-5 :")
     
     # Utiliser les colonnes Streamlit avec des composants natifs
     niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
@@ -1427,44 +977,27 @@ def show_home_page():
     with niveau_col3:
         st.error("**Niveau 3**\n\nNécessite un soutien très important")
 
-    # Espacement après les colonnes
-    st.markdown("<div style='margin: 40px 0;'></div>", unsafe_allow_html=True)
-
-    # Section "Contexte du projet" avec titre centré
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
-        📊 Contexte du projet
-    </h2>
-    """, unsafe_allow_html=True)
+    # Section "Contexte du projet" corrigée avec composants natifs
+    st.header("📊 Contexte du projet")
     
-    # Utiliser un container avec plus d'espacement
-    st.markdown("""
-    <div style="background-color: white; padding: 30px; border-radius: 15px; 
-               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db; margin: 35px 0;">
-        <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50; margin-bottom: 20px;">
-            Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
-            <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
-            mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
-        </p>
+    # Utiliser un container natif au lieu du HTML
+    with st.container():
+        st.write("""
+        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
+        **Troubles du Spectre de l'Autisme (TSA)**. L'autisme n'est pas une maladie 
+        mais une **différence neurologique** affectant le fonctionnement du cerveau.
+        """)
         
-        <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50;">
-            Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
-            5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
-            pour identifier les facteurs associés à la présence d'un TSA.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        st.write("""
+        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 
+        5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
+        pour identifier les facteurs associés à la présence d'un TSA.
+        """)
     
-    # Section prévalence avec titre centré et espacement
-    st.markdown("""
-    <h3 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 1.8rem;">
-        📈 Prévalence de l'autisme
-    </h3>
-    """, unsafe_allow_html=True)
+    # Section prévalence avec métriques natives
+    st.subheader("📈 Prévalence de l'autisme")
     
-    # Utiliser les composants info natifs Streamlit avec espacement
-    st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
-    
+    # Utiliser les composants info natifs Streamlit
     st.info("""
     **Données clés sur l'autisme :**
     
@@ -1473,9 +1006,7 @@ def show_home_page():
     • Ratio historique garçons/filles d'environ **4:1** (aujourd'hui remis en question)
     """)
     
-    # Alternative avec métriques espacées
-    st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
-    
+    # Alternative avec métriques si vous préférez
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -1486,10 +1017,11 @@ def show_home_page():
     
     with col3:
         st.metric("Ratio historique", "4:1", "En évolution")
+    
 
-    # Section "À qui s'adresse ce projet" avec titre centré et espacement amélioré
+    # Section "À qui s'adresse ce projet" moderne
     st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
         🎯 À qui s'adresse ce projet
     </h2>
     """, unsafe_allow_html=True)
@@ -1497,13 +1029,13 @@ def show_home_page():
     col1, col2, col3 = st.columns([1, 10, 1])
     
     with col2:
-        # Grille 2x2 pour les publics cibles avec espacement amélioré
+        # Grille 2x2 pour les publics cibles
         col_a, col_b = st.columns(2)
 
         with col_a:
             st.markdown("""
             <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
-                       border-radius: 15px; padding: 30px; margin-bottom: 25px; height: 180px;
+                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
                        border-left: 4px solid #3498db;">
                 <h4 style="color: #2980b9; margin-top: 0;">🔬 Chercheurs en santé</h4>
                 <p style="color: #34495e; line-height: 1.6; font-size: 0.95rem;">
@@ -1515,7 +1047,7 @@ def show_home_page():
             
             st.markdown("""
             <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); 
-                       border-radius: 15px; padding: 30px; height: 180px;
+                       border-radius: 15px; padding: 25px; height: 180px;
                        border-left: 4px solid #ffa726;">
                 <h4 style="color: #f57c00; margin-top: 0;">👨‍👩‍👧‍👦 Familles et particuliers</h4>
                 <p style="color: #bf360c; line-height: 1.6; font-size: 0.95rem;">
@@ -1528,7 +1060,7 @@ def show_home_page():
         with col_b:
             st.markdown("""
             <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); 
-                       border-radius: 15px; padding: 30px; margin-bottom: 25px; height: 180px;
+                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
                        border-left: 4px solid #4caf50;">
                 <h4 style="color: #388e3c; margin-top: 0;">🩺 Professionnels de santé</h4>
                 <p style="color: #2e7d32; line-height: 1.6; font-size: 0.95rem;">
@@ -1540,7 +1072,7 @@ def show_home_page():
             
             st.markdown("""
             <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd9); 
-                       border-radius: 15px; padding: 30px; height: 180px;
+                       border-radius: 15px; padding: 25px; height: 180px;
                        border-left: 4px solid #e91e63;">
                 <h4 style="color: #c2185b; margin-top: 0;">🏛️ Décideurs publics</h4>
                 <p style="color: #ad1457; line-height: 1.6; font-size: 0.95rem;">
@@ -1550,9 +1082,9 @@ def show_home_page():
             </div>
             """, unsafe_allow_html=True)
 
-    # Section "Accompagnement et soutien" avec titre centré et espacement
+    # Section "Accompagnement et soutien" améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
         🤝 Accompagnement et soutien
     </h2>
     """, unsafe_allow_html=True)
@@ -1582,7 +1114,7 @@ def show_home_page():
             items_html = "".join([f"<li>{item}</li>" for item in card['items']])
             st.markdown(f"""
             <div style="background: {card['gradient']}; color: white; 
-                       padding: 30px; border-radius: 15px; height: 280px; margin: 25px 0;
+                       padding: 25px; border-radius: 15px; height: 280px; 
                        box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
                 <h3 style="border-bottom: 2px solid rgba(255,255,255,0.3); 
                           padding-bottom: 12px; margin-bottom: 20px; font-size: 1.3rem;">
@@ -1594,9 +1126,9 @@ def show_home_page():
             </div>
             """, unsafe_allow_html=True)
 
-    # Section "Caractéristiques principales" avec titre centré et espacement
+    # Section "Caractéristiques principales" améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
         🧠 Caractéristiques principales
     </h2>
     """, unsafe_allow_html=True)
@@ -1629,9 +1161,9 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-    # Section "Notre approche" finale avec titre centré et espacement
+    # Section "Notre approche" finale
     st.markdown("""
-    <h2 style="color: #3498db; margin: 60px 0 35px 0; text-align: center; font-size: 2.2rem;">
+    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
         🚀 Notre approche
     </h2>
     """, unsafe_allow_html=True)
@@ -1641,7 +1173,7 @@ def show_home_page():
     with col2:
         st.markdown("""
         <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-                   padding: 40px; border-radius: 20px; text-align: center; color: white; margin: 35px 0;
+                   padding: 35px; border-radius: 20px; text-align: center; color: white;
                    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);">
             <p style="font-size: 1.3rem; max-width: 800px; margin: 0 auto; line-height: 1.7;">
                 Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle 
@@ -1651,9 +1183,9 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-    # Avertissement final stylisé avec espacement
+    # Avertissement final stylisé
     st.markdown("""
-    <div style="margin: 50px 0 40px 0; padding: 25px; border-radius: 12px; 
+    <div style="margin: 40px 0 30px 0; padding: 20px; border-radius: 12px; 
                border-left: 4px solid #e74c3c; background: linear-gradient(135deg, #fff5f5, #ffebee);
                box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1);">
         <p style="font-size: 1rem; color: #c0392b; text-align: center; margin: 0; line-height: 1.6;">
@@ -1663,6 +1195,7 @@ def show_home_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 def show_data_exploration():
     import plotly.express as px
@@ -1676,19 +1209,11 @@ def show_data_exploration():
     df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
 
     st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-            padding: 40px 25px; border-radius: 20px; margin-bottom: 60px; text-align: center;">
-    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
-               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-        🔍 Exploration des Données TSA
-    </h1>
-    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
-              max-width: 800px; margin: 0 auto; line-height: 1.6;">
-        Analyse interactive et visualisation des données de dépistage
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
+    <div class="header-container">
+        <span style="font-size:2.5rem">🔍</span>
+        <h1 class="app-title">Exploration des Données TSA</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
     if 'expanders_initialized' not in st.session_state:
         st.session_state.expanders_initialized = {
@@ -2665,19 +2190,13 @@ def show_ml_analysis():
         verbose_feature_names_out=False
     )
 
+    # Interface utilisateur
     st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-            padding: 40px 25px; border-radius: 20px; margin-bottom: 60px; text-align: center;">
-    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
-               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-        🧠 Outil de Dépistage TSA par Machine Learning
-    </h1>
-    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
-              max-width: 800px; margin: 0 auto; line-height: 1.6;">
-        Intelligence artificielle pour l'aide au diagnostic précoce
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    <div class="header-container">
+        <span style="font-size:2.5rem">🧠</span>
+        <h1 class="app-title">Outil de Dépistage TSA par Machine Learning</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
@@ -2951,42 +2470,45 @@ def show_ml_analysis():
                 )
 
         with rf_tabs[1]:
-                st.subheader("🔍 Matrice de confusion")
-        
-                cm = rf_results['confusion_matrix']  # Correction ici
-                
-                # Créer la visualisation de la matrice de confusion
-                fig_cm = px.imshow(
-                    cm,
-                    text_auto=True,
-                    aspect="auto",
-                    title="Matrice de Confusion",
-                    labels=dict(x="Prédiction", y="Réel"),
-                    x=['Non-TSA', 'TSA'],
-                    y=['Non-TSA', 'TSA'],
-                    color_continuous_scale='Blues'
-                )
-                
-                fig_cm.update_layout(
-                    xaxis_title="Prédiction",
-                    yaxis_title="Réel",
-                    height=400
-                )
-                
-                st.plotly_chart(fig_cm, use_container_width=True)
-                
-                # Interprétation de la matrice
+            st.subheader("🔍 Matrice de confusion")
+
+            cm = rf_results['confusion_matrix']
+
+            fig_cm = go.Figure(data=go.Heatmap(
+                z=cm,
+                x=['Prédit: Non-TSA', 'Prédit: TSA'],
+                y=['Réel: Non-TSA', 'Réel: TSA'],
+                colorscale='Blues',
+                text=cm,
+                texttemplate="%{text}",
+                textfont={"size": 24, "color": "white"},
+                hoverongaps=False,
+                showscale=True
+            ))
+
+            fig_cm.update_layout(
+                title="Matrice de confusion - Random Forest",
+                xaxis_title="Prédiction du modèle",
+                yaxis_title="Réalité terrain",
+                height=500,
+                font_size=14
+            )
+
+            st.plotly_chart(fig_cm, use_container_width=True)
+
+            if len(cm.ravel()) == 4:
                 tn, fp, fn, tp = cm.ravel()
-                
-                col1, col2 = st.columns(2)
-                
+
+                col1, col2, col3 = st.columns(3)
+
                 with col1:
-                    st.metric("Vrais Positifs (TP)", tp)
-                    st.metric("Vrais Négatifs (TN)", tn)
-                    
+                    st.metric("✅ Vrais Positifs", tp, "Cas TSA correctement identifiés")
+                    st.metric("✅ Vrais Négatifs", tn, "Cas normaux correctement identifiés")
+
                 with col2:
-                    st.metric("Faux Positifs (FP)", fp)
-                    st.metric("Faux Négatifs (FN)", fn)
+                    st.metric("❌ Faux Positifs", fp, "Fausses alertes")
+                    st.metric("❌ Faux Négatifs", fn, "Cas TSA manqués")
+
                 with col3:
                     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
                     npv = tn / (tn + fn) if (tn + fn) > 0 else 0
@@ -4249,7 +3771,6 @@ def show_documentation():
         <h1 class="app-title">Documentation</h1>
     </div>
     """, unsafe_allow_html=True)
-    
 
     new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
     st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
@@ -4825,34 +4346,61 @@ def show_about_page():
     pass
 
 def main():
-    """Application principale corrigée"""
-    
-    # Initialiser l'état de session
-    initialize_session_state()
-    
-    # Appliquer le thème esthétique corrigé
-    set_enhanced_navigation_theme()
-    
-    # Afficher la navigation dans la sidebar
+    if "initialized" not in st.session_state:
+        set_custom_theme()
+        st.session_state.initialized = True
+
+        if "aq10_total" not in st.session_state:
+            st.session_state.aq10_total = 0
+
+        if "expanders_initialized" not in st.session_state:
+            st.session_state.expanders_initialized = {
+                'structure': True,
+                'valeurs_manquantes': False,
+                'pipeline': False,
+                'variables_cles': True,
+                'questionnaire': False,
+                'composite': False,
+                'statistiques': False,
+                'correlation': False,
+                'famd': False
+            }
+
+    if 'df' not in st.session_state:
+        with st.spinner("Chargement des données..."):
+            st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
+
     with st.sidebar:
-        selected_tool = show_enhanced_navigation_menu()
-    
-    # Navigation entre les pages - CORRECTION DE LA LOGIQUE
-    if selected_tool == "🏠 Accueil":
+        st.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
+        pages = [
+            "🏠 Accueil",
+            "🔍 Exploration des Données",
+            "🧠 Analyse ML",
+            "🤖 Prédiction par IA",
+            "📚 Documentation",
+            "ℹ️ À propos"
+        ]
+        selection = st.sidebar.radio("Choisissez un outil :", pages)
+
+    palette = {
+        "Yes": "#3498db",
+        "No": "#2ecc71",
+        "Unknown": "#95a5a6"
+    }
+
+    if "🏠 Accueil" in selection:
         show_home_page()
-    elif selected_tool == "🔍 Exploration":
-        show_exploration_page()
-    elif selected_tool == "🧠 Analyse ML":
-        show_ml_page()
-    elif selected_tool == "🤖 Prédiction IA":
-        show_prediction_page()
-    elif selected_tool == "📚 Documentation":
-        show_documentation_page()
-    elif selected_tool == "ℹ️ À propos":
+    elif "🔍 Exploration des Données" in selection:
+        show_data_exploration()
+    elif "🧠 Analyse ML" in selection:
+        show_ml_analysis()
+    elif "🤖 Prédiction par IA" in selection:
+        show_aq10_and_prediction()
+    elif "📚 Documentation" in selection:
+        show_documentation()
+    elif "ℹ️ À propos" in selection:
         show_about_page()
-    else:
-        # Fallback vers la page d'accueil
-        show_home_page()
 
 if __name__ == "__main__":
     main()
+
