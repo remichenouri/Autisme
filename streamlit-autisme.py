@@ -4141,9 +4141,8 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
 def show_about_page():
-
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
                 padding: 40px 20px; border-radius: 20px; margin-bottom: 30px; text-align: center;">
         <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
             ℹ️ À propos du Projet
@@ -4153,6 +4152,7 @@ def show_about_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 
     image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
