@@ -3491,7 +3491,7 @@ def show_aq10_and_prediction():
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # Définir les recommandations basées sur les scores
+                      
                         recommendations = []
                         
                         if social_score > 50:
@@ -3510,15 +3510,7 @@ def show_aq10_and_prediction():
                             recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
                         else:
                             recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
-                        
-                        st.markdown("""
-                        <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
-                                    border-radius: 15px; 
-                                    padding: 25px; 
-                                    margin: 20px 0;
-                                    border: 1px solid #e1f5fe;
-                                    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);">
-                        """, unsafe_allow_html=True)
+               
                         
                         for i, rec in enumerate(recommendations, 1):
                             st.markdown(f"""
