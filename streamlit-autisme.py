@@ -4156,11 +4156,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # **AJOUT DE L'IMAGE GHIBLI**
-    # Image Ghibli comme bannière décorative (même que dans la page d'accueil)
-    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
-    st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
-
     # Section contexte avec design amélioré
     st.markdown("""
     <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
@@ -4332,6 +4327,8 @@ def show_about_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
 
     pass
 
