@@ -4294,18 +4294,17 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
         st.markdown("### 🎯 Critères Diagnostiques DSM-5 (2013)")
-
+        
         st.markdown("""
-        <div class="doc-section" style="margin-bottom: 30px;">
-            <h4 style="color: #3498db; margin-top: 20px;">A. Déficits persistants dans la communication sociale</h4>
-            <ul style="line-height: 1.8; color: #2c3e50; list-style-type: disc; padding-left: 20px;">
+        <div class="criteria-section" style="margin-bottom:30px; font-family:Arial, sans-serif;">
+            <h4 style="color:#3498db; margin-top:20px;">A. Déficits persistants dans la communication sociale</h4>
+            <ul style="line-height:1.8; color:#2c3e50; padding-left:20px; list-style-type: disc;">
                 <li><strong>Réciprocité sociocommunicative</strong> : Difficultés dans les échanges sociaux</li>
                 <li><strong>Communication non verbale</strong> : Utilisation atypique du contact visuel, expressions faciales</li>
                 <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li>
             </ul>
-        
-            <h4 style="color: #2ecc71; margin-top: 25px;">B. Comportements répétitifs et intérêts restreints</h4>
-            <ul style="line-height: 1.8; color: #2c3e50; list-style-type: disc; padding-left: 20px;">
+            <h4 style="color:#2ecc71; margin-top:25px;">B. Comportements répétitifs et intérêts restreints</h4>
+            <ul style="line-height:1.8; color:#2c3e50; padding-left:20px; list-style-type: disc;">
                 <li><strong>Stéréotypies motrices</strong> : Mouvements répétitifs, écholalie</li>
                 <li><strong>Rigidité</strong> : Insistance sur la similitude, routines inflexibles</li>
                 <li><strong>Intérêts spécialisés</strong> : Fixations sur des objets ou sujets particuliers</li>
@@ -4313,6 +4312,7 @@ def show_documentation():
             </ul>
         </div>
         """, unsafe_allow_html=True)
+
 
         # Neurobiologie
         st.markdown("### 🧠 Bases Neurobiologiques")
