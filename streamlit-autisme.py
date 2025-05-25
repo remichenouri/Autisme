@@ -954,36 +954,25 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
 
 def show_home_page():
     """Page d'accueil améliorée avec design moderne et responsive"""
-
-    # CSS spécifique pour corriger les problèmes d'affichage
+    
+    # CSS spécifique corrigé - SUPPRIMER les règles conflictuelles
     st.markdown("""
     <style>
-    /* Corrections pour la navigation sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #f5f7fa !important;
-        border-right: none !important;
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-    }
-    /*
-    [data-testid="stSidebar"] > div {
-        border-right: none !important;
-        background-color: #f5f7fa !important;
-    }
-
+    /* Suppression des règles CSS conflictuelles pour la sidebar */
+    /* NE PAS redéfinir les propriétés de [data-testid="stSidebar"] */
+    
     /* Suppression des barres bleues indésirables */
     .stAlert, [data-testid="stAlert"] {
         border: none !important;
         background: transparent !important;
     }
-
+    
     /* Amélioration du contenu principal */
     .main .block-container {
         padding-top: 1rem !important;
         max-width: 1200px !important;
     }
-
+    
     /* Style pour les cartes d'information */
     .info-card-modern {
         background: white;
@@ -994,12 +983,12 @@ def show_home_page():
         border-left: 4px solid #3498db;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
+    
     .info-card-modern:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
-
+    
     /* Timeline responsive */
     .timeline-container {
         background-color: #f8f9fa;
@@ -1008,14 +997,14 @@ def show_home_page():
         margin: 25px 0;
         overflow-x: auto;
     }
-
+    
     .timeline-item {
         min-width: 160px;
         text-align: center;
         margin: 0 15px;
         flex-shrink: 0;
     }
-
+    
     .timeline-year {
         background: linear-gradient(135deg, #3498db, #2ecc71);
         color: white;
@@ -1024,7 +1013,7 @@ def show_home_page():
         font-weight: bold;
         font-size: 0.95rem;
     }
-
+    
     .timeline-text {
         margin-top: 12px;
         font-size: 0.9rem;
