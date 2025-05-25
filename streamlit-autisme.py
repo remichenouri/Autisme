@@ -4788,15 +4788,17 @@ def show_documentation():
                 </div>
                 """, unsafe_allow_html=True)
         
-        # Titre pour la répartition
-        st.markdown("### Répartition des coûts :")
+        st.markdown("### Répartition des coûts :", unsafe_allow_html=True)
+
         st.markdown("""
-        <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
-            <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
-            <li><strong>Services de santé</strong> : 15-25%</li>
-            <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
-            <li><strong>Services sociaux</strong> : 10-15%</li>
-        </ul>
+        <div style="line-height: 1.8; color: #2c3e50; padding-left: 20px; background: #f8f9fa; border-radius: 8px; padding: 15px; margin-top: 10px;">
+            <ul style="margin: 0; padding: 0; list-style-type: disc;">
+                <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
+                <li><strong>Services de santé</strong> : 15-25%</li>
+                <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
+                <li><strong>Services sociaux</strong> : 10-15%</li>
+            </ul>
+        </div>
         """, unsafe_allow_html=True)
 
     with doc_tabs[4]:
