@@ -3941,13 +3941,7 @@ def show_aq10_and_prediction():
                                 </p>
                             </div>
                             """, unsafe_allow_html=True)
-                    
-                        except Exception as e:
-                            st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
-                            st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
-                    else:
-                        st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
-                    
+
                     # Section explicative finale
                 st.markdown("""
                     <div style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); 
