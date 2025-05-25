@@ -4946,18 +4946,12 @@ def main():
         with st.spinner("Chargement des données..."):
             st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
 
+     # Appliquer le thème esthétique
+    set_enhanced_navigation_theme()
+    
+    # Afficher la navigation
     with st.sidebar:
-        st.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
-        pages = [
-            "🏠 Accueil",
-            "🔍 Exploration des Données",
-            "🧠 Analyse ML",
-            "🤖 Prédiction par IA",
-            "📚 Documentation",
-            "ℹ️ À propos"
-        ]
-        selection = st.sidebar.radio("Choisissez un outil :", pages)
-
+        selected_tool = show_enhanced_navigation_menu()
     palette = {
         "Yes": "#3498db",
         "No": "#2ecc71",
