@@ -2601,7 +2601,18 @@ def show_ml_analysis():
         """, unsafe_allow_html=True)
 
     with ml_tabs[1]:
-        st.subheader("Comparaison rapide des algorithmes")
+        st.markdown("""
+        <div class="preprocessing-header">
+            <h2 style="color: white; font-size: 2.2rem; margin-bottom: 10px;
+                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+                🚀 Comparaison rapide des algorithmes
+            </h2>
+            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem;
+                      margin: 0 auto; line-height: 1.5;">
+                Configuration des données pour optimiser la détection des patterns pertinents
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("""
         <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
@@ -2703,7 +2714,18 @@ def show_ml_analysis():
         """)
 
     with ml_tabs[2]:
-        st.header("Analyse Random Forest pour le dépistage")
+        st.markdown("""
+        <div class="preprocessing-header">
+            <h2 style="color: white; font-size: 2.2rem; margin-bottom: 10px;
+                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+                🌲 Analyse Random Forest pour le dépistage
+            </h2>
+            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem;
+                      margin: 0 auto; line-height: 1.5;">
+                Configuration des données pour optimiser la détection des patterns pertinents
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("""
         <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
@@ -3022,7 +3044,18 @@ def show_ml_analysis():
                 st.plotly_chart(fig_pie, use_container_width=True)
 
     with ml_tabs[3]:
-        st.header("⚙️ Optimisation pour le dépistage clinique")
+        st.markdown("""
+        <div class="preprocessing-header">
+            <h2 style="color: white; font-size: 2.2rem; margin-bottom: 10px;
+                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+                ⚙️ Optimisation pour le dépistage clinique
+            </h2>
+            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem;
+                      margin: 0 auto; line-height: 1.5;">
+                Configuration des données pour optimiser la détection des patterns pertinents
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
         st.markdown("""
         <div style="background-color: #f8f5f2; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #e67e22;">
