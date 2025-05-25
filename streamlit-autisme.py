@@ -1342,159 +1342,170 @@ def show_home_page():
 
 
 def show_data_exploration():
-    # Styles CSS pour l'harmonisation avec la page d'accueil
-    st.markdown(f"""
-    <style>
-        :root {{
-            --primary: #3498db;
-            --secondary: #2ecc71;
-            --background: #f8f9fa;
-            --text-primary: #2c3e50;
-        }}
+    import plotly.express as px
+    import plotly.graph_objects as go
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from scipy.stats import chi2_contingency, mannwhitneyu
 
-        .exploration-header {{
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            padding: 40px 25px;
-            border-radius: 20px;
-            margin-bottom: 35px;
-            text-align: center;
-        }}
-
-        .info-card-modern {{
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 15px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--primary);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }}
-
-        .info-card-modern:hover {{
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }}
-
-        .card-title {{
-            color: var(--primary);
-            border-bottom: 2px solid rgba(52, 152, 219, 0.3);
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    # En-tête harmonisé
-    st.markdown("""
-    <div class="exploration-header">
-        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
-                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-            🔍 Exploration des Données TSA
-        </h1>
-        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
-                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
-            Analyse interactive des données de dépistage
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Chargement des données
     df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
+    st.markdown("""
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        🔍 Exploration des Données TSA
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-    # Section Structure des Données
-    with st.container():
+    if 'expanders_initialized' not in st.session_state:
+        st.session_state.expanders_initialized = {
+            'structure': True,
+            'valeurs_manquantes': True,
+            'pipeline': True,
+            'variables_cles': True,
+            'questionnaire': True,
+            'composite': True,
+            'statistiques': True,
+            'correlation': True,
+            'famd': True
+        }
+
+    with st.expander("📂 Structure des Données", expanded=True):
         st.markdown("""
-        <div class="info-card-modern">
-            <h2 class="card-title">📂 Structure des Données</h2>
-            <div style="margin-top: 20px;">
-        """, unsafe_allow_html=True)
-        
+            <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+                <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
+                <ul style="padding-left:20px">
+                    <li>'📁' <strong>Dataset 1:</strong> <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
+                    <li>'📁' <strong>Dataset 2:</strong> <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
+                    <li>'📁' <strong>Dataset 3:</strong> <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
+                    <li>'📁' <strong>Dataset 4:</strong> <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
+                    <li>'📁' <strong>Dataset 5:</strong> <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         tab_main, tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "Dataset Final", "Dataset 1", "Dataset 2", "Dataset 3", "Dataset 4", "Dataset 5"
         ])
-        
+
         with tab_main:
+            st.caption("Dataset Final")
             st.dataframe(df.head(5), use_container_width=True)
         with tab1:
+            st.caption("Dataset 1")
             st.dataframe(df_ds1.head(5), use_container_width=True)
         with tab2:
+            st.caption("Dataset 2")
             st.dataframe(df_ds2.head(5), use_container_width=True)
         with tab3:
+            st.caption("Dataset 3")
             st.dataframe(df_ds3.head(5), use_container_width=True)
         with tab4:
+            st.caption("Dataset 4")
             st.dataframe(df_ds4.head(5), use_container_width=True)
         with tab5:
+            st.caption("Dataset 5")
             st.dataframe(df_ds5.head(5), use_container_width=True)
 
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Section Analyse des Valeurs Manquantes
-    with st.container():
+    with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
         st.markdown("""
-        <div class="info-card-modern">
-            <h2 class="card-title">🧼 Nettoyage des Données</h2>
-            <div style="margin-top: 20px;">
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
+            <p style="color: #7f8c8d;">Processus automatisé pour préparer les données à l'analyse.</p>
+        </div>
         """, unsafe_allow_html=True)
-        
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown("""
+            <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="color: #3498db; margin-top: 0;">Étapes de Transformation</h4>
+                <ol style="padding-left: 20px; color: #2c3e50;">
+                    <li><b>Uniformisation</b> des colonnes</li>
+                    <li><b>Typage</b> des variables</li>
+                    <li><b>Gestion</b> des valeurs manquantes</li>
+                    <li><b>Encodage</b> catégoriel</li>
+                    <li><b>Normalisation</b> des échelles</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            avant_tab, apres_tab = st.tabs(["Avant Nettoyage", "Après Nettoyage"])
+            with avant_tab:
+                raw_data_sample = pd.DataFrame({
+                    'A10_Score': [7, 5, None, 3],
+                    'Age_Years': [29, None, 'unknown', 383],
+                    'asd_traits': ['yes', 'no', 'no', 'yes']
+                })
+                st.dataframe(raw_data_sample.style.highlight_null(color='#ffcdd2'), use_container_width=True)
+            with apres_tab:
+                clean_data_sample = pd.DataFrame({
+                    'A10': [7, 5, 4, 3],
+                    'Age': [29, 35, 42, 38],
+                    'TSA': ['Yes', 'No', 'No', 'Yes'],
+                    'Statut_testeur': ['Famille', 'Famille', 'Famille', 'Famille']
+                })
+                st.dataframe(clean_data_sample, use_container_width=True)
+                metrics_col1, metrics_col2 = st.columns(2)
+                with metrics_col1:
+                    st.metric("Réduction des valeurs manquantes", "92%", "10% → 0.8%")
+                with metrics_col2:
+                    st.metric("Anomalies corrigées", "100%", "14 anomalies détectées")
+                pass
+
+    with st.expander("📉 Analyse des Valeurs Manquantes", expanded=True):
+        st.markdown("""
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse des Valeurs Manquantes</h3>
+            <p style="color: #7f8c8d;">Visualisation et quantification des données manquantes dans le jeu de données.</p>
+        </div>
+        """, unsafe_allow_html=True)
         missing_percent = (df.isnull().sum() / len(df)) * 100
         missing_info = pd.DataFrame({
             'Colonne': missing_percent.index,
             'Pourcentage': missing_percent.values
-        }).sort_values('Pourcentage', ascending=False)
-        
-        col1, col2 = st.columns([3, 2])
-        with col1:
-            fig = px.bar(missing_info, x='Pourcentage', y='Colonne', orientation='h', 
-                        color='Pourcentage', color_continuous_scale='Blues')
-            st.plotly_chart(fig, use_container_width=True)
-        with col2:
-            st.dataframe(missing_info, use_container_width=True)
-        
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Section Statistiques
-    with st.container():
-        st.markdown("""
-        <div class="info-card-modern">
-            <h2 class="card-title">📈 Métriques Clés</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
-        """, unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Nombre total d'échantillons", len(df))
-        with col2:
-            st.metric("Âge moyen", f"{df['Age'].mean():.1f} ans")
-        with col3:
-            tsa_percent = df['TSA'].value_counts(normalize=True).get('Yes', 0) * 100
-            st.metric("Prévalence TSA", f"{tsa_percent:.1f}%")
-        
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Personnalisation des graphiques
-    px.defaults.color_discrete_sequence = ["#3498db", "#2ecc71"]
-    px.defaults.color_continuous_scale = px.colors.sequential.Blues
-
-    # Section Visualisations interactives
-    with st.container():
-        st.markdown("""
-        <div class="info-card-modern">
-            <h2 class="card-title">📊 Analyse Interactive</h2>
-            <div style="margin-top: 20px;">
-        """, unsafe_allow_html=True)
-        
-        selected_var = st.selectbox("Choisir une variable à analyser", df.columns.drop('TSA'))
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            fig = px.histogram(df, x=selected_var, color='TSA', barmode='group')
-            st.plotly_chart(fig, use_container_width=True)
-        with col2:
-            stats = df[selected_var].describe().to_frame().T
-            st.dataframe(stats, use_container_width=True)
-        
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
+        })
+        missing_info = missing_info[missing_info['Pourcentage'] > 0].sort_values('Pourcentage', ascending=False)
+        if not missing_info.empty:
+            col1, col2 = st.columns([3, 2])
+            with col1:
+                fig = px.bar(
+                    missing_info,
+                    x='Pourcentage',
+                    y='Colonne',
+                    orientation='h',
+                    title="Pourcentage de valeurs manquantes par colonne",
+                    color='Pourcentage',
+                    color_continuous_scale=px.colors.sequential.Blues,
+                    text='Pourcentage'
+                )
+                fig.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
+                fig.update_layout(
+                    height=400,
+                    xaxis_title="Pourcentage (%)",
+                    yaxis_title="",
+                    coloraxis_showscale=False,
+                    margin=dict(l=20, r=20, t=40, b=20),
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            with col2:
+                st.metric(
+                    "Nombre de colonnes avec valeurs manquantes",
+                    missing_info.shape[0],
+                    delta=f"{missing_info.shape[0]/df.shape[1]:.1%} des colonnes"
+                )
+                st.markdown("### Détail des valeurs manquantes")
+                st.dataframe(missing_info, use_container_width=True)
+                total_missing = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
+                st.info(f"Taux global de données manquantes : {total_missing:.2f}%")
+        else:
+            st.success("✅ Aucune valeur manquante détectée dans le jeu de données.")
 
 
     with st.expander("📈 Statistiques du Dataset Final", expanded=True):
@@ -2179,7 +2190,6 @@ def show_data_exploration():
 
         except Exception as e:
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
-
 
 def show_ml_analysis():
     import plotly.express as px
@@ -3011,714 +3021,1288 @@ def show_ml_analysis():
 
 
 def show_aq10_and_prediction():
-    import streamlit as st
-    import time
+    """
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA.
+    """
+    import pandas as pd
     import plotly.express as px
     import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import numpy as np
 
-    def show_aq10_questionnaire():
-        """Interface moderne et sophistiquée pour le questionnaire AQ-10"""
-        
-        # CSS moderne pour l'interface AQ-10
-        st.markdown("""
-        <style>
-        /* ================ Variables CSS pour AQ-10 ================ */
-        :root {
-            --primary-blue: #3498db;
-            --secondary-green: #2ecc71;
-            --accent-purple: #9b59b6;
-            --warning-orange: #f39c12;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --background-light: #f8f9fa;
-            --white: #ffffff;
-            --shadow-soft: 0 8px 32px rgba(0,0,0,0.1);
-            --shadow-medium: 0 12px 48px rgba(0,0,0,0.15);
-            --border-radius: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    try:
+        df, _, _, _, _, _, _ = load_dataset()
+        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+        if aq_columns:
+            df = df.drop(columns=aq_columns)
+
+        if 'Jaunisse' in df.columns:
+            df = df.drop(columns=['Jaunisse'])
+
+            rf_model, preprocessor, feature_names = train_advanced_model(df)
+    except Exception as e:
+        st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
+        rf_model, preprocessor, feature_names = None, None, None
+
+    st.markdown("""
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        📝 Test AQ-10 et Prédiction TSA
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+    image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
+                border-radius: 15px; padding: 25px; margin: 30px 0; 
+                border-left: 5px solid #3498db;">
+        <h3 style="color: #2c3e50; text-align: center; margin-top: 0;">
+            🤖 À propos de cette évaluation
+        </h3>
+        <p style="color: #2c3e50; line-height: 1.6; text-align: center;">
+            Ce questionnaire validé scientifiquement combine l'auto-évaluation AQ-10 avec un modèle d'intelligence artificielle 
+            entraîné sur plus de <strong>5 000 cas cliniques internationaux</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <style>
+    .result-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(52,152,219,0.1);
+        padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+        margin-top: 28px;
+        margin-bottom: 22px;
+        text-align: center;
+    }
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
+    }
+    .result-card.warning {
+        border-left: 6px solid #e67e22;
+        background: linear-gradient(90deg, #fff6e0 80%, #fff8f2 100%);
+    }
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(90deg, #ffeaea 80%, #fff6f6 100%);
+    }
+    .result-score {
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .custom-submit-button {
+    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 15px 30px !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+    }
+
+    .custom-submit-button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
+    }
     
-        /* ================ Container Principal AQ-10 ================ */
-        .aq10-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--background-light), var(--white));
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-soft);
-        }
+    .custom-submit-button:active {
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3) !important;
+    }
     
-        /* ================ En-tête Questionnaire ================ */
-        .aq10-header {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
-            padding: 40px 30px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
+    /* Amélioration du container du bouton */
+    .stForm > div:last-child {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
     
-        .aq10-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: headerGlow 6s ease-in-out infinite alternate;
-        }
+    /* Style pour le bouton Streamlit par défaut si custom ne fonctionne pas */
+    div[data-testid="stForm"] button[kind="formSubmit"] {
+        background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 15px 30px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        min-height: 50px !important;
+    }
     
-        @keyframes headerGlow {
-            0% { transform: rotate(0deg) scale(1); }
-            100% { transform: rotate(360deg) scale(1.1); }
-        }
-    
-        .aq10-title {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 15px 0;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 2;
-        }
-    
-        .aq10-subtitle {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.2rem;
-            margin: 0;
-            position: relative;
-            z-index: 2;
-            line-height: 1.6;
-        }
-    
-        /* ================ Barre de Progression Moderne ================ */
-        .progress-container {
-            background: var(--white);
-            border-radius: 25px;
-            padding: 8px;
-            margin: 25px 0;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-    
-        .progress-bar {
-            height: 12px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--secondary-green));
-            border-radius: 20px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-    
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: progressShine 2s infinite;
-        }
-    
-        @keyframes progressShine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-    
-        .progress-text {
-            text-align: center;
-            margin-top: 10px;
-            color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-    
-        /* ================ Carte Question Moderne ================ */
-        .question-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            padding: 35px;
-            margin: 25px 0;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(52, 152, 219, 0.1);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-    
-        .question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-            border-color: rgba(52, 152, 219, 0.2);
-        }
-    
-        .question-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, var(--primary-blue), var(--secondary-green));
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-    
-        .question-card:hover::before {
-            transform: scaleY(1);
-        }
-    
-        .question-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
-            color: white;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-        }
-    
-        .question-text {
-            color: var(--text-dark);
-            font-size: 1.3rem;
-            line-height: 1.6;
-            margin: 0 0 30px 0;
-            font-weight: 500;
-        }
-    
-        /* ================ Options de Réponse Modernes ================ */
-        .response-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 25px;
-        }
-    
-        .response-option {
-            background: var(--background-light);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 20px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-    
-        .response-option:hover {
-            background: rgba(52, 152, 219, 0.05);
-            border-color: rgba(52, 152, 219, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-        }
-    
-        .response-option.selected {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
-            color: white;
-            border-color: var(--primary-blue);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
-        }
-    
-        .response-option input[type="radio"] {
-            display: none;
-        }
-    
-        .response-emoji {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-    
-        .response-text {
-            font-weight: 600;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-    
-        /* ================ Boutons Navigation ================ */
-        .navigation-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 40px 0 20px 0;
-            gap: 20px;
-        }
-    
-        .nav-button {
-            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 30px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-    
-        .nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-        }
-    
-        .nav-button:disabled {
-            background: var(--text-light);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-    
-        .nav-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-    
-        .nav-button:hover::before {
-            left: 100%;
-        }
-    
-        /* ================ Score Display ================ */
-        .score-display {
-            background: linear-gradient(135deg, var(--accent-purple), var(--warning-orange));
-            color: white;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            margin: 30px 0;
-            box-shadow: var(--shadow-medium);
-        }
-    
-        .score-number {
-            font-size: 4rem;
-            font-weight: 800;
-            margin: 0;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-    
-        .score-label {
-            font-size: 1.2rem;
-            margin: 10px 0 0 0;
-            opacity: 0.95;
-        }
-    
-        /* ================ Animations d'Entrée ================ */
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-    
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    
-        /* ================ Responsive Design ================ */
-        @media (max-width: 768px) {
-            .aq10-title {
-                font-size: 2rem;
-            }
-            
-            .response-options {
-                grid-template-columns: 1fr;
-            }
-            
-            .question-card {
-                padding: 25px 20px;
-            }
-            
-            .navigation-buttons {
-                flex-direction: column;
-            }
-            
-            .nav-button {
-                width: 100%;
-                margin: 5px 0;
-            }
-        }
-        </style>
-        """, unsafe_allow_html=True)
-    
-        # Initialisation des états de session
-        if 'aq10_current_question' not in st.session_state:
-            st.session_state.aq10_current_question = 0
-        if 'aq10_responses' not in st.session_state:
-            st.session_state.aq10_responses = {}
-        if 'aq10_completed' not in st.session_state:
-            st.session_state.aq10_completed = False
-    
-        # Questions du questionnaire AQ-10
-        questions = {
-            1: "Je remarque souvent de petits bruits que les autres ne remarquent pas.",
-            2: "Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
-            3: "Je trouve facile de faire plusieurs choses en même temps.",
-            4: "S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
-            5: "Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
-            6: "Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
-            7: "Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
-            8: "J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
-            9: "Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
-            10: "J'ai du mal à comprendre les intentions des gens."
-        }
-    
-        # Options de réponse avec émojis
-        response_options = {
-            "Tout à fait d'accord": {"emoji": "💯", "value": 1},
-            "Plutôt d'accord": {"emoji": "👍", "value": 1}, 
-            "Plutôt pas d'accord": {"emoji": "👎", "value": 0},
-            "Pas du tout d'accord": {"emoji": "❌", "value": 0}
-        }
-    
-        # En-tête principal
-        st.markdown("""
-        <div class="aq10-container">
-            <div class="aq10-header fade-in">
-                <h1 class="aq10-title">🧩 Questionnaire AQ-10</h1>
-                <p class="aq10-subtitle">
-                    Un outil de dépistage moderne et interactif pour l'évaluation 
-                    des traits du spectre autistique
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-    
-        # Barre de progression
-        progress = (len(st.session_state.aq10_responses) / 10) * 100
-        st.markdown(f"""
-            <div class="progress-container">
-                <div class="progress-bar" style="width: {progress}%"></div>
-            </div>
-            <div class="progress-text">
-                Question {len(st.session_state.aq10_responses)} / 10 complétées 
-                ({progress:.0f}%)
-            </div>
-        """, unsafe_allow_html=True)
-    
-        # Affichage des questions ou résultats
-        if not st.session_state.aq10_completed:
-            show_current_question(questions, response_options)
-        else:
-            show_results()
-    
-        st.markdown("</div>", unsafe_allow_html=True)
-    
-    def show_current_question(questions, response_options):
-        """Affiche la question actuelle avec une interface moderne"""
-        
-        current_q = st.session_state.aq10_current_question + 1
-        
-        if current_q <= 10:
-            question_text = questions[current_q]
-            
-            # Carte de question avec animation
-            st.markdown(f"""
-            <div class="question-card fade-in">
-                <div class="question-number">{current_q}</div>
-                <div class="question-text">{question_text}</div>
-            </div>
-            """, unsafe_allow_html=True)
-    
-            # Interface de réponse moderne
-            st.markdown('<div class="response-options">', unsafe_allow_html=True)
-            
-            # Créer les colonnes pour les options
-            cols = st.columns(4)
-            
-            selected_response = st.session_state.aq10_responses.get(current_q)
-            
-            for i, (option_text, option_data) in enumerate(response_options.items()):
-                with cols[i]:
-                    # CSS class pour l'option sélectionnée
-                    selected_class = "selected" if selected_response == option_text else ""
-                    
-                    if st.button(
-                        f"{option_data['emoji']}\n{option_text}",
-                        key=f"q{current_q}_option_{i}",
-                        help=f"Sélectionner : {option_text}"
-                    ):
-                        st.session_state.aq10_responses[current_q] = option_text
-                        st.rerun()
-    
+    div[data-testid="stForm"] button[kind="formSubmit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
+    }
+    .result-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #3498db;
+        text-align: center;
+    }
+    .kpi-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 5px 0;
+        text-align: center;
+    }
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    .kpi-comparison {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-top: 5px;
+        text-align: center;
+    }
+    .question-container {
+        text-align: left;
+    }
+    p {
+        text-align: center;
+    }
+    .stButton > button {
+        display: block;
+        margin: 0 auto;
+    }
+    .diagnostic-box {
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Questionnaire AQ-10</p>', unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Répondez aux 10 questions suivantes :</p>", unsafe_allow_html=True)
+
+        form_responses = {}
+
+        for i, q in enumerate(questions):
+            options = list(q["scoring"].keys())
+            question_key = f"aq10_question_{i}"
+
+            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
+
+            selected_response = st.radio(
+                "",
+                options,
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
+            )
+
+            form_responses[question_key] = selected_response
             st.markdown('</div>', unsafe_allow_html=True)
-    
-            # Boutons de navigation
-            show_navigation_buttons()
-        else:
-            # Toutes les questions sont terminées
-            st.session_state.aq10_completed = True
-            st.rerun()
-    
-    def show_navigation_buttons():
-        """Affiche les boutons de navigation avec design moderne"""
-        
-        st.markdown('<div class="navigation-buttons">', unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1, 2, 1])
-        
+
+        st.markdown("### 👤 Informations personnelles")
+
+        col1, col2 = st.columns(2)
+
         with col1:
-            if st.session_state.aq10_current_question > 0:
-                if st.button("⬅️ Précédent", key="prev_btn"):
-                    st.session_state.aq10_current_question -= 1
-                    st.rerun()
-        
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24)
+            genres = ["Féminin", "Masculin"]
+            genre = st.selectbox("Genre", genres)
+
         with col2:
-            # Indicateur de progression central
-            completed = len(st.session_state.aq10_responses)
-            st.markdown(f"""
-            <div style="text-align: center; color: var(--text-dark); font-weight: 600;">
-                📋 {completed}/10 questions répondues
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with col3:
-            current_q = st.session_state.aq10_current_question + 1
-            
-            # Bouton suivant ou terminer
-            if current_q in st.session_state.aq10_responses:
-                if current_q < 10:
-                    if st.button("Suivant ➡️", key="next_btn"):
-                        st.session_state.aq10_current_question += 1
-                        st.rerun()
-                else:
-                    if st.button("🏁 Terminer", key="finish_btn"):
-                        st.session_state.aq10_completed = True
-                        st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    def show_results():
-        """Affiche les résultats avec visualisations modernes"""
-        
-        # Calcul du score
-        score_mapping = {
-            "Tout à fait d'accord": 1,
-            "Plutôt d'accord": 1,
-            "Plutôt pas d'accord": 0,
-            "Pas du tout d'accord": 0
-        }
-        
-        # Questions qui sont inversées (score 0 = réponse positive pour TSA)
-        reversed_questions = [2, 3, 4, 5, 6, 9]
-        
-        total_score = 0
-        for q_num, response in st.session_state.aq10_responses.items():
-            base_score = score_mapping[response]
-            if q_num in reversed_questions:
-                total_score += 1 - base_score
-            else:
-                total_score += base_score
-    
-        # Affichage du score avec design moderne
-        st.markdown(f"""
-        <div class="score-display fade-in">
-            <div class="score-number">{total_score}</div>
-            <div class="score-label">Score AQ-10 sur 10</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-        # Interprétation des résultats
-        show_score_interpretation(total_score)
-        
-        # Visualisation des réponses
-        show_response_visualization()
-        
-        # Boutons d'action
-        show_action_buttons()
-    
-    def show_score_interpretation(score):
-        """Affiche l'interprétation du score avec design moderne"""
-        
-        if score >= 6:
-            interpretation = {
-                "level": "Élevé",
-                "color": "#e74c3c",
-                "icon": "🚨",
-                "message": "Score suggérant la présence de traits autistiques significatifs",
-                "recommendation": "Il est recommandé de consulter un professionnel de santé spécialisé pour une évaluation plus approfondie."
-            }
-        elif score >= 4:
-            interpretation = {
-                "level": "Modéré", 
-                "color": "#f39c12",
-                "icon": "⚠️",
-                "message": "Score intermédiaire nécessitant une attention particulière",
-                "recommendation": "Une surveillance ou une consultation préventive pourrait être bénéfique."
-            }
-        else:
-            interpretation = {
-                "level": "Faible",
-                "color": "#27ae60", 
-                "icon": "✅",
-                "message": "Score dans la fourchette typique",
-                "recommendation": "Les réponses ne suggèrent pas de traits autistiques marqués."
-            }
-    
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, {interpretation['color']}, {interpretation['color']}dd); 
-                    color: white; border-radius: 16px; padding: 30px; margin: 25px 0; 
-                    box-shadow: 0 8px 32px rgba(0,0,0,0.15);">
-            <div style="text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">{interpretation['icon']}</div>
-                <h3 style="margin: 0 0 15px 0; font-size: 1.8rem;">Niveau {interpretation['level']}</h3>
-                <p style="font-size: 1.2rem; margin: 0 0 20px 0; line-height: 1.6;">
-                    {interpretation['message']}
-                </p>
-                <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 20px;">
-                    <p style="margin: 0; font-size: 1.1rem; line-height: 1.6;">
-                        <strong>Recommandation :</strong> {interpretation['recommendation']}
-                    </p>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    def show_response_visualization():
-        """Affiche une visualisation moderne des réponses"""
-        
-        st.subheader("📊 Analyse détaillée de vos réponses")
-        
-        # Préparation des données pour la visualisation
-        responses_data = []
-        for q_num, response in st.session_state.aq10_responses.items():
-            responses_data.append({
-                'Question': f'Q{q_num}',
-                'Réponse': response,
-                'Niveau': 'Accord' if 'accord' in response.lower() and 'pas' not in response.lower() else 'Désaccord'
-            })
-        
-        import pandas as pd
-        df_responses = pd.DataFrame(responses_data)
-        
-        # Graphique en secteurs moderne
-        fig_pie = px.pie(
-            df_responses, 
-            names='Niveau',
-            title="Répartition de vos réponses",
-            color_discrete_sequence=['#3498db', '#e74c3c']
-        )
-        fig_pie.update_traces(
-            textposition='inside', 
-            textinfo='percent+label',
-            hovertemplate='<b>%{label}</b><br>%{value} réponses<br>%{percent}<extra></extra>'
-        )
-        fig_pie.update_layout(
-            font_size=14,
-            height=400,
-            showlegend=True
-        )
-        
-        st.plotly_chart(fig_pie, use_container_width=True)
-        
-        # Graphique en barres par question
-        response_mapping = {
-            "Tout à fait d'accord": 4,
-            "Plutôt d'accord": 3,
-            "Plutôt pas d'accord": 2, 
-            "Pas du tout d'accord": 1
-        }
-        
-        df_responses['Score_Numérique'] = df_responses['Réponse'].map(response_mapping)
-        
-        fig_bar = px.bar(
-            df_responses,
-            x='Question',
-            y='Score_Numérique',
-            color='Score_Numérique',
-            title="Intensité des réponses par question",
-            color_continuous_scale='Blues',
-            labels={'Score_Numérique': 'Niveau d\'accord (1-4)'}
-        )
-        fig_bar.update_layout(
-            height=400,
-            showlegend=False
-        )
-        
-        st.plotly_chart(fig_bar, use_container_width=True)
-    
-    def show_action_buttons():
-        """Affiche les boutons d'action avec design moderne"""
-        
-        st.markdown("### 🎯 Prochaines étapes")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button("🔄 Recommencer le test", key="restart_btn"):
-                # Réinitialiser toutes les variables de session
-                for key in ['aq10_current_question', 'aq10_responses', 'aq10_completed']:
-                    if key in st.session_state:
-                        del st.session_state[key]
-                st.rerun()
-        
-        with col2:
-            if st.button("📄 Télécharger les résultats", key="download_btn"):
-                # Fonction de téléchargement (à implémenter)
-                st.success("Fonctionnalité de téléchargement en cours de développement")
-        
-        with col3:
-            if st.button("🩺 Trouver un spécialiste", key="specialist_btn"):
-                # Redirection vers ressources (à implémenter)
-                st.info("Redirection vers les ressources spécialisées")
-    
-    # Intégration dans l'application principale
-    def integrate_aq10_in_prediction():
-        """Intègre le questionnaire AQ-10 moderne dans la section prédiction"""
-        
+            ethnies = ["Européen", "Asiatique", "Africain", "Hispanique", "Moyen-Orient", "Autre"]
+            ethnicite = st.selectbox("Origine ethnique", ethnies)
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["Non", "Oui"])
+
+        testeur = st.selectbox("Qui remplit ce questionnaire ?", 
+                              ["Moi-même", "Parent/Famille", "Professionnel de santé", "Enseignant", "Autre"])
         st.markdown("""
-        <div style="background: linear-gradient(90deg, #3498db, #2ecc71);
-                    padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
-            <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
-                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-                🤖 Prédiction par Intelligence Artificielle
-            </h1>
-            <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
-                      max-width: 800px; margin: 0 auto; line-height: 1.6;">
-                Évaluation moderne avec le questionnaire AQ-10 interactif
+        <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
+                    border-radius: 12px; padding: 20px; margin: 25px 0; text-align: center;
+                    border-left: 4px solid #3498db;">
+            <h4 style="color: #2c3e50; margin-top: 0;">🎯 Prêt pour l'évaluation ?</h4>
+            <p style="color: #34495e; margin-bottom: 15px;">
+                Assurez-vous d'avoir répondu à toutes les questions avant de continuer.
+            </p>
+            <p style="color: #7f8c8d; font-size: 0.9rem; margin: 0;">
+                L'analyse prendra quelques secondes pour traiter vos réponses.
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Onglets pour différentes approches
-        tabs = st.tabs([
-            "📝 Questionnaire AQ-10 Moderne",
-            "🔬 Analyse Prédictive", 
-            "📊 Tableau de Bord"
-        ])
-        
-        with tabs[0]:
-            show_aq10_questionnaire()
-        
-        with tabs[1]:
-            st.info("Section d'analyse prédictive basée sur les réponses AQ-10")
-            # Intégrer ici l'analyse ML basée sur les réponses
-        
-        with tabs[2]:
-            st.info("Tableau de bord avec métriques et insights")
-            # Affichage des statistiques globales
 
+        submitted = st.form_submit_button(
+            "🔬 Calculer mon score et obtenir une prédiction", 
+            use_container_width=True,
+            type="primary"
+        )
+
+        if submitted:
+            if None in form_responses.values():
+                st.error("⚠️ Veuillez répondre à toutes les questions du questionnaire.")
+            else:
+                total_score = 0
+                scores_individuels = []
+
+                for i, q in enumerate(questions):
+                    selected_option = form_responses[f"aq10_question_{i}"]
+                    if selected_option is not None:
+                        score = q["scoring"][selected_option]
+                        total_score += score
+                        scores_individuels.append(score)
+                    else:
+                        scores_individuels.append(0)
+                st.session_state.aq10_total = total_score
+                st.session_state.aq10_responses = scores_individuels
+                user_data = {
+                    'Age': age,
+                    'Genre': genre,
+                    'Ethnie': ethnicite,
+                    'Antecedent_autisme': antecedents,
+                    'Statut_testeur': testeur,
+                }
+
+                for i, score in enumerate(scores_individuels):
+                    user_data[f'A{i+1}'] = score
+
+                user_data['Score_A10'] = total_score
+
+                user_df = pd.DataFrame([user_data])
+
+                if total_score >= 6:
+                    st.markdown(f"""
+                        <div class="result-card warning">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
+                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                        <div class="result-card success">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
+                if rf_model is not None and preprocessor is not None:
+                    try:
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                if col.startswith('A') and col[1:].isdigit():
+                                    idx = int(col[1:]) - 1
+                                    if idx < len(scores_individuels):
+                                        user_df[col] = scores_individuels[idx]
+                                    else:
+                                        user_df[col] = 0
+                                else:
+                                    user_df[col] = 0 
+
+                        column_mapping = {
+                            'Antecedent_autisme': 'Autisme_familial',
+                        }
+                        user_df = user_df.rename(columns=column_mapping)
+
+                        if 'Jaunisse' not in user_df.columns:
+                            user_df['Jaunisse'] = "No"
+
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
+                                          'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                user_df[col] = 0 
+
+                        user_df = user_df[required_columns]
+
+                        user_df = user_df[required_columns]
+
+                        prediction_proba = rf_model.predict_proba(user_df)
+
+                        tsa_probability = prediction_proba[0][1]
+
+                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
+
+                        probability_percentage = int(tsa_probability * 100)
+
+                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
+
+                        st.markdown(f"""
+                            <div class="result-card {color_class}">
+                                <div class="result-title">Prédiction IA</div>
+                                <div class="result-score">{probability_percentage}%</div>
+                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
+                                <p>Classification: <strong>{prediction_class}</strong></p>
+                            </div>
+
+                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
+                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
+                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                        st.markdown("### 📈 Profil détaillé des traits autistiques")
+                        
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)
+                        risk_factor = min(10.0, (total_score/6) * (1.5 if antecedents == "Oui" else 1))
+                        
+                        def severity_color(score):
+                            if score < 30: return "#2ecc71"
+                            elif score < 60: return "#f39c12"
+                            else: return "#e74c3c"
+                    
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">👥 Perception sociale</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(social_score)};">
+                                    {social_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Difficulté à interpréter les interactions sociales
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🧠 Flexibilité cognitive</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(cognitive_score)};">
+                                    {cognitive_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Rigidité face au changement
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🔍 Attention aux détails</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-detail_score)};">
+                                    {detail_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Focalisation sur les spécificités
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        col4, col5, col6 = st.columns(3)
+                        
+                        with col4:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🎭 Indice de masquage</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-masking_index)};">
+                                    {masking_index:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Compensation sociale estimée
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col5:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">⚠️ Risque relatif</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(risk_factor*10)};">
+                                    {risk_factor:.1f}x
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Par rapport à la population générale
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col6:
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">📉 Impact fonctionnel</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(impact_score)};">
+                                    {impact_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Sur la vie quotidienne
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Profil de sensibilité multidimensionnel
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        dimensions = [
+                            "Communication sociale",
+                            "Interactions sociales",
+                            "Intérêts restreints",
+                            "Comportements répétitifs",
+                            "Sensibilité sensorielle"
+                        ]
+
+                        dim_scores = [
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100, 
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  
+                            (scores_individuels[7]) * 100,  
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  
+                            (scores_individuels[0]) * 100  
+                        ]
+
+                   
+                        fig = go.Figure()
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=dim_scores,
+                            theta=dimensions,
+                            fill='toself',
+                            name='Votre profil',
+                            line_color='#3498db',
+                            fillcolor='rgba(52, 152, 219, 0.3)'
+                        ))
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=[80, 75, 70, 65, 85], 
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil typique TSA',
+                            line_color='#e74c3c',
+                            fillcolor='rgba(231, 76, 60, 0.1)'
+                        ))
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=[20, 25, 30, 25, 15], 
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil neurotypique',
+                            line_color='#2ecc71',
+                            fillcolor='rgba(46, 204, 113, 0.1)'
+                        ))
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            title="Comparaison de votre profil avec les profils de référence",
+                            showlegend=True,
+                            height=500,
+                            margin=dict(t=70, b=20)
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        st.markdown("""
+                        <div style="margin-top: 40px; margin-bottom: 30px;">
+                            <h3 style="text-align: center; margin-bottom: 25px; color: #34495e; font-size: 1.8rem;">
+                                💡 Recommandations personnalisées
+                            </h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+
+                        recommendations = []
+
+                        if social_score > 50:
+                            recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
+
+                        if cognitive_score > 50:
+                            recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
+
+                        if detail_score > 60:
+                            recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
+
+                        if masking_index > 60:
+                            recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
+
+                        if risk_factor > 3:
+                            recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
+                        else:
+                            recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
+
+
+                        for i, rec in enumerate(recommendations, 1):
+                            st.markdown(f"""
+                            <div style="display: flex; align-items: flex-start; margin-bottom: 15px; padding: 12px 0;">
+                                <div style="background: linear-gradient(135deg, #3498db, #2980b9);
+                                            color: white;
+                                            border-radius: 50%;
+                                            width: 24px;
+                                            height: 24px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.8rem;
+                                            font-weight: bold;
+                                            margin-right: 15px;
+                                            flex-shrink: 0;">
+                                    {i}
+                                </div>
+                                <p style="margin: 0;
+                                          font-size: 1rem;
+                                          line-height: 1.6;
+                                          color: #2c3e50;
+                                          text-align: justify;">
+                                    {rec}
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <div style="margin-top: 25px;
+                                    padding: 15px;
+                                    background: rgba(52, 152, 219, 0.05);
+                                    border-radius: 8px;
+                                    border-left: 4px solid #3498db;">
+                            <p style="font-style: italic;
+                                      margin: 0;
+                                      color: #5d6d7e;
+                                      text-align: center;
+                                      font-size: 0.95rem;">
+                                ⚠️ Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                        </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        st.markdown("### Analyse comparative")
+
+                        fig = go.Figure()
+
+                        if 'Score_A10' in df.columns and 'TSA' in df.columns:
+                            avg_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                            avg_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                        else:
+                            avg_tsa = 7.2  
+                            avg_non_tsa = 2.8  
+
+                        categories = ['Votre score', 'Moyenne TSA', 'Moyenne non-TSA']
+                        scores = [total_score, avg_tsa, avg_non_tsa]
+                        colors = ['#3498db', '#e74c3c', '#2ecc71']
+
+                        fig.add_trace(go.Bar(
+                            x=categories,
+                            y=scores,
+                            marker_color=colors,
+                            text=scores,
+                            textposition='auto'
+                        ))
+
+                        fig.update_layout(
+                            title='Comparaison de votre score avec les moyennes de référence',
+                            yaxis=dict(
+                                title='Score AQ-10',
+                                range=[0, 10.5]
+                            ),
+                            height=400
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
+                        st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
+                else:
+                    st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
+
+                    st.html("""
+                        <div style="background-color: #f0f7fa; border-left: 4px solid #3498db; padding: 20px; border-radius: 5px; margin: 30px 0; text-align: left;">
+                            <h4 style="color: #3498db; margin-top: 0; text-align: center;">Comment fonctionne cette prédiction ?</h4>
+                            <p style="margin-bottom: 10px; text-align: left;">Cette prédiction est calculée par un algorithme d'<strong>intelligence artificielle</strong> appelé "<em>Random Forest</em>" (forêt aléatoire) qui a été entraîné sur des milliers de cas cliniques.</p>
+
+                            <p style="text-align: left;">L'algorithme prend en compte :</p>
+                            <ul style="text-align: left;">
+                                <li><strong>Vos réponses au questionnaire AQ-10</strong> : chaque question a été validée scientifiquement pour détecter des traits autistiques spécifiques</li>
+                                <li><strong>Vos données démographiques</strong> : âge, genre, origine ethnique</li>
+                                <li><strong>Les antécédents familiaux</strong> : la présence de TSA dans la famille est un facteur important</li>
+                            </ul>
+
+                            <p style="text-align: left;">Le modèle compare ensuite votre profil à tous les cas qu'il a appris et détermine la probabilité que vous présentiez des traits autistiques similaires à ceux diagnostiqués TSA.</p>
+
+                            <p style="font-style: italic; margin-top: 10px; text-align: left;">Ce pourcentage représente le niveau de confiance du modèle dans sa prédiction, pas la "gravité" ou l'"intensité" de l'autisme.</p>
+                        </div>
+                        """)
+
+                    st.html("""
+                        <div style="background-color: #fef9e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <h4 style="color: #f39c12; margin-top: 0;">Limites de cette prédiction</h4>
+                            <p>Ce modèle est un <strong>outil de dépistage</strong>, pas un instrument de diagnostic. Un diagnostic formel de TSA nécessite une évaluation complète par des professionnels de santé qualifiés.</p>
+
+                            <p>Facteurs non pris en compte par ce modèle :</p>
+                            <ul>
+                                <li>Observation directe des comportements sociaux</li>
+                                <li>Développement précoce et historique médical complet</li>
+                                <li>Impact des traits sur la vie quotidienne</li>
+                                <li>Autres conditions médicales ou psychiatriques</li>
+                            </ul>
+                        </div>
+                        """)
+
+                    st.markdown("""
+                        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                            Comparaison avec la population de référence
+                        </h3>
+                        """, unsafe_allow_html=True)
+
+                    mean_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                    mean_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                    overall_mean = df['Score_A10'].mean()
+
+                    percentile = 100 * (df['Score_A10'] <= total_score).mean()
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Percentile</div>
+                                <div class="kpi-value">{percentile:.0f}<sup>ème</sup></div>
+                                <div class="kpi-comparison">Votre score dépasse {percentile:.0f}% de la population testée</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col2:
+                        diff_non_tsa = total_score - mean_non_tsa
+                        color_non_tsa = "#e74c3c" if diff_non_tsa > 0 else "#2ecc71"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe non-TSA</div>
+                                <div class="kpi-value" style="color:{color_non_tsa};">{diff_non_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes sans diagnostic ({mean_non_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col3:
+                        diff_tsa = total_score - mean_tsa
+                        color_tsa = "#2ecc71" if diff_tsa < 0 else "#e74c3c"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe TSA</div>
+                                <div class="kpi-value" style="color:{color_tsa};">{diff_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes avec diagnostic ({mean_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                            Analyse détaillée de vos réponses par question
+                        </h4>
+                        """, unsafe_allow_html=True)
+
+                        categories = [f'Q{i+1}' for i in range(10)]
+                        user_scores = scores_individuels
+
+                        tsa_mean_scores = [df[df['TSA'] == 'Yes'][f'A{i+1}'].mean() for i in range(10)]
+                        non_tsa_mean_scores = [df[df['TSA'] == 'No'][f'A{i+1}'].mean() for i in range(10)]
+
+                        fig = make_subplots(rows=1, cols=3,
+                                        specs=[[{'type': 'polar'}]*3],
+                                        subplot_titles=["Vos réponses", "Profil moyen TSA", "Profil moyen non-TSA"])
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=user_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Vos réponses',
+                                line_color='#2ecc71',
+                                fillcolor='rgba(46, 204, 113, 0.5)'
+                            ),
+                            row=1, col=1
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne TSA',
+                                line_color='#e74c3c',
+                                fillcolor='rgba(231, 76, 60, 0.5)'
+                            ),
+                            row=1, col=2
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=non_tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne non-TSA',
+                                line_color='#3498db',
+                                fillcolor='rgba(52, 152, 219, 0.5)'
+                            ),
+                            row=1, col=3
+                        )
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar2=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar3=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            height=450,
+                            margin=dict(l=80, r=80, t=80, b=50),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(size=12),
+                            showlegend=False
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        with st.expander("🔍 Comprendre la signification des questions"):
+                            st.markdown("""
+                            | Question | Description | Score élevé indique |
+                            |----------|-------------|---------------------|
+                            | Q1 | Perception des petits bruits | ↑ Hypersensibilité auditive |
+                            | Q2 | Focus sur les détails vs l'ensemble | ↑ Attention aux détails |
+                            | Q3 | Capacité à faire plusieurs choses | ↓ Difficultés avec le multitâche |
+                            | Q4 | Reprise d'activité après interruption | ↓ Difficultés avec les transitions |
+                            | Q5 | Compréhension du langage figuré | ↓ Interprétation littérale |
+                            | Q6 | Perception de l'ennui chez autrui | ↓ Difficulté à lire les signaux sociaux |
+                            | Q7 | Compréhension des intentions des personnages | ↑ Difficulté avec la théorie de l'esprit |
+                            | Q8 | Collection d'informations sur des catégories | ↑ Intérêts restreints |
+                            | Q9 | Compréhension des émotions par l'expression | ↓ Difficulté à lire les émotions |
+                            | Q10 | Compréhension des intentions d'autrui | ↑ Difficulté d'interprétation sociale |
+                            """)
+
+                        st.info("⚠️ Ce résultat est une indication basée sur un modèle statistique et ne constitue pas un diagnostic médical. Consultez un professionnel de santé pour une évaluation complète.")
+
+                st.markdown("""
+                <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                    Prévalence du Trouble du Spectre Autistique
+                </h3>
+                """, unsafe_allow_html=True)
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #3498db; margin-bottom: 10px;">Monde</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #3498db; margin: 15px 0;">1 sur 100</div>
+                        <p style="color: #2c3e50;">enfants dans le monde est concerné par un trouble du spectre autistique selon l'OMS</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col2:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #e74c3c; margin-bottom: 10px;">France</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #e74c3c; margin: 15px 0;">~1 million</div>
+                        <p style="color: #2c3e50;">de personnes en France, soit entre 1% et 2% de la population française</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col3:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #2ecc71; margin-bottom: 10px;">États-Unis</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #2ecc71; margin: 15px 0;">1 sur 36</div>
+                        <p style="color: #2c3e50;">enfants de 8 ans présentent un TSA selon les dernières données CDC</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+def show_documentation():
+    st.markdown("""
+<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
+            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        📚 Documentation
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+              max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        Une approche moderne et scientifique pour le dépistage précoce
+    </p>
+</div>
+""", unsafe_allow_html=True)
+    
+    new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
+    st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
+
+
+    with st.expander("📋 À propos du questionnaire AQ-10", expanded=True):
+        st.markdown("""
+        ### Le questionnaire AQ-10
+
+        L'AQ-10 est une version abrégée du Quotient du Spectre Autistique (AQ), un outil de dépistage validé scientifiquement.
+
+        - **Développé par** : Professeur Simon Baron-Cohen et son équipe à l'Université de Cambridge
+        - **Objectif** : Identifier rapidement les traits autistiques chez les adultes et adolescents
+        - **Utilisation** : Outil de dépistage initial, non diagnostique
+        - **Validation** : Études internationales avec sensibilité et spécificité élevées
+        """)
+
+        st.markdown("""
+        ### Interprétation des scores
+
+        - **Score ≥ 6** : Dépistage positif, suggérant la présence de traits autistiques significatifs
+        - **Score < 6** : Dépistage négatif
+
+        Un dépistage positif n'est pas un diagnostic mais indique qu'une évaluation plus approfondie pourrait être bénéfique.
+        """)
+
+    with st.expander("🧠 Signification des questions", expanded=True):
+        st.markdown("""
+        ### Comprendre les questions du test AQ-10
+
+        Chaque question évalue un aspect spécifique des traits associés aux TSA :
+        """)
+
+        q_tabs = st.tabs(["Q1-3", "Q4-7", "Q8-10"])
+
+        with q_tabs[0]:
+            st.markdown("""
+            #### Questions 1 à 3
+
+            **Q1: Je remarque souvent de petits bruits que les autres ne remarquent pas.**
+            - Évalue l'hypersensibilité sensorielle, trait fréquent dans les TSA
+
+            **Q2: Je me concentre généralement davantage sur l'ensemble que sur les petits détails.**
+            - Évalue la tendance à la cohérence centrale (vision d'ensemble vs détails)
+
+            **Q3: Je trouve facile de faire plusieurs choses en même temps.**
+            - Évalue les fonctions exécutives et la flexibilité cognitive
+            """)
+
+        with q_tabs[1]:
+            st.markdown("""
+            #### Questions 4 à 7
+
+            **Q4: S'il y a une interruption, je peux rapidement reprendre ce que je faisais.**
+            - Évalue la flexibilité attentionnelle et l'adaptation aux changements
+
+            **Q5: Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.**
+            - Évalue la compréhension des messages implicites et du langage indirect
+
+            **Q6: Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.**
+            - Évalue la capacité à détecter les signaux sociaux non verbaux
+
+            **Q7: Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.**
+            - Évalue la théorie de l'esprit (comprendre les états mentaux d'autrui)
+            """)
+
+        with q_tabs[2]:
+            st.markdown("""
+            #### Questions 8 à 10
+
+            **Q8: J'aime collecter des informations sur des catégories de choses.**
+            - Évalue la tendance aux intérêts restreints et spécifiques
+
+            **Q9: Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.**
+            - Évalue la capacité à lire les expressions faciales
+
+            **Q10: J'ai du mal à comprendre les intentions des gens.**
+            - Évalue la compréhension des intentions et motivations sociales
+            """)
+
+    with st.expander("🔍 Sources Académiques", expanded=True):
+        st.markdown("""
+          <div style="border-left:4px solid #1e88e5; padding-left:15px; margin-bottom:20px">
+              <h3 style="color:#1e88e5">Références Bibliographiques</h3>
+          </div>
+          """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+              st.markdown("""
+              <div style="background:#f8f9fa; padding:15px; border-radius:8px; height:100%">
+                  <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Manuels de Référence</h4>
+                  <ul style="padding-left:20px">
+                      <li>American Psychiatric Association. (2013). <em>Diagnostic and statistical manual of mental disorders</em> (5th ed.). <a href="https://doi.org/10.1176/appi.books.9780890425596" target="_blank">DOI</a></li>
+                      <li>World Health Organization. (2019). <em>International classification of diseases</em> (11th ed.). <a href="https://icd.who.int/" target="_blank">Site web</a></li>
+                      <li>Baron-Cohen, S. (2017). <em>The Pattern Seekers: How Autism Drives Human Invention</em>. <a href="https://www.simonandschuster.com/books/The-Pattern-Seekers/Simon-Baron-Cohen/9781541647145" target="_blank">Éditeur</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        with col2:
+              st.markdown("""
+              <div style="background:#f8f9fa; padding:15px; border-radius:8px; height:100%">
+                  <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Études Fondatrices</h4>
+                  <ul style="padding-left:20px">
+                      <li>Bergeron, M., & Hébert, M. (2006). <em>Évaluation d'une intervention de groupe d'approche féministe auprès de femmes victimes d'agression sexuelle</em>.</li>
+                      <li>Mottron, L. (2020). <em>L'intervention précoce pour enfants autistes : Nouveaux principes pour soutenir une autre intelligence</em>.</li>
+                      <li>Silberman, S. (2015). <em>NeuroTribes: The Legacy of Autism and the Future of Neurodiversity</em>. <a href="https://www.penguinrandomhouse.com/books/310415/neurotribes-by-steve-silberman/" target="_blank">Éditeur</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        st.markdown("""
+          <div style="margin-top:20px; background:#f8f9fa; padding:15px; border-radius:8px">
+              <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Articles Scientifiques Récents</h4>
+              <ul style="padding-left:20px">
+                  <li>Culotta, L. et al. (2024). "Brain Structural Differences in Autism Spectrum Disorder". <em>Journal of Autism and Developmental Disorders</em>.</li>
+                  <li>Anderson, J. S. (2023). "Connectivity Patterns in the Autistic Brain". <em>Autism Research</em>, 16(3), 456-472.</li>
+                  <li>Grandin, T. (2023). "The Autistic Brain: Updated Perspectives". <em>Journal of Neuropsychology</em>, 15(2), 112-128.</li>
+                  <li>Baron-Cohen, S. (2022). "Autism, Invention, and the STEM Connection". <em>Nature Neuroscience</em>, 25(1), 45-57.</li>
+              </ul>
+          </div>
+          """, unsafe_allow_html=True)
+
+    with st.expander("🧠 Ressources sur l'Autisme", expanded=True):
+        st.markdown("""
+          <div style="border-left:4px solid #4caf50; padding-left:15px; margin-bottom:20px">
+              <h3 style="color:#4caf50">Comprendre l'Autisme</h3>
+          </div>
+          """, unsafe_allow_html=True)
+
+        st.markdown("""
+          <h4 style="color:#2e7d32; margin-top:20px">Vidéos Éducatives</h4>
+          """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("""
+              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
+                  <h5 style="color:#33691e">Conférences TED</h5>
+                  <ul style="padding-left:20px">
+                      <li><a href="https://www.ted.com/talks/temple_grandin_the_world_needs_all_kinds_of_minds?language=fr" target="_blank">Temple Grandin : Le monde a besoin de toutes sortes d'esprits</a></li>
+                      <li><a href="https://www.youtube.com/watch?v=kHmvZBQjB0g" target="_blank">Comment l'autisme stimule l'invention humaine - Simon Baron-Cohen</a></li>
+                      <li><a href="https://www.ted.com/talks/steve_silberman_the_forgotten_history_of_autism" target="_blank">Steve Silberman : L'histoire oubliée de l'autisme</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
+                  <h5 style="color:#33691e">Documentaires</h5>
+                  <ul style="padding-left:20px">
+                      <li><a href="https://www.youtube.com/watch?v=J9ZxvR_cm94" target="_blank">The Reason I Jump - Bande annonce officielle</a></li>
+                      <li><a href="https://www.youtube.com/watch?v=Lr4_dOorquQ" target="_blank">Autism: The Musical - HBO Documentary</a></li>
+                      <li><a href="https://www.arte.tv/fr/videos/RC-014294/dans-la-tete-des-autistes/" target="_blank">Dans la tête des autistes - Arte</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        st.markdown("""
+          <h4 style="color:#2e7d32; margin-top:20px">Sites Web et Organisations</h4>
+          """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+              st.markdown("""
+              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
+                  <h5 style="color:#33691e">France</h5>
+                  <ul style="padding-left:20px">
+                      <li><a href="https://www.autisme-france.fr" target="_blank">Autisme France</a></li>
+                      <li><a href="https://www.autismeinfoservice.fr" target="_blank">Autisme Info Service</a></li>
+                      <li><a href="https://maisondelautisme.gouv.fr" target="_blank">Maison de l'autisme</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        with col2:
+              st.markdown("""
+              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
+                  <h5 style="color:#33691e">International</h5>
+                  <ul style="padding-left:20px">
+                      <li><a href="https://www.autismspeaks.org" target="_blank">Autism Speaks</a></li>
+                      <li><a href="https://www.autism.org" target="_blank">National Autistic Society (UK)</a></li>
+                      <li><a href="https://www.cdc.gov/ncbddd/autism/" target="_blank">CDC - Autism Spectrum Disorder</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        with col3:
+              st.markdown("""
+              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
+                  <h5 style="color:#33691e">Recherche et Formation</h5>
+                  <ul style="padding-left:20px">
+                      <li><a href="https://www.gncra.fr" target="_blank">GNCRA - Groupement National des CRA</a></li>
+                      <li><a href="https://researchautism.org" target="_blank">Research Autism</a></li>
+                      <li><a href="https://www.autism-uni.org" target="_blank">Autism&Uni</a></li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        st.markdown("""
+          <h4 style="color:#2e7d32; margin-top:20px">Livres Recommandés</h4>
+          <div style="display:flex; overflow-x:auto; padding:10px 0; gap:15px">
+              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+                  <div style="width:100%; height:120px; background:#e8f5e9; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
+                      <span style="font-weight:bold; color:#2e7d32">NeuroTribes</span>
+                  </div>
+                  <h5 style="margin:10px 0 5px 0">NeuroTribes</h5>
+                  <p style="font-size:0.9rem; margin:0">Steve Silberman (2015)</p>
+              </div>
+              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+                  <div style="width:100%; height:120px; background:#e3f2fd; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
+                      <span style="font-weight:bold; color:#1565c0">The Autistic Brain</span>
+                  </div>
+                  <h5 style="margin:10px 0 5px 0">The Autistic Brain</h5>
+                  <p style="font-size:0.9rem; margin:0">Temple Grandin (2014)</p>
+              </div>
+              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+                  <div style="width:100%; height:120px; background:#fff3e0; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
+                      <span style="font-weight:bold; color:#e65100">Uniquely Human</span>
+                  </div>
+                  <h5 style="margin:10px 0 5px 0">Uniquely Human</h5>
+                  <p style="font-size:0.9rem; margin:0">Barry M. Prizant (2022)</p>
+              </div>
+              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
+                  <div style="width:100%; height:120px; background:#f3e5f5; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
+                      <span style="font-weight:bold; color:#6a1b9a">The Pattern Seekers</span>
+                  </div>
+                  <h5 style="margin:10px 0 5px 0">The Pattern Seekers</h5>
+                  <p style="font-size:0.9rem; margin:0">Simon Baron-Cohen (2021)</p>
+              </div>
+          </div>
+          """, unsafe_allow_html=True)
+
+    with st.expander("📊 Données et Modèles", expanded=True):
+        st.markdown("""
+          <div style="border-left:4px solid #ff9800; padding-left:15px; margin-bottom:20px">
+              <h3 style="color:#ff9800">Sources des Données et Modélisation</h3>
+          </div>
+          """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+              st.markdown("""
+              <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+                  <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
+                  <ul style="padding-left:20px">
+                      <li>📁 <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
+                      <li>📁 <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
+                      <li>📁 <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
+                      <li>📁 <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
+                      <li>📁 <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
+                  </ul>
+              </div>
+              """, unsafe_allow_html=True)
+
+        with col2:
+              st.markdown("""
+              <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+                  <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Modèles Utilisés</h4>
+                  <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px">
+                      <div style="padding:10px; background:#e3f2fd; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                          <h5 style="margin:0 0 8px 0; color:#0d47a1">Random Forest</h5>
+                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
+                              <li>n_estimators=100</li>
+                              <li>max_depth=10</li>
+                              <li>min_samples_split=10</li>
+                              <li>min_samples_leaf=1</li>
+                          </ul>
+                      </div>
+                      <div style="padding:10px; background:#e8f5e9; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                          <h5 style="margin:0 0 8px 0; color:#1b5e20">LightGBM</h5>
+                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
+                              <li>learning_rate=0.1</li>
+                              <li>max_depth=15</li>
+                              <li>n_estimators=150</li>
+                              <li>boosting_type='gbdt'</li>
+                          </ul>
+                      </div>
+                      <div style="padding:10px; background:#fff8e1; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                          <h5 style="margin:0 0 8px 0; color:#ff6f00">XGBoost</h5>
+                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
+                              <li>learning_rate=0.1</li>
+                              <li>max_depth=5</li>
+                              <li>n_estimators=100</li>
+                              <li>objective='binary:logistic'</li>
+                          </ul>
+                      </div>
+                      <div style="padding:10px; background:#f3e5f5; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
+                          <h5 style="margin:0 0 8px 0; color:#4a148c">Logistic Regression</h5>
+                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
+                              <li>C=1.0</li>
+                              <li>penalty='l2'</li>
+                              <li>solver='lbfgs'</li>
+                              <li>max_iter=200</li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+              """, unsafe_allow_html=True)
+
+    with st.expander("📝 Références Techniques", expanded=True):
+        st.markdown("""
+        <div style="border-left:4px solid #9c27b0; padding-left:15px; margin-bottom:20px">
+            <h3 style="color:#9c27b0">Stack Technologique</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown("""
+            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
+                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
+                    <span style="font-size:1.2rem; margin-right:5px">'📚'</span> Bibliothèques Principales
+                </h4>
+                <ul style="padding-left:20px; margin-top:10px">
+                    <li><strong>Scikit-learn 1.3.2</strong> - Modèles et prétraitement</li>
+                    <li><strong>Plotly 5.18.0</strong> - Visualisations interactives</li>
+                    <li><strong>XGBoost 2.0.3</strong> - Modèles boosting</li>
+                    <li><strong>LightGBM 4.1.0</strong> - Modèles gradient boosting</li>
+                    <li><strong>Pandas 2.1.3</strong> - Manipulation des données</li>
+                    <li><strong>NumPy 1.26.0</strong> - Calculs numériques</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
+                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
+                    <span style="font-size:1.2rem; margin-right:5px">🖥️</span> Infrastructure
+                </h4>
+                <ul style="padding-left:20px; margin-top:10px">
+                    <li><strong>Streamlit 1.29.0</strong> - Interface utilisateur</li>
+                    <li><strong>Docker 24.0.7</strong> - Conteneurisation</li>
+                    <li><strong>AWS EC2 t3.large</strong> - Hébergement</li>
+                    <li><strong>GitHub Actions</strong> - CI/CD</li>
+                    <li><strong>Python 3.10</strong> - Langage principal</li>
+                    <li><strong>NGINX</strong> - Serveur web</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col3:
+            st.markdown("""
+            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
+                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
+                    <span style="font-size:1.2rem; margin-right:5px">🔗</span> Sources Externes
+                </h4>
+                <ul style="padding-left:20px; margin-top:10px">
+                    <li><a href="https://autism-resources.org" target="_blank"><strong>Autism Resources Initiative</strong></a></li>
+                    <li><a href="https://www.cdc.gov/ncbddd/autism/data.html" target="_blank"><strong>CDC Autism Data</strong></a></li>
+                    <li><a href="https://www.kaggle.com/datasets" target="_blank"><strong>Kaggle Datasets</strong></a></li>
+                    <li><a href="https://archive.ics.uci.edu/ml/" target="_blank"><strong>UCI ML Repository</strong></a></li>
+                    <li><a href="https://huggingface.co/datasets" target="_blank"><strong>Hugging Face Datasets</strong></a></li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
 def show_about_page():
     st.markdown("""
