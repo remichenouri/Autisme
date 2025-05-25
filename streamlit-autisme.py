@@ -4141,85 +4141,198 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
 def show_about_page():
-
-    st.markdown(
-        f"""<div class="header-container">
-            <span style="font-size:2.5rem">ℹ️</span>
-            <h1 class="app-title">À propos</h1>
-        </div>""", unsafe_allow_html=True
-    )
-
-    html_code = """
-    <div style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <!-- Contenu HTML -->
+    """Page À propos améliorée et esthétique avec image Ghibli"""
+    
+    # En-tête principal avec gradient
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 40px 20px; border-radius: 20px; margin-bottom: 30px; text-align: center;">
+        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            ℹ️ À propos du Projet
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; max-width: 800px; margin: 0 auto; line-height: 1.6;">
+            Une initiative innovante pour améliorer le dépistage précoce des Troubles du Spectre Autistique
+        </p>
     </div>
-    """
+    """, unsafe_allow_html=True)
 
+    # **AJOUT DE L'IMAGE GHIBLI**
+    # Image Ghibli comme bannière décorative (même que dans la page d'accueil)
+    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
+
+    # Section contexte avec design amélioré
     st.markdown("""
-    ## À propos du projet
+    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+                padding: 30px; border-radius: 15px; margin-bottom: 30px;">
+        <h2 style="color: #2c3e50; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
+            🎯 Contexte du Projet
+        </h2>
+        <div style="max-width: 900px; margin: 0 auto;">
+            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #34495e;">
+                Ce projet a été développé dans le cadre d'une étude approfondie sur les méthodes de dépistage 
+                des Troubles du Spectre Autistique (TSA). Notre approche combine l'analyse de données massives, 
+                l'intelligence artificielle et l'expertise clinique pour créer un outil d'aide au diagnostic précoce.
+            </p>
+            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; color: #34495e;">
+                L'objectif principal est de faciliter l'identification précoce des signaux d'alerte, permettant 
+                ainsi une intervention plus rapide et plus efficace pour les personnes concernées et leurs familles.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    Ce projet a été réalisé dans le cadre d'une étude sur les méthodes de dépistage des Troubles du Spectre Autistique (TSA).
+    # Objectifs avec cartes élégantes
+    st.markdown("## 🎯 Objectifs du Projet")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    objectives = [
+        {
+            "icon": "🔍",
+            "title": "Identifier les facteurs",
+            "description": "Analyser les variables associées à la présence d'un TSA à partir de données multiples",
+            "color": "#3498db"
+        },
+        {
+            "icon": "📊",
+            "title": "Explorer les données",
+            "description": "Découvrir des tendances et biais dans les jeux de données internationaux",
+            "color": "#2ecc71"
+        },
+        {
+            "icon": "🤖",
+            "title": "Construire des modèles",
+            "description": "Développer des outils prédictifs pour l'aide à l'évaluation du TSA",
+            "color": "#9b59b6"
+        }
+    ]
+    
+    for i, (obj, col) in enumerate(zip(objectives, [col1, col2, col3])):
+        with col:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, {obj['color']}, {obj['color']}cc); 
+                        color: white; padding: 25px; border-radius: 15px; height: 280px; 
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.15); transition: transform 0.3s ease;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">{obj['icon']}</div>
+                    <h3 style="margin: 0; font-size: 1.4rem; font-weight: 600;">{obj['title']}</h3>
+                </div>
+                <p style="font-size: 1rem; line-height: 1.5; text-align: center; margin: 0;">
+                    {obj['description']}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
-    ### Objectifs du Projet
-
-    1. Identifier les facteurs associés à la présence d'un TSA
-    2. Explorer les données pour déceler des tendances et biais
-    3. Construire des modèles prédictifs pour l'évaluation du TSA
-
-    ### Remerciements
-
-    Nous remercions toutes les personnes ayant contribué à ce projet, en particulier notre mentor Yohan Cohen pour son soutien et ses conseils précieux.""")
-
+    # Section données avec style amélioré
     st.markdown("""
-    ### Licence
-    Cette application est mise à disposition sous licence open-source. Le code et les données anonymisées sont disponibles pour des fins de recherche uniquement.""")
-
-
-    html_code = """
-        <h4 style="color:#0d47a1; margin-top:20px">Auteurs du Projet</h4>
-        <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:15px">
-            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
-                <div style="width:100px; height:100px; border-radius:50%; background:#e3f2fd; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #bbdefb">
-                    <span style="font-size:40px">AB</span>
-                </div>
-                <h4 style="margin:0 0 5px 0; color:#1565c0">Alexandre Bernard</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
+    <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); 
+                padding: 30px; border-radius: 15px; margin: 30px 0;">
+        <h2 style="color: #8b4513; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
+            📚 Sources de Données
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+                    gap: 20px; max-width: 1000px; margin: 0 auto;">
+            <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;">
+                <h4 style="color: #8b4513; margin-bottom: 10px;">🌍 Couverture Internationale</h4>
+                <p style="margin: 0; color: #5d4e37;">Plus de 5000 participants de différentes origines géographiques</p>
             </div>
-
-            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
-                <div style="width:100px; height:100px; border-radius:50%; background:#e8f5e9; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #c8e6c9">
-                    <span style="font-size:40px">RC</span>
-                </div>
-                <h4 style="margin:0 0 5px 0; color:#2e7d32">Rémi Chenouri</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
-            </div>
-
-            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
-                <div style="width:100px; height:100px; border-radius:50%; background:#fff3e0; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #ffe0b2">
-                    <span style="font-size:40px">AI</span>
-                </div>
-                <h4 style="margin:0 0 5px 0; color:#e65100">Ahmed Ibnabasse</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
-            </div>
-
-            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
-                <div style="width:100px; height:100px; border-radius:50%; background:#f3e5f5; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #e1bee7">
-                    <span style="font-size:40px">LS</span>
-                </div>
-                <h4 style="margin:0 0 5px 0; color:#6a1b9a">Laurence Souppayaraza</h4>
-                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Future Data Analyst</p>
+            <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;">
+                <h4 style="color: #8b4513; margin-bottom: 10px;">📊 Données Diversifiées</h4>
+                <p style="margin: 0; color: #5d4e37;">5 jeux de données publics combinés et harmonisés</p>
             </div>
         </div>
-        """
-    components.html(html_code, height=300)
+    </div>
+    """, unsafe_allow_html=True)
 
-    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
-    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
-
-
+    # SECTION ÉQUIPE - Équipe du Projet avec les 4 noms
     st.markdown("""
-    &copy; 2025 - Projet Autisme - Tous droits réservés
-    """)
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 30px; border-radius: 15px; margin: 30px 0;">
+        <h2 style="color: white; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
+            👥 Équipe du Projet
+        </h2>
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(255,255,255,0.9); text-align: center; margin-bottom: 30px;">
+                Ce projet a été réalisé par une équipe de futurs data analysts passionnés par l'innovation en santé digitale.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Rémi CHENOURI</h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">Data Scientist</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Alexandre BERNARD</h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">ML Engineer</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Laurence SOUPPARAZAYA</h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">Data Analyst</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👩‍💻</div>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Ahmed IBNABASSE</h4>
+                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">Business Analyst</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Remerciements avec design sophistiqué
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); 
+                padding: 30px; border-radius: 15px; margin: 30px 0;">
+        <h2 style="color: #2c3e50; text-align: center; margin-bottom: 20px; font-size: 2.2rem;">
+            🙏 Remerciements
+        </h2>
+        <div style="text-align: center; max-width: 700px; margin: 0 auto;">
+            <p style="font-size: 1.2rem; line-height: 1.7; color: #2c3e50; margin-bottom: 15px;">
+                Nous remercions toutes les personnes ayant contribué à ce projet, en particulier 
+                <strong>notre mentor Yohan Cohen</strong> pour son soutien et ses conseils précieux 
+                tout au long de cette recherche.
+            </p>
+            <p style="font-size: 1.1rem; color: #34495e; font-style: italic;">
+                Un remerciement spécial à toutes les familles et individus qui ont participé aux études 
+                ayant permis la constitution de ces jeux de données.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Licence avec style cohérent
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); 
+                padding: 25px; border-radius: 15px; margin: 30px 0;">
+        <h2 style="color: #8b4513; text-align: center; margin-bottom: 20px; font-size: 2rem;">
+            📄 Licence et Utilisation
+        </h2>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <p style="font-size: 1.1rem; line-height: 1.6; color: #5d4e37;">
+                Cette application est mise à disposition sous licence open-source. 
+                Le code et les données anonymisées sont disponibles pour des fins de recherche uniquement.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Avertissement final stylisé
+    st.markdown("""
+    <div style="border: 2px solid #e74c3c; border-radius: 10px; padding: 20px; 
+                background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); margin-top: 30px;">
+        <h3 style="color: #c62828; margin-top: 0; text-align: center;">
+            ⚠️ Avertissement Important
+        </h3>
+        <p style="font-size: 1rem; color: #b71c1c; text-align: center; margin: 0; font-weight: 500;">
+            Cette application est un outil d'aide au dépistage précoce et ne remplace en aucun cas 
+            une évaluation clinique complète par un professionnel de santé qualifié.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     pass
 
 def main():
