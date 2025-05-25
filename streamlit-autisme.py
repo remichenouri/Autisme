@@ -133,580 +133,142 @@ def set_custom_theme():
         with open(css_path, 'r') as f:
             custom_theme = f.read()
     else:
-
         custom_theme = """
         <style>
-        /* Variables globales */
+        /* ================ Variables Globales ================ */
         :root {
-            --primary: #3498db;
-            --secondary: #2ecc71;
-            --background: #f0f2f6;
-            --card-bg: white;
-            --text: #2c3e50;
+            --primary: #3498db !important;
+            --secondary: #2ecc71 !important;
+            --background: #f0f2f6 !important;
+            --card-bg: white !important;
+            --text: #2c3e50 !important;
+            --sidebar-width: 280px !important;
         }
 
-        /* Styles généraux du conteneur */
+        /* ================ Structure Principale ================ */
         [data-testid="stAppViewContainer"] {
-            background-color: var(--background);
+            background-color: var(--background) !important;
         }
 
+        /* ================ Barre Latérale ================ */
+        [data-testid="stSidebar"] {
+            /* Position et dimensions */
+            width: var(--sidebar-width) !important;
+            min-width: var(--sidebar-width) !important;
+            max-width: var(--sidebar-width) !important;
+            position: fixed !important;
+            height: 100vh !important;
+            
+            /* Style visuel */
+            background-color: #f5f7fa !important;
+            border-right: 2px solid var(--primary) !important;
+            padding-top: 1rem !important;
+            
+            /* Gestion du défilement */
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Masquage de la barre de défilement */
+        [data-testid="stSidebar"]::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        /* ================ Contenu Principal ================ */
+        .main .block-container {
+            margin-left: calc(var(--sidebar-width) + 20px) !important;
+            padding: 2rem !important;
+            max-width: calc(100vw - var(--sidebar-width) - 40px) !important;
+            transition: margin-left 0.3s ease !important;
+        }
+
+        /* ================ Typographie ================ */
         h1, h2, h3, h4, h5, h6 {
-            color: var(--text);
-            font-weight: 600;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        /* Suppression des bordures bleues sur les conteneurs */
-        .stAlert, [data-testid="stAlert"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        /* Suppression des barres bleues sur les info boxes */
-        .stInfo {
-            border: none !important;
-            border-left: 4px solid #3498db !important;
-            background-color: #f8f9fa !important;
-            border-radius: 8px !important;
-        }
-        
-        /* Suppression des bordures sur les colonnes */
-        [data-testid="column"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        /* Solution pour la largeur cohérente du sidebar */
-        [data-testid="stSidebar"] {
-            width: 280px !important;
-            min-width: 280px !important;
-            max-width: 280px !important;
-            background-color: #f5f7fa;
-            border-right: 2px solid #3498db;
-            padding-top: 1rem;
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 999;
-        }
-        
-        /* Ajustement du contenu principal */
-        .main .block-container {
-            margin-left: 300px !important;
-            padding-left: 2rem !important;
-            max-width: calc(100vw - 320px) !important;
+            color: var(--text) !important;
+            font-family: 'Segoe UI', sans-serif !important;
+            margin-bottom: 1rem !important;
         }
 
-        
-        /* Suppression des bordures sur les conteneurs de markdown */
-        .stMarkdown {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        /* Élimination des barres bleues sur les éléments de base */
-        div[data-baseweb="base-input"] {
-            border: none !important;
-        }
-        /* Masquer le code HTML qui s'affiche comme texte */
-        .stMarkdown pre,
-        .stMarkdown code[class*="language-"],
-        .stMarkdown .highlight,
-        .stMarkdown .hljs {
-            display: none !important;
-        }
-        
-        /* Assurer l'affichage normal du contenu */
-        .stMarkdown p,
-        .stMarkdown div,
-        .stMarkdown ul,
-        .stMarkdown li {
-            display: block !important;
-            background: transparent !important;
-        }
-        
-        .css-1d391kg {
-            border: none !important;
-        }
-
-        /* Correction de la navigation - SOLUTION PRINCIPALE */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa;
-            border-right: 2px solid var(--primary);
-            padding-top: 2rem;
-            width: 250px !important; /* Largeur augmentée */
-        }
-        [data-testid="stSidebar"] label {
-        margin-bottom: 14px !important;
-        padding: 8px 12px !important;
-        border-radius: 8px;
-        transition: background 0.2s;
-        }
-        [data-testid="stSidebar"] label:hover {
-            background: #eaf2f8 !important;
-        }
-        /* Masquer le code HTML qui s'affiche */
-        .stMarkdown pre,
-        .stMarkdown code[class*="language-"],
-        .stMarkdown .highlight,
-        .stMarkdown .hljs {
-            display: none !important;
-        }
-        
-        /* Assurer l'affichage normal du contenu */
-        .stMarkdown p,
-        .stMarkdown div,
-        .stMarkdown ul,
-        .stMarkdown li,
-        .stMarkdown h1,
-        .stMarkdown h2,
-        .stMarkdown h3 {
-            display: block !important;
-            background: transparent !important;
-        }
-        
-        /* Améliorer les composants info/warning/error natifs */
-        .stAlert {
+        /* ================ Composants Communs ================ */
+        /* Cartes */
+        .info-card {
+            background: var(--card-bg) !important;
             border-radius: 12px !important;
-            border: none !important;
-            padding: 20px !important;
-            margin: 10px 0 !important;
-        }
-        
-        .stSuccess {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
-            border-left: 4px solid #28a745 !important;
-        }
-        
-        .stInfo {
-            background: linear-gradient(135deg, #cce7ff, #b3d9ff) !important;
-            border-left: 4px solid #007bff !important;
-        }
-        
-        .stWarning {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
-            border-left: 4px solid #ffc107 !important;
-        }
-        
-        .stError {
-            background: linear-gradient(135deg, #f8d7da, #f1c2c7) !important;
-            border-left: 4px solid #dc3545 !important;
-        }
-        .sidebar-title {
-            margin-bottom: 2rem !important;
-        }... /* Assurer que le contenu est correctement dimensionné */
-        [data-testid="stSidebarContent"] {
-            width: 100%;
-            overflow: auto;
-            background-color: #f5f7fa !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+            border-left: 4px solid var(--primary) !important;
+            transition: transform 0.3s ease !important;
         }
 
-        /* Amélioration du texte dans la sidebar */
-        [data-testid="stSidebar"] label,
-        [data-testid="stSidebar"] div,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] span {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
+        /* Boutons */
+        .stButton > button {
+            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
+            color: white !important;
+            border-radius: 30px !important;
+            transition: all 0.3s ease !important;
         }
 
-        /* Amélioration spécifique pour les expanders */
-        [data-testid="stSidebar"] .streamlit-expanderHeader {
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-            hyphens: auto !important;
-            padding-right: 10px !important;
+        /* Formulaire */
+        div[data-baseweb="base-input"] {
+            border-radius: 8px !important;
+            border: 1px solid #dfe4ea !important;
+            transition: border-color 0.3s ease !important;
         }
 
-        /* Titre de la sidebar plus visible */
-        .sidebar-title {
-            font-size: 1.5rem;
-            color: #3498db;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 0.5rem;
+        /* ================ Responsive Design ================ */
+        @media (max-width: 1200px) {
+            [data-testid="stSidebar"] {
+                width: 260px !important;
+                min-width: 260px !important;
+            }
+            
+            .main .block-container {
+                margin-left: 280px !important;
+                max-width: calc(100vw - 300px) !important;
+            }
         }
 
-        /* Amélioration pour le menu de radiobuttons */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            margin-bottom: 5px !important;
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            line-height: 1.4 !important;
-            padding: 5px 10px !important;
-            display: block !important;
-            width: 100% !important;
+        @media (max-width: 768px) {
+            [data-testid="stSidebar"] {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main .block-container {
+                margin-left: 0 !important;
+                max-width: 100vw !important;
+                padding: 1rem !important;
+            }
         }
 
-        .sidebar .sidebar-content {
-            background-color: #f5f7fa !important;
-            border-right: 2px solid #3498db !important;
-        }
-
-        .sidebar .sidebar-content .streamlit-expanderHeader,
-        .sidebar .sidebar-content label,
-        .sidebar .sidebar-content div,
-        .sidebar .sidebar-content p,
-        .sidebar .sidebar-content span {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-        }
-
-        .sidebar .sidebar-content label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-        }
-
-        /* Styles des cartes et conteneurs */
-        .header-container {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            padding: 1.5rem;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-
-        .app-title {
-            font-size: 2.2rem;
-            font-weight: bold;
-            margin-left: 1rem;
-        }
-
-        .puzzle-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 2.2rem;
-            color: var(--primary);
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .puzzle-icon {
-            font-size: 2.2rem;
-        }
-
-        .main .block-container {
-            padding-top: 0.7rem !important;
-            padding-bottom: 0.7rem !important;
-        }
-
+        /* ================ Corrections Spécifiques ================ */
+        /* Alignement vertical des éléments */
         [data-testid="stVerticalBlock"] {
             gap: 0.5rem !important;
+            align-items: stretch !important;
         }
 
+        /* Suppression des bordures indésirables */
+        .stAlert, [data-testid="stAlert"],
+        .stMarkdown, [data-testid="column"] {
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* Uniformisation des espacements */
         .element-container {
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 1rem !important;
+            padding: 0.5rem !important;
         }
 
-        .css-1544g2n.e1fqkh3o4 {
-            padding-top: 2rem !important;
-            padding-bottom: 0.5rem !important;
-        }
-
-        /* Styles des info-cards */
-        .info-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem !important;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-top: 5px solid var(--primary);
-            margin-bottom: 10px !important;
+        /* ================ États Interactifs ================ */
+        [data-testid="stSidebar"] label:hover {
+            background: #eaf2f8 !important;
+            cursor: pointer !important;
         }
 
         .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-title {
-            color: var(--primary);
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 0.5rem;
-        }
-        div[role="radiogroup"] input[type="radio"]:checked + div {
-        background-color: #3498db !important;
-        color: white !important;
-        border-color: #2980b9 !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4) !important;
-    }
-
-        /* Styles des questions et formulaires */
-        .question-container {
-            background-color: white;
-            padding: 12px 15px !important;
-            border-radius: 12px;
-            margin-bottom: 12px !important;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--primary);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .question-container:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .question-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .questionnaire-title {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        /* Styles des radiobuttons */
-        div[role="radiogroup"] {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px !important;
-            margin-top: 10px;
-            margin-bottom: 15px !important;
-        }
-
-        div[role="radiogroup"] label {
-        color: #2c3e50 !important;  /* Texte foncé */
-        padding-right: 15px !important;
-        margin-bottom: 5px !important;
-        font-weight: 500 !important;
-        font-size: 1rem !important;
-        white-space: normal !important;
-        overflow-wrap: break-word !important;
-        line-height: 1.4 !important;
-        padding: 5px 10px !important;
-        display: block !important;
-        width: 100% !important;
-    }
-
-
-        div[role="radiogroup"] label > div:first-child {
-            display: none !important;
-        }
-
-        input[type="radio"] + div {
-            background: #f5f7fa !important;
-            color: var(--text);
-            border-radius: 38px !important;
-            padding: 10px 20px !important;
-            border: 1px solid #dfe4ea;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }... input[type="radio"] + div:hover {
-            background: #e9f0ff !important;
-            border-color: var(--primary);
-            transform: translateY(-1px);
-        }
-
-        /* Styles des boutons et CTA */
-        .cta-button {
-            background: linear-gradient(135deg, var(--primary), #2980b9);
-            color: white;
-            padding: 0.9rem 1.5rem;
-            border-radius: 30px;
-            font-weight: bold;
-            text-align: center;
-            display: inline-block;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-            width: 80%;
-        }
-
-        .cta-button:hover {
-            background: linear-gradient(135deg, #2980b9, var(--primary));
-            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .stButton > button {
-            width: 100%;
-            padding: 0.8rem 1rem !important;
-            font-size: 1.1rem !important;
-            margin-top: 1rem;
-        }
-
-        /* Styles des expanders et tabs */
-        .streamlit-expanderHeader {
-            background-color: #f5f7fa;
-            border-radius: 8px;
-            font-weight: 600;
-            padding: 10px 15px !important;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s ease;
-        }
-
-        .streamlit-expanderHeader:hover {
-            background-color: #eef1f5;
-            transform: translateX(2px);
-        }
-
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 2px;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            height: 40px;
-            white-space: pre-wrap;
-            background-color: #f5f7fa;
-            border-radius: 5px 5px 0 0;
-            gap: 1px;
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background-color: var(--primary) !important;
-            color: white !important;
-        }
-
-        /* Styles divers */
-        [data-testid="stDataFrame"] {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        [data-testid="stMetricValue"] {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        [data-testid="stMetricDelta"] {
-            font-size: 0.9rem;
-        }
-
-        div[data-baseweb="select"] > div {
-            border-radius: 8px;
-            background-color: white;
-            transition: all 0.2s ease;
-        }
-
-        div[data-baseweb="select"] > div:hover {
-            border-color: var(--primary);
-        }
-
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            overflow-x: auto;
-            max-width: 100%;
-            font-size: 0.9rem;
-            color: #2c3e50;
-        }
-
-        .structure-donnees pre {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            border: 1px solid #d0d0d0;
-            line-height: 1.6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .footer {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            text-align: center;
-            border-top: 2px solid #3498db;
-            margin-top: 2rem;
-            border-radius: 10px;
-        }
-
-        .sidebar .sidebar-content .streamlit-expanderHeader {
-            white-space: normal !important;
-            overflow-wrap: break-word !important;
-            word-wrap: break-word !important;
-            hyphens: auto !important;
-            padding-right: 10px !important;
-        }
-
-        .sidebar .sidebar-content label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-        }
-
-        .sidebar .sidebar-content div[role="radiogroup"] label {
-            padding-right: 15px !important;
-            margin-bottom: 5px !important;
-            display: block !important;
-            width: 100% !important;
-        }
-
-        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-            width: 320px;
-            min-width: 320px;
-        }
-        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-            width: 320px;
-            min-width: 320px;
-        }
-
-
-        [data-testid="stSidebar"] .css-1wvake5,
-        [data-testid="stSidebar"] .css-1v0mbdj,
-        [data-testid="stSidebar"] label {
-            white-space: normal !important;
-            word-break: break-word !important;
-            font-size: 1.1rem !important;
-            font-weight: 500 !important;
-            padding: 8px 14px !important;
-            margin-bottom: 10px !important;
-            border-radius: 8px;
-            color: #2c3e50 !important;
-            background: none !important;
-            transition: background 0.2s;
-            display: block;
-        }
-
-
-        [data-testid="stSidebar"] .css-1wvake5[aria-checked="true"],
-        [data-testid="stSidebar"] .css-1v0mbdj[aria-checked="true"],
-        [data-testid="stSidebar"] label[data-selected="true"] {
-            background: linear-gradient(90deg, #eaf6fb 60%, #e0f7fa 100%) !important;
-            color: #0077b6 !important;
-        }... [data-testid="stSidebar"] svg {
-            margin-right: 10px;
-            vertical-align: middle;
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
         }
         </style>
         """
