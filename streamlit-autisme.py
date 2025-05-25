@@ -1350,7 +1350,7 @@ def show_data_exploration():
     import seaborn as sns
     from scipy.stats import chi2_contingency, mannwhitneyu
     
-     st.markdown(f"""
+    st.markdown(f"""
     <style>
         .exploration-header {{
             background: linear-gradient(90deg, #3498db, #2ecc71);
