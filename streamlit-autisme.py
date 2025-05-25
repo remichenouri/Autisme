@@ -4141,10 +4141,7 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
 def show_about_page():
-    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
-    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
-    
-    # En-tête principal avec gradient
+
     st.markdown("""
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                 padding: 40px 20px; border-radius: 20px; margin-bottom: 30px; text-align: center;">
@@ -4156,6 +4153,9 @@ def show_about_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
 
     # Section contexte avec design amélioré
     st.markdown("""
