@@ -1349,26 +1349,6 @@ def show_data_exploration():
     import matplotlib.pyplot as plt
     import seaborn as sns
     from scipy.stats import chi2_contingency, mannwhitneyu
-    
-    st.markdown(f"""
-    <style>
-        .exploration-header {{
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            padding: 40px 25px;
-            border-radius: 20px;
-            margin-bottom: 35px;
-            text-align: center;
-        }}
-        
-        .section-title {{
-            color: #2c3e50;
-            font-size: 2.2rem;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin: 40px 0 25px 0;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
 
     df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats = load_dataset()
     st.markdown("""
@@ -1399,9 +1379,6 @@ def show_data_exploration():
         }
 
     with st.expander("📂 Structure des Données", expanded=True):
-        st.markdown("""
-        <div class="section-title">Structure des Données</div>
-        """, unsafe_allow_html=True)
         st.markdown("""
             <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
                 <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
@@ -1436,10 +1413,8 @@ def show_data_exploration():
         with tab5:
             st.caption("Dataset 5")
             st.dataframe(df_ds5.head(5), use_container_width=True)
-            
+
     with st.expander("🧼 Pipeline de Nettoyage", expanded=True):
-        st.markdown("""
-        <div class="section-title">Pipeline de Nettoyage</div>""")
         st.markdown("""
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #2c3e50; margin-top: 0;">Étapes de Transformation des Données</h3>
@@ -2215,6 +2190,7 @@ def show_data_exploration():
 
         except Exception as e:
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
+
 
 def show_ml_analysis():
     import plotly.express as px
