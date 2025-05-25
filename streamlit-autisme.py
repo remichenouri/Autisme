@@ -48,10 +48,10 @@ def initialize_session_state():
     """Initialise l'état de session pour conserver les configurations entre les recharges"""
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
-        
+
         # Par défaut, commencer sur la page d'accueil
         default_tool = "🏠 Accueil"
-        
+
         # Récupérer le paramètre de sélection de l'URL s'il existe
         try:
             # Pour les versions récentes de Streamlit (1.30.0+)
@@ -63,7 +63,7 @@ def initialize_session_state():
                     "🤖 Prédiction par IA": "🤖 Prédiction par IA",
                     "🔍 Exploration des Données": "🔍 Exploration des Données"
                 }
-                
+
                 if selection in selection_mapping:
                     st.session_state.tool_choice = selection_mapping[selection]
                 else:
@@ -80,7 +80,7 @@ def initialize_session_state():
                         "🤖 Prédiction par IA": "🤖 Prédiction par IA",
                         "🔍 Exploration des Données": "🔍 Exploration des Données"
                     }
-                    
+
                     if selection in selection_mapping:
                         st.session_state.tool_choice = selection_mapping[selection]
                     else:
@@ -89,42 +89,35 @@ def initialize_session_state():
                     st.session_state.tool_choice = default_tool
             except:
                 st.session_state.tool_choice = default_tool
-        
+
         st.session_state.data_exploration_expanded = True
 
 def show_navigation_menu():
-    """Menu de navigation amélioré sans barres bleues"""
-    
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-        <h2 style="color: white; text-align: center; margin: 0; font-size: 1.8rem;">
-            🧩 Autisme - Navigation
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("## Autisme - Navigation")
 
-    st.markdown("**Choisissez un outil :**")
+    st.markdown("Choisissez un outil :")
 
-    options = [
-        "🏠 Accueil",
-        "🔍 Exploration des Données", 
-        "🧠 Analyse ML",
-        "🤖 Prédiction par IA",
-        "📚 Documentation",
-        "ℹ️ À propos"
-    ]
 
-    if 'tool_choice' not in st.session_state:
+    options = ["🏠 Accueil",
+             "🔍 Exploration des Données",
+             "🧠 Analyse ML",
+             "🤖 Prédiction par IA",
+             "📚 Documentation",
+             "ℹ️ À propos"]
+
+
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
         st.session_state.tool_choice = "🏠 Accueil"
 
-    current_index = options.index(st.session_state.tool_choice) if st.session_state.tool_choice in options else 0
+    current_index = options.index(st.session_state.tool_choice)
+
 
     tool_choice = st.radio(
         "",
         options,
+        label_visibility="collapsed",
         index=current_index,
-        label_visibility="collapsed"
+        extended=True
     )
 
     if tool_choice != st.session_state.tool_choice:
@@ -236,7 +229,7 @@ def set_custom_theme():
 
         .sidebar .sidebar-content {
             background-color: #f5f7fa !important;
-             border-right: none !important; /* Supprimer la bordure bleue */
+            border-right: 2px solid #3498db !important;
         }
 
         .sidebar .sidebar-content .streamlit-expanderHeader,
@@ -318,75 +311,6 @@ def set_custom_theme():
             transform: translateY(-5px);
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
-        /* Correction pour les sections info sans bordures bleues */
-        .stInfo, [data-testid="stAlert"] {
-            border: none !important;
-            border-left: 4px solid #3498db !important; /* Bordure gauche uniquement */
-            background-color: #f8f9fa !important;
-            border-radius: 8px !important;
-        }
-        
-        /* Suppression des bordures sur les conteneurs de colonnes */
-        [data-testid="column"] {
-            border: none !important;
-            background: transparent !important;
-        }
-        
-        /* Amélioration des messages d'info/success/warning */
-        .stSuccess {
-            border: none !important;
-            border-left: 4px solid #2ecc71 !important;
-            background-color: #f1f8e9 !important;
-        }
-        
-        .stWarning {
-            border: none !important;
-            border-left: 4px solid #f39c12 !important;
-            background-color: #fef9e7 !important;
-        }
-
-        /* Correction de la sidebar - remplacer la section problématique */
-        [data-testid="stSidebar"] {
-            background-color: #f5f7fa !important;
-            border-right: none !important; /* Supprimer la bordure bleue */
-            padding-top: 2rem;
-            width: 250px !important;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1); /* Ombre subtile au lieu de bordure */
-        }
-        
-        [data-testid="stSidebarContent"] {
-            width: 100%;
-            overflow: auto;
-            background-color: #f5f7fa !important;
-            border: none !important; /* Éliminer toute bordure */
-        }
-        
-        /* Amélioration des labels radio sans bordures bleues */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: #2c3e50 !important;
-            font-weight: 500 !important;
-            font-size: 0.95rem !important;
-            margin-bottom: 8px !important;
-            padding: 8px 12px !important;
-            border-radius: 8px;
-            border: none !important; /* Supprimer les bordures */
-            background: transparent !important;
-            transition: background-color 0.2s ease;
-        }
-        
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background-color: #e3f2fd !important;
-        }
-        
-        /* État sélectionné sans barre bleue */
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
-            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
-            color: #1976d2 !important;
-            font-weight: 600 !important;
-            border: none !important;
-        }
-        
-
 
         .card-title {
             color: var(--primary);
@@ -866,7 +790,7 @@ def get_img_with_href(img_url, target_url, as_banner=False):
             style = 'style="width:100%;height:auto;display:block;object-fit:contain;margin:0 auto;padding:0;" loading="lazy"'
 
         container_style = 'style="width:100%; padding:10px; background-color:white; border-radius:10px; overflow:hidden; margin-bottom:20px;"'
-        
+
         # Ne pas ajouter de lien si target_url est None, vide ou '#'
         if target_url and target_url != "#":
             html_code = f'<div {container_style}><a href="{target_url}" target="_blank" style="display:block; margin:0; padding:0; line-height:0;"><img src="data:image/webp;base64,{img_str}" {style}></a></div>'
@@ -1138,7 +1062,7 @@ def show_home_page():
     # Conservation de l'image Ghibli sans lien cliquable
     image_url ="https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
-    
+
     st.markdown("""
     <div style="padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
         <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2rem;">Qu'est-ce que l'autisme?</h2>
@@ -1147,7 +1071,7 @@ def show_home_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("""
     <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Évolution de la compréhension de l'autisme</h2>
 
@@ -1172,7 +1096,7 @@ def show_home_page():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Rectangle du spectre autistique recentré (image 265)
     st.markdown("## Le spectre autistique", unsafe_allow_html=True)
 
@@ -1180,27 +1104,27 @@ def show_home_page():
 
     with col2:  # Utilisation de la colonne centrale pour centrer le contenu
         st.write("""
-        L'autisme est aujourd'hui compris comme un **spectre** de conditions, reflétant la 
+        L'autisme est aujourd'hui compris comme un **spectre** de conditions, reflétant la
         grande variabilité des manifestations. Cette conception reconnaît que:
-        
+
         * Chaque personne autiste présente un profil unique de forces et de défis
         * Les manifestations varient en intensité et en expression
         * Les niveaux de soutien nécessaires peuvent différer considérablement
         """)
-        
+
         st.write("Le DSM-5 définit trois niveaux de soutien nécessaire:")
-        
+
         niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
-        
+
         with niveau_col1:
             st.info("**Niveau 1**\n\nNécessite un soutien")
-        
+
         with niveau_col2:
             st.info("**Niveau 2**\n\nNécessite un soutien important")
-        
+
         with niveau_col3:
             st.info("**Niveau 3**\n\nNécessite un soutien très important")
-    
+
     # Section "Contexte du projet" (ajoutée depuis le rapport)
     st.markdown("## Contexte du projet", unsafe_allow_html=True)
 
@@ -1208,24 +1132,24 @@ def show_home_page():
 
     with col2:
         st.write("""
-        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des **Troubles du Spectre de l'Autisme (TSA)**. 
+        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des **Troubles du Spectre de l'Autisme (TSA)**.
         L'autisme n'est pas une maladie mais une **différence neurologique** affectant le fonctionnement du cerveau.
-        
-        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 5000 personnes de différentes origines 
+
+        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 5000 personnes de différentes origines
         (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) pour identifier les facteurs associés à la présence d'un TSA.
-        
-        L'objectif est de construire des modèles prédictifs capables d'assister dans l'évaluation de la présence d'un TSA 
-        en fonction des caractéristiques individuelles, tout en offrant une compréhension claire et accessible de ce qu'est 
+
+        L'objectif est de construire des modèles prédictifs capables d'assister dans l'évaluation de la présence d'un TSA
+        en fonction des caractéristiques individuelles, tout en offrant une compréhension claire et accessible de ce qu'est
         l'autisme pour tous les publics.
         """)
-        
+
         st.write("""
         📊 **Prévalence de l'autisme:**
         * 1 à 2% de la population mondiale est concernée
         * En France, environ 700 000 personnes sont concernées
         * Ratio historique garçons/filles d'environ 4:1 (aujourd'hui remis en question)
         """)
-    
+
     # Section "À qui s'adresse ce projet" (ajoutée depuis le rapport)
     st.markdown("## À qui s'adresse ce projet", unsafe_allow_html=True)
 
@@ -1233,11 +1157,11 @@ def show_home_page():
 
     with col2:
         col_a, col_b = st.columns(2)
-        
+
         with col_a:
             st.info("### Chercheurs en santé et psychologie\nUne analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer des tendances cliniques dans le domaine des TSA.")
             st.warning("### Familles et particuliers\nOutils d'auto-évaluation et d'information pour répondre aux questions ou suspicions de TSA et faciliter l'orientation.")
-            
+
         with col_b:
             st.success("### Professionnels de santé\nDes résultats exploitables permettant d'améliorer le dépistage et la prise en charge des personnes avec TSA.")
             st.error("### Décideurs publics\nDonnées et analyses pouvant informer les politiques publiques et orienter les décisions de financement pour les services aux personnes avec TSA.")
@@ -1247,13 +1171,13 @@ def show_home_page():
         et des explications vulgarisées. Les outils de prédiction peuvent aider à une détection précoce, facilitant
         ainsi une prise en charge adaptée et personnalisée.
         """)
-        
+
     st.markdown("""
     <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Accompagnement et soutien</h2>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
-    
+
     with col1:
         st.markdown("""
         <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 10px; height: 300px;">
@@ -1266,7 +1190,7 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with col2:
         st.markdown("""
         <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 20px; border-radius: 10px; height: 300px;">
@@ -1279,7 +1203,7 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with col3:
         st.markdown("""
         <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 10px; height: 300px;">
@@ -1292,13 +1216,13 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        
+
     st.markdown("""
     <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Caractéristiques principales</h2>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    
+
     with col1:
         st.markdown("""
         <div style="background-color: #f2f6f9; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
@@ -1311,7 +1235,7 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with col2:
         st.markdown("""
         <div style="background-color: #f2f9f5; padding: 20px; border-radius: 10px; border-left: 4px solid #2ecc71;">
@@ -1324,7 +1248,7 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     # Rectangle "Notre approche" recentré sans liens cliquables (image 291)
     st.markdown("## Notre approche", unsafe_allow_html=True)
 
@@ -1338,10 +1262,10 @@ def show_home_page():
             Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
             </p>
             <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
-            
+
         </div>
         """, unsafe_allow_html=True)
-            
+
     # Avertissement professionnel
     st.markdown("""
     <div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
@@ -1512,7 +1436,7 @@ def show_data_exploration():
         else:
             st.success("✅ Aucune valeur manquante détectée dans le jeu de données.")
 
-    
+
     with st.expander("📈 Statistiques du Dataset Final", expanded=True):
         st.subheader("Statistiques Descriptives")
         tab1, tab2 = st.tabs(["Numériques", "Catégorielles"])
@@ -1520,7 +1444,7 @@ def show_data_exploration():
             st.write(df.describe())
         with tab2:
             categorical_stats = df.select_dtypes(include=['object']).describe().T
-            st.dataframe(categorical_stats)           
+            st.dataframe(categorical_stats)
 
     with st.expander("📊 Distribution des Variables Clés", expanded=True):
         st.markdown("""
@@ -1529,7 +1453,7 @@ def show_data_exploration():
             <p style="color: #7f8c8d;">Analyse interactive des distributions par variable.</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         # Dictionnaire de commentaires pour les variables
         variable_comments = {
             'A1': "Variable liée au questionnaire AQ-10 : évalue la capacité à remarquer des détails que d'autres pourraient manquer.",
@@ -1545,17 +1469,17 @@ def show_data_exploration():
             'Jaunisse': "Indique si l'individu a eu une jaunisse à la naissance, facteur potentiellement associé au risque d'autisme.",
             'Statut_testeur': "Indique la relation entre le testeur et la personne évaluée (Famille, Professionnel de santé, Individu, etc.).",
         }
-        
+
         # Définition par défaut pour les variables sans commentaire spécifique
         default_comment = "Distribution de la variable dans l'ensemble du dataset."
-        
+
         all_columns = [col for col in df.columns if col != 'TSA']
         analysis_var = st.selectbox("Choisir une variable à analyser", all_columns, key="analysis_var_in_exploration")
-        
+
         # Afficher le commentaire pour la variable sélectionnée
         comment = variable_comments.get(analysis_var, default_comment)
         st.info(comment)
-        
+
         col1, col2 = st.columns(2)
         with col1:
             color_var = None  # Ne pas utiliser la coloration par TSA
@@ -1680,58 +1604,58 @@ def show_data_exploration():
             <p>Évaluation des relations entre variables et diagnostic TSA</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
         test_type = st.radio(
             "Choisir le type de test:",
             ["Chi-carré (variables catégorielles)", "Mann-Whitney (variables numériques)"],
             key="stat_test_type"
         )
-        
+
         if test_type == "Chi-carré (variables catégorielles)":
             from scipy.stats import chi2_contingency
-    
+
             st.markdown("""
-            **Test d'indépendance du Chi-carré :** Évalue si deux variables catégorielles sont indépendantes. 
+            **Test d'indépendance du Chi-carré :** Évalue si deux variables catégorielles sont indépendantes.
             Un p-value < 0.05 suggère une relation significative.
             """)
-    
+
             df = df.copy()
             categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
             aq_columns = [col for col in df.columns if col.startswith('A') and col[1:].isdigit()]
             categorical_cols.extend([col for col in aq_columns if col not in categorical_cols])
-    
+
             if 'TSA' in categorical_cols:
                 categorical_cols.remove('TSA')
-    
+
                 if categorical_cols:
                     cat_var = st.selectbox(
                         "Sélectionner une variable catégorielle:",
                         categorical_cols,
                         key="chi2_var_selector"
                     )
-    
+
                     try:
                         contingency_table = pd.crosstab(df[cat_var], df['TSA'])
                         chi2_stat, p_val, dof, expected = chi2_contingency(contingency_table)
-    
+
                         # Réduction de la largeur avec colonnes optimisées
                         col1, col2, col3 = st.columns([2, 2, 3])
-                        
+
                         with col1:
                             st.markdown("### Table de contingence")
                             st.dataframe(contingency_table, use_container_width=True)
-                            
+
                         with col2:
                             st.markdown("### Résultats du test")
                             st.metric("Statistique χ²", f"{chi2_stat:.3f}")
                             st.metric("p-value", f"{p_val:.5f}")
                             st.metric("Degrés de liberté", dof)
-    
+
                             if p_val < 0.05:
                                 st.success("**Significatif** (p < 0.05)")
                             else:
                                 st.info("**Non significatif** (p > 0.05)")
-    
+
                         with col3:
                             # Graphique plus compact
                             contingency_percent = contingency_table.div(contingency_table.sum(axis=1), axis=0) * 100
@@ -1745,58 +1669,58 @@ def show_data_exploration():
                             )
                             fig.update_layout(height=300)  # Hauteur réduite
                             st.plotly_chart(fig, use_container_width=True)
-    
+
                     except Exception as e:
                         st.error(f"Erreur lors du test Chi-carré: {str(e)}")
                 else:
                     st.warning("Aucune variable catégorielle trouvée.")
-    
+
         else:  # Mann-Whitney
             st.markdown("""
-            **Test de Mann-Whitney U :** Compare les distributions de deux groupes indépendants. 
+            **Test de Mann-Whitney U :** Compare les distributions de deux groupes indépendants.
             Un p-value < 0.05 suggère une différence significative.
             """)
-    
+
             numeric_cols = df.select_dtypes(include=['float', 'int']).columns.tolist()
             numeric_cols = [col for col in numeric_cols if not (col.startswith('A') and col[1:].isdigit() and len(col) <= 3)]
-    
+
             if 'Score_A10' in numeric_cols:
                 numeric_cols.remove('Score_A10')
                 numeric_cols = ['Score_A10'] + numeric_cols
-    
+
             if numeric_cols:
                 num_var = st.selectbox(
                     "Sélectionner une variable numérique:",
                     numeric_cols,
                     key="mw_var_selector"
                 )
-                
+
                 try:
                     if 'TSA' in df.columns and df['TSA'].nunique() >= 2:
                         yes_group = df[df['TSA'] == 'Yes'][num_var].dropna()
                         no_group = df[df['TSA'] == 'No'][num_var].dropna()
-    
+
                         if len(yes_group) > 0 and len(no_group) > 0:
                             stat, p_val = mannwhitneyu(yes_group, no_group, alternative='two-sided')
-    
+
                             # Disposition compacte en 3 colonnes
                             col1, col2, col3 = st.columns([2, 2, 3])
-                            
+
                             with col1:
                                 st.markdown("### Statistiques")
                                 group_stats = df.groupby('TSA')[num_var].agg(['count', 'mean', 'std']).round(2)
                                 st.dataframe(group_stats, use_container_width=True)
-    
+
                             with col2:
                                 st.markdown("### Résultats")
                                 st.metric("Statistique U", f"{stat:.1f}")
                                 st.metric("p-value", f"{p_val:.5f}")
-                                
+
                                 if p_val < 0.05:
                                     st.success("**Significatif**")
                                 else:
                                     st.info("**Non significatif**")
-    
+
                             with col3:
                                 # Box plot compact
                                 fig = px.box(
@@ -1822,81 +1746,81 @@ def show_data_exploration():
             <p style="color: #7f8c8d;">Réduction de dimensions pour visualiser la structure des données et les relations entre variables.</p>
         </div>
         """, unsafe_allow_html=True)
-    
+
         st.markdown("""
         L'**Analyse Factorielle de Données Mixtes (FAMD)** est une méthode particulièrement adaptée à nos données car elle permet de traiter simultanément:
         - Des variables numériques (comme l'âge, les scores A1-A10)
         - Des variables catégorielles (comme le genre, l'ethnie, les antécédents familiaux)
-    
+
         Cette méthode nous permet de projeter les données sur un plan à deux dimensions pour visualiser les relations entre les variables et les individus.
         """)
-    
+
         try:
             import prince
             from sklearn import utils
             import numpy as np
-    
+
             df_famd = df.copy()
             if 'Jaunisse' in df_famd.columns:
                 df_famd = df_famd.drop(columns=['Jaunisse'])
             df_famd = df_famd.reset_index(drop=True)
-    
+
             class FAMD_Custom(prince.FAMD):
                 """Classe personnalisée pour contourner le problème d'indexation booléenne dans Prince"""
                 def transform(self, X):
                     utils.validation.check_is_fitted(self, 's_')
                     return self.row_coordinates(X)
-    
+
                 def column_correlations_custom(self, X):
                     """Méthode personnalisée pour calculer les corrélations des colonnes"""
                     row_pc = self.row_coordinates(X)
                     correlations = {}
-    
+
                     for feature in X.columns:
-                        if X[feature].dtype.kind in 'ifc':  
+                        if X[feature].dtype.kind in 'ifc':
                             corrs = []
                             for component in row_pc.columns:
                                 corrs.append(np.corrcoef(X[feature], row_pc[component])[0, 1])
                             correlations[feature] = corrs
-                      
-                        else: 
+
+                        else:
                             means = {}
                             for component in row_pc.columns:
                                 means[component] = []
-    
+
                             for category in X[feature].unique():
                                 mask = (X[feature] == category).values
                                 for component in row_pc.columns:
                                     coord_mean = row_pc.loc[mask, component].mean()
                                     means[component].append(coord_mean)
-    
+
                             max_abs = max(abs(v) for comp_means in means.values() for v in comp_means)
-                            if max_abs > 0:  
+                            if max_abs > 0:
                                 for component in means:
                                     means[component] = [v/max_abs for v in means[component]]
-    
+
                             corrs = []
                             for component in row_pc.columns:
                                 corrs.append(sum(means[component])/len(means[component]))
                             correlations[feature] = corrs
-    
+
                     return pd.DataFrame(
                         data=[[correlations[feature][i] for feature in X.columns] for i in range(len(row_pc.columns))],
                         columns=X.columns
                     ).T
-    
+
             for col in df_famd.select_dtypes(include=['object']).columns:
                 df_famd[col] = df_famd[col].astype('category')
-    
+
             for col in df_famd.select_dtypes(include=['number']).columns:
                 df_famd[col] = df_famd[col].astype('float64')
-    
+
             df_famd = df_famd.dropna()
             df_famd = df_famd.reset_index(drop=True)
-    
+
             n_components = min(5, min(df_famd.shape) - 1)
             X_famd = df_famd.copy()
-    
+
             famd = FAMD_Custom(
                 n_components=n_components,
                 n_iter=10,
@@ -1905,12 +1829,12 @@ def show_data_exploration():
                 engine='sklearn'
             )
             famd = famd.fit(X_famd)
-    
+
             coordinates = famd.transform(X_famd)
-    
+
             eigenvalues = famd.eigenvalues_
             explained_variance = eigenvalues / sum(eigenvalues)
-    
+
             famd_tabs = st.tabs([
                 "Projection des individus",
                 "Cercle des corrélations",
@@ -1918,12 +1842,12 @@ def show_data_exploration():
                 "Cercle de corrélation Score A10",
                 "Interprétation"
             ])
-    
+
             with famd_tabs[0]:
                 st.subheader("Projection des individus")
-                
+
                 col1, col2 = st.columns([2, 1])
-                
+
                 with col1:
                     fig, ax = plt.subplots(figsize=(8, 5))
                     if 'TSA' in X_famd.columns:
@@ -1942,49 +1866,49 @@ def show_data_exploration():
                         ax.legend(title="TSA")
                     else:
                         ax.scatter(coordinates.values[:, 0], coordinates.values[:, 1], alpha=0.7, s=30)
-    
+
                     ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})')
                     ax.set_ylabel(f'Comp. 2 ({explained_variance[1]:.1%})')
                     ax.set_title('Projection des individus', fontsize=12)
                     ax.grid(True, linestyle='--', alpha=0.7)
                     st.pyplot(fig)
-                    
+
                 with col2:
                     st.markdown("### Variance expliquée")
                     for i, var in enumerate(explained_variance[:3]):
                         st.metric(f"Composante {i+1}", f"{var:.1%}")
-    
+
             with famd_tabs[1]:
                 st.subheader("Cercle des corrélations")
-                
+
                 col1, col2 = st.columns([3, 2])
-                
+
                 with col1:
                     try:
                         if hasattr(famd, 'column_correlations'):
                             column_corr = famd.column_correlations(X_famd)
                         else:
                             column_corr = famd.column_correlations_custom(X_famd)
-    
+
                         fig, ax = plt.subplots(figsize=(6, 6))
                         circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
                         ax.add_artist(circle)
-    
+
                         ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
                         ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-    
+
                         for i, var in enumerate(column_corr.index):
                             x = column_corr.iloc[i, 0]
                             y = column_corr.iloc[i, 1]
-    
+
                             ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-    
+
                             # Texte plus petit et sélectif
                             if var == 'Score_A10':
                                 ax.text(x*1.1, y*1.1, var, fontsize=10, color='red', fontweight='bold')
                             elif var in ['TSA', 'Age', 'Genre']:
                                 ax.text(x*1.1, y*1.1, var, fontsize=8, color='green')
-    
+
                         ax.set_xlim(-1.1, 1.1)
                         ax.set_ylim(-1.1, 1.1)
                         ax.set_xlabel(f'Comp. 1 ({explained_variance[0]:.1%})', fontsize=10)
@@ -1992,10 +1916,10 @@ def show_data_exploration():
                         ax.set_title('Cercle des corrélations', fontsize=12)
                         ax.grid(True, linestyle='--', alpha=0.5)
                         st.pyplot(fig)
-                        
+
                     except Exception as e:
                         st.warning(f"Impossible de générer le cercle : {str(e)}")
-                        
+
                 with col2:
                     st.markdown("### Variables principales")
                     st.write("Variables les plus contributives :")
@@ -2004,13 +1928,13 @@ def show_data_exploration():
                         if var in column_corr.index:
                             contrib = np.sqrt(column_corr.loc[var, 0]**2 + column_corr.loc[var, 1]**2)
                             st.write(f"• **{var}** : {contrib:.3f}")
-    
+
             with famd_tabs[2]:
                 st.subheader("FAMD centrée sur Score A10")
                 st.markdown("""
                 Analyse spécifique mettant en évidence la relation entre le Score A10 et le diagnostic TSA.
                 """)
-          
+
                 try:
                     if 'Score_A10' in X_famd.columns:
                         a_vars_to_exclude = []
@@ -2018,25 +1942,25 @@ def show_data_exploration():
                             col_name = f'A{i}'
                             if col_name in X_famd.columns:
                                 a_vars_to_exclude.append(col_name)
-                        
+
                         # Créer un nouveau dataframe en excluant explicitement les variables A1-A10
                         X_filtered = X_famd.drop(columns=a_vars_to_exclude, errors='ignore').copy()
-                        
+
                         # Vérification que toutes les variables A1-A10 sont bien exclues
                         remaining_a_vars = [col for col in X_filtered.columns if col.startswith('A') and col[1:].isdigit()]
                         if remaining_a_vars:
                             st.warning(f"Variables A résiduelles : {remaining_a_vars}")
                             X_filtered = X_filtered.drop(columns=remaining_a_vars, errors='ignore')
-                        
+
                         # Définir les variables clés pour l'analyse FAMD centrée sur Score_A10
                         key_vars = ['Score_A10', 'TSA']
                         for var in ['Age', 'Genre', 'Ethnie']:
                             if var in X_filtered.columns:
                                 key_vars.append(var)
-                        
+
                         # Créer le dataset final pour l'analyse
                         X_a10 = X_filtered[key_vars].copy()
-                        
+
                         famd_a10 = FAMD_Custom(
                             n_components=min(3, len(key_vars)-1),
                             n_iter=10,
@@ -2046,15 +1970,15 @@ def show_data_exploration():
                         )
                         famd_a10 = famd_a10.fit(X_a10)
                         coords_a10 = famd_a10.transform(X_a10)
-                        
+
                         # Disposition en colonnes comme la projection des individus
                         col1, col2 = st.columns([2, 1])
-                        
+
                         with col1:
                             # Création du graphique de projection avec même taille que projection individus
                             fig, ax = plt.subplots(figsize=(8, 5))
                             coords_array = coords_a10.values
-    
+
                             if 'TSA' in X_a10.columns:
                                 for category in X_a10['TSA'].unique():
                                     mask = (X_a10['TSA'] == category).values
@@ -2068,13 +1992,13 @@ def show_data_exploration():
                                         s=25
                                     )
                                 ax.legend(title="TSA")
-                            
+
                             ax.set_xlabel('Composante 1', fontsize=10)
                             ax.set_ylabel('Composante 2', fontsize=10)
                             ax.set_title('FAMD centrée Score_A10', fontsize=12)
                             ax.grid(True, linestyle='--', alpha=0.7)
                             st.pyplot(fig)
-                            
+
                         with col2:
                             st.markdown("### Variance Score A10")
                             eigenvalues_a10 = famd_a10.eigenvalues_
@@ -2085,12 +2009,12 @@ def show_data_exploration():
                         st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                 except Exception as e:
                     st.warning(f"Erreur lors de l'analyse FAMD : {str(e)}")
-    
+
             with famd_tabs[3]:
                 st.subheader("Cercle de corrélation Score A10")
-                
+
                 col1, col2 = st.columns([3, 2])
-                
+
                 with col1:
                     try:
                         if 'Score_A10' in X_famd.columns:
@@ -2100,26 +2024,26 @@ def show_data_exploration():
                             else:
                                 st.info("Utilisation d'une méthode alternative pour calculer les corrélations...")
                                 column_corr_a10 = famd_a10.column_correlations_custom(X_a10)
-    
+
                             fig, ax = plt.subplots(figsize=(6, 6))
                             circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
                             ax.add_artist(circle)
-    
+
                             ax.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
                             ax.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
-    
+
                             for i, var in enumerate(column_corr_a10.index):
                                 x = column_corr_a10.iloc[i, 0]
                                 y = column_corr_a10.iloc[i, 1]
-    
+
                                 ax.arrow(0, 0, x, y, head_width=0.05, head_length=0.05, fc='blue', ec='blue', alpha=0.7)
-                                
+
                                 # Mise en évidence du Score_A10
                                 if var == 'Score_A10':
                                     ax.text(x*1.1, y*1.1, var, fontsize=12, color='red', fontweight='bold')
                                 else:
                                     ax.text(x*1.1, y*1.1, var, fontsize=10)
-    
+
                             ax.set_xlim(-1.1, 1.1)
                             ax.set_ylim(-1.1, 1.1)
                             ax.set_xlabel(f'Composante 1', fontsize=10)
@@ -2131,25 +2055,25 @@ def show_data_exploration():
                             st.warning("La variable Score_A10 n'est pas disponible dans le dataset.")
                     except Exception as e:
                         st.warning(f"Impossible de générer le cercle des corrélations: {str(e)}")
-                        
+
                 with col2:
                     st.markdown("### Analyse Score A10")
                     if 'column_corr_a10' in locals():
                         if 'Score_A10' in column_corr_a10.index:
                             score_contrib = np.sqrt(column_corr_a10.loc['Score_A10', 0]**2 + column_corr_a10.loc['Score_A10', 1]**2)
                             st.metric("Contribution Score A10", f"{score_contrib:.3f}")
-                        
+
                         st.markdown("**Variables corrélées :**")
                         for var in column_corr_a10.index:
                             if var != 'Score_A10':
                                 contrib = np.sqrt(column_corr_a10.loc[var, 0]**2 + column_corr_a10.loc[var, 1]**2)
                                 st.write(f"• {var}: {contrib:.3f}")
-    
+
             with famd_tabs[4]:
                 st.subheader("Interprétation des résultats")
-                
+
                 col1, col2 = st.columns(2)
-                
+
                 with col1:
                     st.markdown("### Points clés")
                     st.write(f"""
@@ -2157,7 +2081,7 @@ def show_data_exploration():
                     • **Variables discriminantes** : Score A10, TSA, Age
                     • **Regroupement TSA** : Patterns identifiables
                     """)
-                    
+
                 with col2:
                     st.markdown("### Composantes principales")
                     summary_df = pd.DataFrame({
@@ -2165,21 +2089,21 @@ def show_data_exploration():
                         'Variance (%)': (explained_variance[:3] * 100).round(2)
                     })
                     st.dataframe(summary_df, use_container_width=True)
-    
+
                 st.markdown("""
                 ### Analyse détaillée
-    
+
                 L'analyse factorielle de données mixtes nous permet d'identifier plusieurs tendances importantes:
-    
+
                 1. **Structure des données** : Les deux premières composantes principales expliquent environ {:.1%} de la variance totale, ce qui indique une bonne capture de la structure des données.
-    
+
                 2. **Variables discriminantes** : Les variables qui contribuent le plus à la distinction entre les groupes incluent le Score A10 et d'autres variables démographiques.
-    
+
                 3. **Regroupement des cas TSA** : On observe une tendance au regroupement des cas diagnostiqués TSA dans l'espace factoriel, ce qui suggère des patterns communs dans leurs profils.
-    
+
                 4. **Influence du Score A10** : Le Score A10 montre une corrélation significative avec la première composante principale, confirmant son importance dans le processus diagnostique.
                 """.format(explained_variance[0] + explained_variance[1]))
-    
+
                 st.subheader("Tableau récapitulatif")
                 summary_complete_df = pd.DataFrame({
                     'Composante': [f"Composante {i+1}" for i in range(len(eigenvalues))],
@@ -2192,7 +2116,7 @@ def show_data_exploration():
                     'Variance expliquée (%)': '{:.2f}%',
                     'Variance cumulée (%)': '{:.2f}%'
                 }))
-    
+
         except Exception as e:
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
 
@@ -2218,7 +2142,7 @@ def show_ml_analysis():
 
     # Configuration initiale
     os.environ['TQDM_DISABLE'] = '1'
-    
+
     try:
         st.set_option('deprecation.showPyplotGlobalUse', False)
     except Exception:
@@ -2237,20 +2161,20 @@ def show_ml_analysis():
                 random_state=42,
                 n_jobs=-1
             )
-            
+
             pipeline = Pipeline([
                 ('preprocessor', _preprocessor),
                 ('classifier', rf)
             ])
-            
+
             start_time = time.time()
             pipeline.fit(_X_train, _y_train)
             training_time = time.time() - start_time
-            
+
             # Prédictions
             y_pred = pipeline.predict(_X_test)
             y_pred_proba = pipeline.predict_proba(_X_test)[:, 1]
-            
+
             # Métriques
             metrics = {
                 'accuracy': accuracy_score(_y_test, y_pred),
@@ -2260,29 +2184,29 @@ def show_ml_analysis():
                 'auc': roc_auc_score(_y_test, y_pred_proba),
                 'training_time': training_time
             }
-            
+
             # Matrice de confusion
             cm = confusion_matrix(_y_test, y_pred)
-            
+
             # Courbes
             fpr, tpr, _ = roc_curve(_y_test, y_pred_proba)
             precision_curve, recall_curve, _ = precision_recall_curve(_y_test, y_pred_proba)
-            
+
             # Importance des features
             try:
                 feature_names = pipeline.named_steps['preprocessor'].get_feature_names_out()
             except:
                 feature_names = [f"feature_{i}" for i in range(len(pipeline.named_steps['classifier'].feature_importances_))]
-            
+
             importances = pipeline.named_steps['classifier'].feature_importances_
             feature_importance = pd.DataFrame({
                 'feature': feature_names,
                 'importance': importances
             }).sort_values('importance', ascending=False)
-            
+
             # Validation croisée
             cv_scores = cross_val_score(pipeline, _X_train, _y_train, cv=5, scoring='accuracy')
-            
+
             return {
                 'pipeline': pipeline,
                 'metrics': metrics,
@@ -2295,7 +2219,7 @@ def show_ml_analysis():
                 'y_pred_proba': y_pred_proba,
                 'status': 'success'
             }
-            
+
         except Exception as e:
             st.error(f"Erreur lors de l'entraînement : {str(e)}")
             return {'status': 'error', 'message': str(e)}
@@ -2304,30 +2228,30 @@ def show_ml_analysis():
     try:
         with st.spinner("Chargement des données..."):
             df, _, _, _, _, _, _ = load_dataset()
-        
+
         # Nettoyage optimisé
         aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
         if aq_columns:
             df = df.drop(columns=aq_columns)
-        
+
         if 'Jaunisse' in df.columns:
             df = df.drop(columns=['Jaunisse'])
-            
+
         if 'TSA' not in df.columns:
             st.error("❌ Colonne 'TSA' manquante dans le dataset")
             return
-            
+
         # Préparation des variables
         X = df.drop(columns=['TSA'])
         y = df['TSA'].map({'Yes': 1, 'No': 0})
-        
+
         # Vérification des données
         if X.empty or y.empty:
             st.error("❌ Données insuffisantes pour l'analyse")
             return
-            
+
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
-        
+
     except Exception as e:
         st.error(f"❌ Erreur de chargement des données : {str(e)}")
         return
@@ -2335,7 +2259,7 @@ def show_ml_analysis():
     # Préprocesseur
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     categorical_cols = X.select_dtypes(include=['object', 'category']).columns.tolist()
-    
+
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', StandardScaler(), numerical_cols),
@@ -2352,11 +2276,11 @@ def show_ml_analysis():
         <h1 class="app-title">Outil de Dépistage TSA par Machine Learning</h1>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
         <p style="font-size: 1.1rem; line-height: 1.6; text-align: center; margin: 0;">
-        Cette section présente un outil d'aide au dépistage précoce utilisant l'intelligence artificielle. 
+        Cette section présente un outil d'aide au dépistage précoce utilisant l'intelligence artificielle.
         L'objectif est d'identifier les profils à risque nécessitant une évaluation approfondie par un professionnel qualifié.
         </p>
     </div>
@@ -2365,14 +2289,14 @@ def show_ml_analysis():
     # Onglets
     ml_tabs = st.tabs([
         "📊 Préprocessing",
-        "🚀 Comparaison Rapide", 
+        "🚀 Comparaison Rapide",
         "🌲 Analyse Random Forest",
         "⚙️ Optimisation Dépistage"
     ])
 
     with ml_tabs[0]:
         st.subheader("Pipeline de prétraitement des données")
-        
+
         st.markdown("""
         <div style="background-color: #e8f4fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
             <h3 style="color: #2c3e50; margin-top: 0;">Configuration des données pour le dépistage</h3>
@@ -2383,15 +2307,15 @@ def show_ml_analysis():
         """, unsafe_allow_html=True)
 
         col1, col2 = st.columns([1, 1])
-        
+
         with col1:
             st.markdown("### 📋 Structure du dataset")
             total_samples = len(df)
             tsa_positive = (y == 1).sum()
-            
+
             st.metric("Nombre total d'échantillons", f"{total_samples:,}")
             st.metric("Cas à risque détectés", f"{tsa_positive:,} ({tsa_positive/total_samples:.1%})")
-            
+
             # Distribution des classes
             fig_dist = px.pie(
                 values=[tsa_positive, total_samples - tsa_positive],
@@ -2409,13 +2333,13 @@ def show_ml_analysis():
                 'Traitement': ['Standardisation', 'Encodage One-Hot', '-']
             })
             st.dataframe(preprocessing_info, use_container_width=True)
-            
+
             st.markdown("#### Variables numériques:")
             for col in numerical_cols[:5]:  # Limiter l'affichage
                 st.write(f"• {col}")
             if len(numerical_cols) > 5:
                 st.write(f"... et {len(numerical_cols) - 5} autres")
-                
+
             st.markdown("#### Variables catégorielles:")
             for col in categorical_cols[:5]:  # Limiter l'affichage
                 st.write(f"• {col}")
@@ -2424,7 +2348,7 @@ def show_ml_analysis():
 
     with ml_tabs[1]:
         st.subheader("Comparaison rapide des algorithmes")
-        
+
         st.markdown("""
         <div style="background-color: #eaf6fc; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #3498db;">
             <h3 style="color: #2c3e50; margin-top: 0;">Critères de sélection pour le dépistage</h3>
@@ -2449,11 +2373,11 @@ def show_ml_analysis():
             }).T
 
         lazy_results = get_lazy_predict_results()
-        
+
         # Tableau stylisé
         def style_dataframe(df):
             return df.style.background_gradient(
-                cmap='Blues', 
+                cmap='Blues',
                 subset=['Accuracy', 'Recall', 'F1 Score']
             ).background_gradient(
                 cmap='Blues_r',
@@ -2470,17 +2394,17 @@ def show_ml_analysis():
 
         # Top 3 des modèles
         st.markdown("### 🏆 Top 3 des modèles pour le dépistage")
-        
+
         top_3 = lazy_results.nlargest(3, 'Accuracy')
-        
+
         col1, col2, col3 = st.columns(3)
-        
+
         models_info = [
             ("LGBMClassifier", "🥇", "#1e3a8a"),
-            ("RandomForestClassifier", "🥈", "#1e40af"), 
+            ("RandomForestClassifier", "🥈", "#1e40af"),
             ("XGBClassifier", "🥉", "#1d4ed8")
         ]
-        
+
         for i, ((model_name, medal, color), col) in enumerate(zip(models_info, [col1, col2, col3])):
             if model_name in top_3.index:
                 row = top_3.loc[model_name]
@@ -2518,7 +2442,7 @@ def show_ml_analysis():
         # Pourquoi Random Forest ?
         st.info("""
         **🎯 Pourquoi choisir Random Forest pour le dépistage ?**
-        
+
         - **Excellent équilibre** sensibilité/spécificité (96% de sensibilité)
         - **Interprétation clinique** via l'importance des caractéristiques
         - **Robustesse** aux données manquantes et bruitées
@@ -2527,7 +2451,7 @@ def show_ml_analysis():
 
     with ml_tabs[2]:
         st.header("Analyse Random Forest pour le dépistage")
-        
+
         st.markdown("""
         <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #2ecc71;">
             <h3 style="color: #2c3e50; margin-top: 0;">Configuration optimale pour le dépistage</h3>
@@ -2538,14 +2462,14 @@ def show_ml_analysis():
         # Entraînement du modèle avec gestion d'erreur
         with st.spinner("🤖 Entraînement du modèle Random Forest en cours..."):
             rf_results = train_optimized_rf_model(X_train, y_train, preprocessor, X_test, y_test)
-        
+
         if rf_results.get('status') != 'success':
             st.error(f"❌ Échec de l'entraînement : {rf_results.get('message', 'Erreur inconnue')}")
             return
 
         # Métriques principales
         col1, col2, col3 = st.columns(3)
-        
+
         with col1:
             st.metric(
                 "🎯 Accuracy",
@@ -2568,16 +2492,16 @@ def show_ml_analysis():
         # Onglets d'analyse détaillée
         rf_tabs = st.tabs([
             "📊 Performances détaillées",
-            "🔍 Matrice de confusion", 
+            "🔍 Matrice de confusion",
             "📈 Courbes de performance",
             "🌟 Importance des variables"
         ])
 
         with rf_tabs[0]:
             st.subheader("📊 Métriques de performance détaillées")
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 metrics_df = pd.DataFrame({
                     'Métrique': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'],
@@ -2589,7 +2513,7 @@ def show_ml_analysis():
                         rf_results['metrics']['auc']
                     ]
                 })
-                
+
                 fig_metrics = px.bar(
                     metrics_df,
                     x='Score',
@@ -2601,27 +2525,27 @@ def show_ml_analysis():
                 )
                 fig_metrics.update_layout(height=400, showlegend=False)
                 st.plotly_chart(fig_metrics, use_container_width=True)
-                
+
             with col2:
                 st.markdown("### 🏥 Interprétation clinique")
-                
+
                 recall_value = rf_results['metrics']['recall']
                 precision_value = rf_results['metrics']['precision']
-                
+
                 if recall_value >= 0.95:
                     st.success("✅ **Sensibilité excellente** : Détecte 95%+ des cas TSA")
                 elif recall_value >= 0.90:
                     st.info("ℹ️ **Sensibilité très bonne** : Détecte 90%+ des cas")
                 else:
                     st.warning("⚠️ **Sensibilité à améliorer** : Risque de cas manqués")
-                    
+
                 if precision_value >= 0.95:
                     st.success("✅ **Précision excellente** : 95%+ des alertes sont justifiées")
                 elif precision_value >= 0.90:
                     st.info("ℹ️ **Précision très bonne** : 90%+ des alertes sont fiables")
                 else:
                     st.warning("⚠️ **Précision à améliorer** : Risque de fausses alertes")
-                
+
                 # Temps d'entraînement
                 st.metric(
                     "⏱️ Temps d'entraînement",
@@ -2631,9 +2555,9 @@ def show_ml_analysis():
 
         with rf_tabs[1]:
             st.subheader("🔍 Matrice de confusion")
-            
+
             cm = rf_results['confusion_matrix']
-            
+
             # Visualisation moderne de la matrice
             fig_cm = go.Figure(data=go.Heatmap(
                 z=cm,
@@ -2646,7 +2570,7 @@ def show_ml_analysis():
                 hoverongaps=False,
                 showscale=True
             ))
-            
+
             fig_cm.update_layout(
                 title="Matrice de confusion - Random Forest",
                 xaxis_title="Prédiction du modèle",
@@ -2654,42 +2578,42 @@ def show_ml_analysis():
                 height=500,
                 font_size=14
             )
-            
+
             st.plotly_chart(fig_cm, use_container_width=True)
-            
+
             # Détail des métriques
             if len(cm.ravel()) == 4:
                 tn, fp, fn, tp = cm.ravel()
-                
+
                 col1, col2, col3 = st.columns(3)
-                
+
                 with col1:
                     st.metric("✅ Vrais Positifs", tp, "Cas TSA correctement identifiés")
                     st.metric("✅ Vrais Négatifs", tn, "Cas normaux correctement identifiés")
-                    
+
                 with col2:
                     st.metric("❌ Faux Positifs", fp, "Fausses alertes")
                     st.metric("❌ Faux Négatifs", fn, "Cas TSA manqués")
-                    
+
                 with col3:
                     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
                     npv = tn / (tn + fn) if (tn + fn) > 0 else 0
-                    
+
                     st.metric("🎯 Spécificité", f"{specificity:.1%}", "Éviter les fausses alertes")
                     st.metric("🛡️ VPN", f"{npv:.1%}", "Fiabilité des cas négatifs")
 
         with rf_tabs[2]:
             st.subheader("📈 Courbes de performance")
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 # Courbe ROC
                 fpr, tpr = rf_results['roc_curve']
                 auc_score = rf_results['metrics']['auc']
-                
+
                 fig_roc = go.Figure()
-                
+
                 fig_roc.add_trace(go.Scatter(
                     x=fpr, y=tpr,
                     mode='lines',
@@ -2697,14 +2621,14 @@ def show_ml_analysis():
                     line=dict(color='#e74c3c', width=3),
                     fill='tonexty'
                 ))
-                
+
                 fig_roc.add_trace(go.Scatter(
                     x=[0, 1], y=[0, 1],
                     mode='lines',
                     name='Référence (AUC = 0.5)',
                     line=dict(color='gray', dash='dash', width=2)
                 ))
-                
+
                 fig_roc.update_layout(
                     title='Courbe ROC',
                     xaxis_title='Taux de Faux Positifs',
@@ -2712,15 +2636,15 @@ def show_ml_analysis():
                     height=400,
                     showlegend=True
                 )
-                
+
                 st.plotly_chart(fig_roc, use_container_width=True)
-                
+
             with col2:
                 # Courbe Precision-Recall
                 precision_curve, recall_curve = rf_results['pr_curve']
-                
+
                 fig_pr = go.Figure()
-                
+
                 fig_pr.add_trace(go.Scatter(
                     x=recall_curve, y=precision_curve,
                     mode='lines',
@@ -2728,7 +2652,7 @@ def show_ml_analysis():
                     line=dict(color='#2ecc71', width=3),
                     fill='tonexty'
                 ))
-                
+
                 baseline_precision = (y_test == 1).mean()
                 fig_pr.add_trace(go.Scatter(
                     x=[0, 1], y=[baseline_precision, baseline_precision],
@@ -2736,7 +2660,7 @@ def show_ml_analysis():
                     name=f'Baseline ({baseline_precision:.2f})',
                     line=dict(color='gray', dash='dash', width=2)
                 ))
-                
+
                 fig_pr.update_layout(
                     title='Courbe Precision-Recall',
                     xaxis_title='Recall (Sensibilité)',
@@ -2744,15 +2668,15 @@ def show_ml_analysis():
                     height=400,
                     showlegend=True
                 )
-                
+
                 st.plotly_chart(fig_pr, use_container_width=True)
-            
+
             # Validation croisée
             st.subheader("🔄 Validation croisée")
             cv_scores = rf_results['cv_scores']
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 cv_metrics = {
                     'Score moyen': cv_scores.mean(),
@@ -2760,10 +2684,10 @@ def show_ml_analysis():
                     'Score min': cv_scores.min(),
                     'Score max': cv_scores.max()
                 }
-                
+
                 for metric, value in cv_metrics.items():
                     st.metric(metric, f"{value:.3f}")
-                    
+
             with col2:
                 fig_cv = go.Figure(data=go.Bar(
                     x=[f'Fold {i+1}' for i in range(len(cv_scores))],
@@ -2773,28 +2697,28 @@ def show_ml_analysis():
                     texttemplate='%{text:.3f}',
                     textposition='outside'
                 ))
-                
+
                 fig_cv.add_hline(
-                    y=cv_scores.mean(), 
-                    line_dash="dash", 
+                    y=cv_scores.mean(),
+                    line_dash="dash",
                     line_color="red",
                     annotation_text=f"Moyenne: {cv_scores.mean():.3f}"
                 )
-                
+
                 fig_cv.update_layout(
                     title="Scores de validation croisée",
                     xaxis_title="Pli",
                     yaxis_title="Accuracy",
                     height=400
                 )
-                
+
                 st.plotly_chart(fig_cv, use_container_width=True)
 
         with rf_tabs[3]:
             st.subheader("🌟 Importance des variables")
-            
+
             feature_importance = rf_results['feature_importance'].head(10)
-            
+
             # Graphique d'importance amélioré
             fig_importance = px.bar(
                 feature_importance,
@@ -2807,9 +2731,9 @@ def show_ml_analysis():
                 color_continuous_scale='Blues',
                 text='importance'
             )
-            
+
             fig_importance.update_traces(
-                texttemplate='%{text:.3f}', 
+                texttemplate='%{text:.3f}',
                 textposition='outside'
             )
             fig_importance.update_layout(
@@ -2817,23 +2741,23 @@ def show_ml_analysis():
                 yaxis={'categoryorder': 'total ascending'},
                 showlegend=False
             )
-            
+
             st.plotly_chart(fig_importance, use_container_width=True)
-            
+
             # Analyse des top features
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 top_feature = feature_importance.iloc[0]
                 st.success(f"""
                 **🎯 Variable la plus importante :**
-                
+
                 **{top_feature['feature']}**
-                
+
                 - Score : {top_feature['importance']:.3f}
                 - Contribution : {(top_feature['importance']/feature_importance['importance'].sum())*100:.1f}%
                 """)
-                
+
             with col2:
                 # Graphique en secteurs pour les top 5
                 top_5 = feature_importance.head(5)
@@ -2845,7 +2769,7 @@ def show_ml_analysis():
                     color_discrete_sequence=px.colors.sequential.Blues_r
                 )
                 fig_pie.update_traces(
-                    textposition='inside', 
+                    textposition='inside',
                     textinfo='percent+label',
                     textfont_size=14  # Augmenter la taille du texte
                 )
@@ -2858,7 +2782,7 @@ def show_ml_analysis():
 
     with ml_tabs[3]:
         st.header("⚙️ Optimisation pour le dépistage clinique")
-        
+
         st.markdown("""
         <div style="background-color: #f8f5f2; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #e67e22;">
             <h3 style="color: #2c3e50; margin-top: 0;">Adaptation au contexte clinique</h3>
@@ -2870,12 +2794,12 @@ def show_ml_analysis():
 
         if rf_results.get('status') == 'success':
             y_pred_proba = rf_results['y_pred_proba']
-            
+
             # Réglage du seuil interactif
             st.subheader("🎯 Réglage du seuil de décision")
-            
+
             col1, col2 = st.columns([2, 1])
-            
+
             with col1:
                 threshold = st.slider(
                     "Seuil de probabilité pour déclencher une alerte",
@@ -2885,23 +2809,23 @@ def show_ml_analysis():
                     step=0.05,
                     help="Plus le seuil est bas, plus le modèle sera sensible (détectera plus de cas mais avec plus de fausses alertes)"
                 )
-                
+
                 # Calcul des métriques ajustées
                 y_pred_adjusted = (y_pred_proba >= threshold).astype(int)
                 adjusted_recall = recall_score(y_test, y_pred_adjusted)
                 adjusted_precision = precision_score(y_test, y_pred_adjusted, zero_division=0)
                 adjusted_f1 = f1_score(y_test, y_pred_adjusted, zero_division=0)
-                
+
                 # Affichage des métriques en temps réel
                 met_col1, met_col2, met_col3 = st.columns(3)
-                
+
                 with met_col1:
                     st.metric("Sensibilité ajustée", f"{adjusted_recall:.1%}")
                 with met_col2:
                     st.metric("Précision ajustée", f"{adjusted_precision:.1%}")
                 with met_col3:
                     st.metric("F1-Score ajusté", f"{adjusted_f1:.1%}")
-                
+
             with col2:
                 # Gauge de sensibilité
                 fig_gauge = go.Figure(go.Indicator(
@@ -2930,10 +2854,10 @@ def show_ml_analysis():
 
             # Impact du seuil sur les performances
             st.subheader("📊 Impact du seuil sur les performances")
-            
+
             thresholds = np.linspace(0.1, 0.9, 17)
             metrics_by_threshold = []
-            
+
             for t in thresholds:
                 y_pred_t = (y_pred_proba >= t).astype(int)
                 metrics_by_threshold.append({
@@ -2942,9 +2866,9 @@ def show_ml_analysis():
                     'Précision': precision_score(y_test, y_pred_t, zero_division=0),
                     'F1-Score': f1_score(y_test, y_pred_t, zero_division=0)
                 })
-            
+
             df_thresholds = pd.DataFrame(metrics_by_threshold)
-            
+
             fig_threshold = px.line(
                 df_thresholds,
                 x='Seuil',
@@ -2953,21 +2877,21 @@ def show_ml_analysis():
                 labels={'value': 'Score', 'variable': 'Métrique'},
                 color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
             )
-            
+
             # Ligne verticale pour le seuil actuel
             fig_threshold.add_vline(
-                x=threshold, 
-                line_dash="dash", 
+                x=threshold,
+                line_dash="dash",
                 line_color="red",
                 annotation_text=f"Seuil actuel: {threshold}"
             )
-            
+
             fig_threshold.update_layout(height=400)
             st.plotly_chart(fig_threshold, use_container_width=True)
 
         # Protocole de dépistage recommandé
         st.subheader("📋 Protocole de dépistage recommandé")
-        
+
         st.markdown("""
         <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 20px; border-radius: 10px; color: white; margin: 20px 0;">
             <h4 style="margin: 0 0 15px 0;">🔄 Processus de dépistage en 4 étapes</h4>
@@ -2994,31 +2918,31 @@ def show_ml_analysis():
 
         # Recommandations par contexte
         st.subheader("🎯 Recommandations par contexte d'utilisation")
-        
+
         context_col1, context_col2, context_col3 = st.columns(3)
-        
+
         with context_col1:
             st.info("""
             **🏥 Dépistage de masse**
-            
+
             - Seuil recommandé : **0.2**
             - Priorité : Sensibilité maximale
             - Objectif : Ne manquer aucun cas
             """)
-            
+
         with context_col2:
             st.success("""
             **👨‍⚕️ Consultation spécialisée**
-            
+
             - Seuil recommandé : **0.5**
             - Priorité : Équilibre optimal
             - Objectif : Aide au diagnostic
             """)
-            
+
         with context_col3:
             st.warning("""
             **🔬 Recherche clinique**
-            
+
             - Seuil recommandé : **0.7**
             - Priorité : Précision élevée
             - Objectif : Cohortes homogènes
@@ -3069,7 +2993,7 @@ def show_aq10_and_prediction():
 
     st.markdown(
         f"""<div class="header-container" style="text-align: center;">
-            <span style="font-size:2.5rem">📝</span>
+            <span style="font-size:2.5rem">''📝''</span>
             <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
         </div>""", unsafe_allow_html=True
     )
@@ -3844,7 +3768,6 @@ def show_aq10_and_prediction():
                     </div>
                     """, unsafe_allow_html=True)
 
-                    
 def show_documentation():
     st.markdown("""
     <div class="header-container">
@@ -3852,7 +3775,7 @@ def show_documentation():
         <h1 class="app-title">Documentation</h1>
     </div>
     """, unsafe_allow_html=True)
-    
+
     new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
     st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
 
@@ -4218,156 +4141,86 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
 def show_about_page():
-    """Page À propos améliorée et esthétique"""
-    
-    # En-tête principal avec gradient
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 40px 20px; border-radius: 20px; margin-bottom: 30px; text-align: center;">
-        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-            ℹ️ À propos du Projet
-        </h1>
-        <p style="color: rgba(255,255,255,0.9); font-size: 1.3rem; max-width: 800px; margin: 0 auto; line-height: 1.6;">
-            Une initiative innovante pour améliorer le dépistage précoce des Troubles du Spectre Autistique
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
 
-    # Section contexte avec design amélioré
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-                padding: 30px; border-radius: 15px; margin-bottom: 30px;">
-        <h2 style="color: #2c3e50; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
-            🎯 Contexte du Projet
-        </h2>
-        <div style="max-width: 900px; margin: 0 auto;">
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #34495e;">
-                Ce projet a été développé dans le cadre d'une étude approfondie sur les méthodes de dépistage 
-                des Troubles du Spectre Autistique (TSA). Notre approche combine l'analyse de données massives, 
-                l'intelligence artificielle et l'expertise clinique pour créer un outil d'aide au diagnostic précoce.
-            </p>
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; color: #34495e;">
-                L'objectif principal est de faciliter l'identification précoce des signaux d'alerte, permettant 
-                ainsi une intervention plus rapide et plus efficace pour les personnes concernées et leurs familles.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f"""<div class="header-container">
+            <span style="font-size:2.5rem">ℹ️</span>
+            <h1 class="app-title">À propos</h1>
+        </div>""", unsafe_allow_html=True
+    )
 
-    # Objectifs avec cartes élégantes
-    st.markdown("## 🎯 Objectifs du Projet")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    objectives = [
-        {
-            "icon": "🔍",
-            "title": "Identifier les facteurs",
-            "description": "Analyser les variables associées à la présence d'un TSA à partir de données multiples",
-            "color": "#3498db"
-        },
-        {
-            "icon": "📊",
-            "title": "Explorer les données",
-            "description": "Découvrir des tendances et biais dans les jeux de données internationaux",
-            "color": "#2ecc71"
-        },
-        {
-            "icon": "🤖",
-            "title": "Construire des modèles",
-            "description": "Développer des outils prédictifs pour l'aide à l'évaluation du TSA",
-            "color": "#9b59b6"
-        }
-    ]
-    
-    for i, (obj, col) in enumerate(zip(objectives, [col1, col2, col3])):
-        with col:
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, {obj['color']}, {obj['color']}cc); 
-                        color: white; padding: 25px; border-radius: 15px; height: 280px; 
-                        box-shadow: 0 8px 25px rgba(0,0,0,0.15); transition: transform 0.3s ease;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">{obj['icon']}</div>
-                    <h3 style="margin: 0; font-size: 1.4rem; font-weight: 600;">{obj['title']}</h3>
+    html_code = """
+    <div style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <!-- Contenu HTML -->
+    </div>
+    """
+
+    st.markdown("""
+    ## À propos du projet
+
+    Ce projet a été réalisé dans le cadre d'une étude sur les méthodes de dépistage des Troubles du Spectre Autistique (TSA).
+
+    ### Objectifs du Projet
+
+    1. Identifier les facteurs associés à la présence d'un TSA
+    2. Explorer les données pour déceler des tendances et biais
+    3. Construire des modèles prédictifs pour l'évaluation du TSA
+
+    ### Remerciements
+
+    Nous remercions toutes les personnes ayant contribué à ce projet, en particulier notre mentor Yohan Cohen pour son soutien et ses conseils précieux.""")
+
+    st.markdown("""
+    ### Licence
+    Cette application est mise à disposition sous licence open-source. Le code et les données anonymisées sont disponibles pour des fins de recherche uniquement.""")
+
+
+    html_code = """
+        <h4 style="color:#0d47a1; margin-top:20px">Auteurs du Projet</h4>
+        <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:15px">
+            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
+                <div style="width:100px; height:100px; border-radius:50%; background:#e3f2fd; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #bbdefb">
+                    <span style="font-size:40px">AB</span>
                 </div>
-                <p style="font-size: 1rem; line-height: 1.5; text-align: center; margin: 0;">
-                    {obj['description']}
-                </p>
+                <h4 style="margin:0 0 5px 0; color:#1565c0">Alexandre Bernard</h4>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
             </div>
-            """, unsafe_allow_html=True)
 
-    # Section données avec style amélioré
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); 
-                padding: 30px; border-radius: 15px; margin: 30px 0;">
-        <h2 style="color: #8b4513; text-align: center; margin-bottom: 25px; font-size: 2.2rem;">
-            📚 Sources de Données
-        </h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-                    gap: 20px; max-width: 1000px; margin: 0 auto;">
-            <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;">
-                <h4 style="color: #8b4513; margin-bottom: 10px;">🌍 Couverture Internationale</h4>
-                <p style="margin: 0; color: #5d4e37;">Plus de 5000 participants de différentes origines géographiques</p>
+            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
+                <div style="width:100px; height:100px; border-radius:50%; background:#e8f5e9; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #c8e6c9">
+                    <span style="font-size:40px">RC</span>
+                </div>
+                <h4 style="margin:0 0 5px 0; color:#2e7d32">Rémi Chenouri</h4>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
             </div>
-            <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 10px;">
-                <h4 style="color: #8b4513; margin-bottom: 10px;">📊 Données Diversifiées</h4>
-                <p style="margin: 0; color: #5d4e37;">5 jeux de données publics combinés et harmonisés</p>
+
+            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
+                <div style="width:100px; height:100px; border-radius:50%; background:#fff3e0; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #ffe0b2">
+                    <span style="font-size:40px">AI</span>
+                </div>
+                <h4 style="margin:0 0 5px 0; color:#e65100">Ahmed Ibnabasse</h4>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Futur Data Analyst</p>
+            </div>
+
+            <div style="flex:1; min-width:200px; background:#f5f5f5; padding:20px; border-radius:10px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1)">
+                <div style="width:100px; height:100px; border-radius:50%; background:#f3e5f5; margin:0 auto 15px auto; display:flex; justify-content:center; align-items:center; border:2px solid #e1bee7">
+                    <span style="font-size:40px">LS</span>
+                </div>
+                <h4 style="margin:0 0 5px 0; color:#6a1b9a">Laurence Souppayaraza</h4>
+                <p style="margin:0 0 10px 0; color:#546e7a; font-style:italic">Future Data Analyst</p>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """
+    components.html(html_code, height=300)
 
-    # Remerciements avec design sophistiqué
+    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
+
+
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); 
-                padding: 30px; border-radius: 15px; margin: 30px 0;">
-        <h2 style="color: #2c3e50; text-align: center; margin-bottom: 20px; font-size: 2.2rem;">
-            🙏 Remerciements
-        </h2>
-        <div style="text-align: center; max-width: 700px; margin: 0 auto;">
-            <p style="font-size: 1.2rem; line-height: 1.7; color: #2c3e50; margin-bottom: 15px;">
-                Nous remercions toutes les personnes ayant contribué à ce projet, en particulier 
-                <strong>notre mentor Yohan Cohen</strong> pour son soutien et ses conseils précieux 
-                tout au long de cette recherche.
-            </p>
-            <p style="font-size: 1.1rem; color: #34495e; font-style: italic;">
-                Un remerciement spécial à toutes les familles et individus qui ont participé aux études 
-                ayant permis la constitution de ces jeux de données.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Licence avec style cohérent
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); 
-                padding: 25px; border-radius: 15px; margin: 30px 0;">
-        <h2 style="color: #8b4513; text-align: center; margin-bottom: 20px; font-size: 2rem;">
-            📄 Licence et Utilisation
-        </h2>
-        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
-            <p style="font-size: 1.1rem; line-height: 1.6; color: #5d4e37;">
-                Cette application est mise à disposition sous licence open-source. 
-                Le code et les données anonymisées sont disponibles pour des fins de recherche uniquement.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Avertissement final stylisé
-    st.markdown("""
-    <div style="border: 2px solid #e74c3c; border-radius: 10px; padding: 20px; 
-                background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); margin-top: 30px;">
-        <h3 style="color: #c62828; margin-top: 0; text-align: center;">
-            ⚠️ Avertissement Important
-        </h3>
-        <p style="font-size: 1rem; color: #b71c1c; text-align: center; margin: 0; font-weight: 500;">
-            Cette application est un outil d'aide au dépistage précoce et ne remplace en aucun cas 
-            une évaluation clinique complète par un professionnel de santé qualifié.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
+    &copy; 2025 - Projet Autisme - Tous droits réservés
+    """)
+    pass
 
 def main():
     if "initialized" not in st.session_state:
