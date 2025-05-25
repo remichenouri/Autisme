@@ -3910,68 +3910,69 @@ def show_aq10_and_prediction():
                         """, unsafe_allow_html=True)
                 
                         # Section d'interprétation des probabilités
-                        st.markdown("""
-                        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); 
-                                    border-radius: 15px; padding: 25px; margin: 25px 0;">
-                            <h4 style="color: #856404; text-align: center; margin-bottom: 20px;">
-                                📊 Interprétation des Probabilités
-                            </h4>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
-                                <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
-                                    <div style="font-weight: bold; color: #2ecc71; font-size: 1.2rem;">0-29%</div>
-                                    <div style="color: #27ae60; font-size: 0.9rem;">Très peu probable</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
-                                    <div style="font-weight: bold; color: #f39c12; font-size: 1.2rem;">30-59%</div>
-                                    <div style="color: #e67e22; font-size: 0.9rem;">Dépistage recommandé</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
-                                    <div style="font-weight: bold; color: #e67e22; font-size: 1.2rem;">60-79%</div>
-                                    <div style="color: #d35400; font-size: 0.9rem;">Probabilité élevée</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
-                                    <div style="font-weight: bold; color: #e74c3c; font-size: 1.2rem;">80-100%</div>
-                                    <div style="color: #c0392b; font-size: 0.9rem;">Très probable</div>
-                                </div>
-                            </div>
-                            
-                            <p style="color: #856404; text-align: center; margin: 20px 0 0 0; font-style: italic;">
-                                ⚠️ Ces pourcentages représentent la confiance du modèle, pas l'intensité des traits autistiques
-                            </p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                
-                    except Exception as e:
-                        st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
-                        st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
-                else:
-                    st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
-                
-                # Section explicative finale
                 st.markdown("""
-                <div style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); 
-                            border-radius: 15px; padding: 25px; margin: 30px 0;">
-                    <h4 style="color: #2e7d32; text-align: center; margin-bottom: 20px;">
-                        🔍 Pourquoi ces Questions Spécifiques ?
-                    </h4>
+                <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); 
+                                        border-radius: 15px; padding: 25px; margin: 25px 0;">
+                                <h4 style="color: #856404; text-align: center; margin-bottom: 20px;">
+                                    📊 Interprétation des Probabilités
+                                </h4>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
+                                    <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
+                                        <div style="font-weight: bold; color: #2ecc71; font-size: 1.2rem;">0-29%</div>
+                                        <div style="color: #27ae60; font-size: 0.9rem;">Très peu probable</div>
+                                    </div>
+                                    <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
+                                        <div style="font-weight: bold; color: #f39c12; font-size: 1.2rem;">30-59%</div>
+                                        <div style="color: #e67e22; font-size: 0.9rem;">Dépistage recommandé</div>
+                                    </div>
+                                    <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
+                                        <div style="font-weight: bold; color: #e67e22; font-size: 1.2rem;">60-79%</div>
+                                        <div style="color: #d35400; font-size: 0.9rem;">Probabilité élevée</div>
+                                    </div>
+                                    <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 15px;">
+                                        <div style="font-weight: bold; color: #e74c3c; font-size: 1.2rem;">80-100%</div>
+                                        <div style="color: #c0392b; font-size: 0.9rem;">Très probable</div>
+                                    </div>
+                                </div>
+                                
+                                <p style="color: #856404; text-align: center; margin: 20px 0 0 0; font-style: italic;">
+                                    ⚠️ Ces pourcentages représentent la confiance du modèle, pas l'intensité des traits autistiques
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
                     
-                    <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 20px;">
-                        <p style="color: #1b5e20; line-height: 1.6; margin-bottom: 15px;">
-                            <strong>Cohérence avec les données d'entraînement :</strong> Le modèle Random Forest 
-                            a été entraîné sur des bases de données cliniques internationales qui collectaient 
-                            exactement ces mêmes informations démographiques.
-                        </p>
+                        except Exception as e:
+                            st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
+                            st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
+                    else:
+                        st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
+                    
+                    # Section explicative finale
+                st.markdown("""
+                    <div style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); 
+                                border-radius: 15px; padding: 25px; margin: 30px 0;">
+                        <h4 style="color: #2e7d32; text-align: center; margin-bottom: 20px;">
+                            🔍 Pourquoi ces Questions Spécifiques ?
+                        </h4>
                         
-                        <ul style="color: #2e7d32; line-height: 1.6; margin: 0; padding-left: 20px;">
-                            <li><strong>Âge :</strong> Les manifestations du TSA évoluent avec l'âge</li>
-                            <li><strong>Genre :</strong> Différences dans l'expression des traits selon le sexe</li>
-                            <li><strong>Origine ethnique :</strong> Variations culturelles dans l'expression des symptômes</li>
-                            <li><strong>Antécédents familiaux :</strong> Facteur de risque génétique important</li>
-                        </ul>
+                        <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 20px;">
+                            <p style="color: #1b5e20; line-height: 1.6; margin-bottom: 15px;">
+                                <strong>Cohérence avec les données d'entraînement :</strong> Le modèle Random Forest 
+                                a été entraîné sur des bases de données cliniques internationales qui collectaient 
+                                exactement ces mêmes informations démographiques.
+                            </p>
+                            
+                            <ul style="color: #2e7d32; line-height: 1.6; margin: 0; padding-left: 20px;">
+                                <li><strong>Âge :</strong> Les manifestations du TSA évoluent avec l'âge</li>
+                                <li><strong>Genre :</strong> Différences dans l'expression des traits selon le sexe</li>
+                                <li><strong>Origine ethnique :</strong> Variations culturelles dans l'expression des symptômes</li>
+                                <li><strong>Antécédents familiaux :</strong> Facteur de risque génétique important</li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+                            
 
 
 def show_documentation():
