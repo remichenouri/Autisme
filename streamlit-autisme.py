@@ -155,6 +155,40 @@ def set_custom_theme():
             font-weight: 600;
             font-family: 'Segoe UI', sans-serif;
         }
+        /* Suppression des bordures bleues sur les conteneurs */
+        .stAlert, [data-testid="stAlert"] {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Suppression des barres bleues sur les info boxes */
+        .stInfo {
+            border: none !important;
+            border-left: 4px solid #3498db !important;
+            background-color: #f8f9fa !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Suppression des bordures sur les colonnes */
+        [data-testid="column"] {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Suppression des bordures sur les conteneurs de markdown */
+        .stMarkdown {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Élimination des barres bleues sur les éléments de base */
+        div[data-baseweb="base-input"] {
+            border: none !important;
+        }
+        
+        .css-1d391kg {
+            border: none !important;
+        }
 
         /* Correction de la navigation - SOLUTION PRINCIPALE */
         [data-testid="stSidebar"] {
@@ -3448,37 +3482,88 @@ def show_aq10_and_prediction():
 
                         st.plotly_chart(fig, use_container_width=True)
 
-                        # Ajout des recommandations personnalisées
+                       # Ajout des recommandations personnalisées (remplacer la section existante)
                         st.markdown("""
-                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
-                                Recommandations personnalisées
-                            </h4>
+                        <div style="margin-top: 40px; margin-bottom: 30px;">
+                            <h3 style="text-align: center; margin-bottom: 25px; color: #34495e; font-size: 1.8rem;">
+                                💡 Recommandations personnalisées
+                            </h3>
+                        </div>
                         """, unsafe_allow_html=True)
-
+                        
                         # Définir les recommandations basées sur les scores
                         recommendations = []
-
+                        
                         if social_score > 50:
                             recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
-
+                        
                         if cognitive_score > 50:
                             recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
-
+                        
                         if detail_score > 60:
                             recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
-
+                        
                         if masking_index > 60:
                             recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
-
+                        
                         if risk_factor > 3:
                             recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
                         else:
                             recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
-
-                        # Affichage des recommandations
+                        
                         st.markdown("""
-                            <div style="background-color: #eaf7fb; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                        <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%); 
+                                    border-radius: 15px; 
+                                    padding: 25px; 
+                                    margin: 20px 0;
+                                    border: 1px solid #e1f5fe;
+                                    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);">
                         """, unsafe_allow_html=True)
+                        
+                        for i, rec in enumerate(recommendations, 1):
+                            st.markdown(f"""
+                            <div style="display: flex; align-items: flex-start; margin-bottom: 15px; padding: 12px 0;">
+                                <div style="background: linear-gradient(135deg, #3498db, #2980b9); 
+                                            color: white; 
+                                            border-radius: 50%; 
+                                            width: 24px; 
+                                            height: 24px; 
+                                            display: flex; 
+                                            align-items: center; 
+                                            justify-content: center; 
+                                            font-size: 0.8rem; 
+                                            font-weight: bold; 
+                                            margin-right: 15px; 
+                                            flex-shrink: 0;">
+                                    {i}
+                                </div>
+                                <p style="margin: 0; 
+                                          font-size: 1rem; 
+                                          line-height: 1.6; 
+                                          color: #2c3e50;
+                                          text-align: justify;">
+                                    {rec}
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        st.markdown("""
+                        <div style="margin-top: 25px; 
+                                    padding: 15px; 
+                                    background: rgba(52, 152, 219, 0.05); 
+                                    border-radius: 8px; 
+                                    border-left: 4px solid #3498db;">
+                            <p style="font-style: italic; 
+                                      margin: 0; 
+                                      color: #5d6d7e; 
+                                      text-align: center; 
+                                      font-size: 0.95rem;">
+                                ⚠️ Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                        </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
 
                         for rec in recommendations:
                             st.markdown(f"""
