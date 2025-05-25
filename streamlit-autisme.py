@@ -2372,233 +2372,233 @@ def show_ml_analysis():
 
     with ml_tabs[0]:
     # Styles CSS pour harmonisation
-    st.markdown("""
-    <style>
-        .preprocessing-header {
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            padding: 30px 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .info-card-modern {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 15px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border-left: 4px solid #3498db;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .info-card-modern:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .metric-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid #e9ecef;
-        }
-        
-        .section-title {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin: 30px 0 20px 0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # En-tête de section harmonisé
-    st.markdown("""
-    <div class="preprocessing-header">
-        <h2 style="color: white; font-size: 2.2rem; margin-bottom: 10px;
-                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-            🔧 Pipeline de Prétraitement des Données
-        </h2>
-        <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem;
-                  margin: 0 auto; line-height: 1.5;">
-            Configuration des données pour optimiser la détection des patterns pertinents
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Carte d'introduction
-    st.markdown("""
-    <div class="info-card-modern">
-        <div style="background-color: #e8f4fd; padding: 20px; border-radius: 10px; 
-                    margin-bottom: 20px; border-left: 4px solid #3498db;">
-            <h3 style="color: #2c3e50; margin-top: 0; display: flex; align-items: center;">
-                <span style="margin-right: 10px;">⚙️</span>
-                Configuration des Données pour le Dépistage
-            </h3>
-            <p style="color: #34495e; margin-bottom: 0; line-height: 1.6;">
-                Les transformations appliquées pour optimiser la détection des patterns pertinents 
-                dans le processus de dépistage précoce du TSA.
+        st.markdown("""
+        <style>
+            .preprocessing-header {
+                background: linear-gradient(90deg, #3498db, #2ecc71);
+                padding: 30px 20px;
+                border-radius: 15px;
+                margin-bottom: 25px;
+                text-align: center;
+            }
+            
+            .info-card-modern {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                margin: 15px 0;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                border-left: 4px solid #3498db;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .info-card-modern:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            }
+            
+            .metric-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+            
+            .metric-card {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                border: 1px solid #e9ecef;
+            }
+            
+            .section-title {
+                color: #2c3e50;
+                font-size: 1.8rem;
+                border-bottom: 3px solid #3498db;
+                padding-bottom: 10px;
+                margin: 30px 0 20px 0;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+    
+        # En-tête de section harmonisé
+        st.markdown("""
+        <div class="preprocessing-header">
+            <h2 style="color: white; font-size: 2.2rem; margin-bottom: 10px;
+                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+                🔧 Pipeline de Prétraitement des Données
+            </h2>
+            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem;
+                      margin: 0 auto; line-height: 1.5;">
+                Configuration des données pour optimiser la détection des patterns pertinents
             </p>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Conteneur principal avec deux colonnes
-    col1, col2 = st.columns([1, 1], gap="large")
-
-    # Colonne 1 - Structure du dataset
-    with col1:
+        """, unsafe_allow_html=True)
+    
+        # Carte d'introduction
         st.markdown("""
         <div class="info-card-modern">
-            <h3 class="section-title">📋 Structure du Dataset</h3>
-            <div style="margin-top: 20px;">
-        """, unsafe_allow_html=True)
-        
-        # Calculs existants conservés
-        total_samples = len(df)
-        tsa_positive = (y == 1).sum()
-
-        # Métriques dans des cartes stylisées
-        st.markdown(f"""
-        <div class="metric-grid">
-            <div class="metric-card">
-                <h4 style="color: #3498db; margin: 0 0 10px 0;">📊 Échantillons</h4>
-                <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">
-                    {total_samples:,}
-                </div>
-                <p style="color: #7f8c8d; margin: 5px 0 0 0; font-size: 0.9rem;">
-                    Total des participants
-                </p>
-            </div>
-            <div class="metric-card">
-                <h4 style="color: #e74c3c; margin: 0 0 10px 0;">🎯 Cas à Risque</h4>
-                <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">
-                    {tsa_positive:,}
-                </div>
-                <p style="color: #7f8c8d; margin: 5px 0 0 0; font-size: 0.9rem;">
-                    ({tsa_positive/total_samples:.1%} du total)
+            <div style="background-color: #e8f4fd; padding: 20px; border-radius: 10px; 
+                        margin-bottom: 20px; border-left: 4px solid #3498db;">
+                <h3 style="color: #2c3e50; margin-top: 0; display: flex; align-items: center;">
+                    <span style="margin-right: 10px;">⚙️</span>
+                    Configuration des Données pour le Dépistage
+                </h3>
+                <p style="color: #34495e; margin-bottom: 0; line-height: 1.6;">
+                    Les transformations appliquées pour optimiser la détection des patterns pertinents 
+                    dans le processus de dépistage précoce du TSA.
                 </p>
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-        # Espacement
-        st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
-
-        # Graphique de distribution conservé
-        st.markdown("""
-        <h4 style="color: #2c3e50; margin: 20px 0 15px 0; display: flex; align-items: center;">
-            <span style="margin-right: 8px;">📈</span>
-            Répartition des Cas
-        </h4>
-        """, unsafe_allow_html=True)
-        
-        fig_dist = px.pie(
-            values=[tsa_positive, total_samples - tsa_positive],
-            names=['TSA Positif', 'TSA Négatif'],
-            color_discrete_sequence=['#e74c3c', '#3498db'],
-            hole=0.4  # Donut chart plus moderne
-        )
-        fig_dist.update_layout(
-            showlegend=True,
-            font=dict(size=12),
-            margin=dict(t=20, b=20, l=20, r=20)
-        )
-        st.plotly_chart(fig_dist, use_container_width=True)
-        
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Colonne 2 - Variables analysées
-    with col2:
-        st.markdown("""
-        <div class="info-card-modern">
-            <h3 class="section-title">🔧 Variables Analysées</h3>
+    
+        # Conteneur principal avec deux colonnes
+        col1, col2 = st.columns([1, 1], gap="large")
+    
+        # Colonne 1 - Structure du dataset
+        with col1:
+            st.markdown("""
+            <div class="info-card-modern">
+                <h3 class="section-title">📋 Structure du Dataset</h3>
+                <div style="margin-top: 20px;">
+            """, unsafe_allow_html=True)
+            
+            # Calculs existants conservés
+            total_samples = len(df)
+            tsa_positive = (y == 1).sum()
+    
+            # Métriques dans des cartes stylisées
+            st.markdown(f"""
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <h4 style="color: #3498db; margin: 0 0 10px 0;">📊 Échantillons</h4>
+                    <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">
+                        {total_samples:,}
+                    </div>
+                    <p style="color: #7f8c8d; margin: 5px 0 0 0; font-size: 0.9rem;">
+                        Total des participants
+                    </p>
+                </div>
+                <div class="metric-card">
+                    <h4 style="color: #e74c3c; margin: 0 0 10px 0;">🎯 Cas à Risque</h4>
+                    <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">
+                        {tsa_positive:,}
+                    </div>
+                    <p style="color: #7f8c8d; margin: 5px 0 0 0; font-size: 0.9rem;">
+                        ({tsa_positive/total_samples:.1%} du total)
+                    </p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+            # Espacement
+            st.markdown("<div style='margin: 30px 0;'></div>", unsafe_allow_html=True)
+    
+            # Graphique de distribution conservé
+            st.markdown("""
+            <h4 style="color: #2c3e50; margin: 20px 0 15px 0; display: flex; align-items: center;">
+                <span style="margin-right: 8px;">📈</span>
+                Répartition des Cas
+            </h4>
+            """, unsafe_allow_html=True)
+            
+            fig_dist = px.pie(
+                values=[tsa_positive, total_samples - tsa_positive],
+                names=['TSA Positif', 'TSA Négatif'],
+                color_discrete_sequence=['#e74c3c', '#3498db'],
+                hole=0.4  # Donut chart plus moderne
+            )
+            fig_dist.update_layout(
+                showlegend=True,
+                font=dict(size=12),
+                margin=dict(t=20, b=20, l=20, r=20)
+            )
+            st.plotly_chart(fig_dist, use_container_width=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
+    
+        # Colonne 2 - Variables analysées
+        with col2:
+            st.markdown("""
+            <div class="info-card-modern">
+                <h3 class="section-title">🔧 Variables Analysées</h3>
+                <div style="margin-top: 20px;">
+            """, unsafe_allow_html=True)
+            
+            # Tableau de preprocessing conservé mais stylisé
+            preprocessing_info = pd.DataFrame({
+                'Type': ['Numériques', 'Catégorielles', 'Total'],
+                'Nombre': [len(numerical_cols), len(categorical_cols), len(numerical_cols) + len(categorical_cols)],
+                'Traitement': ['Standardisation', 'Encodage One-Hot', '-']
+            })
+            
+            st.markdown("""
+            <h4 style="color: #2c3e50; margin: 20px 0 15px 0; display: flex; align-items: center;">
+                <span style="margin-right: 8px;">📊</span>
+                Résumé du Traitement
+            </h4>
+            """, unsafe_allow_html=True)
+            
+            st.dataframe(
+                preprocessing_info, 
+                use_container_width=True,
+                hide_index=True
+            )
+    
+            # Variables numériques avec style amélioré
+            st.markdown("""
+            <div style="margin-top: 25px;">
+                <h4 style="color: #2c3e50; margin: 15px 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">🔢</span>
+                    Variables Numériques
+                </h4>
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; 
+                            border-left: 3px solid #3498db;">
+            """, unsafe_allow_html=True)
+            
+            for col in numerical_cols[:5]:
+                st.markdown(f"• **{col}**")
+            if len(numerical_cols) > 5:
+                st.markdown(f"*... et {len(numerical_cols) - 5} autres variables*")
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
+    
+            # Variables catégorielles avec style amélioré
+            st.markdown("""
             <div style="margin-top: 20px;">
-        """, unsafe_allow_html=True)
-        
-        # Tableau de preprocessing conservé mais stylisé
-        preprocessing_info = pd.DataFrame({
-            'Type': ['Numériques', 'Catégorielles', 'Total'],
-            'Nombre': [len(numerical_cols), len(categorical_cols), len(numerical_cols) + len(categorical_cols)],
-            'Traitement': ['Standardisation', 'Encodage One-Hot', '-']
-        })
-        
+                <h4 style="color: #2c3e50; margin: 15px 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">📝</span>
+                    Variables Catégorielles
+                </h4>
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; 
+                            border-left: 3px solid #2ecc71;">
+            """, unsafe_allow_html=True)
+            
+            for col in categorical_cols[:5]:
+                st.markdown(f"• **{col}**")
+            if len(categorical_cols) > 5:
+                st.markdown(f"*... et {len(categorical_cols) - 5} autres variables*")
+            
+            st.markdown("</div></div></div></div>", unsafe_allow_html=True)
+    
+        # Note informative finale
         st.markdown("""
-        <h4 style="color: #2c3e50; margin: 20px 0 15px 0; display: flex; align-items: center;">
-            <span style="margin-right: 8px;">📊</span>
-            Résumé du Traitement
-        </h4>
-        """, unsafe_allow_html=True)
-        
-        st.dataframe(
-            preprocessing_info, 
-            use_container_width=True,
-            hide_index=True
-        )
-
-        # Variables numériques avec style amélioré
-        st.markdown("""
-        <div style="margin-top: 25px;">
-            <h4 style="color: #2c3e50; margin: 15px 0; display: flex; align-items: center;">
-                <span style="margin-right: 8px;">🔢</span>
-                Variables Numériques
-            </h4>
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; 
-                        border-left: 3px solid #3498db;">
-        """, unsafe_allow_html=True)
-        
-        for col in numerical_cols[:5]:
-            st.markdown(f"• **{col}**")
-        if len(numerical_cols) > 5:
-            st.markdown(f"*... et {len(numerical_cols) - 5} autres variables*")
-        
-        st.markdown("</div></div>", unsafe_allow_html=True)
-
-        # Variables catégorielles avec style amélioré
-        st.markdown("""
-        <div style="margin-top: 20px;">
-            <h4 style="color: #2c3e50; margin: 15px 0; display: flex; align-items: center;">
-                <span style="margin-right: 8px;">📝</span>
-                Variables Catégorielles
-            </h4>
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; 
-                        border-left: 3px solid #2ecc71;">
-        """, unsafe_allow_html=True)
-        
-        for col in categorical_cols[:5]:
-            st.markdown(f"• **{col}**")
-        if len(categorical_cols) > 5:
-            st.markdown(f"*... et {len(categorical_cols) - 5} autres variables*")
-        
-        st.markdown("</div></div></div></div>", unsafe_allow_html=True)
-
-    # Note informative finale
-    st.markdown("""
-    <div class="info-card-modern" style="margin-top: 30px;">
-        <div style="display: flex; align-items: center; background-color: #fff3cd; 
-                    padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-            <span style="font-size: 1.5rem; margin-right: 15px;">💡</span>
-            <div>
-                <strong style="color: #856404;">Note Importante :</strong>
-                <p style="margin: 5px 0 0 0; color: #856404; line-height: 1.5;">
-                    Ce preprocessing garantit une normalisation optimale des données pour 
-                    améliorer la performance des algorithmes de machine learning dans le 
-                    contexte du dépistage précoce du TSA.
-                </p>
+        <div class="info-card-modern" style="margin-top: 30px;">
+            <div style="display: flex; align-items: center; background-color: #fff3cd; 
+                        padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <span style="font-size: 1.5rem; margin-right: 15px;">💡</span>
+                <div>
+                    <strong style="color: #856404;">Note Importante :</strong>
+                    <p style="margin: 5px 0 0 0; color: #856404; line-height: 1.5;">
+                        Ce preprocessing garantit une normalisation optimale des données pour 
+                        améliorer la performance des algorithmes de machine learning dans le 
+                        contexte du dépistage précoce du TSA.
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
     with ml_tabs[1]:
         st.subheader("Comparaison rapide des algorithmes")
