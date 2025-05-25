@@ -1313,40 +1313,40 @@ def show_home_page():
     with niveau_col3:
         st.error("**Niveau 3**\n\nNécessite un soutien très important")
 
-    # Section contexte du projet améliorée
+    # Section "Contexte du projet" avec HTML simplifié
+    st.markdown("## 📊 Contexte du projet")
+    
     st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        📊 Contexte du projet
-    </h2>
+    <div style="background-color: white; padding: 25px; border-radius: 15px; 
+               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #2c3e50; margin-bottom: 20px;">
+            Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
+            <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
+            mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
+        </p>
+        
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #2c3e50; margin-bottom: 25px;">
+            Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
+            5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
+            pour identifier les facteurs associés à la présence d'un TSA.
+        </p>
+    </div>
     """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 10, 1])
+    
+    st.markdown("### 📈 Prévalence de l'autisme")
+    
+    # Utiliser les colonnes Streamlit avec des composants natifs
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.info("**1-2%**\n\nPopulation mondiale concernée")
     
     with col2:
-        st.markdown("""
-        <div class="info-card-modern">
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #2c3e50;">
-                Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
-                <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
-                mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
-            </p>
-            
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
-                Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
-                5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
-                pour identifier les facteurs associés à la présence d'un TSA.
-            </p>
-            
-            <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin: 25px 0;">
-                <h4 style="color: #2c3e50; margin-top: 0;">📈 Prévalence de l'autisme :</h4>
-                <ul style="padding-left: 25px; line-height: 1.6; color: #34495e;">
-                    <li><strong>1 à 2%</strong> de la population mondiale est concernée</li>
-                    <li>En France, environ <strong>700 000 personnes</strong> sont concernées</li>
-                    <li>Ratio historique garçons/filles d'environ <strong>4:1</strong> (aujourd'hui remis en question)</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.info("**700 000**\n\nPersonnes en France")
+    
+    with col3:
+        st.info("**4:1**\n\nRatio historique garçons/filles")
+    
 
     # Section "À qui s'adresse ce projet" moderne
     st.markdown("""
