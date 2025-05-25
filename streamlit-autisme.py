@@ -4736,8 +4736,6 @@ def show_documentation():
         fig_countries.update_layout(height=400)
         st.plotly_chart(fig_countries, use_container_width=True)
 
-        import streamlit as st
-
         st.markdown("### 💰 Impact Économique")
         
         st.markdown("""
@@ -4790,15 +4788,14 @@ def show_documentation():
         
             st.markdown("### 💰 Répartition des coûts :")
 
-            # Utiliser st.html() au lieu de st.markdown() avec unsafe_allow_html
-            st.html("""
+            st.markdown("""
             <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px; font-size: 1.05rem;">
                 <li><strong style="color: #27ae60;">Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
                 <li><strong style="color: #27ae60;">Services de santé</strong> : 15-25%</li>
                 <li><strong style="color: #27ae60;">Perte de productivité familiale</strong> : 20-30%</li>
                 <li><strong style="color: #27ae60;">Services sociaux</strong> : 10-15%</li>
             </ul>
-            """)
+            """, unsafe_allow_html=True)
 
 
     with doc_tabs[4]:
