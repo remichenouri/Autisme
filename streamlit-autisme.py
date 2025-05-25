@@ -4848,50 +4848,50 @@ def show_documentation():
             </div>
             """, unsafe_allow_html=True)
 
-        # Parcours de soin
-        st.markdown("### 🛤️ Parcours de Soin Recommandé")
-        
-        st.markdown("""
-        <div class="doc-section">
+            st.markdown("### 🛤️ Parcours de Soin Recommandé")
+    
+            st.markdown("""
+            <div class="doc-section">
             <div style="background: linear-gradient(135deg, #ecf0f1, #bdc3c7); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <h4 style="color: #2c3e50; margin-top: 0; text-align: center;">Étapes du Parcours Diagnostique</h4>
-                
-                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
-                        <span style="background: #3498db; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">1</span>
-                        <div>
-                            <strong style="color: #2c3e50;">Repérage précoce</strong>
-                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Médecin généraliste, pédiatre, PMI (12-24 mois)</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71;">
-                        <span style="background: #2ecc71; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">2</span>
-                        <div>
-                            <strong style="color: #2c3e50;">Évaluation diagnostique</strong>
-                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Équipe spécialisée, CRA, CAMSP/CMPP</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12;">
-                        <span style="background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">3</span>
-                        <div>
-                            <strong style="color: #2c3e50;">Annonce diagnostique</strong>
-                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Information, soutien, orientation vers les services</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
-                        <span style="background: #e74c3c; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">4</span>
-                        <div>
-                            <strong style="color: #2c3e50;">Interventions précoces</strong>
-                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">SESSAD, libéral, structures spécialisées</p>
-                        </div>
-                    </div>
-                </div>
+            <h4 style="color: #2c3e50; margin-top: 0; text-align: center;">Étapes du Parcours Diagnostique</h4>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+            <span style="background: #3498db; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">1</span>
+            <div>
+            <strong style="color: #2c3e50;">Repérage précoce</strong>
+            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Médecin généraliste, pédiatre, PMI (12-24 mois)</p>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
+            </div>
+            
+            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71;">
+            <span style="background: #2ecc71; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">2</span>
+            <div>
+            <strong style="color: #2c3e50;">Évaluation diagnostique</strong>
+            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Équipe spécialisée, CRA, CAMSP/CMPP</p>
+            </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12;">
+            <span style="background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">3</span>
+            <div>
+            <strong style="color: #2c3e50;">Annonce diagnostique</strong>
+            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Information, soutien, orientation vers les services</p>
+            </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+            <span style="background: #e74c3c; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">4</span>
+            <div>
+            <strong style="color: #2c3e50;">Interventions précoces</strong>
+            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">SESSAD, libéral, structures spécialisées</p>
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
 
     with doc_tabs[5]:
         # Organisations
