@@ -4141,7 +4141,8 @@ def show_documentation():
             """, unsafe_allow_html=True)
 
 def show_about_page():
-    """Page À propos améliorée et esthétique avec image Ghibli"""
+    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
     
     # En-tête principal avec gradient
     st.markdown("""
@@ -4327,8 +4328,6 @@ def show_about_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
-    image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
-    st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
 
     pass
 
