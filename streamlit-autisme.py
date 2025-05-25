@@ -174,6 +174,30 @@ def set_custom_theme():
             border: none !important;
             background: transparent !important;
         }
+        /* Solution pour la largeur cohérente du sidebar */
+        [data-testid="stSidebar"] {
+            width: 280px !important;
+            min-width: 280px !important;
+            max-width: 280px !important;
+            background-color: #f5f7fa;
+            border-right: 2px solid #3498db;
+            padding-top: 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 999;
+        }
+        
+        /* Ajustement du contenu principal */
+        .main .block-container {
+            margin-left: 300px !important;
+            padding-left: 2rem !important;
+            max-width: calc(100vw - 320px) !important;
+        }
+
         
         /* Suppression des bordures sur les conteneurs de markdown */
         .stMarkdown {
