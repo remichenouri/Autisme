@@ -4848,9 +4848,9 @@ def show_documentation():
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown("### 🛤️ Parcours de Soin Recommandé")
+        st.markdown("### 🛤️ Parcours de Soin Recommandé")
     
-            st.markdown("""
+        st.markdown("""
             <div class="doc-section">
             <div style="background: linear-gradient(135deg, #ecf0f1, #bdc3c7); padding: 20px; border-radius: 10px; margin: 20px 0;">
             <h4 style="color: #2c3e50; margin-top: 0; text-align: center;">Étapes du Parcours Diagnostique</h4>
