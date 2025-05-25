@@ -4154,6 +4154,7 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
+
     image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
     st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
 
@@ -4241,7 +4242,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # SECTION ÉQUIPE - Équipe du Projet avec les 4 noms
     st.markdown("""
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                 padding: 30px; border-radius: 15px; margin: 30px 0;">
@@ -4265,7 +4265,7 @@ def show_about_page():
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
                     <div style="font-size: 2.5rem; margin-bottom: 10px;">👨‍💻</div>
-                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Laurence SOUPPARAZAYA</h4>
+                    <h4 style="color: white; margin: 0; font-size: 1.2rem;">Laurence SOUPPAYARAZA</h4>
                     <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 0.9rem;">Data Analyst</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px);">
