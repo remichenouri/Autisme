@@ -4902,7 +4902,7 @@ def main():
         with st.spinner("Chargement des données..."):
             st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
 
-     set_enhanced_navigation_theme()
+    set_enhanced_navigation_theme()
     
     # Afficher la navigation
     with st.sidebar:
