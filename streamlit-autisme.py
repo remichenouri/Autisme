@@ -3557,19 +3557,6 @@ def show_aq10_and_prediction():
                         """, unsafe_allow_html=True)
 
 
-                        for rec in recommendations:
-                            st.markdown(f"""
-                                <p style="margin-bottom: 10px;"><span style="color: #3498db; font-weight: bold;">•</span> {rec}</p>
-                            """, unsafe_allow_html=True)
-
-                        st.markdown("""
-                            <p style="font-style: italic; margin-top: 15px; color: #7f8c8d; text-align: center;">
-                                Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
-                            </p>
-                            </div>
-                        """, unsafe_allow_html=True)
-
-
                         # 6. Affichage du graphique comparatif
                         st.markdown("### Analyse comparative")
 
