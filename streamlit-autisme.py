@@ -4736,35 +4736,67 @@ def show_documentation():
         fig_countries.update_layout(height=400)
         st.plotly_chart(fig_countries, use_container_width=True)
 
-        # Données économiques
+        import streamlit as st
+
         st.markdown("### 💰 Impact Économique")
         
         st.markdown("""
-        <div class="doc-section">
-            <h4 style="color: #3498db; margin-top: 0;">Coûts Sociétaux (Estimations annuelles)</h4>
-            <div class="statistics-grid">
+        <style>
+        /* Styles pour la grille de statistiques */
+        .statistics-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            flex: 1 1 200px;
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Utilisation de st.columns() pour une disposition en grille
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(
+                """
                 <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
                     <h3 style="margin: 0 0 10px 0; font-size: 2rem;">268 Md$</h3>
                     <p style="margin: 0;">États-Unis<br>(2020)</p>
                 </div>
+                """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(
+                """
                 <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
                     <h3 style="margin: 0 0 10px 0; font-size: 2rem;">32 Md£</h3>
                     <p style="margin: 0;">Royaume-Uni<br>(2019)</p>
                 </div>
+                """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(
+                """
                 <div class="stat-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
                     <h3 style="margin: 0 0 10px 0; font-size: 2rem;">6,2 Md€</h3>
                     <p style="margin: 0;">France<br>(estimation 2021)</p>
                 </div>
-            </div>
-            
-            <h4 style="color: #2ecc71; margin: 25px 0 15px 0;">Répartition des coûts :</h4>
-            <ul style="line-height: 1.8; color: #2c3e50;">
-                <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
-                <li><strong>Services de santé</strong> : 15-25%</li>
-                <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
-                <li><strong>Services sociaux</strong> : 10-15%</li>
-            </ul>
-        </div>
+                """, unsafe_allow_html=True)
+        
+        # Titre pour la répartition
+        st.markdown("### Répartition des coûts :")
+        st.markdown("""
+        <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
+            <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
+            <li><strong>Services de santé</strong> : 15-25%</li>
+            <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
+            <li><strong>Services sociaux</strong> : 10-15%</li>
+        </ul>
         """, unsafe_allow_html=True)
 
     with doc_tabs[4]:
