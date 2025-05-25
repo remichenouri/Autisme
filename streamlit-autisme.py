@@ -102,16 +102,21 @@ def set_custom_theme():
     else:
         custom_theme = """
         <style>
-        /* ================ Variables Globales ================ */
+        /* ================ Variables Globales Optimisées ================ */
         :root {
-            --primary: #3498db !important;
-            --secondary: #2ecc71 !important;
-            --background: #f0f2f6 !important;
-            --card-bg: white !important;
-            --text: #2c3e50 !important;
-            --sidebar-width-collapsed: 70px !important;
-            --sidebar-width-expanded: 280px !important;
+            --primary: #2c3e50 !important;
+            --secondary: #3498db !important;
+            --accent: #e74c3c !important;
+            --background: #f8f9fa !important;
+            --sidebar-bg: #ffffff !important;
+            --sidebar-border: #e9ecef !important;
+            --text-primary: #2c3e50 !important;
+            --text-secondary: #6c757d !important;
+            --sidebar-width-collapsed: 60px !important;
+            --sidebar-width-expanded: 240px !important;
             --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            --shadow-light: 0 2px 8px rgba(0,0,0,0.08) !important;
+            --shadow-medium: 0 4px 16px rgba(0,0,0,0.12) !important;
         }
 
         /* ================ Structure Principale ================ */
@@ -119,248 +124,243 @@ def set_custom_theme():
             background-color: var(--background) !important;
         }
 
-        /* ================ Zone de Trigger pour le Survol ================ */
-        .sidebar-trigger-zone {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 15px !important;
-            height: 100vh !important;
-            z-index: 999998 !important;
-            background: transparent !important;
-            cursor: pointer !important;
-        }
-
-        /* ================ Barre Latérale Déployable ================ */
+        /* ================ Sidebar Compacte et Professionnelle ================ */
         [data-testid="stSidebar"] {
-            /* Position et dimensions */
+            /* Dimensions optimisées */
             width: var(--sidebar-width-collapsed) !important;
             min-width: var(--sidebar-width-collapsed) !important;
             max-width: var(--sidebar-width-collapsed) !important;
-            position: fixed !important;
             height: 100vh !important;
+            
+            /* Position fixe */
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
             z-index: 999999 !important;
             
-            /* Style visuel */
-            background-color: #f5f7fa !important;
-            border-right: 2px solid var(--primary) !important;
-            padding-top: 1rem !important;
+            /* Style moderne */
+            background: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--sidebar-border) !important;
+            box-shadow: var(--shadow-light) !important;
             
-            /* Gestion du défilement */
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
+            /* Élimination du défilement */
+            overflow: hidden !important;
+            padding: 0 !important;
             
             /* Transition fluide */
             transition: var(--sidebar-transition) !important;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
         }
 
-        /* État étendu au survol de la sidebar OU de la zone trigger */
-        [data-testid="stSidebar"]:hover,
-        .sidebar-trigger-zone:hover + [data-testid="stSidebar"],
-        [data-testid="stSidebar"].expanded {
+        /* État étendu au survol */
+        [data-testid="stSidebar"]:hover {
             width: var(--sidebar-width-expanded) !important;
             min-width: var(--sidebar-width-expanded) !important;
             max-width: var(--sidebar-width-expanded) !important;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.15) !important;
+            box-shadow: var(--shadow-medium) !important;
+            overflow-y: auto !important;
         }
 
-        /* Masquage de la barre de défilement */
-        [data-testid="stSidebar"]::-webkit-scrollbar {
+        /* Contenu interne optimisé */
+        [data-testid="stSidebar"] > div {
+            width: var(--sidebar-width-expanded) !important;
+            padding: 12px 8px !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
+
+        [data-testid="stSidebar"]:hover > div {
+            overflow-y: auto !important;
+            padding: 16px 12px !important;
+        }
+
+        /* ================ Masquage des Barres de Défilement ================ */
+        [data-testid="stSidebar"]::-webkit-scrollbar,
+        [data-testid="stSidebar"] > div::-webkit-scrollbar {
             width: 0px !important;
             background: transparent !important;
         }
 
-        /* Contenu de la sidebar */
         [data-testid="stSidebar"] > div {
-            width: var(--sidebar-width-expanded) !important;
-            padding: 0 15px !important;
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
         }
 
-        /* ================ Animation du Contenu ================ */
-        /* Masquer le texte par défaut */
-        [data-testid="stSidebar"] .element-container {
-            opacity: 0 !important;
-            transition: opacity 0.3s ease 0.1s !important;
-        }
-
-        /* Afficher le texte au survol */
-        [data-testid="stSidebar"]:hover .element-container,
-        [data-testid="stSidebar"].expanded .element-container {
-            opacity: 1 !important;
-        }
-
-        /* Style spécial pour le titre en mode réduit */
+        /* ================ En-tête Professionnel ================ */
         [data-testid="stSidebar"] h2 {
             font-size: 0 !important;
-            transition: font-size 0.3s ease !important;
+            margin: 0 0 20px 0 !important;
+            padding: 12px 0 !important;
+            border-bottom: 1px solid var(--sidebar-border) !important;
+            text-align: center !important;
+            transition: all 0.3s ease !important;
             position: relative !important;
+            height: 60px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
+        /* Icône en mode réduit */
         [data-testid="stSidebar"] h2::before {
             content: "🧩" !important;
-            font-size: 24px !important;
-            position: absolute !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            top: 0 !important;
+            font-size: 28px !important;
+            display: block !important;
+            margin: 0 !important;
         }
 
-        [data-testid="stSidebar"]:hover h2,
-        [data-testid="stSidebar"].expanded h2 {
-            font-size: 1.5rem !important;
+        /* Texte complet au survol */
+        [data-testid="stSidebar"]:hover h2 {
+            font-size: 1.4rem !important;
+            color: var(--primary) !important;
+            font-weight: 600 !important;
         }
 
-        [data-testid="stSidebar"]:hover h2::before,
-        [data-testid="stSidebar"].expanded h2::before {
-            position: static !important;
-            transform: none !important;
-            margin-right: 10px !important;
+        [data-testid="stSidebar"]:hover h2::before {
+            font-size: 20px !important;
+            margin-right: 8px !important;
         }
 
-        /* ================ Style des Options Radio ================ */
+        /* ================ Options de Navigation Modernisées ================ */
+        [data-testid="stSidebar"] .stRadio {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
         [data-testid="stSidebar"] .stRadio > div {
             display: flex !important;
             flex-direction: column !important;
-            gap: 8px !important;
+            gap: 4px !important;
+            padding: 0 !important;
         }
 
         [data-testid="stSidebar"] .stRadio label {
             display: flex !important;
             align-items: center !important;
-            padding: 12px 8px !important;
-            margin: 2px 0 !important;
+            padding: 10px 6px !important;
+            margin: 0 !important;
             border-radius: 8px !important;
             transition: all 0.3s ease !important;
             cursor: pointer !important;
             position: relative !important;
+            height: 44px !important;
             overflow: hidden !important;
-            white-space: nowrap !important;
+            background: transparent !important;
         }
 
-        /* Mode réduit : afficher seulement l'emoji */
+        /* Icônes centrées en mode réduit */
+        [data-testid="stSidebar"] .stRadio label > div:first-child {
+            display: none !important;
+        }
+
         [data-testid="stSidebar"] .stRadio label span {
             font-size: 0 !important;
             transition: all 0.3s ease !important;
+            width: 100% !important;
+            text-align: center !important;
+            position: relative !important;
         }
 
+        /* Affichage des icônes uniquement */
         [data-testid="stSidebar"] .stRadio label span::before {
-            content: attr(data-emoji) !important;
-            font-size: 20px !important;
-            display: inline-block !important;
+            font-size: 22px !important;
+            display: block !important;
             width: 100% !important;
             text-align: center !important;
         }
 
-        /* Mode étendu : afficher le texte complet */
-        [data-testid="stSidebar"]:hover .stRadio label span,
-        [data-testid="stSidebar"].expanded .stRadio label span {
+        /* Mapping des icônes pour chaque option */
+        [data-testid="stSidebar"] .stRadio label:nth-child(1) span::before { content: "🏠" !important; }
+        [data-testid="stSidebar"] .stRadio label:nth-child(2) span::before { content: "🔍" !important; }
+        [data-testid="stSidebar"] .stRadio label:nth-child(3) span::before { content: "🧠" !important; }
+        [data-testid="stSidebar"] .stRadio label:nth-child(4) span::before { content: "🤖" !important; }
+        [data-testid="stSidebar"] .stRadio label:nth-child(5) span::before { content: "📚" !important; }
+        [data-testid="stSidebar"] .stRadio label:nth-child(6) span::before { content: "ℹ️" !important; }
+
+        /* Mode étendu - affichage du texte */
+        [data-testid="stSidebar"]:hover .stRadio label span {
             font-size: 14px !important;
-        }
-
-        [data-testid="stSidebar"]:hover .stRadio label span::before,
-        [data-testid="stSidebar"].expanded .stRadio label span::before {
-            width: auto !important;
+            font-weight: 500 !important;
             text-align: left !important;
-            margin-right: 10px !important;
+            padding-left: 12px !important;
         }
 
-        /* Effet hover sur les options */
+        [data-testid="stSidebar"]:hover .stRadio label span::before {
+            font-size: 18px !important;
+            position: absolute !important;
+            left: -8px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: auto !important;
+        }
+
+        /* Effets de survol */
         [data-testid="stSidebar"] .stRadio label:hover {
-            background-color: #eaf2f8 !important;
-            transform: translateX(5px) !important;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+            transform: translateX(3px) !important;
+            box-shadow: var(--shadow-light) !important;
         }
 
         /* Option sélectionnée */
         [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
-            background-color: #d4edda !important;
-            border-left: 3px solid var(--primary) !important;
+            background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
+            color: white !important;
+            box-shadow: var(--shadow-medium) !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio label[data-checked="true"]:hover {
+            background: linear-gradient(135deg, #2980b9, var(--secondary)) !important;
+            transform: translateX(5px) !important;
         }
 
         /* ================ Contenu Principal Adaptatif ================ */
         .main .block-container {
-            margin-left: calc(var(--sidebar-width-collapsed) + 20px) !important;
-            padding: 2rem !important;
-            max-width: calc(100vw - var(--sidebar-width-collapsed) - 40px) !important;
+            margin-left: calc(var(--sidebar-width-collapsed) + 16px) !important;
+            padding: 1.5rem !important;
+            max-width: calc(100vw - var(--sidebar-width-collapsed) - 32px) !important;
             transition: var(--sidebar-transition) !important;
         }
 
-        /* ================ Indicateur Visuel ================ */
+        /* ================ Indicateur Visuel Subtil ================ */
         [data-testid="stSidebar"]::after {
-            content: "→" !important;
+            content: "›" !important;
             position: absolute !important;
-            right: 5px !important;
+            right: 6px !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
-            font-size: 16px !important;
-            color: var(--primary) !important;
-            opacity: 0.6 !important;
+            font-size: 12px !important;
+            color: var(--text-secondary) !important;
+            opacity: 0.5 !important;
             transition: all 0.3s ease !important;
-            animation: pulse 2s infinite !important;
+            font-weight: bold !important;
         }
 
-        [data-testid="stSidebar"]:hover::after,
-        [data-testid="stSidebar"].expanded::after {
+        [data-testid="stSidebar"]:hover::after {
             opacity: 0 !important;
             transform: translateY(-50%) translateX(10px) !important;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        /* ================ Styles pour les titres avec centrage ================ */
-        .centered-title {
-            color: #3498db !important;
-            margin: 45px 0 30px 0 !important;
-            text-align: center !important;
-            font-size: 2.2rem !important;
-            font-weight: 600 !important;
-        }
-
-        /* ================ Cartes d'information avec espacement amélioré ================ */
-        .info-card-modern {
-            background: white !important;
-            border-radius: 15px !important;
-            padding: 30px !important;
-            margin: 35px 0 !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-            border-left: 4px solid #3498db !important;
-            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-        }
-
-        .info-card-modern:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-        }
-
-        /* ================ Timeline responsive ================ */
-        .timeline-container {
-            background-color: #f8f9fa !important;
-            padding: 25px !important;
-            border-radius: 15px !important;
-            margin: 40px 0 !important;
-            overflow-x: auto !important;
+        /* ================ Zone de Trigger Invisible ================ */
+        .sidebar-trigger-zone {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 10px !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            background: transparent !important;
         }
 
         /* ================ Responsive Design ================ */
-        @media (max-width: 1200px) {
-            .main .block-container {
-                margin-left: calc(var(--sidebar-width-collapsed) + 10px) !important;
-                max-width: calc(100vw - var(--sidebar-width-collapsed) - 20px) !important;
-            }
-        }
-
         @media (max-width: 768px) {
             [data-testid="stSidebar"] {
                 transform: translateX(-100%) !important;
-                transition: transform 0.3s ease !important;
             }
             
-            [data-testid="stSidebar"]:hover,
-            .sidebar-trigger-zone:hover + [data-testid="stSidebar"] {
+            [data-testid="stSidebar"]:hover {
                 transform: translateX(0) !important;
+                width: 280px !important;
+                min-width: 280px !important;
+                max-width: 280px !important;
             }
             
             .main .block-container {
@@ -370,92 +370,89 @@ def set_custom_theme():
             }
             
             .sidebar-trigger-zone {
-                width: 20px !important;
+                width: 15px !important;
             }
         }
 
-        /* ================ Corrections Spécifiques ================ */
-        .stAlert, [data-testid="stAlert"] {
-            border: none !important;
-            background: transparent !important;
-        }
-
-        /* ================ Boutons ================ */
+        /* ================ Améliorations Générales ================ */
         .stButton > button {
-            background: linear-gradient(135deg, var(--primary), #2980b9) !important;
+            background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
             color: white !important;
-            border-radius: 30px !important;
-            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
             border: none !important;
-            padding: 12px 24px !important;
-            font-weight: 600 !important;
+            padding: 10px 20px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: var(--shadow-light) !important;
         }
 
         .stButton > button:hover {
             transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+            box-shadow: var(--shadow-medium) !important;
+            background: linear-gradient(135deg, #2980b9, var(--secondary)) !important;
         }
 
-        /* ================ Uniformisation des espacements ================ */
-        h2 {
-            color: #3498db !important;
-            margin: 45px 0 25px 0 !important;
-            text-align: center !important;
-            font-size: 2.2rem !important;
-            font-weight: 600 !important;
-        }
-
-        .section-container {
-            margin: 50px 0 !important;
-            padding: 0 20px !important;
+        /* Suppression des alertes indésirables */
+        .stAlert, [data-testid="stAlert"] {
+            border: none !important;
+            background: transparent !important;
         }
         </style>
 
         <script>
-        // Script JavaScript pour améliorer l'interaction
+        // Script JavaScript optimisé
         document.addEventListener('DOMContentLoaded', function() {
-            // Créer la zone de trigger
-            const triggerZone = document.createElement('div');
-            triggerZone.className = 'sidebar-trigger-zone';
-            document.body.appendChild(triggerZone);
+            // Créer la zone de trigger si elle n'existe pas
+            if (!document.querySelector('.sidebar-trigger-zone')) {
+                const triggerZone = document.createElement('div');
+                triggerZone.className = 'sidebar-trigger-zone';
+                document.body.appendChild(triggerZone);
+            }
             
             const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            const triggerZone = document.querySelector('.sidebar-trigger-zone');
             
-            if (sidebar) {
-                // Ajouter des attributs data-emoji aux labels
-                const radioLabels = sidebar.querySelectorAll('.stRadio label span');
-                const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
-                
-                radioLabels.forEach((label, index) => {
-                    if (emojis[index]) {
-                        label.setAttribute('data-emoji', emojis[index]);
-                    }
-                });
-                
-                // Gestion du survol avec JavaScript pour plus de contrôle
+            if (sidebar && triggerZone) {
+                let isExpanded = false;
                 let hoverTimeout;
                 
                 function expandSidebar() {
                     clearTimeout(hoverTimeout);
-                    sidebar.classList.add('expanded');
+                    isExpanded = true;
+                    sidebar.style.overflow = 'visible';
                 }
                 
                 function collapseSidebar() {
                     hoverTimeout = setTimeout(() => {
-                        sidebar.classList.remove('expanded');
-                    }, 300); // Délai avant fermeture
+                        isExpanded = false;
+                        sidebar.style.overflow = 'hidden';
+                    }, 200);
                 }
                 
-                // Events sur la zone trigger
-                triggerZone.addEventListener('mouseenter', expandSidebar);
-                triggerZone.addEventListener('mouseleave', collapseSidebar);
+                // Gestion des événements
+                [sidebar, triggerZone].forEach(element => {
+                    element.addEventListener('mouseenter', expandSidebar);
+                    element.addEventListener('mouseleave', collapseSidebar);
+                });
                 
-                // Events sur la sidebar
-                sidebar.addEventListener('mouseenter', expandSidebar);
-                sidebar.addEventListener('mouseleave', collapseSidebar);
+                // Attribution des états pour les options sélectionnées
+                const observer = new MutationObserver(() => {
+                    const radioLabels = sidebar.querySelectorAll('.stRadio label');
+                    radioLabels.forEach(label => {
+                        const input = label.querySelector('input[type="radio"]');
+                        if (input && input.checked) {
+                            label.setAttribute('data-checked', 'true');
+                        } else {
+                            label.setAttribute('data-checked', 'false');
+                        }
+                    });
+                });
                 
-                // Tooltips pour le mode réduit
-                sidebar.setAttribute('title', 'Survolez pour déployer le menu');
+                observer.observe(sidebar, { 
+                    childList: true, 
+                    subtree: true,
+                    attributes: true 
+                });
             }
         });
         </script>
@@ -467,11 +464,11 @@ def set_custom_theme():
     st.markdown(custom_theme, unsafe_allow_html=True)
 
 def show_navigation_menu():
-    """Menu de navigation avec support pour la sidebar déployable"""
+    """Menu de navigation optimisé et professionnel"""
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options avec emojis pour l'affichage réduit
+    # Options optimisées avec icônes cohérentes
     options = [
         "🏠 Accueil",
         "🔍 Exploration des Données", 
@@ -490,13 +487,15 @@ def show_navigation_menu():
         "",
         options,
         label_visibility="collapsed",
-        index=current_index
+        index=current_index,
+        key="main_navigation"
     )
 
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
 
     return tool_choice
+
 
 set_custom_theme()
 
