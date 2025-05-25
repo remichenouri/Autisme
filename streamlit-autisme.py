@@ -4906,7 +4906,7 @@ def main():
     
     # Afficher la navigation
     with st.sidebar:
-        selected_tool = show_enhanced_navigation_menu()
+        selected_tool = show_navigation_menu()
 
     palette = {
         "Yes": "#3498db",
