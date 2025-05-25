@@ -92,65 +92,40 @@ def initialize_session_state():
 
         st.session_state.data_exploration_expanded = True
 
-def show_navigation_menu_optimized():
-    """Menu de navigation optimisé sans barre de défilement"""
-    
-    # CSS spécifique pour la navigation
-    st.markdown("""
-    <style>
-    /* Titre de navigation compact */
-    .nav-title {
-        text-align: center;
-        padding: 15px 10px;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #3498db, #2ecc71);
-        border-radius: 10px;
-        color: white;
-    }
-    
-    /* Conteneur de navigation sans défilement */
-    .nav-container {
-        height: calc(100vh - 120px);
-        overflow: hidden;
-        padding-right: 5px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Titre compact avec gradient
-    st.sidebar.markdown("""
-    <div class="nav-title">
-        <h2 style="margin: 0; font-size: 1.4rem;">🧩 Navigation</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Options de navigation compactes
-    options = [
-        "🏠 Accueil",
-        "🔍 Exploration", 
-        "🧠 Analyse ML",
-        "🤖 Prédiction IA",
-        "📚 Documentation",
-        "ℹ️ À propos"
-    ]
-    
-    # Initialisation de l'état
-    if 'tool_choice' not in st.session_state:
-        st.session_state.tool_choice = options[0]
-    
-    # Menu radio dans un conteneur sans défilement
-    with st.sidebar.container():
-        choice = st.radio(
-            "",
-            options,
-            key="nav_choice",
-            label_visibility="collapsed"
-        )
-    
-    return choice
+def show_navigation_menu():
+    st.markdown("## Autisme - Navigation")
+
+    st.markdown("Choisissez un outil :")
+
+
+    options = ["🏠 Accueil",
+             "🔍 Exploration des Données",
+             "🧠 Analyse ML",
+             "🤖 Prédiction par IA",
+             "📚 Documentation",
+             "ℹ️ À propos"]
+
+
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+        st.session_state.tool_choice = "🏠 Accueil"
+
+    current_index = options.index(st.session_state.tool_choice)
+
+
+    tool_choice = st.radio(
+        "",
+        options,
+        label_visibility="collapsed",
+        index=current_index,
+        extended=True
+    )
+
+    if tool_choice != st.session_state.tool_choice:
+        st.session_state.tool_choice = tool_choice
+
+    return tool_choice
 
 def set_custom_theme():
-    """Définit le thème personnalisé de l'application avec CSS optimisé"""
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
 
@@ -158,9 +133,10 @@ def set_custom_theme():
         with open(css_path, 'r') as f:
             custom_theme = f.read()
     else:
+
         custom_theme = """
         <style>
-        /* =========== VARIABLES GLOBALES =========== */
+        /* Variables globales */
         :root {
             --primary: #3498db;
             --secondary: #2ecc71;
@@ -169,109 +145,317 @@ def set_custom_theme():
             --text: #2c3e50;
         }
 
-        /* =========== CONFIGURATION GENERALE =========== */
+        /* Styles généraux du conteneur */
         [data-testid="stAppViewContainer"] {
             background-color: var(--background);
-            margin-left: 300px !important;
-            width: calc(100vw - 300px) !important;
-            min-height: 100vh !important;
         }
 
-        /* =========== SIDEBAR OPTIMISEE =========== */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text);
+            font-weight: 600;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        /* Suppression des bordures bleues sur les conteneurs */
+        .stAlert, [data-testid="stAlert"] {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Suppression des barres bleues sur les info boxes */
+        .stInfo {
+            border: none !important;
+            border-left: 4px solid #3498db !important;
+            background-color: #f8f9fa !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Suppression des bordures sur les colonnes */
+        [data-testid="column"] {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Suppression des bordures sur les conteneurs de markdown */
+        .stMarkdown {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        /* Élimination des barres bleues sur les éléments de base */
+        div[data-baseweb="base-input"] {
+            border: none !important;
+        }
+        
+        .css-1d391kg {
+            border: none !important;
+        }
+
+        /* Correction de la navigation - SOLUTION PRINCIPALE */
         [data-testid="stSidebar"] {
-            background-color: #f5f7fa !important;
-            border-right: 2px solid var(--primary) !important;
-            width: 300px !important;
-            min-width: 300px !important;
-            max-width: 300px !important;
-            overflow: hidden !important;
-            position: fixed !important;
-            height: 100vh !important;
-            top: 0 !important;
-            left: 0 !important;
-            z-index: 999 !important;
-            transition: transform 0.3s ease !important;
+            background-color: #f5f7fa;
+            border-right: 2px solid var(--primary);
+            padding-top: 2rem;
+            width: 250px !important; /* Largeur augmentée */
         }
-
+        [data-testid="stSidebar"] label {
+        margin-bottom: 14px !important;
+        padding: 8px 12px !important;
+        border-radius: 8px;
+        transition: background 0.2s;
+        }
+        [data-testid="stSidebar"] label:hover {
+            background: #eaf2f8 !important;
+        }
+        .sidebar-title {
+            margin-bottom: 2rem !important;
+        }... /* Assurer que le contenu est correctement dimensionné */
         [data-testid="stSidebarContent"] {
-            width: 100% !important;
-            height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            padding: 15px !important;
-            box-sizing: border-box !important;
+            width: 100%;
+            overflow: auto;
+            background-color: #f5f7fa !important;
         }
 
-        /* Masquage des barres de défilement */
-        [data-testid="stSidebar"]::-webkit-scrollbar,
-        [data-testid="stSidebarContent"]::-webkit-scrollbar,
-        [data-testid="stSidebar"] *::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-
-        [data-testid="stSidebar"],
-        [data-testid="stSidebarContent"],
-        [data-testid="stSidebar"] * {
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
-        }
-
-        /* =========== ELEMENTS DE NAVIGATION =========== */
-        [data-testid="stSidebar"] div[role="radiogroup"] {
-            margin: 10px 0 !important;
-            padding: 0 !important;
-        }
-
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            color: var(--text) !important;
+        /* Amélioration du texte dans la sidebar */
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] div,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span {
+            color: #2c3e50 !important;
             font-weight: 500 !important;
             font-size: 1rem !important;
-            margin-bottom: 8px !important;
-            padding: 12px 15px !important;
-            border-radius: 8px !important;
-            border: none !important;
-            transition: all 0.2s ease !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+        }
+
+        /* Amélioration spécifique pour les expanders */
+        [data-testid="stSidebar"] .streamlit-expanderHeader {
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            hyphens: auto !important;
+            padding-right: 10px !important;
+        }
+
+        /* Titre de la sidebar plus visible */
+        .sidebar-title {
+            font-size: 1.5rem;
+            color: #3498db;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Amélioration pour le menu de radiobuttons */
+        [data-testid="stSidebar"] div[role="radiogroup"] label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 0.95rem !important;
+            margin-bottom: 5px !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            line-height: 1.4 !important;
+            padding: 5px 10px !important;
             display: block !important;
-            width: calc(100% - 30px) !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            box-sizing: border-box !important;
+            width: 100% !important;
         }
 
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            background-color: #e3f2fd !important;
-            transform: translateX(3px) !important;
+        .sidebar .sidebar-content {
+            background-color: #f5f7fa !important;
+            border-right: 2px solid #3498db !important;
         }
 
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
-            background: linear-gradient(90deg, #e3f2fd 60%, #e1f5fe 100%) !important;
-            color: #1976d2 !important;
-            font-weight: 600 !important;
-            border-left: 4px solid var(--primary) !important;
+        .sidebar .sidebar-content .streamlit-expanderHeader,
+        .sidebar .sidebar-content label,
+        .sidebar .sidebar-content div,
+        .sidebar .sidebar-content p,
+        .sidebar .sidebar-content span {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
         }
 
-        /* =========== CONTENU PRINCIPAL =========== */
+        .sidebar .sidebar-content label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 1rem !important;
+        }
+
+        /* Styles des cartes et conteneurs */
+        .header-container {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            padding: 1.5rem;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-left: 1rem;
+        }
+
+        .puzzle-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.2rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .puzzle-icon {
+            font-size: 2.2rem;
+        }
+
         .main .block-container {
-            padding-left: 320px !important;
-            padding-right: 20px !important;
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
-            max-width: none !important;
-            width: calc(100vw - 340px) !important;
-            margin-left: 0 !important;
-            box-sizing: border-box !important;
+            padding-top: 0.7rem !important;
+            padding-bottom: 0.7rem !important;
         }
 
-        /* =========== ELEMENTS INTERACTIFS =========== */
+        [data-testid="stVerticalBlock"] {
+            gap: 0.5rem !important;
+        }
+
+        .element-container {
+            margin-bottom: 0.5rem !important;
+        }
+
+        .css-1544g2n.e1fqkh3o4 {
+            padding-top: 2rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        /* Styles des info-cards */
+        .info-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid var(--primary);
+            margin-bottom: 10px !important;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-title {
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
         div[role="radiogroup"] input[type="radio"]:checked + div {
-            background-color: var(--primary) !important;
-            color: white !important;
-            border-color: #2980b9 !important;
-            font-weight: 600 !important;
-            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4) !important;
+        background-color: #3498db !important;
+        color: white !important;
+        border-color: #2980b9 !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 5px rgba(52, 152, 219, 0.4) !important;
+    }
+
+        /* Styles des questions et formulaires */
+        .question-container {
+            background-color: white;
+            padding: 12px 15px !important;
+            border-radius: 12px;
+            margin-bottom: 12px !important;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .question-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .questionnaire-title {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Styles des radiobuttons */
+        div[role="radiogroup"] {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 5px !important;
+            margin-top: 10px;
+            margin-bottom: 15px !important;
+        }
+
+        div[role="radiogroup"] label {
+        color: #2c3e50 !important;  /* Texte foncé */
+        padding-right: 15px !important;
+        margin-bottom: 5px !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.4 !important;
+        padding: 5px 10px !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+
+        div[role="radiogroup"] label > div:first-child {
+            display: none !important;
+        }
+
+        input[type="radio"] + div {
+            background: #f5f7fa !important;
+            color: var(--text);
+            border-radius: 38px !important;
+            padding: 10px 20px !important;
+            border: 1px solid #dfe4ea;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }... input[type="radio"] + div:hover {
+            background: #e9f0ff !important;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Styles des boutons et CTA */
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            color: white;
+            padding: 0.9rem 1.5rem;
+            border-radius: 30px;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            width: 80%;
+        }
+
+        .cta-button:hover {
+            background: linear-gradient(135deg, #2980b9, var(--primary));
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+            transform: translateY(-2px);
         }
 
         .stButton > button {
@@ -279,38 +463,47 @@ def set_custom_theme():
             padding: 0.8rem 1rem !important;
             font-size: 1.1rem !important;
             margin-top: 1rem;
-            transition: all 0.3s ease !important;
         }
 
-        /* =========== RESPONSIVE DESIGN =========== */
-        @media (max-width: 768px) {
-            .main .block-container {
-                padding-left: 20px !important;
-                width: calc(100vw - 40px) !important;
-            }
-            
-            [data-testid="stAppViewContainer"] {
-                margin-left: 0 !important;
-                width: 100vw !important;
-            }
-            
-            [data-testid="stSidebar"] {
-                width: 280px !important;
-                min-width: 280px !important;
-                max-width: 280px !important;
-                transform: translateX(-100%) !important;
-            }
-            
-            [data-testid="stSidebar"]:hover,
-            [data-testid="stSidebar"]:focus-within {
-                transform: translateX(0) !important;
-            }
+        /* Styles des expanders et tabs */
+        .streamlit-expanderHeader {
+            background-color: #f5f7fa;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 15px !important;
+            border-left: 4px solid var(--primary);
+            transition: all 0.2s ease;
         }
 
-        /* =========== CORRECTIONS VISUELLES =========== */
-        .stAlert, [data-testid="stAlert"] {
-            border: none !important;
-            background: transparent !important;
+        .streamlit-expanderHeader:hover {
+            background-color: #eef1f5;
+            transform: translateX(2px);
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            height: 40px;
+            white-space: pre-wrap;
+            background-color: #f5f7fa;
+            border-radius: 5px 5px 0 0;
+            gap: 1px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background-color: var(--primary) !important;
+            color: white !important;
+        }
+
+        /* Styles divers */
+        [data-testid="stDataFrame"] {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         [data-testid="stMetricValue"] {
@@ -319,26 +512,125 @@ def set_custom_theme():
             font-size: 1.2rem;
         }
 
-        .stDataFrame {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        [data-testid="stMetricDelta"] {
+            font-size: 0.9rem;
         }
 
-        /* =========== OPTIMISATION PERFORMANCE =========== */
-        [data-testid="stSidebar"] * {
-            will-change: transform;
-            backface-visibility: hidden;
+        div[data-baseweb="select"] > div {
+            border-radius: 8px;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        div[data-baseweb="select"] > div:hover {
+            border-color: var(--primary);
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow-x: auto;
+            max-width: 100%;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .structure-donnees pre {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #d0d0d0;
+            line-height: 1.6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            background-color: #f0f2f6;
+            padding: 1rem;
+            text-align: center;
+            border-top: 2px solid #3498db;
+            margin-top: 2rem;
+            border-radius: 10px;
+        }
+
+        .sidebar .sidebar-content .streamlit-expanderHeader {
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            hyphens: auto !important;
+            padding-right: 10px !important;
+        }
+
+        .sidebar .sidebar-content label {
+            color: #2c3e50 !important;
+            font-weight: 500 !important;
+            font-size: 1rem !important;
+        }
+
+        .sidebar .sidebar-content div[role="radiogroup"] label {
+            padding-right: 15px !important;
+            margin-bottom: 5px !important;
+            display: block !important;
+            width: 100% !important;
+        }
+
+        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
+            width: 320px;
+            min-width: 320px;
+        }
+        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
+            width: 320px;
+            min-width: 320px;
+        }
+
+
+        [data-testid="stSidebar"] .css-1wvake5,
+        [data-testid="stSidebar"] .css-1v0mbdj,
+        [data-testid="stSidebar"] label {
+            white-space: normal !important;
+            word-break: break-word !important;
+            font-size: 1.1rem !important;
+            font-weight: 500 !important;
+            padding: 8px 14px !important;
+            margin-bottom: 10px !important;
+            border-radius: 8px;
+            color: #2c3e50 !important;
+            background: none !important;
+            transition: background 0.2s;
+            display: block;
+        }
+
+
+        [data-testid="stSidebar"] .css-1wvake5[aria-checked="true"],
+        [data-testid="stSidebar"] .css-1v0mbdj[aria-checked="true"],
+        [data-testid="stSidebar"] label[data-selected="true"] {
+            background: linear-gradient(90deg, #eaf6fb 60%, #e0f7fa 100%) !important;
+            color: #0077b6 !important;
+        }... [data-testid="stSidebar"] svg {
+            margin-right: 10px;
+            vertical-align: middle;
         }
         </style>
         """
-        
-        # Sauvegarde du CSS optimisé
+        st.markdown(custom_theme, unsafe_allow_html=True)
+
         with open(css_path, 'w') as f:
             f.write(custom_theme)
-    
-    # Application du thème
+
     st.markdown(custom_theme, unsafe_allow_html=True)
+
+set_custom_theme()
 
 def load_visualization_libraries():
     global plt, px, go, sns
@@ -794,350 +1086,182 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         return None
 
 def show_home_page():
-    """Page d'accueil améliorée avec design moderne et responsive"""
-    
-    # CSS spécifique pour corriger les problèmes d'affichage
     st.markdown("""
-    <style>
-    /* Corrections pour la navigation sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #f5f7fa !important;
-        border-right: none !important;
-        width: 280px !important;
-        min-width: 280px !important;
-        max-width: 280px !important;
-    }
-    
-    [data-testid="stSidebar"] > div {
-        border-right: none !important;
-        background-color: #f5f7fa !important;
-    }
-    
-    /* Suppression des barres bleues indésirables */
-    .stAlert, [data-testid="stAlert"] {
-        border: none !important;
-        background: transparent !important;
-    }
-    
-    /* Amélioration du contenu principal */
-    .main .block-container {
-        padding-top: 1rem !important;
-        max-width: 1200px !important;
-    }
-    
-    /* Style pour les cartes d'information */
-    .info-card-modern {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin: 15px 0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        border-left: 4px solid #3498db;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .info-card-modern:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    
-    /* Timeline responsive */
-    .timeline-container {
-        background-color: #f8f9fa;
-        padding: 25px;
-        border-radius: 15px;
-        margin: 25px 0;
-        overflow-x: auto;
-    }
-    
-    .timeline-item {
-        min-width: 160px;
-        text-align: center;
-        margin: 0 15px;
-        flex-shrink: 0;
-    }
-    
-    .timeline-year {
-        background: linear-gradient(135deg, #3498db, #2ecc71);
-        color: white;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 0.95rem;
-    }
-    
-    .timeline-text {
-        margin-top: 12px;
-        font-size: 0.9rem;
-        color: #2c3e50;
-        line-height: 1.4;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # En-tête principal amélioré
-    st.markdown("""
-    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-                padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
-        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px; 
-                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-            🧩 Comprendre les Troubles du Spectre Autistique
-        </h1>
-        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem; 
-                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
-            Une approche moderne et scientifique pour le dépistage précoce
-        </p>
+    <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+        <h1 style="color: white; text-align: center; font-size: 2.5rem;">Comprendre les Troubles du Spectre Autistique</h1>
+        <p style="color: white; text-align: center; font-size: 1.2rem;">Une approche moderne et scientifique</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Image Ghibli (conservée)
-    image_url = "https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
+    # Conservation de l'image Ghibli sans lien cliquable
+    image_url ="https://drive.google.com/file/d/1fY4J-WgufGTF6AgorFOspVKkHiRKEaiW/view?usp=drive_link"
     st.markdown(get_img_with_href(image_url, None, as_banner=True), unsafe_allow_html=True)
 
-    # Section "Qu'est-ce que l'autisme ?" améliorée
     st.markdown("""
-    <div class="info-card-modern">
-        <h2 style="color: #3498db; margin-bottom: 25px; font-size: 2.2rem; text-align: center;">
-            🔬 Qu'est-ce que l'autisme ?
-        </h2>
-        <p style="font-size: 1.2rem; line-height: 1.8; text-align: justify; 
-                  max-width: 900px; margin: 0 auto; color: #2c3e50;">
-            Les <strong>Troubles du Spectre Autistique (TSA)</strong> sont des conditions neurodéveloppementales 
-            qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des 
-            différences dans la communication sociale, les interactions sociales et par des comportements ou 
-            intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de 
-            niveaux de fonctionnement.
+    <div style="padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
+        <h2 style="color: #3498db; margin-bottom: 20px; font-size: 2rem;">Qu'est-ce que l'autisme?</h2>
+        <p style="font-size: 1.2rem; line-height: 1.6; text-align: justify; max-width: 800px; margin: 0 auto;">
+        Les Troubles du Spectre Autistique (TSA) sont des conditions neurodéveloppementales qui affectent la façon dont une personne perçoit et interagit avec le monde. Caractérisés par des différences dans la communication sociale, les interactions sociales et par des comportements ou intérêts restreints et répétitifs, les TSA se manifestent sur un large spectre de symptômes et de niveaux de fonctionnement.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Timeline de l'évolution améliorée
     st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        📅 Évolution de la compréhension de l'autisme
-    </h2>
-    """, unsafe_allow_html=True)
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Évolution de la compréhension de l'autisme</h2>
 
-    st.markdown("""
-    <div class="timeline-container">
-        <div style="display: flex; justify-content: space-between; min-width: 700px;">
-            <div class="timeline-item">
-                <div class="timeline-year">1943</div>
-                <div class="timeline-text">Leo Kanner décrit l'autisme infantile</div>
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; overflow-x: auto;">
+        <div style="display: flex; justify-content: space-between; min-width: 650px;">
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1943</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Leo Kanner décrit l'autisme infantile</div>
             </div>
-            <div class="timeline-item">
-                <div class="timeline-year">1980</div>
-                <div class="timeline-text">L'autisme entre dans le DSM-III</div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">1980</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">L'autisme dans le DSM-III</div>
             </div>
-            <div class="timeline-item">
-                <div class="timeline-year">2013</div>
-                <div class="timeline-text">Le DSM-5 introduit les TSA</div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">2013</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Le DSM-5 introduit les TSA</div>
             </div>
-            <div class="timeline-item">
-                <div class="timeline-year">Aujourd'hui</div>
-                <div class="timeline-text">Approche neurodiversité</div>
+            <div style="min-width: 150px; text-align: center; margin: 0 10px;">
+                <div style="background: linear-gradient(135deg, #3498db, #2ecc71); color: white; padding: 10px; border-radius: 5px; font-weight: bold;">Aujourd'hui</div>
+                <div style="margin-top: 10px; font-size: 0.9rem;">Approche neurodiversité</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Section "Le spectre autistique" avec HTML corrigé
-    st.markdown("## 🌈 Le spectre autistique")
-    
-    # HTML simple et correct
-    st.markdown("""
-    <div style="background-color: white; padding: 25px; border-radius: 15px; 
-               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
-        <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50;">
-            L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, 
-            reflétant la grande variabilité des manifestations.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Niveaux avec colonnes Streamlit
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-        <div style="background: #e8f4fd; padding: 20px; border-radius: 12px; text-align: center;">
-            <h4 style="color: #2980b9; margin: 0;">Niveau 1</h4>
-            <p style="color: #34495e; margin: 8px 0 0 0;">Nécessite un soutien</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
+    # Rectangle du spectre autistique recentré (image 265)
+    st.markdown("## Le spectre autistique", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
+    with col2:  # Utilisation de la colonne centrale pour centrer le contenu
+        st.write("""
+        L'autisme est aujourd'hui compris comme un **spectre** de conditions, reflétant la
+        grande variabilité des manifestations. Cette conception reconnaît que:
+
+        * Chaque personne autiste présente un profil unique de forces et de défis
+        * Les manifestations varient en intensité et en expression
+        * Les niveaux de soutien nécessaires peuvent différer considérablement
+        """)
+
+        st.write("Le DSM-5 définit trois niveaux de soutien nécessaire:")
+
+        niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
+
+        with niveau_col1:
+            st.info("**Niveau 1**\n\nNécessite un soutien")
+
+        with niveau_col2:
+            st.info("**Niveau 2**\n\nNécessite un soutien important")
+
+        with niveau_col3:
+            st.info("**Niveau 3**\n\nNécessite un soutien très important")
+
+    # Section "Contexte du projet" (ajoutée depuis le rapport)
+    st.markdown("## Contexte du projet", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
     with col2:
-        st.markdown("""
-        <div style="background: #fff3e0; padding: 20px; border-radius: 12px; text-align: center;">
-            <h4 style="color: #e67e22; margin: 0;">Niveau 2</h4>
-            <p style="color: #8b4513; margin: 8px 0 0 0;">Nécessite un soutien important</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style="background: #ffebee; padding: 20px; border-radius: 12px; text-align: center;">
-            <h4 style="color: #c0392b; margin: 0;">Niveau 3</h4>
-            <p style="color: #8b0000; margin: 8px 0 0 0;">Nécessite un soutien très important</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.write("""
+        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des **Troubles du Spectre de l'Autisme (TSA)**.
+        L'autisme n'est pas une maladie mais une **différence neurologique** affectant le fonctionnement du cerveau.
 
-    # Section contexte du projet améliorée
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        📊 Contexte du projet
-    </h2>
-    """, unsafe_allow_html=True)
+        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 5000 personnes de différentes origines
+        (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) pour identifier les facteurs associés à la présence d'un TSA.
 
-    col1, col2, col3 = st.columns([1, 10, 1])
-    
+        L'objectif est de construire des modèles prédictifs capables d'assister dans l'évaluation de la présence d'un TSA
+        en fonction des caractéristiques individuelles, tout en offrant une compréhension claire et accessible de ce qu'est
+        l'autisme pour tous les publics.
+        """)
+
+        st.write("""
+        📊 **Prévalence de l'autisme:**
+        * 1 à 2% de la population mondiale est concernée
+        * En France, environ 700 000 personnes sont concernées
+        * Ratio historique garçons/filles d'environ 4:1 (aujourd'hui remis en question)
+        """)
+
+    # Section "À qui s'adresse ce projet" (ajoutée depuis le rapport)
+    st.markdown("## À qui s'adresse ce projet", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
     with col2:
-        st.markdown("""
-        <div class="info-card-modern">
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 20px; color: #2c3e50;">
-                Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
-                <strong>Troubles du Spectre de l'Autisme (TSA)</strong>. L'autisme n'est pas une maladie 
-                mais une <strong>différence neurologique</strong> affectant le fonctionnement du cerveau.
-            </p>
-            
-            <p style="font-size: 1.1rem; line-height: 1.8; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
-                Notre équipe a travaillé sur <strong>5 jeux de données publics</strong> représentant plus de 
-                5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
-                pour identifier les facteurs associés à la présence d'un TSA.
-            </p>
-            
-            <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin: 25px 0;">
-                <h4 style="color: #2c3e50; margin-top: 0;">📈 Prévalence de l'autisme :</h4>
-                <ul style="padding-left: 25px; line-height: 1.6; color: #34495e;">
-                    <li><strong>1 à 2%</strong> de la population mondiale est concernée</li>
-                    <li>En France, environ <strong>700 000 personnes</strong> sont concernées</li>
-                    <li>Ratio historique garçons/filles d'environ <strong>4:1</strong> (aujourd'hui remis en question)</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Section "À qui s'adresse ce projet" moderne
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🎯 À qui s'adresse ce projet
-    </h2>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 10, 1])
-    
-    with col2:
-        # Grille 2x2 pour les publics cibles
         col_a, col_b = st.columns(2)
 
         with col_a:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
-                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
-                       border-left: 4px solid #3498db;">
-                <h4 style="color: #2980b9; margin-top: 0;">🔬 Chercheurs en santé</h4>
-                <p style="color: #34495e; line-height: 1.6; font-size: 0.95rem;">
-                    Analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer 
-                    des tendances cliniques dans le domaine des TSA.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); 
-                       border-radius: 15px; padding: 25px; height: 180px;
-                       border-left: 4px solid #ffa726;">
-                <h4 style="color: #f57c00; margin-top: 0;">👨‍👩‍👧‍👦 Familles et particuliers</h4>
-                <p style="color: #bf360c; line-height: 1.6; font-size: 0.95rem;">
-                    Outils d'auto-évaluation et d'information pour répondre aux questions 
-                    ou suspicions de TSA et faciliter l'orientation.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info("### Chercheurs en santé et psychologie\nUne analyse détaillée permettant d'étayer des hypothèses scientifiques et confirmer des tendances cliniques dans le domaine des TSA.")
+            st.warning("### Familles et particuliers\nOutils d'auto-évaluation et d'information pour répondre aux questions ou suspicions de TSA et faciliter l'orientation.")
 
         with col_b:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); 
-                       border-radius: 15px; padding: 25px; margin-bottom: 20px; height: 180px;
-                       border-left: 4px solid #4caf50;">
-                <h4 style="color: #388e3c; margin-top: 0;">🩺 Professionnels de santé</h4>
-                <p style="color: #2e7d32; line-height: 1.6; font-size: 0.95rem;">
-                    Résultats exploitables permettant d'améliorer le dépistage et la prise 
-                    en charge des personnes avec TSA.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #fce4ec, #f8bbd9); 
-                       border-radius: 15px; padding: 25px; height: 180px;
-                       border-left: 4px solid #e91e63;">
-                <h4 style="color: #c2185b; margin-top: 0;">🏛️ Décideurs publics</h4>
-                <p style="color: #ad1457; line-height: 1.6; font-size: 0.95rem;">
-                    Données et analyses pouvant informer les politiques publiques et orienter 
-                    les décisions de financement.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.success("### Professionnels de santé\nDes résultats exploitables permettant d'améliorer le dépistage et la prise en charge des personnes avec TSA.")
+            st.error("### Décideurs publics\nDonnées et analyses pouvant informer les politiques publiques et orienter les décisions de financement pour les services aux personnes avec TSA.")
 
-    # Section "Accompagnement et soutien" améliorée
+        st.write("""
+        Notre plateforme facilite la compréhension des TSA pour tous ces publics grâce à des visualisations claires
+        et des explications vulgarisées. Les outils de prédiction peuvent aider à une détection précoce, facilitant
+        ainsi une prise en charge adaptée et personnalisée.
+        """)
+
     st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🤝 Accompagnement et soutien
-    </h2>
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Accompagnement et soutien</h2>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
-    support_cards = [
-        {
-            "title": "🌱 Intervention précoce",
-            "items": ["Programmes de stimulation", "Accompagnement parental", "Thérapies comportementales", "Approches sensorimotrices"],
-            "gradient": "linear-gradient(135deg, #3498db, #2980b9)"
-        },
-        {
-            "title": "📚 Approches éducatives", 
-            "items": ["Méthodes structurées", "Soutien à l'inclusion", "Aménagements adaptés", "Programmes individualisés"],
-            "gradient": "linear-gradient(135deg, #2ecc71, #27ae60)"
-        },
-        {
-            "title": "👥 Suivi multidisciplinaire",
-            "items": ["Orthophonie", "Ergothérapie", "Psychomotricité", "Soutien psychologique"],
-            "gradient": "linear-gradient(135deg, #9b59b6, #8e44ad)"
-        }
-    ]
+    with col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 10px; height: 300px;">
+            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Intervention précoce</h3>
+            <ul style="padding-left: 20px; margin-top: 15px;">
+                <li>Programmes de stimulation</li>
+                <li>Accompagnement parental</li>
+                <li>Thérapies comportementales</li>
+                <li>Approches sensorimotrices</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
-    for i, (card, col) in enumerate(zip(support_cards, [col1, col2, col3])):
-        with col:
-            items_html = "".join([f"<li>{item}</li>" for item in card['items']])
-            st.markdown(f"""
-            <div style="background: {card['gradient']}; color: white; 
-                       padding: 25px; border-radius: 15px; height: 280px; 
-                       box-shadow: 0 6px 20px rgba(0,0,0,0.15);">
-                <h3 style="border-bottom: 2px solid rgba(255,255,255,0.3); 
-                          padding-bottom: 12px; margin-bottom: 20px; font-size: 1.3rem;">
-                    {card['title']}
-                </h3>
-                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
-                    {items_html}
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 20px; border-radius: 10px; height: 300px;">
+            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Approches éducatives</h3>
+            <ul style="padding-left: 20px; margin-top: 15px;">
+                <li>Méthodes structurées</li>
+                <li>Soutien à l'inclusion</li>
+                <li>Aménagements adaptés</li>
+                <li>Programmes individualisés</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # Section "Caractéristiques principales" améliorée
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 10px; height: 300px;">
+            <h3 style="border-bottom: 2px solid white; padding-bottom: 10px;">Suivi multidisciplinaire</h3>
+            <ul style="padding-left: 20px; margin-top: 15px;">
+                <li>Orthophonie</li>
+                <li>Ergothérapie</li>
+                <li>Psychomotricité</li>
+                <li>Soutien psychologique</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🧠 Caractéristiques principales
-    </h2>
+    <h2 style="color: #3498db; margin: 40px 0 20px 0; text-align: center;">Caractéristiques principales</h2>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
-        <div class="info-card-modern" style="border-left-color: #3498db;">
-            <h3 style="color: #3498db; margin-bottom: 20px;">💬 Communication sociale</h3>
-            <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
+        <div style="background-color: #f2f6f9; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
+            <h3 style="color: #3498db;">Communication sociale</h3>
+            <ul style="line-height: 1.6;">
                 <li>Différences dans la communication non verbale</li>
                 <li>Défis dans les interactions sociales</li>
                 <li>Interprétation littérale du langage</li>
@@ -1148,9 +1272,9 @@ def show_home_page():
 
     with col2:
         st.markdown("""
-        <div class="info-card-modern" style="border-left-color: #2ecc71;">
-            <h3 style="color: #2ecc71; margin-bottom: 20px;">🔄 Comportements et intérêts</h3>
-            <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px;">
+        <div style="background-color: #f2f9f5; padding: 20px; border-radius: 10px; border-left: 4px solid #2ecc71;">
+            <h3 style="color: #2ecc71;">Comportements et intérêts</h3>
+            <ul style="line-height: 1.6;">
                 <li>Intérêts spécifiques et intenses</li>
                 <li>Attachement aux routines</li>
                 <li>Mouvements répétitifs</li>
@@ -1159,39 +1283,32 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-    # Section "Notre approche" finale
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🚀 Notre approche
-    </h2>
-    """, unsafe_allow_html=True)
+    # Rectangle "Notre approche" recentré sans liens cliquables (image 291)
+    st.markdown("## Notre approche", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 10, 1])
-    
+    col1, col2, col3 = st.columns([1, 8, 1])  # Utilisation des colonnes pour centrer le contenu
+
     with col2:
+        # Création d'un conteneur avec dégradé de couleur pour la section "Notre approche"
         st.markdown("""
-        <div style="background: linear-gradient(90deg, #3498db, #2ecc71); 
-                   padding: 35px; border-radius: 20px; text-align: center; color: white;
-                   box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);">
-            <p style="font-size: 1.3rem; max-width: 800px; margin: 0 auto; line-height: 1.7;">
-                Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle 
-                pour améliorer la détection précoce et l'accompagnement des personnes autistes, 
-                dans une vision respectueuse de la neurodiversité.
+        <div style="background: linear-gradient(90deg, #3498db, #2ecc71); padding: 30px; border-radius: 15px; margin-top: 0px; text-align: center; color: white;">
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
+            Notre plateforme combine les connaissances scientifiques actuelles et l'intelligence artificielle pour améliorer la détection précoce et l'accompagnement des personnes autistes, dans une vision respectueuse de la neurodiversité.
             </p>
+            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
+
         </div>
         """, unsafe_allow_html=True)
 
+    # Avertissement professionnel
     st.markdown("""
-    <div style="margin: 40px 0 30px 0; padding: 20px; border-radius: 12px; 
-               border-left: 4px solid #e74c3c; background: linear-gradient(135deg, #fff5f5, #ffebee);
-               box-shadow: 0 4px 12px rgba(231, 76, 60, 0.1);">
-        <p style="font-size: 1rem; color: #c0392b; text-align: center; margin: 0; line-height: 1.6;">
-            <strong style="color: #e74c3c;">⚠️ Avertissement :</strong> 
-            Les informations présentées sur cette plateforme sont à titre informatif uniquement. 
-            Elles ne remplacent pas l'avis médical professionnel.
+    <div style="margin-top: 30px; padding: 15px; border-radius: 5px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
+        <p style="font-size: 0.9rem;">
+        <strong style="color: #e74c3c;">Avertissement :</strong> Les informations présentées sur cette plateforme sont à titre informatif uniquement. Elles ne remplacent pas l'avis médical professionnel.
         </p>
     </div>
     """, unsafe_allow_html=True)
+
 
 def show_data_exploration():
     import plotly.express as px
@@ -2356,7 +2473,6 @@ def show_ml_analysis():
         fig_scatter.update_layout(height=500)
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-        # Pourquoi Random Forest ?
         st.info("""
         **🎯 Pourquoi choisir Random Forest pour le dépistage ?**
 
@@ -2376,7 +2492,6 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
-        # Entraînement du modèle avec gestion d'erreur
         with st.spinner("🤖 Entraînement du modèle Random Forest en cours..."):
             rf_results = train_optimized_rf_model(X_train, y_train, preprocessor, X_test, y_test)
 
@@ -2384,7 +2499,6 @@ def show_ml_analysis():
             st.error(f"❌ Échec de l'entraînement : {rf_results.get('message', 'Erreur inconnue')}")
             return
 
-        # Métriques principales
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -2406,7 +2520,6 @@ def show_ml_analysis():
                 "Capacité discriminante"
             )
 
-        # Onglets d'analyse détaillée
         rf_tabs = st.tabs([
             "📊 Performances détaillées",
             "🔍 Matrice de confusion",
@@ -2463,7 +2576,6 @@ def show_ml_analysis():
                 else:
                     st.warning("⚠️ **Précision à améliorer** : Risque de fausses alertes")
 
-                # Temps d'entraînement
                 st.metric(
                     "⏱️ Temps d'entraînement",
                     f"{rf_results['metrics']['training_time']:.2f}s",
@@ -2475,7 +2587,6 @@ def show_ml_analysis():
 
             cm = rf_results['confusion_matrix']
 
-            # Visualisation moderne de la matrice
             fig_cm = go.Figure(data=go.Heatmap(
                 z=cm,
                 x=['Prédit: Non-TSA', 'Prédit: TSA'],
@@ -2483,7 +2594,7 @@ def show_ml_analysis():
                 colorscale='Blues',
                 text=cm,
                 texttemplate="%{text}",
-                textfont={"size": 24, "color": "black"},
+                textfont={"size": 24, "color": "white"},
                 hoverongaps=False,
                 showscale=True
             ))
@@ -2498,7 +2609,6 @@ def show_ml_analysis():
 
             st.plotly_chart(fig_cm, use_container_width=True)
 
-            # Détail des métriques
             if len(cm.ravel()) == 4:
                 tn, fp, fn, tp = cm.ravel()
 
@@ -2525,7 +2635,6 @@ def show_ml_analysis():
             col1, col2 = st.columns(2)
 
             with col1:
-                # Courbe ROC
                 fpr, tpr = rf_results['roc_curve']
                 auc_score = rf_results['metrics']['auc']
 
@@ -2557,7 +2666,6 @@ def show_ml_analysis():
                 st.plotly_chart(fig_roc, use_container_width=True)
 
             with col2:
-                # Courbe Precision-Recall
                 precision_curve, recall_curve = rf_results['pr_curve']
 
                 fig_pr = go.Figure()
@@ -2588,7 +2696,6 @@ def show_ml_analysis():
 
                 st.plotly_chart(fig_pr, use_container_width=True)
 
-            # Validation croisée
             st.subheader("🔄 Validation croisée")
             cv_scores = rf_results['cv_scores']
 
@@ -2636,7 +2743,6 @@ def show_ml_analysis():
 
             feature_importance = rf_results['feature_importance'].head(10)
 
-            # Graphique d'importance amélioré
             fig_importance = px.bar(
                 feature_importance,
                 x='importance',
@@ -2661,7 +2767,6 @@ def show_ml_analysis():
 
             st.plotly_chart(fig_importance, use_container_width=True)
 
-            # Analyse des top features
             col1, col2 = st.columns(2)
 
             with col1:
@@ -2676,7 +2781,6 @@ def show_ml_analysis():
                 """)
 
             with col2:
-                # Graphique en secteurs pour les top 5
                 top_5 = feature_importance.head(5)
                 fig_pie = px.pie(
                     top_5,
@@ -2688,12 +2792,12 @@ def show_ml_analysis():
                 fig_pie.update_traces(
                     textposition='inside',
                     textinfo='percent+label',
-                    textfont_size=14  # Augmenter la taille du texte
+                    textfont_size=14  
                 )
                 fig_pie.update_layout(
-                    height=500,  # <-- Nouvelle hauteur : 500px (au lieu de 300px)
+                    height=500,  #
                     showlegend=False,
-                    font=dict(size=14)  # Améliorer la lisibilité du titre
+                    font=dict(size=14)
                 )
                 st.plotly_chart(fig_pie, use_container_width=True)
 
@@ -2712,7 +2816,6 @@ def show_ml_analysis():
         if rf_results.get('status') == 'success':
             y_pred_proba = rf_results['y_pred_proba']
 
-            # Réglage du seuil interactif
             st.subheader("🎯 Réglage du seuil de décision")
 
             col1, col2 = st.columns([2, 1])
@@ -2727,13 +2830,11 @@ def show_ml_analysis():
                     help="Plus le seuil est bas, plus le modèle sera sensible (détectera plus de cas mais avec plus de fausses alertes)"
                 )
 
-                # Calcul des métriques ajustées
                 y_pred_adjusted = (y_pred_proba >= threshold).astype(int)
                 adjusted_recall = recall_score(y_test, y_pred_adjusted)
                 adjusted_precision = precision_score(y_test, y_pred_adjusted, zero_division=0)
                 adjusted_f1 = f1_score(y_test, y_pred_adjusted, zero_division=0)
 
-                # Affichage des métriques en temps réel
                 met_col1, met_col2, met_col3 = st.columns(3)
 
                 with met_col1:
@@ -2744,7 +2845,6 @@ def show_ml_analysis():
                     st.metric("F1-Score ajusté", f"{adjusted_f1:.1%}")
 
             with col2:
-                # Gauge de sensibilité
                 fig_gauge = go.Figure(go.Indicator(
                     mode = "gauge+number+delta",
                     value = adjusted_recall * 100,
@@ -2769,7 +2869,6 @@ def show_ml_analysis():
                 fig_gauge.update_layout(height=300)
                 st.plotly_chart(fig_gauge, use_container_width=True)
 
-            # Impact du seuil sur les performances
             st.subheader("📊 Impact du seuil sur les performances")
 
             thresholds = np.linspace(0.1, 0.9, 17)
@@ -2795,7 +2894,6 @@ def show_ml_analysis():
                 color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
             )
 
-            # Ligne verticale pour le seuil actuel
             fig_threshold.add_vline(
                 x=threshold,
                 line_dash="dash",
@@ -2806,7 +2904,6 @@ def show_ml_analysis():
             fig_threshold.update_layout(height=400)
             st.plotly_chart(fig_threshold, use_container_width=True)
 
-        # Protocole de dépistage recommandé
         st.subheader("📋 Protocole de dépistage recommandé")
 
         st.markdown("""
@@ -2833,7 +2930,6 @@ def show_ml_analysis():
         </div>
         """, unsafe_allow_html=True)
 
-        # Recommandations par contexte
         st.subheader("🎯 Recommandations par contexte d'utilisation")
 
         context_col1, context_col2, context_col3 = st.columns(3)
@@ -2865,7 +2961,6 @@ def show_ml_analysis():
             - Objectif : Cohortes homogènes
             """)
 
-        # Avertissement final
         st.markdown("""
         <div style="margin-top: 30px; padding: 20px; border-radius: 10px; border-left: 4px solid #e74c3c; background-color: rgba(231, 76, 60, 0.1);">
             <h4 style="color: #e74c3c; margin-top: 0;">⚠️ Avertissement important</h4>
@@ -3216,7 +3311,6 @@ def show_aq10_and_prediction():
                 st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
                 if rf_model is not None and preprocessor is not None:
                     try:
-                        # 1. Créer une structure de données cohérente avec celle utilisée pour l'entraînement
                         required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
                         for col in required_columns:
                             if col not in user_df.columns:
@@ -3227,37 +3321,31 @@ def show_aq10_and_prediction():
                                     else:
                                         user_df[col] = 0
                                 else:
-                                    user_df[col] = 0  # Valeur par défaut
+                                    user_df[col] = 0 
 
                         column_mapping = {
                             'Antecedent_autisme': 'Autisme_familial',
                         }
                         user_df = user_df.rename(columns=column_mapping)
 
-                        # Ajouter les colonnes manquantes avec des valeurs par défaut
                         if 'Jaunisse' not in user_df.columns:
                             user_df['Jaunisse'] = "No"
 
-                        # S'assurer que toutes les colonnes nécessaires existent
                         required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
                                           'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
 
                         for col in required_columns:
                             if col not in user_df.columns:
-                                user_df[col] = 0  # Valeur par défaut
-
-                        # Réorganiser les colonnes pour correspondre à l'ordre attendu par le modèle
-                        user_df = user_df[required_columns]
+                                user_df[col] = 0 
 
                         user_df = user_df[required_columns]
 
-                        # 3. Effectuer la prédiction
+                        user_df = user_df[required_columns]
+
                         prediction_proba = rf_model.predict_proba(user_df)
 
-                        # 4. Récupérer la probabilité de la classe positive (TSA)
                         tsa_probability = prediction_proba[0][1]
 
-                        # 5. Classification et affichage
                         prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
 
                         probability_percentage = int(tsa_probability * 100)
@@ -3278,10 +3366,8 @@ def show_aq10_and_prediction():
                             </div>
                         """, unsafe_allow_html=True)
 
-                        # Après la section de prédiction IA, avant les recommandations
                         st.markdown("### 📈 Profil détaillé des traits autistiques")
                         
-                        # Calcul des sous-scores
                         social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
                         cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100
                         detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100
@@ -3293,8 +3379,7 @@ def show_aq10_and_prediction():
                             if score < 30: return "#2ecc71"
                             elif score < 60: return "#f39c12"
                             else: return "#e74c3c"
-                        
-                        # Première ligne de KPI
+                    
                         col1, col2, col3 = st.columns(3)
                         
                         with col1:
@@ -3336,7 +3421,6 @@ def show_aq10_and_prediction():
                             </div>
                             """, unsafe_allow_html=True)
                         
-                        # Deuxième ligne de KPI
                         col4, col5, col6 = st.columns(3)
                         
                         with col4:
@@ -3385,7 +3469,6 @@ def show_aq10_and_prediction():
                             </h4>
                         """, unsafe_allow_html=True)
 
-                        # Calcul des scores par dimension
                         dimensions = [
                             "Communication sociale",
                             "Interactions sociales",
@@ -3394,16 +3477,15 @@ def show_aq10_and_prediction():
                             "Sensibilité sensorielle"
                         ]
 
-                        # Mapping des questions vers les dimensions (simplifié)
                         dim_scores = [
-                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100,  # Communication
-                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  # Interactions
-                            (scores_individuels[7]) * 100,  # Intérêts
-                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  # Comportements
-                            (scores_individuels[0]) * 100  # Sensibilité
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100, 
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,  
+                            (scores_individuels[7]) * 100,  
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,  
+                            (scores_individuels[0]) * 100  
                         ]
 
-                        # Création du graphique radar
+                   
                         fig = go.Figure()
 
                         fig.add_trace(go.Scatterpolar(
@@ -3415,9 +3497,8 @@ def show_aq10_and_prediction():
                             fillcolor='rgba(52, 152, 219, 0.3)'
                         ))
 
-                        # Ajouter profil typique TSA pour comparaison
                         fig.add_trace(go.Scatterpolar(
-                            r=[80, 75, 70, 65, 85],  # Valeurs typiques pour TSA (à ajuster)
+                            r=[80, 75, 70, 65, 85], 
                             theta=dimensions,
                             fill='toself',
                             name='Profil typique TSA',
@@ -3425,9 +3506,8 @@ def show_aq10_and_prediction():
                             fillcolor='rgba(231, 76, 60, 0.1)'
                         ))
 
-                        # Ajouter profil neurotypique pour comparaison
                         fig.add_trace(go.Scatterpolar(
-                            r=[20, 25, 30, 25, 15],  # Valeurs typiques pour non-TSA (à ajuster)
+                            r=[20, 25, 30, 25, 15], 
                             theta=dimensions,
                             fill='toself',
                             name='Profil neurotypique',
@@ -3450,7 +3530,6 @@ def show_aq10_and_prediction():
 
                         st.plotly_chart(fig, use_container_width=True)
 
-                       # Ajout des recommandations personnalisées (remplacer la section existante)
                         st.markdown("""
                         <div style="margin-top: 40px; margin-bottom: 30px;">
                             <h3 style="text-align: center; margin-bottom: 25px; color: #34495e; font-size: 1.8rem;">
@@ -3524,8 +3603,6 @@ def show_aq10_and_prediction():
                         </div>
                         """, unsafe_allow_html=True)
 
-
-                        # 6. Affichage du graphique comparatif
                         st.markdown("### Analyse comparative")
 
                         fig = go.Figure()
@@ -3534,8 +3611,8 @@ def show_aq10_and_prediction():
                             avg_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
                             avg_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
                         else:
-                            avg_tsa = 7.2  # Valeur moyenne typique
-                            avg_non_tsa = 2.8  # Valeur moyenne typique
+                            avg_tsa = 7.2  
+                            avg_non_tsa = 2.8  
 
                         categories = ['Votre score', 'Moyenne TSA', 'Moyenne non-TSA']
                         scores = [total_score, avg_tsa, avg_non_tsa]
@@ -4190,7 +4267,6 @@ def show_about_page():
     image_url = "https://drive.google.com/file/d/1tbARR43xi1GCnfY9XrEc-O2FbMnTmPcW/view?usp=sharing"
     st.markdown(get_img_with_href(image_url, "#", as_banner=False), unsafe_allow_html=True)
 
-    # Section contexte avec design amélioré
     st.markdown("""
     <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
                 padding: 30px; border-radius: 15px; margin-bottom: 30px;">
@@ -4211,7 +4287,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Objectifs avec cartes élégantes
     st.markdown("## 🎯 Objectifs du Projet")
     
     col1, col2, col3 = st.columns(3)
@@ -4253,7 +4328,6 @@ def show_about_page():
             </div>
             """, unsafe_allow_html=True)
 
-    # Section données avec style amélioré
     st.markdown("""
     <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); 
                 padding: 30px; border-radius: 15px; margin: 30px 0;">
@@ -4334,8 +4408,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-
-    # Remerciements avec design sophistiqué
     st.markdown("""
     <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); 
                 padding: 30px; border-radius: 15px; margin: 30px 0;">
@@ -4356,7 +4428,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Licence avec style cohérent
     st.markdown("""
     <div style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); 
                 padding: 25px; border-radius: 15px; margin: 30px 0;">
@@ -4372,7 +4443,6 @@ def show_about_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Avertissement final stylisé
     st.markdown("""
     <div style="border: 2px solid #e74c3c; border-radius: 10px; padding: 20px; 
                 background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); margin-top: 30px;">
