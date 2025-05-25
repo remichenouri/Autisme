@@ -4777,20 +4777,6 @@ def show_documentation():
                 </div>
                 """, unsafe_allow_html=True)
         
-        with col3:
-            st.markdown("### 💰 Répartition des coûts :")
-
-            st.markdown("""
-            <div style="text-align: center;">
-                <ul style="line-height: 1.8; color: #2c3e50; padding-left: 20px; display: inline-block; text-align: left; font-size: 1.05rem;">
-                    <li><strong style="color: #27ae60;">Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
-                    <li><strong style="color: #27ae60;">Services de santé</strong> : 15-25%</li>
-                    <li><strong style="color: #27ae60;">Perte de productivité familiale</strong> : 20-30%</li>
-                    <li><strong style="color: #27ae60;">Services sociaux</strong> : 10-15%</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-            
 
     with doc_tabs[4]:
         # Guides cliniques
