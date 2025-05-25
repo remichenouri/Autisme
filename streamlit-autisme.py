@@ -4249,6 +4249,7 @@ def show_documentation():
         <h1 class="app-title">Documentation</h1>
     </div>
     """, unsafe_allow_html=True)
+    
 
     new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
     st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
@@ -4828,54 +4829,30 @@ def main():
         set_custom_theme()
         st.session_state.initialized = True
 
-        if "aq10_total" not in st.session_state:
-            st.session_state.aq10_total = 0
-
-        if "expanders_initialized" not in st.session_state:
-            st.session_state.expanders_initialized = {
-                'structure': True,
-                'valeurs_manquantes': False,
-                'pipeline': False,
-                'variables_cles': True,
-                'questionnaire': False,
-                'composite': False,
-                'statistiques': False,
-                'correlation': False,
-                'famd': False
-            }
-
+    # Vérification si le contenu est bien appelé
     if 'df' not in st.session_state:
         with st.spinner("Chargement des données..."):
             st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
-            
     initialize_session_state()
     set_enhanced_navigation_theme()
 
     with st.sidebar:
         selected_tool = show_enhanced_navigation_menu()
-    
 
-    palette = {
-        "Yes": "#3498db",
-        "No": "#2ecc71",
-        "Unknown": "#95a5a6"
-    }
- 
-    # Navigation entre les pages
+    # Vérification du contenu à afficher
     if selected_tool == "🏠 Accueil":
         show_home_page()
     elif selected_tool == "🔍 Exploration":
         show_data_exploration()
     elif selected_tool == "🧠 Analyse ML":
-        show_ml_analysis_corrected()  # Utiliser la version corrigée
+        show_ml_analysis_corrected()
     elif selected_tool == "🤖 Prédiction IA":
         show_prediction_page()
     elif selected_tool == "📚 Documentation":
         st.write("Page de documentation en cours de développement")
     elif selected_tool == "ℹ️ À propos":
-        st.write("Page à propos en cours de développement")
+        # Suppression d’un puzzle ou contenu problématique
+        show_about_page()
 
 if __name__ == "__main__":
     main()
-
-
