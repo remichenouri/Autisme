@@ -206,6 +206,53 @@ def set_custom_theme():
         [data-testid="stSidebar"] label:hover {
             background: #eaf2f8 !important;
         }
+        /* Masquer le code HTML qui s'affiche */
+        .stMarkdown pre,
+        .stMarkdown code[class*="language-"],
+        .stMarkdown .highlight,
+        .stMarkdown .hljs {
+            display: none !important;
+        }
+        
+        /* Assurer l'affichage normal du contenu */
+        .stMarkdown p,
+        .stMarkdown div,
+        .stMarkdown ul,
+        .stMarkdown li,
+        .stMarkdown h1,
+        .stMarkdown h2,
+        .stMarkdown h3 {
+            display: block !important;
+            background: transparent !important;
+        }
+        
+        /* Améliorer les composants info/warning/error natifs */
+        .stAlert {
+            border-radius: 12px !important;
+            border: none !important;
+            padding: 20px !important;
+            margin: 10px 0 !important;
+        }
+        
+        .stSuccess {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
+            border-left: 4px solid #28a745 !important;
+        }
+        
+        .stInfo {
+            background: linear-gradient(135deg, #cce7ff, #b3d9ff) !important;
+            border-left: 4px solid #007bff !important;
+        }
+        
+        .stWarning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
+            border-left: 4px solid #ffc107 !important;
+        }
+        
+        .stError {
+            background: linear-gradient(135deg, #f8d7da, #f1c2c7) !important;
+            border-left: 4px solid #dc3545 !important;
+        }
         .sidebar-title {
             margin-bottom: 2rem !important;
         }... /* Assurer que le contenu est correctement dimensionné */
@@ -1233,70 +1280,38 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Section "Le spectre autistique" améliorée et centrée
-    st.markdown("""
-    <h2 style="color: #3498db; margin: 45px 0 25px 0; text-align: center; font-size: 2.2rem;">
-        🌈 Le spectre autistique
-    </h2>
-    """, unsafe_allow_html=True)
-
-    # Conteneur centré pour le contenu
-    col1, col2, col3 = st.columns([1, 10, 1])
+   # Section "Le spectre autistique" avec HTML simplifié
+    st.markdown("## 🌈 Le spectre autistique")
     
-    with col2:
-        st.markdown("""
-        <div class="info-card-modern">
-            <p style="font-size: 1.1rem; line-height: 1.7; text-align: justify; margin-bottom: 25px; color: #2c3e50;">
-                L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, reflétant la
-                grande variabilité des manifestations. Cette conception reconnaît que :
-            </p>
-            
-            <div style="background: #f8fcff; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <ul style="padding-left: 25px; line-height: 1.8; color: #34495e;">
-                    <li><strong>Chaque personne autiste</strong> présente un profil unique de forces et de défis</li>
-                    <li><strong>Les manifestations</strong> varient en intensité et en expression</li>
-                    <li><strong>Les niveaux de soutien</strong> nécessaires peuvent différer considérablement</li>
-                </ul>
-            </div>
-            
-            <p style="font-size: 1.1rem; line-height: 1.7; margin: 25px 0; text-align: center; color: #2c3e50;">
-                <strong>Le DSM-5 définit trois niveaux de soutien nécessaire :</strong>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Niveaux de soutien avec design moderne
-        niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
-
-        with niveau_col1:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #e8f4fd, #d1ecf1); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #3498db; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #2980b9; margin: 0; font-size: 1.1rem;">Niveau 1</h4>
-                <p style="color: #34495e; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with niveau_col2:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #fff3e0, #ffe0b2); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #f39c12; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #e67e22; margin: 0; font-size: 1.1rem;">Niveau 2</h4>
-                <p style="color: #8b4513; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien important</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with niveau_col3:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #ffebee, #ffcdd2); 
-                       border-radius: 12px; padding: 20px; text-align: center; height: 120px;
-                       border-left: 4px solid #e74c3c; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="color: #c0392b; margin: 0; font-size: 1.1rem;">Niveau 3</h4>
-                <p style="color: #8b0000; margin: 8px 0 0 0; font-size: 0.95rem;">Nécessite un soutien très important</p>
-            </div>
-            """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background-color: white; padding: 25px; border-radius: 15px; 
+               box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #3498db;">
+        <p style="font-size: 1.1rem; line-height: 1.7; color: #2c3e50; margin-bottom: 20px;">
+            L'autisme est aujourd'hui compris comme un <strong>spectre</strong> de conditions, 
+            reflétant la grande variabilité des manifestations.
+        </p>
+        <p style="font-size: 1rem; color: #34495e; margin-bottom: 15px;">Cette conception reconnaît que :</p>
+        <ul style="color: #34495e; padding-left: 25px; line-height: 1.6;">
+            <li><strong>Chaque personne autiste</strong> présente un profil unique de forces et de défis</li>
+            <li><strong>Les manifestations</strong> varient en intensité et en expression</li>
+            <li><strong>Les niveaux de soutien</strong> nécessaires peuvent différer considérablement</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### Les trois niveaux de soutien du DSM-5 :")
+    
+    # Utiliser les colonnes Streamlit avec des composants natifs
+    niveau_col1, niveau_col2, niveau_col3 = st.columns(3)
+    
+    with niveau_col1:
+        st.success("**Niveau 1**\n\nNécessite un soutien")
+    
+    with niveau_col2:
+        st.warning("**Niveau 2**\n\nNécessite un soutien important")
+    
+    with niveau_col3:
+        st.error("**Niveau 3**\n\nNécessite un soutien très important")
 
     # Section contexte du projet améliorée
     st.markdown("""
