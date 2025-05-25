@@ -3233,719 +3233,1879 @@ def show_ml_analysis():
 
 
 def show_aq10_and_prediction():
-    """Interface modernisée du questionnaire AQ-10 basée sur le design des images"""
-    
-    # CSS personnalisé pour le questionnaire
+    """
+    Fonction combinée pour l'évaluation AQ-10 et la prédiction TSA.
+    """
+    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import numpy as np
+
+    try:
+        df, _, _, _, _, _, _ = load_dataset()
+        aq_columns = [f'A{i}' for i in range(1, 11) if f'A{i}' in df.columns]
+        if aq_columns:
+            df = df.drop(columns=aq_columns)
+
+        if 'Jaunisse' in df.columns:
+            df = df.drop(columns=['Jaunisse'])
+
+            rf_model, preprocessor, feature_names = train_advanced_model(df)
+    except Exception as e:
+        st.error(f"Erreur lors du chargement des données ou du modèle: {str(e)}")
+        rf_model, preprocessor, feature_names = None, None, None
+
+    st.markdown(
+        f"""<div class="header-container" style="text-align: center;">
+            <span style="font-size:2.5rem">📝</span>
+            <h1 class="app-title">Test AQ-10 et Prédiction TSA</h1>
+        </div>""", unsafe_allow_html=True
+    )
+
+    image_url = "https://drive.google.com/file/d/1c2RrCChdmOv9IsGRY_T0i0QOgNB-oHt0/view?usp=sharing"
+    st.markdown(get_img_with_href(image_url, "#", as_banner=True), unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+                border-radius: 15px; padding: 25px; margin: 30px 0;
+                border-left: 5px solid #3498db;">
+        <h3 style="color: #2c3e50; text-align: center; margin-top: 0;">
+            🤖 À propos de cette évaluation
+        </h3>
+        <p style="color: #2c3e50; line-height: 1.6; text-align: center;">
+            Ce questionnaire validé scientifiquement combine l'auto-évaluation AQ-10 avec un modèle d'intelligence artificielle
+            entraîné sur plus de <strong>5 000 cas cliniques internationaux</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("""
     <style>
-    .aq10-container {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        margin: 20px 0;
-    }
-    
-    .aq10-header {
-        background: linear-gradient(90deg, #3498db, #2ecc71);
-        padding: 30px;
-        border-radius: 20px;
+    .result-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(52,152,219,0.1);
+        padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+        margin-top: 28px;
+        margin-bottom: 22px;
         text-align: center;
-        margin-bottom: 30px;
     }
-    
-    .question-card {
-        background: #f8f9fa;
-        border-radius: 15px;
-        padding: 25px;
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
+    }
+    .result-card.warning {
+        border-left: 6px solid #e67e22;
+        background: linear-gradient(90deg, #fff6e0 80%, #fff8f2 100%);
+    }
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(90deg, #ffeaea 80%, #fff6f6 100%);
+    }
+    .result-score {
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    .custom-submit-button {
+    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 15px 30px !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+    }
+
+    .custom-submit-button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
+    }
+
+    .custom-submit-button:active {
+        transform: translateY(0px) !important;
+        box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3) !important;
+    }
+
+    /* Amélioration du container du bouton */
+    .stForm > div:last-child {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
+
+    /* Style pour le bouton Streamlit par défaut si custom ne fonctionne pas */
+    div[data-testid="stForm"] button[kind="formSubmit"] {
+        background: linear-gradient(90deg, #3498db, #2ecc71) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 15px 30px !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        min-height: 50px !important;
+    }
+
+    div[data-testid="stForm"] button[kind="formSubmit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
+        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
+    }
+    .result-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #3498db;
+        text-align: center;
+    }
+    .kpi-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
         margin: 20px 0;
-        border-left: 4px solid #3498db;
+        text-align: center;
     }
-    
-    .question-text {
-        font-size: 1.1rem;
+    .kpi-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 5px 0;
+        text-align: center;
+    }
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    .kpi-comparison {
+        font-size: 0.9rem;
         color: #2c3e50;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
-    
-    .response-button {
-        display: inline-block;
-        background: white;
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
-        padding: 12px 20px;
-        margin: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        margin-top: 5px;
         text-align: center;
-        min-width: 150px;
     }
-    
-    .response-button:hover {
-        border-color: #3498db;
-        background: #e8f4fd;
-        transform: translateY(-2px);
+    .question-container {
+        text-align: left;
     }
-    
-    .response-button.selected {
-        background: #3498db;
-        color: white;
-        border-color: #3498db;
+    p {
+        text-align: center;
     }
-    
-    .progress-bar {
-        background: #e9ecef;
+    .stButton > button {
+        display: block;
+        margin: 0 auto;
+    }
+    .diagnostic-box {
+        padding: 20px;
         border-radius: 10px;
-        height: 8px;
-        margin: 20px 0;
-        overflow: hidden;
-    }
-    
-    .progress-fill {
-        background: linear-gradient(90deg, #3498db, #2ecc71);
-        height: 100%;
-        transition: width 0.3s ease;
+        margin-top: 25px;
+        text-align: center;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # En-tête du questionnaire
+    questions = [
+        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
+        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
+        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
+         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+    ]
+
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.markdown('<p class="questionnaire-title" style="text-align: center;">Questionnaire AQ-10</p>', unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Répondez aux 10 questions suivantes :</p>", unsafe_allow_html=True)
+
+        form_responses = {}
+
+        for i, q in enumerate(questions):
+            options = list(q["scoring"].keys())
+            question_key = f"aq10_question_{i}"
+
+            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
+
+            selected_response = st.radio(
+                "",
+                options,
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
+            )
+
+            form_responses[question_key] = selected_response
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("### 👤 Informations personnelles")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            age = st.number_input("Âge", min_value=2, max_value=99, value=24)
+            genres = ["Féminin", "Masculin"]
+            genre = st.selectbox("Genre", genres)
+
+        with col2:
+            ethnies = ["Européen", "Asiatique", "Africain", "Hispanique", "Moyen-Orient", "Autre"]
+            ethnicite = st.selectbox("Origine ethnique", ethnies)
+            antecedents = st.selectbox("Antécédents familiaux d'autisme", ["Non", "Oui"])
+
+        testeur = st.selectbox("Qui remplit ce questionnaire ?",
+                              ["Moi-même", "Parent/Famille", "Professionnel de santé", "Enseignant", "Autre"])
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+                    border-radius: 12px; padding: 20px; margin: 25px 0; text-align: center;
+                    border-left: 4px solid #3498db;">
+            <h4 style="color: #2c3e50; margin-top: 0;">🎯 Prêt pour l'évaluation ?</h4>
+            <p style="color: #34495e; margin-bottom: 15px;">
+                Assurez-vous d'avoir répondu à toutes les questions avant de continuer.
+            </p>
+            <p style="color: #7f8c8d; font-size: 0.9rem; margin: 0;">
+                L'analyse prendra quelques secondes pour traiter vos réponses.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        submitted = st.form_submit_button(
+            "🔬 Calculer mon score et obtenir une prédiction",
+            use_container_width=True,
+            type="primary"
+        )
+
+        if submitted:
+            if None in form_responses.values():
+                st.error("⚠️ Veuillez répondre à toutes les questions du questionnaire.")
+            else:
+                total_score = 0
+                scores_individuels = []
+
+                for i, q in enumerate(questions):
+                    selected_option = form_responses[f"aq10_question_{i}"]
+                    if selected_option is not None:
+                        score = q["scoring"][selected_option]
+                        total_score += score
+                        scores_individuels.append(score)
+                    else:
+                        scores_individuels.append(0)
+                st.session_state.aq10_total = total_score
+                st.session_state.aq10_responses = scores_individuels
+                user_data = {
+                    'Age': age,
+                    'Genre': genre,
+                    'Ethnie': ethnicite,
+                    'Antecedent_autisme': antecedents,
+                    'Statut_testeur': testeur,
+                }
+
+                for i, score in enumerate(scores_individuels):
+                    user_data[f'A{i+1}'] = score
+
+                user_data['Score_A10'] = total_score
+
+                user_df = pd.DataFrame([user_data])
+
+                if total_score >= 6:
+                    st.markdown(f"""
+                        <div class="result-card warning">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
+                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                        <div class="result-card success">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
+                if rf_model is not None and preprocessor is not None:
+                    try:
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Antecedent_autisme', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                if col.startswith('A') and col[1:].isdigit():
+                                    idx = int(col[1:]) - 1
+                                    if idx < len(scores_individuels):
+                                        user_df[col] = scores_individuels[idx]
+                                    else:
+                                        user_df[col] = 0
+                                else:
+                                    user_df[col] = 0
+
+                        column_mapping = {
+                            'Antecedent_autisme': 'Autisme_familial',
+                        }
+                        user_df = user_df.rename(columns=column_mapping)
+
+                        if 'Jaunisse' not in user_df.columns:
+                            user_df['Jaunisse'] = "No"
+
+                        required_columns = ['Age', 'Genre', 'Ethnie', 'Autisme_familial', 'Statut_testeur', 'Jaunisse',
+                                          'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'Score_A10']
+
+                        for col in required_columns:
+                            if col not in user_df.columns:
+                                user_df[col] = 0
+
+                        user_df = user_df[required_columns]
+
+                        user_df = user_df[required_columns]
+
+                        prediction_proba = rf_model.predict_proba(user_df)
+
+                        tsa_probability = prediction_proba[0][1]
+
+                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
+
+                        probability_percentage = int(tsa_probability * 100)
+
+                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
+
+                        st.markdown(f"""
+                            <div class="result-card {color_class}">
+                                <div class="result-title">Prédiction IA</div>
+                                <div class="result-score">{probability_percentage}%</div>
+                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
+                                <p>Classification: <strong>{prediction_class}</strong></p>
+                            </div>
+
+                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
+                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
+                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                        st.markdown("### 📈 Profil détaillé des traits autistiques")
+
+                        social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
+                        cognitive_score = sum([scores_individuels[i-1] for i in [2, 3, 4]]) / 3 * 100
+                        detail_score = sum([scores_individuels[i-1] for i in [1, 8]]) / 2 * 100
+                        masking_index = max(0, (detail_score + cognitive_score)/2 - social_score)
+                        masking_index = min(100, masking_index + 50)
+                        risk_factor = min(10.0, (total_score/6) * (1.5 if antecedents == "Oui" else 1))
+
+                        def severity_color(score):
+                            if score < 30: return "#2ecc71"
+                            elif score < 60: return "#f39c12"
+                            else: return "#e74c3c"
+
+                        col1, col2, col3 = st.columns(3)
+
+                        with col1:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">👥 Perception sociale</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(social_score)};">
+                                    {social_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Difficulté à interpréter les interactions sociales
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        with col2:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🧠 Flexibilité cognitive</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(cognitive_score)};">
+                                    {cognitive_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Rigidité face au changement
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        with col3:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🔍 Attention aux détails</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-detail_score)};">
+                                    {detail_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Focalisation sur les spécificités
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        col4, col5, col6 = st.columns(3)
+
+                        with col4:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">🎭 Indice de masquage</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(100-masking_index)};">
+                                    {masking_index:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Compensation sociale estimée
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        with col5:
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">⚠️ Risque relatif</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(risk_factor*10)};">
+                                    {risk_factor:.1f}x
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Par rapport à la population générale
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        with col6:
+                            impact_score = (total_score / 10) * 100
+                            st.markdown(f"""
+                            <div class="kpi-card">
+                                <h4 style="margin-top: 0; color: #7f8c8d;">📉 Impact fonctionnel</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: {severity_color(impact_score)};">
+                                    {impact_score:.0f}%
+                                </div>
+                                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                                    Sur la vie quotidienne
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                            <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                                Profil de sensibilité multidimensionnel
+                            </h4>
+                        """, unsafe_allow_html=True)
+
+                        dimensions = [
+                            "Communication sociale",
+                            "Interactions sociales",
+                            "Intérêts restreints",
+                            "Comportements répétitifs",
+                            "Sensibilité sensorielle"
+                        ]
+
+                        dim_scores = [
+                            (scores_individuels[4] + scores_individuels[6] + scores_individuels[8]) / 3 * 100,
+                            (scores_individuels[5] + scores_individuels[9]) / 2 * 100,
+                            (scores_individuels[7]) * 100,
+                            (scores_individuels[1] + scores_individuels[2] + scores_individuels[3]) / 3 * 100,
+                            (scores_individuels[0]) * 100
+                        ]
+
+
+                        fig = go.Figure()
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=dim_scores,
+                            theta=dimensions,
+                            fill='toself',
+                            name='Votre profil',
+                            line_color='#3498db',
+                            fillcolor='rgba(52, 152, 219, 0.3)'
+                        ))
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=[80, 75, 70, 65, 85],
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil typique TSA',
+                            line_color='#e74c3c',
+                            fillcolor='rgba(231, 76, 60, 0.1)'
+                        ))
+
+                        fig.add_trace(go.Scatterpolar(
+                            r=[20, 25, 30, 25, 15],
+                            theta=dimensions,
+                            fill='toself',
+                            name='Profil neurotypique',
+                            line_color='#2ecc71',
+                            fillcolor='rgba(46, 204, 113, 0.1)'
+                        ))
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 100]
+                                )
+                            ),
+                            title="Comparaison de votre profil avec les profils de référence",
+                            showlegend=True,
+                            height=500,
+                            margin=dict(t=70, b=20)
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        st.markdown("""
+                        <div style="margin-top: 40px; margin-bottom: 30px;">
+                            <h3 style="text-align: center; margin-bottom: 25px; color: #34495e; font-size: 1.8rem;">
+                                💡 Recommandations personnalisées
+                            </h3>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+
+                        recommendations = []
+
+                        if social_score > 50:
+                            recommendations.append("Envisager des thérapies ciblant les compétences sociales et la compréhension des interactions")
+
+                        if cognitive_score > 50:
+                            recommendations.append("Des stratégies pour améliorer la flexibilité cognitive pourraient être bénéfiques")
+
+                        if detail_score > 60:
+                            recommendations.append("Utiliser votre attention aux détails comme force dans des contextes appropriés")
+
+                        if masking_index > 60:
+                            recommendations.append("Explorer avec un professionnel les stratégies de camouflage social que vous pourriez utiliser")
+
+                        if risk_factor > 3:
+                            recommendations.append("Une évaluation clinique approfondie est fortement recommandée")
+                        else:
+                            recommendations.append("Discuter de ces résultats avec un professionnel de santé si vous avez des préoccupations")
+
+
+                        for i, rec in enumerate(recommendations, 1):
+                            st.markdown(f"""
+                            <div style="display: flex; align-items: flex-start; margin-bottom: 15px; padding: 12px 0;">
+                                <div style="background: linear-gradient(135deg, #3498db, #2980b9);
+                                            color: white;
+                                            border-radius: 50%;
+                                            width: 24px;
+                                            height: 24px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.8rem;
+                                            font-weight: bold;
+                                            margin-right: 15px;
+                                            flex-shrink: 0;">
+                                    {i}
+                                </div>
+                                <p style="margin: 0;
+                                          font-size: 1rem;
+                                          line-height: 1.6;
+                                          color: #2c3e50;
+                                          text-align: justify;">
+                                    {rec}
+                                </p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <div style="margin-top: 25px;
+                                    padding: 15px;
+                                    background: rgba(52, 152, 219, 0.05);
+                                    border-radius: 8px;
+                                    border-left: 4px solid #3498db;">
+                            <p style="font-style: italic;
+                                      margin: 0;
+                                      color: #5d6d7e;
+                                      text-align: center;
+                                      font-size: 0.95rem;">
+                                ⚠️ Ces recommandations sont générées automatiquement en fonction de vos réponses et ne remplacent pas l'avis médical professionnel.
+                            </p>
+                        </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                        st.markdown("### Analyse comparative")
+
+                        fig = go.Figure()
+
+                        if 'Score_A10' in df.columns and 'TSA' in df.columns:
+                            avg_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                            avg_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                        else:
+                            avg_tsa = 7.2
+                            avg_non_tsa = 2.8
+
+                        categories = ['Votre score', 'Moyenne TSA', 'Moyenne non-TSA']
+                        scores = [total_score, avg_tsa, avg_non_tsa]
+                        colors = ['#3498db', '#e74c3c', '#2ecc71']
+
+                        fig.add_trace(go.Bar(
+                            x=categories,
+                            y=scores,
+                            marker_color=colors,
+                            text=scores,
+                            textposition='auto'
+                        ))
+
+                        fig.update_layout(
+                            title='Comparaison de votre score avec les moyennes de référence',
+                            yaxis=dict(
+                                title='Score AQ-10',
+                                range=[0, 10.5]
+                            ),
+                            height=400
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    except Exception as e:
+                        st.error(f"Le modèle n'a pas pu générer de prédiction: {str(e)}")
+                        st.info("Veuillez vérifier que toutes les données ont été correctement saisies.")
+                else:
+                    st.warning("Le modèle de prédiction n'est pas disponible. Veuillez réessayer ultérieurement.")
+
+                    st.html("""
+                        <div style="background-color: #f0f7fa; border-left: 4px solid #3498db; padding: 20px; border-radius: 5px; margin: 30px 0; text-align: left;">
+                            <h4 style="color: #3498db; margin-top: 0; text-align: center;">Comment fonctionne cette prédiction ?</h4>
+                            <p style="margin-bottom: 10px; text-align: left;">Cette prédiction est calculée par un algorithme d'<strong>intelligence artificielle</strong> appelé "<em>Random Forest</em>" (forêt aléatoire) qui a été entraîné sur des milliers de cas cliniques.</p>
+
+                            <p style="text-align: left;">L'algorithme prend en compte :</p>
+                            <ul style="text-align: left;">
+                                <li><strong>Vos réponses au questionnaire AQ-10</strong> : chaque question a été validée scientifiquement pour détecter des traits autistiques spécifiques</li>
+                                <li><strong>Vos données démographiques</strong> : âge, genre, origine ethnique</li>
+                                <li><strong>Les antécédents familiaux</strong> : la présence de TSA dans la famille est un facteur important</li>
+                            </ul>
+
+                            <p style="text-align: left;">Le modèle compare ensuite votre profil à tous les cas qu'il a appris et détermine la probabilité que vous présentiez des traits autistiques similaires à ceux diagnostiqués TSA.</p>
+
+                            <p style="font-style: italic; margin-top: 10px; text-align: left;">Ce pourcentage représente le niveau de confiance du modèle dans sa prédiction, pas la "gravité" ou l'"intensité" de l'autisme.</p>
+                        </div>
+                        """)
+
+                    st.html("""
+                        <div style="background-color: #fef9e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                            <h4 style="color: #f39c12; margin-top: 0;">Limites de cette prédiction</h4>
+                            <p>Ce modèle est un <strong>outil de dépistage</strong>, pas un instrument de diagnostic. Un diagnostic formel de TSA nécessite une évaluation complète par des professionnels de santé qualifiés.</p>
+
+                            <p>Facteurs non pris en compte par ce modèle :</p>
+                            <ul>
+                                <li>Observation directe des comportements sociaux</li>
+                                <li>Développement précoce et historique médical complet</li>
+                                <li>Impact des traits sur la vie quotidienne</li>
+                                <li>Autres conditions médicales ou psychiatriques</li>
+                            </ul>
+                        </div>
+                        """)
+
+                    st.markdown("""
+                        <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px; color: #3498db;">
+                            Comparaison avec la population de référence
+                        </h3>
+                        """, unsafe_allow_html=True)
+
+                    mean_tsa = df[df['TSA'] == 'Yes']['Score_A10'].mean()
+                    mean_non_tsa = df[df['TSA'] == 'No']['Score_A10'].mean()
+                    overall_mean = df['Score_A10'].mean()
+
+                    percentile = 100 * (df['Score_A10'] <= total_score).mean()
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Percentile</div>
+                                <div class="kpi-value">{percentile:.0f}<sup>ème</sup></div>
+                                <div class="kpi-comparison">Votre score dépasse {percentile:.0f}% de la population testée</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col2:
+                        diff_non_tsa = total_score - mean_non_tsa
+                        color_non_tsa = "#e74c3c" if diff_non_tsa > 0 else "#2ecc71"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe non-TSA</div>
+                                <div class="kpi-value" style="color:{color_non_tsa};">{diff_non_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes sans diagnostic ({mean_non_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    with col3:
+                        diff_tsa = total_score - mean_tsa
+                        color_tsa = "#2ecc71" if diff_tsa < 0 else "#e74c3c"
+
+                        st.markdown(f"""
+                            <div class="kpi-card">
+                                <div class="kpi-title">Comparaison groupe TSA</div>
+                                <div class="kpi-value" style="color:{color_tsa};">{diff_tsa:+.1f}</div>
+                                <div class="kpi-comparison">Par rapport à la moyenne des personnes avec diagnostic ({mean_tsa:.1f})</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        st.markdown("""
+                        <h4 style="text-align: center; margin-top: 30px; margin-bottom: 15px; color: #34495e;">
+                            Analyse détaillée de vos réponses par question
+                        </h4>
+                        """, unsafe_allow_html=True)
+
+                        categories = [f'Q{i+1}' for i in range(10)]
+                        user_scores = scores_individuels
+
+                        tsa_mean_scores = [df[df['TSA'] == 'Yes'][f'A{i+1}'].mean() for i in range(10)]
+                        non_tsa_mean_scores = [df[df['TSA'] == 'No'][f'A{i+1}'].mean() for i in range(10)]
+
+                        fig = make_subplots(rows=1, cols=3,
+                                        specs=[[{'type': 'polar'}]*3],
+                                        subplot_titles=["Vos réponses", "Profil moyen TSA", "Profil moyen non-TSA"])
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=user_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Vos réponses',
+                                line_color='#2ecc71',
+                                fillcolor='rgba(46, 204, 113, 0.5)'
+                            ),
+                            row=1, col=1
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne TSA',
+                                line_color='#e74c3c',
+                                fillcolor='rgba(231, 76, 60, 0.5)'
+                            ),
+                            row=1, col=2
+                        )
+
+                        fig.add_trace(
+                            go.Scatterpolar(
+                                r=non_tsa_mean_scores,
+                                theta=categories,
+                                fill='toself',
+                                name='Moyenne non-TSA',
+                                line_color='#3498db',
+                                fillcolor='rgba(52, 152, 219, 0.5)'
+                            ),
+                            row=1, col=3
+                        )
+
+                        fig.update_layout(
+                            polar=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar2=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            polar3=dict(
+                                radialaxis=dict(
+                                    visible=True,
+                                    range=[0, 1],
+                                    tickvals=[0, 0.25, 0.5, 0.75, 1],
+                                    ticktext=["0", "1", "2", "3", "4"],
+                                    tickangle=45
+                                ),
+                                angularaxis=dict(
+                                    tickfont_size=11
+                                ),
+                                gridshape='circular'
+                            ),
+                            height=450,
+                            margin=dict(l=80, r=80, t=80, b=50),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(size=12),
+                            showlegend=False
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
+
+                        with st.expander("🔍 Comprendre la signification des questions"):
+                            st.markdown("""
+                            | Question | Description | Score élevé indique |
+                            |----------|-------------|---------------------|
+                            | Q1 | Perception des petits bruits | ↑ Hypersensibilité auditive |
+                            | Q2 | Focus sur les détails vs l'ensemble | ↑ Attention aux détails |
+                            | Q3 | Capacité à faire plusieurs choses | ↓ Difficultés avec le multitâche |
+                            | Q4 | Reprise d'activité après interruption | ↓ Difficultés avec les transitions |
+                            | Q5 | Compréhension du langage figuré | ↓ Interprétation littérale |
+                            | Q6 | Perception de l'ennui chez autrui | ↓ Difficulté à lire les signaux sociaux |
+                            | Q7 | Compréhension des intentions des personnages | ↑ Difficulté avec la théorie de l'esprit |
+                            | Q8 | Collection d'informations sur des catégories | ↑ Intérêts restreints |
+                            | Q9 | Compréhension des émotions par l'expression | ↓ Difficulté à lire les émotions |
+                            | Q10 | Compréhension des intentions d'autrui | ↑ Difficulté d'interprétation sociale |
+                            """)
+
+                        st.info("⚠️ Ce résultat est une indication basée sur un modèle statistique et ne constitue pas un diagnostic médical. Consultez un professionnel de santé pour une évaluation complète.")
+
+                st.markdown("""
+                <h3 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                    Prévalence du Trouble du Spectre Autistique
+                </h3>
+                """, unsafe_allow_html=True)
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #3498db; margin-bottom: 10px;">Monde</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #3498db; margin: 15px 0;">1 sur 100</div>
+                        <p style="color: #2c3e50;">enfants dans le monde est concerné par un trouble du spectre autistique selon l'OMS</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col2:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #e74c3c; margin-bottom: 10px;">France</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #e74c3c; margin: 15px 0;">~1 million</div>
+                        <p style="color: #2c3e50;">de personnes en France, soit entre 1% et 2% de la population française</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col3:
+                    st.markdown("""
+                    <div style="background-color: #f5f7fa; border-radius: 15px; padding: 20px; text-align: center; height: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        <h3 style="color: #2ecc71; margin-bottom: 10px;">États-Unis</h3>
+                        <div style="font-size: 2.8rem; font-weight: bold; color: #2ecc71; margin: 15px 0;">1 sur 36</div>
+                        <p style="color: #2c3e50;">enfants de 8 ans présentent un TSA selon les dernières données CDC</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+
+                    
+def show_documentation():
+    """Page de documentation enrichie avec ressources scientifiques complètes"""
+    
+    # CSS spécifique pour la documentation (harmonisé avec le thème global)
     st.markdown("""
-    <div class="aq10-header">
-        <h1 style="color: white; font-size: 2.5rem; margin-bottom: 15px;
+    <style>
+    /* Documentation styles - harmonisés avec le thème global */
+    .doc-header {
+        background: linear-gradient(135deg, #3498db, #2ecc71);
+        padding: 40px 25px;
+        border-radius: 20px;
+        margin-bottom: 35px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    }
+    
+    .doc-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 25px 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid #3498db;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .doc-section:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .resource-card {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid #e9ecef;
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+    
+    .resource-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    
+    .video-resource { border-left-color: #e74c3c; }
+    .audio-resource { border-left-color: #9b59b6; }
+    .article-resource { border-left-color: #f39c12; }
+    .scientific-resource { border-left-color: #2ecc71; }
+    
+    .tag {
+        display: inline-block;
+        background: #3498db;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+    
+    .difficulty-beginner { background: #2ecc71; }
+    .difficulty-intermediate { background: #f39c12; }
+    .difficulty-advanced { background: #e74c3c; }
+    
+    .timeline-item {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 15px 0;
+        border-left: 4px solid #3498db;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 25px 0;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+    
+    .quote-section {
+        background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+        border-left: 4px solid #3498db;
+        padding: 20px;
+        border-radius: 8px;
+        font-style: italic;
+        margin: 20px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # En-tête principal
+    st.markdown("""
+    <div class="doc-header">
+        <h1 style="color: white; font-size: 3rem; margin-bottom: 15px;
                    text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-            🧩 Questionnaire AQ-10
+            📚 Documentation Scientifique TSA
         </h1>
-        <p style="color: rgba(255,255,255,0.95); font-size: 1.2rem;
-                  margin: 0 auto; line-height: 1.5;">
-            Ce questionnaire aide à évaluer les traits autistiques potentiels. 
-            Répondez à toutes les questions puis complétez vos informations personnelles 
-            pour obtenir une prédiction par intelligence artificielle.
+        <p style="color: rgba(255,255,255,0.95); font-size: 1.4rem;
+                  max-width: 900px; margin: 0 auto; line-height: 1.6;">
+            Ressources complètes pour approfondir vos connaissances sur les Troubles du Spectre Autistique
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Initialisation des variables de session
-    if "current_question" not in st.session_state:
-        st.session_state.current_question = 1
-    
-    if "aq10_responses" not in st.session_state:
-        st.session_state.aq10_responses = {}
-    
-    if "show_results" not in st.session_state:
-        st.session_state.show_results = False
+    # Navigation interne
+    doc_tabs = st.tabs([
+        "🔬 Bases Scientifiques",
+        "📖 Ressources d'Apprentissage", 
+        "🎥 Contenus Audiovisuels",
+        "📊 Données & Statistiques",
+        "🏥 Guides Cliniques",
+        "🌐 Organisations & Associations"
+    ])
 
-    # Conteneur principal
-    with st.container():
-        if not st.session_state.show_results:
-            # Barre de progression
-            progress = (st.session_state.current_question - 1) / 10
+    with doc_tabs[0]:
+        # Section Bases Scientifiques
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                🧬 Fondements Scientifiques de l'Autisme
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Historique et évolution
+        st.markdown("### 📅 Évolution Historique des Connaissances")
+        
+        historical_timeline = [
+            ("1943", "Leo Kanner", "Première description de l'autisme infantile précoce", "#3498db"),
+            ("1944", "Hans Asperger", "Description du syndrome d'Asperger", "#2ecc71"),
+            ("1980", "DSM-III", "Première inclusion de l'autisme dans le manuel diagnostique", "#f39c12"),
+            ("1994", "DSM-IV", "Introduction du concept de spectre autistique", "#9b59b6"),
+            ("2013", "DSM-5", "Unification sous 'Troubles du Spectre Autistique'", "#e74c3c"),
+            ("2020-2024", "Recherche moderne", "Approches neuroscientifiques et génétiques avancées", "#34495e")
+        ]
+
+        for year, author, description, color in historical_timeline:
             st.markdown(f"""
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {progress * 100}%"></div>
+            <div class="timeline-item" style="border-left-color: {color};">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="background: {color}; color: white; padding: 5px 10px; 
+                                 border-radius: 15px; font-weight: bold; margin-right: 15px;">
+                        {year}
+                    </span>
+                    <strong style="color: #2c3e50; font-size: 1.1rem;">{author}</strong>
+                </div>
+                <p style="color: #34495e; margin: 0; line-height: 1.5;">{description}</p>
             </div>
-            <p style="text-align: center; color: #7f8c8d; margin: 10px 0;">
-                Question {st.session_state.current_question} sur 10
-            </p>
             """, unsafe_allow_html=True)
 
-            # Affichage de la question actuelle
-            current_q = st.session_state.current_question
-            question_text = get_question_text(current_q)
+        # Critères diagnostiques actuels
+        st.markdown("### 🎯 Critères Diagnostiques DSM-5 (2013)")
+        
+        st.markdown("""
+        <div class="doc-section">
+            <h4 style="color: #3498db;">A. Déficits persistants dans la communication sociale</h4>
+            <ol style="line-height: 1.8; color: #2c3e50;">
+                <li><strong>Réciprocité sociocommunicative</strong> : Difficultés dans les échanges sociaux</li>
+                <li><strong>Communication non verbale</strong> : Utilisation atypique du contact visuel, expressions faciales</li>
+                <li><strong>Relations sociales</strong> : Difficultés à développer et maintenir des relations appropriées</li>
+            </ol>
             
+            <h4 style="color: #2ecc71; margin-top: 25px;">B. Comportements répétitifs et intérêts restreints</h4>
+            <ol style="line-height: 1.8; color: #2c3e50;">
+                <li><strong>Stéréotypies motrices</strong> : Mouvements répétitifs, écholalie</li>
+                <li><strong>Rigidité</strong> : Insistance sur la similitude, routines inflexibles</li>
+                <li><strong>Intérêts spécialisés</strong> : Fixations sur des objets ou sujets particuliers</li>
+                <li><strong>Sensibilités sensorielles</strong> : Hyper ou hypo-réactivité sensorielle</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Neurobiologie
+        st.markdown("### 🧠 Bases Neurobiologiques")
+        
+        neuro_col1, neuro_col2 = st.columns(2)
+        
+        with neuro_col1:
+            st.markdown("""
+            <div class="resource-card scientific-resource">
+                <h4 style="color: #2ecc71; margin-top: 0;">🔬 Recherches Neurologiques</h4>
+                <ul style="line-height: 1.6; color: #2c3e50;">
+                    <li><strong>Connectivité cérébrale</strong> : Altérations dans les réseaux neuronaux</li>
+                    <li><strong>Développement synaptique</strong> : Différences dans la formation des synapses</li>
+                    <li><strong>Neuroplasticité</strong> : Capacités d'adaptation du cerveau autiste</li>
+                    <li><strong>Traitement sensoriel</strong> : Différences dans l'intégration sensorielle</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with neuro_col2:
+            st.markdown("""
+            <div class="resource-card scientific-resource">
+                <h4 style="color: #2ecc71; margin-top: 0;">🧬 Facteurs Génétiques</h4>
+                <ul style="line-height: 1.6; color: #2c3e50;">
+                    <li><strong>Héritabilité élevée</strong> : 80-90% selon les études de jumeaux</li>
+                    <li><strong>Gènes candidats</strong> : SHANK3, NRXN, CHD8, SCN2A</li>
+                    <li><strong>Variants rares</strong> : Copy Number Variants (CNV)</li>
+                    <li><strong>Épigénétique</strong> : Influence de l'environnement sur l'expression génique</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with doc_tabs[1]:
+        # Ressources d'apprentissage
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                📖 Ressources d'Apprentissage et de Formation
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Livres de référence
+        st.markdown("### 📚 Ouvrages de Référence")
+        
+        books = [
+            {
+                "title": "L'Autisme : De la recherche à la pratique",
+                "authors": "Baghdadli A., Brisot J., Aussiloux C.",
+                "year": "2022",
+                "level": "intermediate",
+                "description": "Synthèse complète des connaissances actuelles sur l'autisme, de la recherche fondamentale aux applications pratiques.",
+                "topics": ["Diagnostic", "Interventions", "Recherche"]
+            },
+            {
+                "title": "Autism and Asperger Syndrome",
+                "authors": "Baron-Cohen S.",
+                "year": "2008",
+                "level": "beginner",
+                "description": "Introduction accessible aux troubles du spectre autistique par l'un des experts mondiaux.",
+                "topics": ["Théorie de l'esprit", "Cognition sociale", "Empathie"]
+            },
+            {
+                "title": "The Autistic Brain",
+                "authors": "Grandin T., Panek R.",
+                "year": "2013",
+                "level": "beginner",
+                "description": "Perspective unique d'une personne autiste sur le fonctionnement du cerveau autiste.",
+                "topics": ["Neurodiversité", "Témoignage", "Sensorialité"]
+            },
+            {
+                "title": "Handbook of Autism and Pervasive Developmental Disorders",
+                "authors": "Volkmar F.R., et al.",
+                "year": "2021",
+                "level": "advanced",
+                "description": "Manuel de référence complet pour les professionnels et chercheurs.",
+                "topics": ["Diagnostic différentiel", "Comorbidités", "Traitements"]
+            }
+        ]
+
+        for book in books:
+            difficulty_class = f"difficulty-{book['level']}"
             st.markdown(f"""
-            <div class="question-card">
-                <div class="question-text">
-                    <strong>🔸 {current_q}. {question_text}</strong>
+            <div class="resource-card article-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #f39c12; margin: 0 0 8px 0;">{book['title']}</h4>
+                        <p style="color: #7f8c8d; margin: 0; font-style: italic;">{book['authors']} ({book['year']})</p>
+                    </div>
+                    <span class="tag {difficulty_class}">{book['level'].title()}</span>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin-bottom: 15px;">{book['description']}</p>
+                <div>
+                    {''.join([f'<span class="tag">{topic}</span>' for topic in book['topics']])}
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # Options de réponse
-            st.markdown("### Répondez aux 10 questions suivantes :")
-            
-            response_options = [
-                ("Tout à fait d'accord", 1),
-                ("Plutôt d'accord", 1),
-                ("Plutôt pas d'accord", 0),
-                ("Pas du tout d'accord", 0)
-            ]
+        # Formations en ligne
+        st.markdown("### 💻 Formations et Cours en Ligne")
+        
+        online_courses = [
+            {
+                "platform": "Coursera",
+                "title": "Introduction to Family Engagement in Education",
+                "university": "University of Colorado Boulder",
+                "duration": "4 semaines",
+                "level": "beginner",
+                "topics": ["Intervention précoce", "Famille", "Éducation"]
+            },
+            {
+                "platform": "edX",
+                "title": "Autism and Mental Health",
+                "university": "University of Kent",
+                "duration": "6 semaines", 
+                "level": "intermediate",
+                "topics": ["Santé mentale", "Comorbidités", "Soutien"]
+            },
+            {
+                "platform": "FUN-MOOC",
+                "title": "Troubles du spectre de l'autisme : diagnostic",
+                "university": "Université de Tours",
+                "duration": "8 semaines",
+                "level": "advanced",
+                "topics": ["Diagnostic", "Outils", "Évaluation"]
+            }
+        ]
 
-            # Créer les boutons de réponse en colonnes
-            cols = st.columns(4)
-            selected_response = st.session_state.aq10_responses.get(f"A{current_q}", None)
-
-            for i, (option_text, option_value) in enumerate(response_options):
-                with cols[i]:
-                    button_class = "response-button selected" if selected_response == option_value and i < 2 else "response-button"
-                    if st.button(option_text, key=f"btn_{current_q}_{i}", use_container_width=True):
-                        st.session_state.aq10_responses[f"A{current_q}"] = option_value
-                        st.rerun()
-
-            # Boutons de navigation
-            st.markdown("<br>", unsafe_allow_html=True)
-            nav_col1, nav_col2, nav_col3 = st.columns([1, 2, 1])
-            
-            with nav_col1:
-                if st.session_state.current_question > 1:
-                    if st.button("⬅️ Précédent", use_container_width=True):
-                        st.session_state.current_question -= 1
-                        st.rerun()
-
-            with nav_col3:
-                if st.session_state.current_question < 10:
-                    if f"A{current_q}" in st.session_state.aq10_responses:
-                        if st.button("Suivant ➡️", use_container_width=True):
-                            st.session_state.current_question += 1
-                            st.rerun()
-                else:
-                    # Bouton pour terminer le questionnaire
-                    if len(st.session_state.aq10_responses) == 10:
-                        if st.button("✅ Terminer le questionnaire", use_container_width=True, type="primary"):
-                            st.session_state.show_results = True
-                            st.rerun()
-
-            # Résumé des réponses
-            if st.session_state.aq10_responses:
-                st.markdown("### 📊 Résumé de vos réponses")
-                responses_summary = []
-                for i in range(1, 11):
-                    if f"A{i}" in st.session_state.aq10_responses:
-                        value = st.session_state.aq10_responses[f"A{i}"]
-                        status = "✅" if value == 1 else "❌"
-                        responses_summary.append(f"Q{i}: {status}")
-                
-                # Affichage en grille
-                summary_cols = st.columns(5)
-                for i, summary in enumerate(responses_summary):
-                    with summary_cols[i % 5]:
-                        st.write(summary)
-
-        else:
-            # Affichage des résultats
-            show_aq10_results()
-
-def show_aq10_results():
-    """Affiche les résultats du questionnaire AQ-10 et la prédiction IA"""
-    
-    # Calcul du score total
-    total_score = sum(st.session_state.aq10_responses.values())
-    
-    st.markdown("""
-    <div class="aq10-header">
-        <h2 style="color: white; font-size: 2.2rem; margin-bottom: 15px;">
-            📊 Résultats de votre Questionnaire AQ-10
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Score et interprétation
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col2:
-        st.markdown(f"""
-        <div style="background: white; border-radius: 20px; padding: 30px; 
-                   text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
-            <h3 style="color: #2c3e50; margin-bottom: 20px;">Votre Score AQ-10</h3>
-            <div style="font-size: 4rem; font-weight: bold; color: #3498db; margin: 20px 0;">
-                {total_score}/10
+        for course in online_courses:
+            difficulty_class = f"difficulty-{course['level']}"
+            st.markdown(f"""
+            <div class="resource-card video-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">{course['title']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            <strong>{course['platform']}</strong> - {course['university']} 
+                            | ⏱️ {course['duration']}
+                        </p>
+                    </div>
+                    <span class="tag {difficulty_class}">{course['level'].title()}</span>
+                </div>
+                <div>
+                    {''.join([f'<span class="tag">{topic}</span>' for topic in course['topics']])}
+                </div>
             </div>
-            <p style="color: #7f8c8d; font-size: 1.1rem;">
-                {"Score élevé - Consultation recommandée" if total_score >= 6 
-                 else "Score modéré - Surveillance suggérée" if total_score >= 4 
-                 else "Score faible - Profil neurotypique probable"}
-            </p>
+            """, unsafe_allow_html=True)
+
+        # Revues scientifiques
+        st.markdown("### 📰 Revues Scientifiques Spécialisées")
+        
+        journals = [
+            {
+                "name": "Journal of Autism and Developmental Disorders",
+                "impact_factor": "3.8",
+                "publisher": "Springer",
+                "focus": "Recherche fondamentale et appliquée sur l'autisme"
+            },
+            {
+                "name": "Autism Research",
+                "impact_factor": "4.9",
+                "publisher": "Wiley",
+                "focus": "Neurosciences, génétique et interventions"
+            },
+            {
+                "name": "Molecular Autism",
+                "impact_factor": "6.3",
+                "publisher": "BMC",
+                "focus": "Bases moléculaires et génétiques de l'autisme"
+            }
+        ]
+
+        for journal in journals:
+            st.markdown(f"""
+            <div class="resource-card scientific-resource">
+                <h4 style="color: #2ecc71; margin: 0 0 10px 0;">{journal['name']}</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="color: #7f8c8d; margin: 0;"><strong>Éditeur:</strong> {journal['publisher']}</p>
+                        <p style="color: #2c3e50; margin: 5px 0 0 0; font-size: 0.9rem;">{journal['focus']}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="tag" style="background: #2ecc71;">IF: {journal['impact_factor']}</span>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with doc_tabs[2]:
+        # Contenus audiovisuels
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                🎥 Ressources Audiovisuelles
+            </h2>
         </div>
         """, unsafe_allow_html=True)
 
-    # Formulaire pour informations personnelles
-    st.markdown("### 👤 Informations complémentaires pour la prédiction IA")
-    
-    with st.form("personal_info_form"):
-        col1, col2 = st.columns(2)
+        # Documentaires
+        st.markdown("### 🎬 Documentaires Recommandés")
         
-        with col1:
-            age = st.number_input("Âge", min_value=1, max_value=100, value=25)
-            genre = st.selectbox("Genre", ["M", "F"])
-            ethnie = st.selectbox("Ethnie", ["White-European", "Asian", "Middle Eastern", "Black", "Latino", "Others"])
-        
-        with col2:
-            status_testeur = st.selectbox("Qui remplit ce questionnaire ?", 
-                                        ["Famille", "Professionnel de santé", "Individu", "Autre"])
-            antecedents = st.selectbox("Antécédents familiaux de TSA", ["Yes", "No"])
-        
-        submitted = st.form_submit_button("🤖 Obtenir la prédiction IA", use_container_width=True, type="primary")
-        
-        if submitted:
-            # Préparer les données pour la prédiction
-            user_data = {
-                'Age': age,
-                'Genre': genre,
-                'Ethnie': ethnie,
-                'Statut_testeur': status_testeur,
-                'Antecedents_familiaux': antecedents,
-                'Score_A10': total_score
+        documentaries = [
+            {
+                "title": "In My Language",
+                "author": "Amanda Baggs",
+                "year": "2007",
+                "duration": "8 min",
+                "platform": "YouTube",
+                "description": "Témoignage puissant d'une personne autiste non-verbale sur sa perception du monde.",
+                "themes": ["Neurodiversité", "Communication", "Témoignage"]
+            },
+            {
+                "title": "Atypical",
+                "author": "Robia Rashid",
+                "year": "2017-2021",
+                "duration": "4 saisons",
+                "platform": "Netflix", 
+                "description": "Série suivant un adolescent autiste dans sa quête d'indépendance et d'amour.",
+                "themes": ["Adolescence", "Famille", "Relations sociales"]
+            },
+            {
+                "title": "Temple Grandin",
+                "author": "Mick Jackson",
+                "year": "2010",
+                "duration": "107 min",
+                "platform": "HBO",
+                "description": "Biopic de Temple Grandin, scientifique autiste révolutionnaire.",
+                "themes": ["Biographie", "Science", "Réussite"]
             }
-            
-            # Ajouter les réponses individuelles
-            for i in range(1, 11):
-                user_data[f'A{i}'] = st.session_state.aq10_responses[f'A{i}']
-            
-            # Simulation de prédiction (remplacer par votre modèle réel)
-            prediction_proba = simulate_prediction(user_data)
-            
-            show_prediction_results(prediction_proba, total_score)
+        ]
 
-    # Bouton pour recommencer
-    if st.button("🔄 Recommencer le questionnaire"):
-        st.session_state.current_question = 1
-        st.session_state.aq10_responses = {}
-        st.session_state.show_results = False
-        st.rerun()
+        for doc in documentaries:
+            st.markdown(f"""
+            <div class="resource-card video-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">🎬 {doc['title']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            {doc['author']} ({doc['year']}) | ⏱️ {doc['duration']} | 📺 {doc['platform']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin-bottom: 15px;">{doc['description']}</p>
+                <div>
+                    {''.join([f'<span class="tag">{theme}</span>' for theme in doc['themes']])}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-def simulate_prediction(user_data):
-    """Simulation de prédiction - remplacer par le modèle réel"""
-    import random
-    # Simulation basée sur le score AQ-10 et d'autres facteurs
-    base_prob = user_data['Score_A10'] / 10 * 0.7
-    age_factor = 0.1 if user_data['Age'] < 18 else 0.05
-    family_factor = 0.2 if user_data['Antecedents_familiaux'] == 'Yes' else 0
-    
-    total_prob = min(base_prob + age_factor + family_factor + random.uniform(-0.1, 0.1), 0.95)
-    return max(total_prob, 0.05)
+        # Podcasts
+        st.markdown("### 🎧 Podcasts Spécialisés")
+        
+        podcasts = [
+            {
+                "title": "Autism Spectrum Podcast",
+                "host": "Máximo Marín",
+                "frequency": "Hebdomadaire",
+                "language": "Anglais",
+                "description": "Témoignages et discussions avec des personnes autistes et leurs familles.",
+                "focus": ["Témoignages", "Vie quotidienne", "Stratégies"]
+            },
+            {
+                "title": "Different Brains",
+                "host": "Hackie Reitman",
+                "frequency": "Bi-mensuel",
+                "language": "Anglais",
+                "description": "Interviews d'experts et de personnes neuroatypiques sur la neurodiversité.",
+                "focus": ["Neurodiversité", "Inclusion", "Innovation"]
+            },
+            {
+                "title": "Autisme Info",
+                "host": "Association Autisme France",
+                "frequency": "Mensuel",
+                "language": "Français",
+                "description": "Actualités et conseils pratiques pour les familles concernées par l'autisme.",
+                "focus": ["Actualités", "Conseils pratiques", "Droits"]
+            }
+        ]
 
-def show_prediction_results(probability, aq10_score):
-    """Affiche les résultats de la prédiction IA"""
-    
-    risk_level = "Élevé" if probability > 0.7 else "Modéré" if probability > 0.4 else "Faible"
-    color = "#e74c3c" if probability > 0.7 else "#f39c12" if probability > 0.4 else "#2ecc71"
-    
-    st.markdown(f"""
-    <div style="background: {color}; color: white; padding: 25px; 
-               border-radius: 15px; margin: 25px 0; text-align: center;">
-        <h3 style="margin-bottom: 15px;">🤖 Résultat de l'Intelligence Artificielle</h3>
-        <div style="font-size: 2.5rem; font-weight: bold; margin: 15px 0;">
-            {probability:.1%}
+        for podcast in podcasts:
+            st.markdown(f"""
+            <div class="resource-card audio-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #9b59b6; margin: 0 0 8px 0;">🎧 {podcast['title']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            Animé par {podcast['host']} | {podcast['frequency']} | 🌍 {podcast['language']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin-bottom: 15px;">{podcast['description']}</p>
+                <div>
+                    {''.join([f'<span class="tag">{focus}</span>' for focus in podcast['focus']])}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Chaînes YouTube
+        st.markdown("### 📺 Chaînes YouTube Éducatives")
+        
+        youtube_channels = [
+            {
+                "name": "Asperger Expertise",
+                "creator": "Dr. Michelle Mowery",
+                "subscribers": "45K",
+                "content": "Vidéos éducatives sur le syndrome d'Asperger et l'autisme de haut niveau.",
+                "topics": ["Diagnostic", "Stratégies", "Témoignages"]
+            },
+            {
+                "name": "Yo Samdy Sam",
+                "creator": "Samdy Sam",
+                "subscribers": "120K",
+                "content": "Vulgarisation scientifique incluant des sujets sur l'autisme et les neurosciences.",
+                "topics": ["Vulgarisation", "Neurosciences", "Inclusion"]
+            },
+            {
+                "name": "Autisme - École des parents",
+                "creator": "École des parents",
+                "subscribers": "8K",
+                "content": "Conseils pratiques et témoignages pour les familles.",
+                "topics": ["Famille", "Éducation", "Soutien"]
+            }
+        ]
+
+        for channel in youtube_channels:
+            st.markdown(f"""
+            <div class="resource-card video-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #e74c3c; margin: 0 0 8px 0;">📺 {channel['name']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            {channel['creator']} | 👥 {channel['subscribers']} abonnés
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin-bottom: 15px;">{channel['content']}</p>
+                <div>
+                    {''.join([f'<span class="tag">{topic}</span>' for topic in channel['topics']])}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with doc_tabs[3]:
+        # Données et statistiques
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                📊 Données et Statistiques Mondiales
+            </h2>
         </div>
-        <p style="font-size: 1.2rem;">
-            Probabilité de présence de traits autistiques - Niveau de risque: {risk_level}
+        """, unsafe_allow_html=True)
+
+        # Statistiques globales
+        st.markdown("### 🌍 Prévalence Mondiale")
+        
+        st.markdown("""
+        <div class="statistics-grid">
+            <div class="stat-card">
+                <h3 style="margin: 0 0 10px 0; font-size: 2.5rem;">1/36</h3>
+                <p style="margin: 0; font-size: 1.1rem;">Enfants aux États-Unis<br>(CDC 2023)</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0 0 10px 0; font-size: 2.5rem;">1-2%</h3>
+                <p style="margin: 0; font-size: 1.1rem;">Population mondiale<br>estimée</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0 0 10px 0; font-size: 2.5rem;">700K</h3>
+                <p style="margin: 0; font-size: 1.1rem;">Personnes en France<br>(estimation)</p>
+            </div>
+            <div class="stat-card">
+                <h3 style="margin: 0 0 10px 0; font-size: 2.5rem;">4:1</h3>
+                <p style="margin: 0; font-size: 1.1rem;">Ratio garçons/filles<br>(historique)</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Évolution de la prévalence
+        st.markdown("### 📈 Évolution de la Prévalence (États-Unis)")
+        
+        prevalence_data = pd.DataFrame({
+            'Année': [2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2023],
+            'Prévalence': [1/150, 1/150, 1/125, 1/110, 1/88, 1/68, 1/88, 1/68, 1/54, 1/44, 1/36, 1/36],
+            'Source': ['CDC'] * 12
+        })
+        
+        prevalence_data['Prévalence_pct'] = (1 / prevalence_data['Prévalence']) * 100
+        
+        fig_prevalence = px.line(
+            prevalence_data, 
+            x='Année', 
+            y='Prévalence_pct',
+            title='Évolution de la prévalence de l\'autisme aux États-Unis',
+            labels={'Prévalence_pct': 'Prévalence (%)', 'Année': 'Année'},
+            markers=True
+        )
+        fig_prevalence.update_layout(
+            height=400,
+            xaxis_title="Année",
+            yaxis_title="Prévalence (%)"
+        )
+        st.plotly_chart(fig_prevalence, use_container_width=True)
+
+        # Données par pays
+        st.markdown("### 🗺️ Prévalence par Région/Pays")
+        
+        country_data = pd.DataFrame({
+            'Pays/Région': ['États-Unis', 'Royaume-Uni', 'Australie', 'Suède', 'Danemark', 'Corée du Sud', 'Japon'],
+            'Prévalence (%)': [2.8, 1.1, 2.5, 1.9, 1.65, 2.6, 1.0],
+            'Année': [2023, 2021, 2022, 2021, 2020, 2019, 2020],
+            'Source': ['CDC', 'NHS', 'AIHW', 'Socialstyrelsen', 'SSI', 'KCDC', 'MHLW']
+        })
+        
+        fig_countries = px.bar(
+            country_data,
+            x='Pays/Région',
+            y='Prévalence (%)',
+            title='Prévalence de l\'autisme par pays',
+            color='Prévalence (%)',
+            color_continuous_scale='Blues'
+        )
+        fig_countries.update_layout(height=400)
+        st.plotly_chart(fig_countries, use_container_width=True)
+
+        # Données économiques
+        st.markdown("### 💰 Impact Économique")
+        
+        st.markdown("""
+        <div class="doc-section">
+            <h4 style="color: #3498db; margin-top: 0;">Coûts Sociétaux (Estimations annuelles)</h4>
+            <div class="statistics-grid">
+                <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2rem;">268 Md$</h3>
+                    <p style="margin: 0;">États-Unis<br>(2020)</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2rem;">32 Md£</h3>
+                    <p style="margin: 0;">Royaume-Uni<br>(2019)</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2rem;">6,2 Md€</h3>
+                    <p style="margin: 0;">France<br>(estimation 2021)</p>
+                </div>
+            </div>
+            
+            <h4 style="color: #2ecc71; margin: 25px 0 15px 0;">Répartition des coûts :</h4>
+            <ul style="line-height: 1.8; color: #2c3e50;">
+                <li><strong>Éducation spécialisée</strong> : 40-50% des coûts totaux</li>
+                <li><strong>Services de santé</strong> : 15-25%</li>
+                <li><strong>Perte de productivité familiale</strong> : 20-30%</li>
+                <li><strong>Services sociaux</strong> : 10-15%</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with doc_tabs[4]:
+        # Guides cliniques
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                🏥 Guides Cliniques et Bonnes Pratiques
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Recommandations HAS
+        st.markdown("### 🇫🇷 Recommandations HAS (France)")
+        
+        has_docs = [
+            {
+                "title": "Trouble du spectre de l'autisme : signes d'alerte, repérage, diagnostic et évaluation",
+                "year": "2018",
+                "type": "Recommandations",
+                "target": "Professionnels de santé",
+                "summary": "Guide complet pour le repérage précoce et le diagnostic des TSA de 12 mois à 36 mois."
+            },
+            {
+                "title": "Trouble du spectre de l'autisme : interventions et parcours de vie de l'adulte",
+                "year": "2017", 
+                "type": "Recommandations",
+                "target": "Équipes médico-sociales",
+                "summary": "Prise en charge et accompagnement des adultes avec TSA."
+            },
+            {
+                "title": "Autisme et autres TED : interventions éducatives et thérapeutiques",
+                "year": "2012",
+                "type": "Recommandations",
+                "target": "Professionnels",
+                "summary": "Interventions recommandées chez l'enfant et l'adolescent."
+            }
+        ]
+
+        for doc in has_docs:
+            st.markdown(f"""
+            <div class="resource-card scientific-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #2ecc71; margin: 0 0 8px 0;">📋 {doc['title']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            HAS {doc['year']} | {doc['type']} | 🎯 {doc['target']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin: 0;">{doc['summary']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Outils de diagnostic
+        st.markdown("### 🔧 Outils de Diagnostic et d'Évaluation")
+        
+        diagnostic_tools = [
+            {
+                "name": "ADOS-2",
+                "full_name": "Autism Diagnostic Observation Schedule",
+                "age_range": "12 mois - adulte",
+                "duration": "45-60 min",
+                "type": "Observation structurée",
+                "description": "Étalon-or pour l'observation des comportements sociaux et communicatifs."
+            },
+            {
+                "name": "ADI-R", 
+                "full_name": "Autism Diagnostic Interview-Revised",
+                "age_range": "2 ans - adulte",
+                "duration": "90-150 min", 
+                "type": "Entretien parental",
+                "description": "Entretien semi-structuré explorant les trois domaines du spectre autistique."
+            },
+            {
+                "name": "M-CHAT-R/F",
+                "full_name": "Modified Checklist for Autism in Toddlers",
+                "age_range": "16-30 mois",
+                "duration": "5-10 min",
+                "type": "Questionnaire de dépistage",
+                "description": "Outil de dépistage précoce utilisé en médecine générale et PMI."
+            },
+            {
+                "name": "CARS-2",
+                "full_name": "Childhood Autism Rating Scale",
+                "age_range": "2 ans et plus",
+                "duration": "20-30 min",
+                "type": "Échelle d'évaluation",
+                "description": "Évaluation de la sévérité des symptômes autistiques."
+            }
+        ]
+
+        for tool in diagnostic_tools:
+            st.markdown(f"""
+            <div class="resource-card article-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #f39c12; margin: 0 0 5px 0;">🔧 {tool['name']}</h4>
+                        <p style="color: #7f8c8d; margin: 0; font-style: italic; font-size: 0.9rem;">
+                            {tool['full_name']}
+                        </p>
+                    </div>
+                    <span class="tag" style="background: #f39c12;">{tool['type']}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: #34495e;"><strong>👶 Age:</strong> {tool['age_range']}</span>
+                    <span style="color: #34495e;"><strong>⏱️ Durée:</strong> {tool['duration']}</span>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin: 0;">{tool['description']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Parcours de soin
+        st.markdown("### 🛤️ Parcours de Soin Recommandé")
+        
+        st.markdown("""
+        <div class="doc-section">
+            <div style="background: linear-gradient(135deg, #ecf0f1, #bdc3c7); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="color: #2c3e50; margin-top: 0; text-align: center;">Étapes du Parcours Diagnostique</h4>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <span style="background: #3498db; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">1</span>
+                        <div>
+                            <strong style="color: #2c3e50;">Repérage précoce</strong>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Médecin généraliste, pédiatre, PMI (12-24 mois)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71;">
+                        <span style="background: #2ecc71; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">2</span>
+                        <div>
+                            <strong style="color: #2c3e50;">Évaluation diagnostique</strong>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Équipe spécialisée, CRA, CAMSP/CMPP</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12;">
+                        <span style="background: #f39c12; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">3</span>
+                        <div>
+                            <strong style="color: #2c3e50;">Annonce diagnostique</strong>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">Information, soutien, orientation vers les services</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <span style="background: #e74c3c; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;">4</span>
+                        <div>
+                            <strong style="color: #2c3e50;">Interventions précoces</strong>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem;">SESSAD, libéral, structures spécialisées</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with doc_tabs[5]:
+        # Organisations
+        st.markdown("""
+        <div class="doc-section">
+            <h2 style="color: #2c3e50; margin-top: 0; font-size: 2.2rem;">
+                🌐 Organisations et Associations
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Associations françaises
+        st.markdown("### 🇫🇷 Associations Françaises")
+        
+        french_orgs = [
+            {
+                "name": "Autisme France",
+                "founded": "1989",
+                "mission": "Défense des droits des personnes autistes et de leurs familles",
+                "services": ["Information", "Formation", "Plaidoyer", "Soutien juridique"],
+                "website": "autisme.france.free.fr"
+            },
+            {
+                "name": "Fondation FondaMental", 
+                "founded": "2007",
+                "mission": "Recherche et soins en psychiatrie de précision",
+                "services": ["Recherche", "Centres experts", "Formation", "Innovation"],
+                "website": "fondation-fondamental.org"
+            },
+            {
+                "name": "Vaincre l'Autisme",
+                "founded": "2001", 
+                "mission": "Sensibilisation et aide aux familles",
+                "services": ["Dépistage", "Formation", "Accompagnement", "Recherche"],
+                "website": "vaincrelautisme.org"
+            },
+            {
+                "name": "GNCRA",
+                "founded": "2010",
+                "mission": "Coordination des Centres de Ressources Autisme",
+                "services": ["Coordination", "Formation", "Recherche", "Documentation"],
+                "website": "gncra.fr"
+            }
+        ]
+
+        for org in french_orgs:
+            st.markdown(f"""
+            <div class="resource-card scientific-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #2ecc71; margin: 0 0 8px 0;">🏛️ {org['name']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            Fondée en {org['founded']} | 🌐 {org['website']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin-bottom: 15px;"><strong>Mission :</strong> {org['mission']}</p>
+                <div>
+                    <strong style="color: #34495e;">Services :</strong><br>
+                    {''.join([f'<span class="tag">{service}</span>' for service in org['services']])}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Organisations internationales
+        st.markdown("### 🌍 Organisations Internationales")
+        
+        intl_orgs = [
+            {
+                "name": "Autism Speaks",
+                "country": "États-Unis",
+                "founded": "2005",
+                "mission": "Promouvoir la recherche et l'inclusion des personnes autistes",
+                "website": "autismspeaks.org"
+            },
+            {
+                "name": "National Autistic Society",
+                "country": "Royaume-Uni", 
+                "founded": "1962",
+                "mission": "Services et soutien pour les personnes autistes",
+                "website": "autism.org.uk"
+            },
+            {
+                "name": "Autism Europe",
+                "country": "Europe",
+                "founded": "1983",
+                "mission": "Fédération européenne des associations d'autisme",
+                "website": "autismeurope.org"
+            },
+            {
+                "name": "Organisation Mondiale de la Santé",
+                "country": "International",
+                "founded": "1948",
+                "mission": "Politiques de santé publique mondiales",
+                "website": "who.int"
+            }
+        ]
+
+        for org in intl_orgs:
+            st.markdown(f"""
+            <div class="resource-card article-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #f39c12; margin: 0 0 8px 0;">🌐 {org['name']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            {org['country']} | Fondée en {org['founded']} | 🌐 {org['website']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin: 0;"><strong>Mission :</strong> {org['mission']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Centres de recherche
+        st.markdown("### 🔬 Centres de Recherche de Référence")
+        
+        research_centers = [
+            {
+                "name": "Institut Pasteur - Génétique humaine et fonctions cognitives",
+                "location": "Paris, France",
+                "director": "Thomas Bourgeron",
+                "focus": "Génétique et neurobiologie de l'autisme"
+            },
+            {
+                "name": "Autism Research Centre - Cambridge",
+                "location": "Cambridge, UK",
+                "director": "Simon Baron-Cohen", 
+                "focus": "Théorie de l'esprit et cognition sociale"
+            },
+            {
+                "name": "Center for Autism Research - CHOP",
+                "location": "Philadelphie, USA",
+                "director": "Robert Schultz",
+                "focus": "Neuroimagerie et interventions précoces"
+            },
+            {
+                "name": "RIKEN Brain Science Institute",
+                "location": "Tokyo, Japon",
+                "director": "Kenji Doya",
+                "focus": "Neurosciences computationnelles"
+            }
+        ]
+
+        for center in research_centers:
+            st.markdown(f"""
+            <div class="resource-card scientific-resource">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #2ecc71; margin: 0 0 8px 0;">🔬 {center['name']}</h4>
+                        <p style="color: #7f8c8d; margin: 0;">
+                            📍 {center['location']} | 👨‍🔬 {center['director']}
+                        </p>
+                    </div>
+                </div>
+                <p style="color: #2c3e50; line-height: 1.6; margin: 0;"><strong>Spécialité :</strong> {center['focus']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Citation inspirante finale
+    st.markdown("""
+    <div class="quote-section">
+        <h3 style="color: #2c3e50; margin-top: 0; text-align: center;">💭 Réflexion</h3>
+        <blockquote style="font-size: 1.2rem; line-height: 1.6; text-align: center; margin: 20px 0; color: #34495e;">
+            "L'autisme n'est pas une tragédie. L'ignorance l'est."<br>
+            <footer style="margin-top: 15px; font-size: 1rem; color: #7f8c8d;">
+                — Temple Grandin, scientifique et auteure autiste
+            </footer>
+        </blockquote>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Note finale
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
+               border-left: 4px solid #3498db; padding: 25px; border-radius: 10px; margin: 30px 0;">
+        <h4 style="color: #2c3e50; margin-top: 0;">📋 Note importante</h4>
+        <p style="color: #34495e; line-height: 1.6; margin: 0;">
+            Cette documentation est fournie à titre informatif et éducatif. Elle ne remplace pas 
+            l'avis médical professionnel. Pour toute question concernant le diagnostic ou la prise 
+            en charge de l'autisme, consultez un professionnel de santé qualifié.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Recommandations
-    st.markdown("### 💡 Recommandations")
-    
-    if probability > 0.7:
-        st.error("""
-        **Risque élevé détecté**
-        - Consultation avec un professionnel spécialisé recommandée
-        - Évaluation diagnostique complète suggérée
-        - Ce résultat ne constitue pas un diagnostic
-        """)
-    elif probability > 0.4:
-        st.warning("""
-        **Risque modéré détecté**
-        - Surveillance et suivi recommandés
-        - Consultation possible avec un professionnel
-        - Réévaluation dans quelques mois
-        """)
-    else:
-        st.success("""
-        **Risque faible détecté**
-        - Profil neurotypique probable
-        - Surveillance de routine suffisante
-        - Consultez si préoccupations persistent
-        """)
-
-    # Avertissement légal
-    st.warning("""
-    ⚠️ **Avertissement Important**
-    
-    Cette prédiction est générée par un algorithme d'intelligence artificielle à des fins d'aide au dépistage uniquement. 
-    Elle ne remplace en aucun cas l'avis d'un professionnel de santé qualifié. 
-    Pour un diagnostic définitif, consultez un psychiatre ou psychologue spécialisé dans les troubles du spectre autistique.
-    """)
-                    
-def show_documentation():
-    st.markdown("""
-<div style="background: linear-gradient(90deg, #3498db, #2ecc71);
-            padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
-    <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
-               text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
-        📚 Documentation
-    </h1>
-    <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
-              max-width: 800px; margin: 0 auto; line-height: 1.6;">
-        Une approche moderne et scientifique pour le dépistage précoce
-    </p>
-</div>
-""", unsafe_allow_html=True)
-    
-    new_image_url = "https://drive.google.com/file/d/1ZGjB0A_9v3SqgeZRk1ZC_ofvIxAANwfs/view?usp=drive_link"
-    st.markdown(get_img_with_href(new_image_url, None, as_banner=True), unsafe_allow_html=True)
-
-
-    with st.expander("📋 À propos du questionnaire AQ-10", expanded=True):
-        st.markdown("""
-        ### Le questionnaire AQ-10
-
-        L'AQ-10 est une version abrégée du Quotient du Spectre Autistique (AQ), un outil de dépistage validé scientifiquement.
-
-        - **Développé par** : Professeur Simon Baron-Cohen et son équipe à l'Université de Cambridge
-        - **Objectif** : Identifier rapidement les traits autistiques chez les adultes et adolescents
-        - **Utilisation** : Outil de dépistage initial, non diagnostique
-        - **Validation** : Études internationales avec sensibilité et spécificité élevées
-        """)
-
-        st.markdown("""
-        ### Interprétation des scores
-
-        - **Score ≥ 6** : Dépistage positif, suggérant la présence de traits autistiques significatifs
-        - **Score < 6** : Dépistage négatif
-
-        Un dépistage positif n'est pas un diagnostic mais indique qu'une évaluation plus approfondie pourrait être bénéfique.
-        """)
-
-    with st.expander("🧠 Signification des questions", expanded=True):
-        st.markdown("""
-        ### Comprendre les questions du test AQ-10
-
-        Chaque question évalue un aspect spécifique des traits associés aux TSA :
-        """)
-
-        q_tabs = st.tabs(["Q1-3", "Q4-7", "Q8-10"])
-
-        with q_tabs[0]:
-            st.markdown("""
-            #### Questions 1 à 3
-
-            **Q1: Je remarque souvent de petits bruits que les autres ne remarquent pas.**
-            - Évalue l'hypersensibilité sensorielle, trait fréquent dans les TSA
-
-            **Q2: Je me concentre généralement davantage sur l'ensemble que sur les petits détails.**
-            - Évalue la tendance à la cohérence centrale (vision d'ensemble vs détails)
-
-            **Q3: Je trouve facile de faire plusieurs choses en même temps.**
-            - Évalue les fonctions exécutives et la flexibilité cognitive
-            """)
-
-        with q_tabs[1]:
-            st.markdown("""
-            #### Questions 4 à 7
-
-            **Q4: S'il y a une interruption, je peux rapidement reprendre ce que je faisais.**
-            - Évalue la flexibilité attentionnelle et l'adaptation aux changements
-
-            **Q5: Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.**
-            - Évalue la compréhension des messages implicites et du langage indirect
-
-            **Q6: Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.**
-            - Évalue la capacité à détecter les signaux sociaux non verbaux
-
-            **Q7: Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.**
-            - Évalue la théorie de l'esprit (comprendre les états mentaux d'autrui)
-            """)
-
-        with q_tabs[2]:
-            st.markdown("""
-            #### Questions 8 à 10
-
-            **Q8: J'aime collecter des informations sur des catégories de choses.**
-            - Évalue la tendance aux intérêts restreints et spécifiques
-
-            **Q9: Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.**
-            - Évalue la capacité à lire les expressions faciales
-
-            **Q10: J'ai du mal à comprendre les intentions des gens.**
-            - Évalue la compréhension des intentions et motivations sociales
-            """)
-
-    with st.expander("🔍 Sources Académiques", expanded=True):
-        st.markdown("""
-          <div style="border-left:4px solid #1e88e5; padding-left:15px; margin-bottom:20px">
-              <h3 style="color:#1e88e5">Références Bibliographiques</h3>
-          </div>
-          """, unsafe_allow_html=True)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-              st.markdown("""
-              <div style="background:#f8f9fa; padding:15px; border-radius:8px; height:100%">
-                  <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Manuels de Référence</h4>
-                  <ul style="padding-left:20px">
-                      <li>American Psychiatric Association. (2013). <em>Diagnostic and statistical manual of mental disorders</em> (5th ed.). <a href="https://doi.org/10.1176/appi.books.9780890425596" target="_blank">DOI</a></li>
-                      <li>World Health Organization. (2019). <em>International classification of diseases</em> (11th ed.). <a href="https://icd.who.int/" target="_blank">Site web</a></li>
-                      <li>Baron-Cohen, S. (2017). <em>The Pattern Seekers: How Autism Drives Human Invention</em>. <a href="https://www.simonandschuster.com/books/The-Pattern-Seekers/Simon-Baron-Cohen/9781541647145" target="_blank">Éditeur</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        with col2:
-              st.markdown("""
-              <div style="background:#f8f9fa; padding:15px; border-radius:8px; height:100%">
-                  <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Études Fondatrices</h4>
-                  <ul style="padding-left:20px">
-                      <li>Bergeron, M., & Hébert, M. (2006). <em>Évaluation d'une intervention de groupe d'approche féministe auprès de femmes victimes d'agression sexuelle</em>.</li>
-                      <li>Mottron, L. (2020). <em>L'intervention précoce pour enfants autistes : Nouveaux principes pour soutenir une autre intelligence</em>.</li>
-                      <li>Silberman, S. (2015). <em>NeuroTribes: The Legacy of Autism and the Future of Neurodiversity</em>. <a href="https://www.penguinrandomhouse.com/books/310415/neurotribes-by-steve-silberman/" target="_blank">Éditeur</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        st.markdown("""
-          <div style="margin-top:20px; background:#f8f9fa; padding:15px; border-radius:8px">
-              <h4 style="color:#0d47a1; border-bottom:1px solid #ddd; padding-bottom:8px">Articles Scientifiques Récents</h4>
-              <ul style="padding-left:20px">
-                  <li>Culotta, L. et al. (2024). "Brain Structural Differences in Autism Spectrum Disorder". <em>Journal of Autism and Developmental Disorders</em>.</li>
-                  <li>Anderson, J. S. (2023). "Connectivity Patterns in the Autistic Brain". <em>Autism Research</em>, 16(3), 456-472.</li>
-                  <li>Grandin, T. (2023). "The Autistic Brain: Updated Perspectives". <em>Journal of Neuropsychology</em>, 15(2), 112-128.</li>
-                  <li>Baron-Cohen, S. (2022). "Autism, Invention, and the STEM Connection". <em>Nature Neuroscience</em>, 25(1), 45-57.</li>
-              </ul>
-          </div>
-          """, unsafe_allow_html=True)
-
-    with st.expander("🧠 Ressources sur l'Autisme", expanded=True):
-        st.markdown("""
-          <div style="border-left:4px solid #4caf50; padding-left:15px; margin-bottom:20px">
-              <h3 style="color:#4caf50">Comprendre l'Autisme</h3>
-          </div>
-          """, unsafe_allow_html=True)
-
-        st.markdown("""
-          <h4 style="color:#2e7d32; margin-top:20px">Vidéos Éducatives</h4>
-          """, unsafe_allow_html=True)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("""
-              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
-                  <h5 style="color:#33691e">Conférences TED</h5>
-                  <ul style="padding-left:20px">
-                      <li><a href="https://www.ted.com/talks/temple_grandin_the_world_needs_all_kinds_of_minds?language=fr" target="_blank">Temple Grandin : Le monde a besoin de toutes sortes d'esprits</a></li>
-                      <li><a href="https://www.youtube.com/watch?v=kHmvZBQjB0g" target="_blank">Comment l'autisme stimule l'invention humaine - Simon Baron-Cohen</a></li>
-                      <li><a href="https://www.ted.com/talks/steve_silberman_the_forgotten_history_of_autism" target="_blank">Steve Silberman : L'histoire oubliée de l'autisme</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("""
-              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
-                  <h5 style="color:#33691e">Documentaires</h5>
-                  <ul style="padding-left:20px">
-                      <li><a href="https://www.youtube.com/watch?v=J9ZxvR_cm94" target="_blank">The Reason I Jump - Bande annonce officielle</a></li>
-                      <li><a href="https://www.youtube.com/watch?v=Lr4_dOorquQ" target="_blank">Autism: The Musical - HBO Documentary</a></li>
-                      <li><a href="https://www.arte.tv/fr/videos/RC-014294/dans-la-tete-des-autistes/" target="_blank">Dans la tête des autistes - Arte</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        st.markdown("""
-          <h4 style="color:#2e7d32; margin-top:20px">Sites Web et Organisations</h4>
-          """, unsafe_allow_html=True)
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-              st.markdown("""
-              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
-                  <h5 style="color:#33691e">France</h5>
-                  <ul style="padding-left:20px">
-                      <li><a href="https://www.autisme-france.fr" target="_blank">Autisme France</a></li>
-                      <li><a href="https://www.autismeinfoservice.fr" target="_blank">Autisme Info Service</a></li>
-                      <li><a href="https://maisondelautisme.gouv.fr" target="_blank">Maison de l'autisme</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        with col2:
-              st.markdown("""
-              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
-                  <h5 style="color:#33691e">International</h5>
-                  <ul style="padding-left:20px">
-                      <li><a href="https://www.autismspeaks.org" target="_blank">Autism Speaks</a></li>
-                      <li><a href="https://www.autism.org" target="_blank">National Autistic Society (UK)</a></li>
-                      <li><a href="https://www.cdc.gov/ncbddd/autism/" target="_blank">CDC - Autism Spectrum Disorder</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        with col3:
-              st.markdown("""
-              <div style="background:#f1f8e9; padding:15px; border-radius:8px; height:100%">
-                  <h5 style="color:#33691e">Recherche et Formation</h5>
-                  <ul style="padding-left:20px">
-                      <li><a href="https://www.gncra.fr" target="_blank">GNCRA - Groupement National des CRA</a></li>
-                      <li><a href="https://researchautism.org" target="_blank">Research Autism</a></li>
-                      <li><a href="https://www.autism-uni.org" target="_blank">Autism&Uni</a></li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        st.markdown("""
-          <h4 style="color:#2e7d32; margin-top:20px">Livres Recommandés</h4>
-          <div style="display:flex; overflow-x:auto; padding:10px 0; gap:15px">
-              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
-                  <div style="width:100%; height:120px; background:#e8f5e9; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
-                      <span style="font-weight:bold; color:#2e7d32">NeuroTribes</span>
-                  </div>
-                  <h5 style="margin:10px 0 5px 0">NeuroTribes</h5>
-                  <p style="font-size:0.9rem; margin:0">Steve Silberman (2015)</p>
-              </div>
-              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
-                  <div style="width:100%; height:120px; background:#e3f2fd; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
-                      <span style="font-weight:bold; color:#1565c0">The Autistic Brain</span>
-                  </div>
-                  <h5 style="margin:10px 0 5px 0">The Autistic Brain</h5>
-                  <p style="font-size:0.9rem; margin:0">Temple Grandin (2014)</p>
-              </div>
-              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
-                  <div style="width:100%; height:120px; background:#fff3e0; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
-                      <span style="font-weight:bold; color:#e65100">Uniquely Human</span>
-                  </div>
-                  <h5 style="margin:10px 0 5px 0">Uniquely Human</h5>
-                  <p style="font-size:0.9rem; margin:0">Barry M. Prizant (2022)</p>
-              </div>
-              <div style="min-width:200px; background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1)">
-                  <div style="width:100%; height:120px; background:#f3e5f5; display:flex; align-items:center; justify-content:center; border-radius:5px; margin-bottom:10px">
-                      <span style="font-weight:bold; color:#6a1b9a">The Pattern Seekers</span>
-                  </div>
-                  <h5 style="margin:10px 0 5px 0">The Pattern Seekers</h5>
-                  <p style="font-size:0.9rem; margin:0">Simon Baron-Cohen (2021)</p>
-              </div>
-          </div>
-          """, unsafe_allow_html=True)
-
-    with st.expander("📊 Données et Modèles", expanded=True):
-        st.markdown("""
-          <div style="border-left:4px solid #ff9800; padding-left:15px; margin-bottom:20px">
-              <h3 style="color:#ff9800">Sources des Données et Modélisation</h3>
-          </div>
-          """, unsafe_allow_html=True)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-              st.markdown("""
-              <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
-                  <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Jeux de Données</h4>
-                  <ul style="padding-left:20px">
-                      <li>📁 <a href="https://www.kaggle.com/datasets/faizunnabi/autism-screening" target="_blank">Autism Screening Dataset</a> (n=1985)</li>
-                      <li>📁 <a href="https://archive.ics.uci.edu/ml/datasets/Autism+Screening+Adult" target="_blank">UCI Machine Learning Repository</a> (n=704)</li>
-                      <li>📁 <a href="https://data.gov.sa/" target="_blank">Open Data Saudi Arabia</a> (n=506)</li>
-                      <li>📁 <a href="https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers" target="_blank">Autism Screening for Toddlers</a> (n=1054)</li>
-                      <li>📁 <a href="https://www.kaggle.com/datasets/reevesii/global-autism-data" target="_blank">Global Autism Data</a> (n=800)</li>
-                  </ul>
-              </div>
-              """, unsafe_allow_html=True)
-
-        with col2:
-              st.markdown("""
-              <div style="background:#fff3e0; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
-                  <h4 style="color:#e65100; border-bottom:1px solid #ffe0b2; padding-bottom:8px">Modèles Utilisés</h4>
-                  <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px">
-                      <div style="padding:10px; background:#e3f2fd; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                          <h5 style="margin:0 0 8px 0; color:#0d47a1">Random Forest</h5>
-                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
-                              <li>n_estimators=100</li>
-                              <li>max_depth=10</li>
-                              <li>min_samples_split=10</li>
-                              <li>min_samples_leaf=1</li>
-                          </ul>
-                      </div>
-                      <div style="padding:10px; background:#e8f5e9; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                          <h5 style="margin:0 0 8px 0; color:#1b5e20">LightGBM</h5>
-                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
-                              <li>learning_rate=0.1</li>
-                              <li>max_depth=15</li>
-                              <li>n_estimators=150</li>
-                              <li>boosting_type='gbdt'</li>
-                          </ul>
-                      </div>
-                      <div style="padding:10px; background:#fff8e1; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                          <h5 style="margin:0 0 8px 0; color:#ff6f00">XGBoost</h5>
-                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
-                              <li>learning_rate=0.1</li>
-                              <li>max_depth=5</li>
-                              <li>n_estimators=100</li>
-                              <li>objective='binary:logistic'</li>
-                          </ul>
-                      </div>
-                      <div style="padding:10px; background:#f3e5f5; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,0.1)">
-                          <h5 style="margin:0 0 8px 0; color:#4a148c">Logistic Regression</h5>
-                          <ul style="margin:0; padding-left:15px; font-size:0.9rem">
-                              <li>C=1.0</li>
-                              <li>penalty='l2'</li>
-                              <li>solver='lbfgs'</li>
-                              <li>max_iter=200</li>
-                          </ul>
-                      </div>
-                  </div>
-              </div>
-              """, unsafe_allow_html=True)
-
-    with st.expander("📝 Références Techniques", expanded=True):
-        st.markdown("""
-        <div style="border-left:4px solid #9c27b0; padding-left:15px; margin-bottom:20px">
-            <h3 style="color:#9c27b0">Stack Technologique</h3>
-        </div>
-        """, unsafe_allow_html=True)
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.markdown("""
-            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
-                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
-                    <span style="font-size:1.2rem; margin-right:5px">'📚'</span> Bibliothèques Principales
-                </h4>
-                <ul style="padding-left:20px; margin-top:10px">
-                    <li><strong>Scikit-learn 1.3.2</strong> - Modèles et prétraitement</li>
-                    <li><strong>Plotly 5.18.0</strong> - Visualisations interactives</li>
-                    <li><strong>XGBoost 2.0.3</strong> - Modèles boosting</li>
-                    <li><strong>LightGBM 4.1.0</strong> - Modèles gradient boosting</li>
-                    <li><strong>Pandas 2.1.3</strong> - Manipulation des données</li>
-                    <li><strong>NumPy 1.26.0</strong> - Calculs numériques</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("""
-            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
-                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
-                    <span style="font-size:1.2rem; margin-right:5px">🖥️</span> Infrastructure
-                </h4>
-                <ul style="padding-left:20px; margin-top:10px">
-                    <li><strong>Streamlit 1.29.0</strong> - Interface utilisateur</li>
-                    <li><strong>Docker 24.0.7</strong> - Conteneurisation</li>
-                    <li><strong>AWS EC2 t3.large</strong> - Hébergement</li>
-                    <li><strong>GitHub Actions</strong> - CI/CD</li>
-                    <li><strong>Python 3.10</strong> - Langage principal</li>
-                    <li><strong>NGINX</strong> - Serveur web</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col3:
-            st.markdown("""
-            <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); height:100%">
-                <h4 style="color:#4a148c; border-bottom:1px solid #e1bee7; padding-bottom:8px">
-                    <span style="font-size:1.2rem; margin-right:5px">🔗</span> Sources Externes
-                </h4>
-                <ul style="padding-left:20px; margin-top:10px">
-                    <li><a href="https://autism-resources.org" target="_blank"><strong>Autism Resources Initiative</strong></a></li>
-                    <li><a href="https://www.cdc.gov/ncbddd/autism/data.html" target="_blank"><strong>CDC Autism Data</strong></a></li>
-                    <li><a href="https://www.kaggle.com/datasets" target="_blank"><strong>Kaggle Datasets</strong></a></li>
-                    <li><a href="https://archive.ics.uci.edu/ml/" target="_blank"><strong>UCI ML Repository</strong></a></li>
-                    <li><a href="https://huggingface.co/datasets" target="_blank"><strong>Hugging Face Datasets</strong></a></li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
 
 def show_about_page():
     st.markdown("""
