@@ -4825,34 +4825,34 @@ def show_about_page():
     pass
 
 def main():
-    if "initialized" not in st.session_state:
-        set_custom_theme()
-        st.session_state.initialized = True
-
-    # Vérification si le contenu est bien appelé
-    if 'df' not in st.session_state:
-        with st.spinner("Chargement des données..."):
-            st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
+    """Application principale corrigée"""
+    
+    # Initialiser l'état de session
     initialize_session_state()
+    
+    # Appliquer le thème esthétique corrigé
     set_enhanced_navigation_theme()
-
+    
+    # Afficher la navigation dans la sidebar
     with st.sidebar:
         selected_tool = show_enhanced_navigation_menu()
-
-    # Vérification du contenu à afficher
+    
+    # Navigation entre les pages - CORRECTION DE LA LOGIQUE
     if selected_tool == "🏠 Accueil":
         show_home_page()
     elif selected_tool == "🔍 Exploration":
-        show_data_exploration()
+        show_exploration_page()
     elif selected_tool == "🧠 Analyse ML":
-        show_ml_analysis_corrected()
+        show_ml_page()
     elif selected_tool == "🤖 Prédiction IA":
         show_prediction_page()
     elif selected_tool == "📚 Documentation":
-        st.write("Page de documentation en cours de développement")
+        show_documentation_page()
     elif selected_tool == "ℹ️ À propos":
-        # Suppression d’un puzzle ou contenu problématique
         show_about_page()
+    else:
+        # Fallback vers la page d'accueil
+        show_home_page()
 
 if __name__ == "__main__":
     main()
