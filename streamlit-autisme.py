@@ -150,28 +150,56 @@ def set_custom_theme():
             background-color: var(--background) !important;
         }
 
-        /* ================ Barre Latérale ================ */
+        /* Pour tous les navigateurs - Masquage de la barre de défilement sidebar */
         [data-testid="stSidebar"] {
-            /* Position et dimensions */
+            /* Existant */
             width: var(--sidebar-width) !important;
             min-width: var(--sidebar-width) !important;
             max-width: var(--sidebar-width) !important;
             position: fixed !important;
             height: 100vh !important;
-            
-            /* Style visuel */
             background-color: #f5f7fa !important;
             border-right: 2px solid var(--primary) !important;
             padding-top: 1rem !important;
             
-            /* Gestion du défilement */
+            /* Amélioration du défilement */
             overflow-y: auto !important;
             overflow-x: hidden !important;
+            
+            /* Masquage cross-browser des barres de défilement */
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important; /* Internet Explorer 10+ */
         }
-
-        /* Masquage de la barre de défilement */
+        
+        /* WebKit browsers (Chrome, Safari, Edge moderne) */
         [data-testid="stSidebar"]::-webkit-scrollbar {
             display: none !important;
+            width: 0 !important;
+        }
+        
+        /* Solution alternative pour les navigateurs récalcitrants */
+        [data-testid="stSidebar"] > div {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        [data-testid="stSidebar"] > div::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+        }
+        
+        /* Gestion spécifique du contenu de la sidebar */
+        [data-testid="stSidebar"] .block-container {
+            padding-right: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Éviter les débordements horizontaux */
+        [data-testid="stSidebar"] * {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         /* ================ Contenu Principal ================ */
@@ -180,6 +208,40 @@ def set_custom_theme():
             padding: 2rem !important;
             max-width: calc(100vw - var(--sidebar-width) - 40px) !important;
             transition: margin-left 0.3s ease !important;
+        }
+
+        /* ================ Défilement fluide ================ */
+        [data-testid="stSidebar"] {
+            scroll-behavior: smooth !important;
+        }
+        
+        /* Padding adaptatif pour éviter le débordement */
+        [data-testid="stSidebar"] .stRadio > div {
+            padding-right: 10px !important;
+        }
+        
+        /* Espacement des éléments de navigation */
+        [data-testid="stSidebar"] label {
+            margin-bottom: 8px !important;
+            padding: 12px 15px !important;
+            border-radius: 8px !important;
+            transition: background-color 0.2s ease !important;
+        }
+        
+        /* ================ Responsive - Sidebar cachée sur mobile ================ */
+        @media (max-width: 768px) {
+            [data-testid="stSidebar"] {
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+                overflow: hidden !important; /* Empêche tout défilement sur mobile */
+            }
+            
+            /* Réaffichage via bouton hamburger natif Streamlit */
+            [data-testid="stSidebar"][data-expanded="true"] {
+                transform: translateX(0) !important;
+                overflow-y: auto !important;
+                scrollbar-width: none !important;
+            }
         }
 
         /* ================ Typographie ================ */
