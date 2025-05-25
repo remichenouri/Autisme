@@ -4847,32 +4847,33 @@ def main():
     if 'df' not in st.session_state:
         with st.spinner("Chargement des données..."):
             st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
-
+            
+    initialize_session_state()
     set_enhanced_navigation_theme()
-    
-    # Afficher la navigation
+
     with st.sidebar:
         selected_tool = show_enhanced_navigation_menu()
-        selection = st.sidebar.radio("Choisissez un outil :", pages)
+    
 
     palette = {
         "Yes": "#3498db",
         "No": "#2ecc71",
         "Unknown": "#95a5a6"
     }
-
-    if "🏠 Accueil" in selection:
+ 
+    # Navigation entre les pages
+    if selected_tool == "🏠 Accueil":
         show_home_page()
-    elif "🔍 Exploration des Données" in selection:
+    elif selected_tool == "🔍 Exploration":
         show_data_exploration()
-    elif "🧠 Analyse ML" in selection:
-        show_ml_analysis()
-    elif "🤖 Prédiction par IA" in selection:
-        show_aq10_and_prediction()
-    elif "📚 Documentation" in selection:
-        show_documentation()
-    elif "ℹ️ À propos" in selection:
-        show_about_page()
+    elif selected_tool == "🧠 Analyse ML":
+        show_ml_analysis_corrected()  # Utiliser la version corrigée
+    elif selected_tool == "🤖 Prédiction IA":
+        show_prediction_page()
+    elif selected_tool == "📚 Documentation":
+        st.write("Page de documentation en cours de développement")
+    elif selected_tool == "ℹ️ À propos":
+        st.write("Page à propos en cours de développement")
 
 if __name__ == "__main__":
     main()
