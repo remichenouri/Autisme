@@ -92,62 +92,38 @@ def initialize_session_state():
 
         st.session_state.data_exploration_expanded = True
 
-def show_navigation_menu():
-    """Menu de navigation amélioré avec gestion correcte de la fermeture"""
+def show_navigation_menu_optimized():
+    """Menu de navigation optimisé sans défilement"""
     
-    # CSS pour contrôler l'affichage de la sidebar
-    st.markdown("""
-    <style>
-    /* Masquer la sidebar quand elle est repliée */
-    section[data-testid="stSidebar"][aria-expanded="false"] {
-        margin-left: -320px !important;
-        display: none !important;
-    }
-    
-    /* Style cohérent pour le contenu principal */
-    .main .block-container {
-        margin-left: 2rem;
-        transition: margin 0.3s ease;
-    }
-    
-    /* Bouton de navigation stylisé */
-    [data-testid="collapsedControl"] {
-        left: 20px;
-        top: 20px;
-        background: #3498db !important;
-        color: white !important;
-        border-radius: 8px;
-        padding: 8px;
-    }
-    
-    /* Correction du débordement horizontal */
-    .stApp {
-        overflow-x: hidden;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Gestion d'état pour la sidebar
-    if 'sidebar_state' not in st.session_state:
-        st.session_state.sidebar_state = "expanded"
-    
-    # Bouton de toggle avec gestion d'état améliorée
-    if st.sidebar.button("✖ Fermer le menu", use_container_width=True):
-        st.session_state.sidebar_state = "collapsed"
-        st.experimental_rerun()
-    
-    # Forcer la mise à jour immédiate de l'état
-    st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
-    
-    # Contenu de la sidebar
+    # Titre compact
     st.sidebar.markdown("""
-    <div style="padding: 15px; border-radius: 12px; background: #f8f9fa;">
-        <h2 style="color: #2c3e50; text-align: center;">Navigation</h2>
+    <div style="text-align: center; padding: 10px; margin-bottom: 15px;">
+        <h2 style="color: #3498db; margin: 0; font-size: 1.3rem;">
+            🧩 Navigation
+        </h2>
     </div>
     """, unsafe_allow_html=True)
     
-    options = ["Accueil", "Analyse", "À propos"]
-    choice = st.sidebar.radio("", options)
+    # Options de navigation compactes
+    options = [
+        "🏠 Accueil",
+        "🔍 Exploration", 
+        "🧠 Analyse ML",
+        "🤖 Prédiction IA",
+        "📚 Documentation",
+        "ℹ️ À propos"
+    ]
+    
+    if 'tool_choice' not in st.session_state:
+        st.session_state.tool_choice = options[0]
+    
+    # Menu radio compact
+    choice = st.sidebar.radio(
+        "",
+        options,
+        key="nav_choice",
+        label_visibility="collapsed"
+    )
     
     return choice
 
