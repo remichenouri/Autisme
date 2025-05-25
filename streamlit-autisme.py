@@ -111,11 +111,24 @@ def set_custom_theme():
             --text: #2c3e50 !important;
             --sidebar-width-collapsed: 70px !important;
             --sidebar-width-expanded: 280px !important;
+            --sidebar-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
 
         /* ================ Structure Principale ================ */
         [data-testid="stAppViewContainer"] {
             background-color: var(--background) !important;
+        }
+
+        /* ================ Zone de Trigger pour le Survol ================ */
+        .sidebar-trigger-zone {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 15px !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            background: transparent !important;
+            cursor: pointer !important;
         }
 
         /* ================ Barre Latérale Déployable ================ */
@@ -138,12 +151,14 @@ def set_custom_theme():
             overflow-x: hidden !important;
             
             /* Transition fluide */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transition: var(--sidebar-transition) !important;
             box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
         }
 
-        /* État étendu au survol */
-        [data-testid="stSidebar"]:hover {
+        /* État étendu au survol de la sidebar OU de la zone trigger */
+        [data-testid="stSidebar"]:hover,
+        .sidebar-trigger-zone:hover + [data-testid="stSidebar"],
+        [data-testid="stSidebar"].expanded {
             width: var(--sidebar-width-expanded) !important;
             min-width: var(--sidebar-width-expanded) !important;
             max-width: var(--sidebar-width-expanded) !important;
@@ -152,7 +167,8 @@ def set_custom_theme():
 
         /* Masquage de la barre de défilement */
         [data-testid="stSidebar"]::-webkit-scrollbar {
-            display: none !important;
+            width: 0px !important;
+            background: transparent !important;
         }
 
         /* Contenu de la sidebar */
@@ -161,57 +177,104 @@ def set_custom_theme():
             padding: 0 15px !important;
         }
 
-        /* Animation du texte dans la sidebar */
+        /* ================ Animation du Contenu ================ */
+        /* Masquer le texte par défaut */
         [data-testid="stSidebar"] .element-container {
             opacity: 0 !important;
             transition: opacity 0.3s ease 0.1s !important;
         }
 
-        [data-testid="stSidebar"]:hover .element-container {
+        /* Afficher le texte au survol */
+        [data-testid="stSidebar"]:hover .element-container,
+        [data-testid="stSidebar"].expanded .element-container {
             opacity: 1 !important;
         }
 
-        /* Icônes et éléments visibles en mode réduit */
-        [data-testid="stSidebar"] .stRadio > label {
-            white-space: nowrap !important;
-            overflow: hidden !important;
+        /* Style spécial pour le titre en mode réduit */
+        [data-testid="stSidebar"] h2 {
+            font-size: 0 !important;
+            transition: font-size 0.3s ease !important;
+            position: relative !important;
         }
 
-        /* Animation spécifique pour les boutons radio */
-        [data-testid="stSidebar"] .stRadio {
-            transition: all 0.3s ease !important;
+        [data-testid="stSidebar"] h2::before {
+            content: "🧩" !important;
+            font-size: 24px !important;
+            position: absolute !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            top: 0 !important;
         }
 
+        [data-testid="stSidebar"]:hover h2,
+        [data-testid="stSidebar"].expanded h2 {
+            font-size: 1.5rem !important;
+        }
+
+        [data-testid="stSidebar"]:hover h2::before,
+        [data-testid="stSidebar"].expanded h2::before {
+            position: static !important;
+            transform: none !important;
+            margin-right: 10px !important;
+        }
+
+        /* ================ Style des Options Radio ================ */
         [data-testid="stSidebar"] .stRadio > div {
             display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+
+        [data-testid="stSidebar"] .stRadio label {
+            display: flex !important;
             align-items: center !important;
-            padding: 8px 12px !important;
-            margin: 4px 0 !important;
+            padding: 12px 8px !important;
+            margin: 2px 0 !important;
             border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+        }
+
+        /* Mode réduit : afficher seulement l'emoji */
+        [data-testid="stSidebar"] .stRadio label span {
+            font-size: 0 !important;
             transition: all 0.3s ease !important;
         }
 
-        [data-testid="stSidebar"] .stRadio > div:hover {
+        [data-testid="stSidebar"] .stRadio label span::before {
+            content: attr(data-emoji) !important;
+            font-size: 20px !important;
+            display: inline-block !important;
+            width: 100% !important;
+            text-align: center !important;
+        }
+
+        /* Mode étendu : afficher le texte complet */
+        [data-testid="stSidebar"]:hover .stRadio label span,
+        [data-testid="stSidebar"].expanded .stRadio label span {
+            font-size: 14px !important;
+        }
+
+        [data-testid="stSidebar"]:hover .stRadio label span::before,
+        [data-testid="stSidebar"].expanded .stRadio label span::before {
+            width: auto !important;
+            text-align: left !important;
+            margin-right: 10px !important;
+        }
+
+        /* Effet hover sur les options */
+        [data-testid="stSidebar"] .stRadio label:hover {
             background-color: #eaf2f8 !important;
             transform: translateX(5px) !important;
         }
 
-        /* Style pour les labels en mode réduit */
-        [data-testid="stSidebar"] .stRadio label {
-            font-size: 0 !important;
-            transition: font-size 0.3s ease !important;
-        }
-
-        [data-testid="stSidebar"]:hover .stRadio label {
-            font-size: 14px !important;
-        }
-
-        /* Affichage des emojis même en mode réduit */
-        [data-testid="stSidebar"] .stRadio label::before {
-            content: attr(data-emoji) !important;
-            font-size: 20px !important;
-            margin-right: 10px !important;
-            display: inline-block !important;
+        /* Option sélectionnée */
+        [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
+            background-color: #d4edda !important;
+            border-left: 3px solid var(--primary) !important;
         }
 
         /* ================ Contenu Principal Adaptatif ================ */
@@ -219,7 +282,32 @@ def set_custom_theme():
             margin-left: calc(var(--sidebar-width-collapsed) + 20px) !important;
             padding: 2rem !important;
             max-width: calc(100vw - var(--sidebar-width-collapsed) - 40px) !important;
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transition: var(--sidebar-transition) !important;
+        }
+
+        /* ================ Indicateur Visuel ================ */
+        [data-testid="stSidebar"]::after {
+            content: "→" !important;
+            position: absolute !important;
+            right: 5px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 16px !important;
+            color: var(--primary) !important;
+            opacity: 0.6 !important;
+            transition: all 0.3s ease !important;
+            animation: pulse 2s infinite !important;
+        }
+
+        [data-testid="stSidebar"]:hover::after,
+        [data-testid="stSidebar"].expanded::after {
+            opacity: 0 !important;
+            transform: translateY(-50%) translateX(10px) !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
         }
 
         /* ================ Styles pour les titres avec centrage ================ */
@@ -229,12 +317,6 @@ def set_custom_theme():
             text-align: center !important;
             font-size: 2.2rem !important;
             font-weight: 600 !important;
-        }
-
-        /* ================ Styles pour l'aération des sections ================ */
-        .section-container {
-            margin: 50px 0 !important;
-            padding: 0 20px !important;
         }
 
         /* ================ Cartes d'information avec espacement amélioré ================ */
@@ -262,46 +344,43 @@ def set_custom_theme():
             overflow-x: auto !important;
         }
 
-        .timeline-item {
-            min-width: 160px !important;
-            text-align: center !important;
-            margin: 0 15px !important;
-            flex-shrink: 0 !important;
+        /* ================ Responsive Design ================ */
+        @media (max-width: 1200px) {
+            .main .block-container {
+                margin-left: calc(var(--sidebar-width-collapsed) + 10px) !important;
+                max-width: calc(100vw - var(--sidebar-width-collapsed) - 20px) !important;
+            }
         }
 
-        .timeline-year {
-            background: linear-gradient(135deg, #3498db, #2ecc71) !important;
-            color: white !important;
-            padding: 12px !important;
-            border-radius: 8px !important;
-            font-weight: bold !important;
-            font-size: 0.95rem !important;
+        @media (max-width: 768px) {
+            [data-testid="stSidebar"] {
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+            }
+            
+            [data-testid="stSidebar"]:hover,
+            .sidebar-trigger-zone:hover + [data-testid="stSidebar"] {
+                transform: translateX(0) !important;
+            }
+            
+            .main .block-container {
+                margin-left: 0 !important;
+                max-width: 100vw !important;
+                padding: 1rem !important;
+            }
+            
+            .sidebar-trigger-zone {
+                width: 20px !important;
+            }
         }
 
-        .timeline-text {
-            margin-top: 12px !important;
-            font-size: 0.9rem !important;
-            color: #2c3e50 !important;
-            line-height: 1.4 !important;
+        /* ================ Corrections Spécifiques ================ */
+        .stAlert, [data-testid="stAlert"] {
+            border: none !important;
+            background: transparent !important;
         }
 
-        /* ================ Typographie ================ */
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--text) !important;
-            font-family: 'Segoe UI', sans-serif !important;
-        }
-
-        /* Espacement uniforme pour tous les titres */
-        h2 {
-            color: #3498db !important;
-            margin: 45px 0 25px 0 !important;
-            text-align: center !important;
-            font-size: 2.2rem !important;
-            font-weight: 600 !important;
-        }
-
-        /* ================ Composants Communs ================ */
-        /* Boutons */
+        /* ================ Boutons ================ */
         .stButton > button {
             background: linear-gradient(135deg, var(--primary), #2980b9) !important;
             color: white !important;
@@ -317,82 +396,69 @@ def set_custom_theme():
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
         }
 
-        /* Formulaire */
-        div[data-baseweb="base-input"] {
-            border-radius: 8px !important;
-            border: 1px solid #dfe4ea !important;
-            transition: border-color 0.3s ease !important;
+        /* ================ Uniformisation des espacements ================ */
+        h2 {
+            color: #3498db !important;
+            margin: 45px 0 25px 0 !important;
+            text-align: center !important;
+            font-size: 2.2rem !important;
+            font-weight: 600 !important;
         }
 
-        /* ================ Responsive Design ================ */
-        @media (max-width: 1200px) {
-            .main .block-container {
-                margin-left: calc(var(--sidebar-width-collapsed) + 10px) !important;
-                max-width: calc(100vw - var(--sidebar-width-collapsed) - 20px) !important;
-            }
-        }
-
-        @media (max-width: 768px) {
-            [data-testid="stSidebar"] {
-                transform: translateX(-100%) !important;
-                transition: transform 0.3s ease !important;
-            }
-            
-            [data-testid="stSidebar"]:hover {
-                transform: translateX(0) !important;
-            }
-            
-            .main .block-container {
-                margin-left: 0 !important;
-                max-width: 100vw !important;
-                padding: 1rem !important;
-            }
-        }
-
-        /* ================ Corrections Spécifiques ================ */
-        /* Suppression des bordures indésirables */
-        .stAlert, [data-testid="stAlert"] {
-            border: none !important;
-            background: transparent !important;
-        }
-
-        /* Uniformisation des espacements */
-        .element-container {
-            margin-bottom: 1rem !important;
-        }
-
-        /* ================ Indicateur visuel de déploiement ================ */
-        [data-testid="stSidebar"]::before {
-            content: "⚡" !important;
-            position: absolute !important;
-            top: 50% !important;
-            right: 10px !important;
-            transform: translateY(-50%) !important;
-            font-size: 16px !important;
-            opacity: 0.6 !important;
-            transition: opacity 0.3s ease !important;
-        }
-
-        [data-testid="stSidebar"]:hover::before {
-            opacity: 0 !important;
-        }
-
-        /* ================ Animation de chargement ================ */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        [data-testid="stSidebar"]:hover .element-container {
-            animation: slideIn 0.3s ease forwards !important;
+        .section-container {
+            margin: 50px 0 !important;
+            padding: 0 20px !important;
         }
         </style>
+
+        <script>
+        // Script JavaScript pour améliorer l'interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            // Créer la zone de trigger
+            const triggerZone = document.createElement('div');
+            triggerZone.className = 'sidebar-trigger-zone';
+            document.body.appendChild(triggerZone);
+            
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            
+            if (sidebar) {
+                // Ajouter des attributs data-emoji aux labels
+                const radioLabels = sidebar.querySelectorAll('.stRadio label span');
+                const emojis = ['🏠', '🔍', '🧠', '🤖', '📚', 'ℹ️'];
+                
+                radioLabels.forEach((label, index) => {
+                    if (emojis[index]) {
+                        label.setAttribute('data-emoji', emojis[index]);
+                    }
+                });
+                
+                // Gestion du survol avec JavaScript pour plus de contrôle
+                let hoverTimeout;
+                
+                function expandSidebar() {
+                    clearTimeout(hoverTimeout);
+                    sidebar.classList.add('expanded');
+                }
+                
+                function collapseSidebar() {
+                    hoverTimeout = setTimeout(() => {
+                        sidebar.classList.remove('expanded');
+                    }, 300); // Délai avant fermeture
+                }
+                
+                // Events sur la zone trigger
+                triggerZone.addEventListener('mouseenter', expandSidebar);
+                triggerZone.addEventListener('mouseleave', collapseSidebar);
+                
+                // Events sur la sidebar
+                sidebar.addEventListener('mouseenter', expandSidebar);
+                sidebar.addEventListener('mouseleave', collapseSidebar);
+                
+                // Tooltips pour le mode réduit
+                sidebar.setAttribute('title', 'Survolez pour déployer le menu');
+            }
+        });
+        </script>
         """
         
         with open(css_path, 'w') as f:
@@ -402,7 +468,7 @@ def set_custom_theme():
 
 def show_navigation_menu():
     """Menu de navigation avec support pour la sidebar déployable"""
-    st.markdown("## 🧩 Navigation")
+    st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
     # Options avec emojis pour l'affichage réduit
@@ -419,18 +485,6 @@ def show_navigation_menu():
         st.session_state.tool_choice = "🏠 Accueil"
 
     current_index = options.index(st.session_state.tool_choice)
-    
-    # Ajout d'un script JavaScript pour améliorer l'interaction
-    st.markdown("""
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            sidebar.setAttribute('title', 'Survolez pour déployer le menu');
-        }
-    });
-    </script>
-    """, unsafe_allow_html=True)
 
     tool_choice = st.radio(
         "",
@@ -443,6 +497,7 @@ def show_navigation_menu():
         st.session_state.tool_choice = tool_choice
 
     return tool_choice
+
 set_custom_theme()
 
 def load_visualization_libraries():
