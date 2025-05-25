@@ -1354,45 +1354,45 @@ def show_home_page():
         st.error("**Niveau 3**\n\nNécessite un soutien très important")
 
     # Section "Contexte du projet" corrigée avec composants natifs
-st.header("📊 Contexte du projet")
-
-# Utiliser un container natif au lieu du HTML
-with st.container():
-    st.write("""
-    Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
-    **Troubles du Spectre de l'Autisme (TSA)**. L'autisme n'est pas une maladie 
-    mais une **différence neurologique** affectant le fonctionnement du cerveau.
+    st.header("📊 Contexte du projet")
+    
+    # Utiliser un container natif au lieu du HTML
+    with st.container():
+        st.write("""
+        Ce projet s'inscrit dans le cadre de l'analyse des données liées au diagnostic des 
+        **Troubles du Spectre de l'Autisme (TSA)**. L'autisme n'est pas une maladie 
+        mais une **différence neurologique** affectant le fonctionnement du cerveau.
+        """)
+        
+        st.write("""
+        Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 
+        5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
+        pour identifier les facteurs associés à la présence d'un TSA.
+        """)
+    
+    # Section prévalence avec métriques natives
+    st.subheader("📈 Prévalence de l'autisme")
+    
+    # Utiliser les composants info natifs Streamlit
+    st.info("""
+    **Données clés sur l'autisme :**
+    
+    • **1 à 2%** de la population mondiale est concernée
+    • En France, environ **700 000 personnes** sont concernées  
+    • Ratio historique garçons/filles d'environ **4:1** (aujourd'hui remis en question)
     """)
     
-    st.write("""
-    Notre équipe a travaillé sur **5 jeux de données publics** représentant plus de 
-    5000 personnes de différentes origines (États-Unis, Nouvelle-Zélande, Arabie Saoudite...) 
-    pour identifier les facteurs associés à la présence d'un TSA.
-    """)
-
-# Section prévalence avec métriques natives
-st.subheader("📈 Prévalence de l'autisme")
-
-# Utiliser les composants info natifs Streamlit
-st.info("""
-**Données clés sur l'autisme :**
-
-• **1 à 2%** de la population mondiale est concernée
-• En France, environ **700 000 personnes** sont concernées  
-• Ratio historique garçons/filles d'environ **4:1** (aujourd'hui remis en question)
-""")
-
-# Alternative avec métriques si vous préférez
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("Population mondiale", "1-2%", "700 000 en France")
-
-with col2:
-    st.metric("Participants étudiés", "5000+", "Origines diverses")
-
-with col3:
-    st.metric("Ratio historique", "4:1", "En évolution")
+    # Alternative avec métriques si vous préférez
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Population mondiale", "1-2%", "700 000 en France")
+    
+    with col2:
+        st.metric("Participants étudiés", "5000+", "Origines diverses")
+    
+    with col3:
+        st.metric("Ratio historique", "4:1", "En évolution")
     
 
     # Section "À qui s'adresse ce projet" moderne
