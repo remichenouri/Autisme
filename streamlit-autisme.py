@@ -3292,19 +3292,9 @@ def show_aq10_and_prediction():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
+        st.markdown("""
     <style>
-    .result-card {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 6px 16px rgba(52,152,219,0.1);
-        padding: 1.5rem 1.5rem 1.2rem 1.5rem;
-        margin-top: 28px;
-        margin-bottom: 22px;
-        text-align: center;
-    }
-    <style>
-    /* ================ Style Global du Questionnaire ================ */
+    /* Votre CSS complet ici */
     .questionnaire-container {
         background: #ffffff;
         border-radius: 15px;
@@ -3314,26 +3304,6 @@ def show_aq10_and_prediction():
         border-top: 4px solid #3498db;
     }
     
-    /* ================ En-tête du Questionnaire ================ */
-    .questionnaire-title {
-        text-align: center;
-        color: #3498db;
-        font-size: 2.2rem;
-        font-weight: 600;
-        margin-bottom: 30px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #ecf0f1;
-    }
-    
-    .questionnaire-subtitle {
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 1.1rem;
-        margin-bottom: 40px;
-        line-height: 1.6;
-    }
-    
-    /* ================ Questions et Réponses ================ */
     .question-block {
         background: #f8f9fa;
         border-radius: 12px;
@@ -3341,61 +3311,6 @@ def show_aq10_and_prediction():
         margin: 25px 0;
         border-left: 4px solid #3498db;
         transition: all 0.3s ease;
-    }
-    [data-testid="stSidebar"],
-    [data-testid="stSidebarNav"],
-    [data-testid="stSidebarNavItems"],
-    [data-testid="stSidebarNavLink"] {
-        /* Préserver les styles par défaut de la navigation */
-    }
-    
-    /* ================ Style Global du Questionnaire SÉCURISÉ ================ */
-    .questionnaire-container {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 30px;
-        margin: 20px 0;
-        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
-        border-top: 4px solid #3498db;
-    }
-    
-    /* ================ En-tête du Questionnaire ================ */
-    .questionnaire-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
-        border-radius: 15px;
-        border-left: 5px solid #3498db;
-    }
-    
-    .questionnaire-header h1 {
-        color: #3498db;
-        font-size: 2.2rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-    
-    .questionnaire-header p {
-        color: #7f8c8d;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin: 0;
-    }
-    
-    /* ================ Questions avec Émojis ================ */
-    .question-block {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 25px;
-        margin: 25px 0;
-        border-left: 4px solid #3498db;
-        transition: all 0.3s ease;
-    }
-    
-    .question-block:hover {
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-        transform: translateY(-2px);
     }
     
     .question-text {
@@ -3432,9 +3347,8 @@ def show_aq10_and_prediction():
         margin-right: 10px;
         display: inline-block;
     }
-    
-    /* ================ BOUTONS RADIO SÉCURISÉS - ÉVITER CONFLITS NAVIGATION ================ */
-    /* Cibler UNIQUEMENT les radio buttons dans les question-block */
+
+    /* CSS pour les boutons radio sécurisés */
     .questionnaire-container .question-block .stRadio > div {
         display: flex !important;
         flex-direction: row !important;
@@ -3484,14 +3398,9 @@ def show_aq10_and_prediction():
         box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
         transform: translateY(-1px) !important;
     }
-    
-    /* ================ Responsive Design ================ */
+
+    /* Responsive */
     @media (max-width: 768px) {
-        .questionnaire-container {
-            padding: 20px;
-            margin: 10px;
-        }
-        
         .questionnaire-container .question-block .stRadio > div {
             flex-direction: column !important;
             gap: 8px !important;
@@ -3503,927 +3412,26 @@ def show_aq10_and_prediction():
             margin: 0 0 5px 0 !important;
             white-space: normal !important;
         }
-        
-        .question-text {
-            font-size: 1rem;
-        }
-    }
-    
-    /* ================ Boutons d'Action ================ */
-    .stButton > button {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 25px !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #2980b9, #3498db) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4) !important;
-    }
-    
-    /* ================ Résultats et KPI ================ */
-    .result-card {
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.1);
-        padding: 30px;
-        margin: 25px 0;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-    
-    .result-card.success {
-        border-left: 6px solid #2ecc71;
-        background: linear-gradient(135deg, #eafaf1, #f8fff8);
-    }
-    
-    .result-card.warning {
-        border-left: 6px solid #f39c12;
-        background: linear-gradient(135deg, #fef9e7, #fff8f2);
-    }
-    
-    .result-card.danger {
-        border-left: 6px solid #e74c3c;
-        background: linear-gradient(135deg, #ffeaea, #fff6f6);
-    }
-    
-    .result-score {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #3498db;
-        margin-bottom: 15px;
-    }
-    
-    .result-title {
-        font-size: 1.8rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #2c3e50;
-    }
-    
-    .kpi-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #3498db;
-        transition: all 0.3s ease;
-    }
-    
-    .kpi-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
-    
-    .kpi-value {
-        font-size: 2.2rem;
-        font-weight: bold;
-        color: #3498db;
-        margin: 10px 0;
-    }
-    
-    .kpi-title {
-        font-size: 1rem;
-        color: #7f8c8d;
-        font-weight: 500;
-    }
-    
-    .question-block:hover {
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-        transform: translateY(-2px);
-    }
-    
-    .question-text {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        line-height: 1.5;
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    .question-number {
-        background: #3498db;
-        color: white;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-weight: bold;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-    }
-    
-    /* ================ Boutons Radio Personnalisés ================ */
-    .stRadio > div {
-        background: white;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    
-    .stRadio > div > label {
-        background: #ffffff;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        padding: 12px 20px;
-        margin: 5px 0;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        font-weight: 500;
-        color: #495057;
-    }
-    
-    .stRadio > div > label:hover {
-        background: #f8f9fa;
-        border-color: #3498db;
-        transform: translateX(5px);
-    }
-    
-    .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        border-color: #3498db;
-        color: white;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-    
-    /* ================ Indicateur de Progression ================ */
-    .progress-container {
-        margin: 30px 0;
-        text-align: center;
-    }
-    
-    .progress-bar {
-        width: 100%;
-        height: 8px;
-        background: #ecf0f1;
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 15px 0;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #3498db, #2ecc71);
-        border-radius: 4px;
-        transition: width 0.3s ease;
-    }
-    
-    .progress-text {
-        color: #7f8c8d;
-        font-size: 0.9rem;
-        margin-top: 10px;
-    }
-    
-    /* ================ Boutons d'Action ================ */
-    .action-buttons {
-        text-align: center;
-        margin: 40px 0 20px 0;
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .stButton > button {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 25px !important;
-        padding: 12px 30px !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-        min-width: 150px !important;
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #2980b9, #3498db) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4) !important;
-    }
-    
-    .stButton > button:active {
-        transform: translateY(-1px) !important;
-    }
-    
-    /* ================ Résultats et KPI ================ */
-    .result-section {
-        margin-top: 40px;
-        padding: 30px;
-        background: linear-gradient(135deg, #f8f9fa, #ffffff);
-        border-radius: 15px;
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-    }
-    
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin: 30px 0;
-    }
-    
-    .kpi-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #3498db;
-        transition: all 0.3s ease;
-    }
-    
-    .kpi-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
-    
-    .kpi-value {
-        font-size: 2.2rem;
-        font-weight: bold;
-        color: #3498db;
-        margin: 10px 0;
-    }
-    
-    .kpi-title {
-        font-size: 1rem;
-        color: #7f8c8d;
-        font-weight: 500;
-    }
-    
-    .kpi-comparison {
-        font-size: 0.9rem;
-        color: #2c3e50;
-        margin-top: 10px;
-        font-style: italic;
-    }
-    
-    /* ================ Cartes de Résultats Spécialisées ================ */
-    .result-card {
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.1);
-        padding: 30px;
-        margin: 25px 0;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-    
-    .result-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(52, 152, 219, 0.15);
-    }
-    
-    .result-card.success {
-        border-left: 6px solid #2ecc71;
-        background: linear-gradient(135deg, #eafaf1, #f8fff8);
-    }
-    
-    .result-card.warning {
-        border-left: 6px solid #f39c12;
-        background: linear-gradient(135deg, #fef9e7, #fff8f2);
-    }
-    
-    .result-card.danger {
-        border-left: 6px solid #e74c3c;
-        background: linear-gradient(135deg, #ffeaea, #fff6f6);
-    }
-    
-    .result-score {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #3498db;
-        margin-bottom: 15px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .result-title {
-        font-size: 1.8rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #2c3e50;
-    }
-    
-    /* ================ Responsive Design ================ */
-    @media (max-width: 768px) {
-        .questionnaire-container {
-            padding: 20px;
-            margin: 10px;
-        }
-        
-        .questionnaire-title {
-            font-size: 1.8rem;
-        }
-        
-        .question-block {
-            padding: 20px;
-            margin: 15px 0;
-        }
-        
-        .question-text {
-            font-size: 1rem;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .stButton > button {
-            width: 100% !important;
-            max-width: 300px !important;
-        }
-        
-        .kpi-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    /* ================ Animations et Transitions ================ */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .question-block {
-        animation: fadeInUp 0.6s ease-out;
-    }
-    
-    .result-card {
-        animation: fadeInUp 0.8s ease-out;
-    }
-    
-    /* ================ Améliorations Accessibilité ================ */
-    .stRadio > div > label:focus {
-        outline: 3px solid rgba(52, 152, 219, 0.3);
-        outline-offset: 2px;
-    }
-    
-    .stButton > button:focus {
-        outline: 3px solid rgba(52, 152, 219, 0.3) !important;
-        outline-offset: 2px !important;
-    }
-    
-    /* ================ Messages d'Information ================ */
-    .info-message {
-        background: linear-gradient(135deg, #e8f4fd, #d1ecf1);
-        border-left: 4px solid #3498db;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-        color: #2c3e50;
-    }
-    
-    .warning-message {
-        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-        border-left: 4px solid #f39c12;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
-        color: #856404;
-    }
-
-    .result-card.success {
-        border-left: 6px solid #2ecc71;
-        background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
-    }
-    .result-card.warning {
-        border-left: 6px solid #e67e22;
-        background: linear-gradient(90deg, #fff6e0 80%, #fff8f2 100%);
-    }
-    .result-card.danger {
-        border-left: 6px solid #e74c3c;
-        background: linear-gradient(90deg, #ffeaea 80%, #fff6f6 100%);
-    }
-    .result-score {
-        font-size: 2.1rem;
-        font-weight: bold;
-        color: #3498db;
-        margin-bottom: 0.5rem;
-        text-align: center;
-    }
-    .custom-submit-button {
-    background: linear-gradient(90deg, #3498db, #2ecc71) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 15px 30px !important;
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-    width: 100% !important;
-    margin: 20px 0 !important;
-    }
-
-    .custom-submit-button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
-        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
-    }
-    /* ================ Style Global du Questionnaire ================ */
-    .questionnaire-container {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 30px;
-        margin: 20px 0;
-        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
-        border-top: 4px solid #3498db;
-    }
-    
-    /* ================ Header avec Image ================ */
-    .questionnaire-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
-        border-radius: 15px;
-        border-left: 5px solid #3498db;
-    }
-    
-    .questionnaire-header h1 {
-        color: #3498db;
-        font-size: 2.2rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-    
-    .questionnaire-header p {
-        color: #7f8c8d;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin: 0;
-    }
-    /* ================ BOUTONS RADIO SÉCURISÉS ================ */
-    /* Cibler uniquement les questions du questionnaire */
-    .question-block .stRadio > div {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 15px !important;
-        background: white !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    }
-    
-    .question-block .stRadio > div > label {
-        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
-        border: 2px solid #e9ecef !important;
-        border-radius: 25px !important;
-        padding: 12px 20px !important;
-        margin: 0 5px !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-        color: #495057 !important;
-        text-align: center !important;
-        min-width: 120px !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    .question-block .stRadio > div > label:hover {
-        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
-        border-color: #3498db !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
-    }
-    
-    /* Style pour la sélection */
-    .question-block .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        border-color: #3498db !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-    }
-
-    
-    /* ================ Questions avec Émojis ================ */
-    .question-block {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 25px;
-        margin: 25px 0;
-        border-left: 4px solid #3498db;
-        transition: all 0.3s ease;
-    }
-    
-    .question-block:hover {
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-        transform: translateY(-2px);
-    }
-    
-    .question-text {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        line-height: 1.5;
-        text-align: left;
-    }
-    
-    /* Container principal du questionnaire */
-    .questionnaire-container {
-        background: #ffffff;
-        border-radius: 15px;
-        padding: 30px;
-        margin: 20px 0;
-        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
-        border-top: 4px solid #3498db;
-    }
-    
-    /* Bloc de chaque question */
-    .question-block {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 25px;
-        margin: 25px 0;
-        border-left: 4px solid #3498db;
-        transition: all 0.3s ease;
-    }
-    .question-block:hover {
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
-        transform: translateY(-2px);
-    }
-    
-    /* Numéro de la question */
-    .question-number {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-weight: bold;
-        font-size: 1rem;
-        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-    }
-    
-    /* Texte de la question */
-    .question-text {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        line-height: 1.5;
-        text-align: left;
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    /* Boutons radio en pilules */
-    .stRadio > div[role="radiogroup"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 15px !important;
-        background: white !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-    }
-    .stRadio > div[role="radiogroup"] label {
-        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
-        border: 2px solid #e9ecef !important;
-        border-radius: 25px !important;
-        padding: 12px 20px !important;
-        margin: 0 !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-        color: #495057 !important;
-        text-align: center !important;
-        min-width: 120px !important;
-        position: relative !important;
-        display: inline-block !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    }
-    .stRadio > div[role="radiogroup"] label:hover {
-        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
-        border-color: #3498db !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
-    }
-    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        border-color: #3498db !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-        transform: translateY(-1px) !important;
-    }
-    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div p {
-        color: white !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Responsive pour mobile */
-    @media (max-width: 768px) {
-        .questionnaire-container { padding: 20px; margin: 10px; }
-        .question-block { padding: 20px; margin: 15px 0; }
-        .question-text { font-size: 1rem; }
-        .stRadio > div[role="radiogroup"] { flex-direction: column !important; gap: 8px !important; }
-        .stRadio > div[role="radiogroup"] label { width: 100% !important; min-width: auto !important; margin-bottom: 5px !important; }
-    }
-    /* ================ Style des Questions avec Numéros ================ */
-    .question-number {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-weight: bold;
-        font-size: 1rem;
-        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-    }
-    /* ================ CENTRAGE DES QUESTIONS ================ */
-    .question-text {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        line-height: 1.5;
-        text-align: center !important; /* Centrer le texte de la question */
-        display: flex;
-        align-items: center;
-        justify-content: center; /* Centrer tout le contenu */
-        flex-direction: column; /* Empiler numéro et texte verticalement */
-    }
-    
-    /* Alternative pour centrer question avec numéro horizontal */
-    .question-text-horizontal {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        line-height: 1.5;
-        text-align: center !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px; /* Espace entre numéro et texte */
-    }
-    
-    .question-number {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1rem;
-        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-        flex-shrink: 0;
-        margin: 0 auto 10px auto; /* Centrer le numéro si vertical */
-    }
-    
-    /* ================ BOUTONS RADIO PLEINE LARGEUR ================ */
-    /* Container des boutons radio - pleine largeur */
-    .question-block .stRadio > div {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important; /* Éviter le retour à la ligne */
-        gap: 0 !important; /* Pas d'espace entre les boutons */
-        justify-content: stretch !important; /* Étirer sur toute la largeur */
-        align-items: center !important;
-        padding: 15px !important;
-        background: white !important;
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-        width: 100% !important;
-    }
-    
-    /* Labels des boutons radio - distribution égale */
-    .question-block .stRadio > div > label {
-        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
-        border: 2px solid #e9ecef !important;
-        border-radius: 8px !important; /* Coins moins arrondis pour un look rectangulaire */
-        padding: 15px 10px !important; /* Padding vertical augmenté */
-        margin: 0 2px !important; /* Petite marge entre boutons */
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        font-weight: 500 !important;
-        color: #495057 !important;
-        text-align: center !important;
-        flex: 1 !important; /* Chaque bouton prend la même largeur */
-        min-width: 0 !important; /* Permet la contraction */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-        font-size: 0.9rem !important; /* Taille de police ajustée */
-        line-height: 1.2 !important;
-        white-space: nowrap !important; /* Éviter le retour à la ligne dans les boutons */
-        overflow: hidden !important;
-        text-overflow: ellipsis !important; /* Points de suspension si texte trop long */
-    }
-    
-    /* Effet hover */
-    .question-block .stRadio > div > label:hover {
-        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
-        border-color: #3498db !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
-    }
-    
-    /* Style pour la sélection */
-    .question-block .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #3498db, #2980b9) !important;
-        border-color: #3498db !important;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-        transform: translateY(-1px) !important;
-    }
-
-/* ================ RESPONSIVE POUR MOBILE ================ */
-    @media (max-width: 768px) {
-    .question-block .stRadio > div {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-    
-    .question-block .stRadio > div > label {
-        width: 100% !important;
-        flex: none !important;
-        margin: 0 0 5px 0 !important;
-        white-space: normal !important; /* Permettre le retour à la ligne sur mobile */
-    }
-    
-    .question-text {
-        font-size: 1rem;
-        text-align: center !important;
-    }
-    }
-
-    /* ================ VERSION ALTERNATIVE POUR TRÈS PETITS ÉCRANS ================ */
-    @media (max-width: 480px) {
-    .question-block .stRadio > div > label {
-        font-size: 0.8rem !important;
-        padding: 12px 8px !important;
-    }
-    }
-    
-    /* ================ Amélioration du Container Principal ================ */
-    .main-questionnaire {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    /* ================ Style pour la Progression ================ */
-    .progress-indicator {
-        text-align: center;
-        margin: 20px 0;
-        font-size: 0.9rem;
-        color: #7f8c8d;
-    }
-    
-    .progress-bar {
-        width: 100%;
-        height: 6px;
-        background: #ecf0f1;
-        border-radius: 3px;
-        overflow: hidden;
-        margin: 10px 0;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #3498db, #2ecc71);
-        transition: width 0.3s ease;
-        border-radius: 3px;
-    }
-
-    .custom-submit-button:active {
-        transform: translateY(0px) !important;
-        box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3) !important;
-    }
-
-    /* Amélioration du container du bouton */
-    .stForm > div:last-child {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 30px;
-    }
-
-    /* Style pour le bouton Streamlit par défaut si custom ne fonctionne pas */
-    div[data-testid="stForm"] button[kind="formSubmit"] {
-        background: linear-gradient(90deg, #3498db, #2ecc71) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 15px 30px !important;
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;
-        min-height: 50px !important;
-    }
-
-    div[data-testid="stForm"] button[kind="formSubmit"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
-        background: linear-gradient(90deg, #2980b9, #27ae60) !important;
-    }
-    .result-title {
-        font-size: 1.6rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        color: #3498db;
-        text-align: center;
-    }
-    .kpi-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        margin: 20px 0;
-        text-align: center;
-    }
-    .kpi-card {
-        background: white;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        text-align: center;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease;
-    }
-    .kpi-card:hover {
-        transform: translateY(-5px);
-    }
-    .kpi-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #3498db;
-        margin: 5px 0;
-        text-align: center;
-    }
-    .kpi-title {
-        font-size: 1rem;
-        color: #7f8c8d;
-        text-align: center;
-    }
-    .kpi-comparison {
-        font-size: 0.9rem;
-        color: #2c3e50;
-        margin-top: 5px;
-        text-align: center;
-    }
-    .question-container {
-        text-align: left;
-    }
-    p {
-        text-align: center;
-    }
-    .stButton > button {
-        display: block;
-        margin: 0 auto;
-    }
-    .diagnostic-box {
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 25px;
-        text-align: center;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # Questions AQ-10 avec émojis optimisés
+    # Description
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+                border-radius: 15px; padding: 25px; margin: 30px 0;
+                border-left: 5px solid #3498db;">
+        <h3 style="color: #2c3e50; text-align: center; margin-top: 0;">
+            🤖 À propos de cette évaluation
+        </h3>
+        <p style="color: #2c3e50; line-height: 1.6; text-align: center;">
+            Ce questionnaire validé scientifiquement combine l'auto-évaluation AQ-10 avec un modèle d'intelligence artificielle
+            entraîné sur plus de <strong>5 000 cas cliniques internationaux</strong>.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Questions AQ-10 avec émojis
     questions = [
         {
             "question": "👂 Je remarque souvent de petits bruits que les autres ne remarquent pas.",
@@ -4474,37 +3482,51 @@ def show_aq10_and_prediction():
             "question": "❓ J'ai du mal à comprendre les intentions des gens.",
             "emoji": "❓",
             "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
-        }]
-    
-    # Dans le formulaire, modifiez la génération des questions :
-    for i, q in enumerate(questions):
-        # Structure de question avec émoji séparé et centré
-        question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
-        emoji = q["emoji"]
-        
-        st.markdown(f"""
-        <div class="question-block">
-            <div class="question-text">
-                <span class="question-number">{i+1}</span>
-                <div>
-                    <span class="question-emoji">{emoji}</span>
-                    {question_text}
-                </div>
-            </div>
+        }
+    ]
+
+    # CORRECTION PRINCIPALE : Formulaire avec initialisation correcte
+    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
+        st.markdown("""
+        <div class="questionnaire-container">
+            <h1 class="questionnaire-title">Questionnaire AQ-10</h1>
+            <p class="questionnaire-subtitle">Répondez aux 10 questions suivantes :</p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Boutons radio avec le nouveau style sécurisé
-        selected_response = st.radio(
-            "",
-            ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
-            key=f"form_radio_{i}",
-            index=None,
-            label_visibility="collapsed",
-            horizontal=True
-        )
+        # INITIALISATION DE form_responses - C'EST LA CORRECTION PRINCIPALE
+        form_responses = {}
         
-        form_responses[f"aq10_question_{i}"] = selected_response
+        # Génération des questions
+        for i, q in enumerate(questions):
+            # Structure de question avec émoji séparé et centré
+            question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
+            emoji = q["emoji"]
+            
+            st.markdown(f"""
+            <div class="question-block">
+                <div class="question-text">
+                    <span class="question-number">{i+1}</span>
+                    <div>
+                        <span class="question-emoji">{emoji}</span>
+                        {question_text}
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Boutons radio avec le nouveau style sécurisé
+            selected_response = st.radio(
+                "",
+                ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
+            )
+            
+            # STOCKAGE SÉCURISÉ DE LA RÉPONSE
+            form_responses[f"aq10_question_{i}"] = selected_response
         
         st.markdown("### 👤 Informations personnelles")
 
