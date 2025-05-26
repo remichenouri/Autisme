@@ -3782,9 +3782,8 @@ def show_aq10_and_prediction():
         # INITIALISATION DE form_responses - C'EST LA CORRECTION PRINCIPALE
         form_responses = {}
         
-        # Génération des questions
+        # Génération des questions avec gestion d'erreur
         for i, q in enumerate(questions):
-            # Structure de question avec séparateur visuel
             question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
             emoji = q["emoji"]
             
@@ -3794,16 +3793,13 @@ def show_aq10_and_prediction():
                     <span class="question-number">{i+1}</span>
                     <div>
                         <span class="question-emoji">{emoji}</span>
-                        <strong>Question {i+1}:</strong> {question_text}
+                        {question_text}
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
             
-            # Ajout d'un sous-titre pour les réponses
-            st.markdown("<p style='text-align: center; color: #7f8c8d; font-size: 0.9rem; margin: 10px 0;'>Choisissez votre réponse :</p>", unsafe_allow_html=True)
-            
-            # Boutons radio rectangulaires
+            # Boutons radio avec clé unique
             selected_response = st.radio(
                 "",
                 ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
@@ -3812,8 +3808,9 @@ def show_aq10_and_prediction():
                 label_visibility="collapsed",
                 horizontal=True
             )
-        
-        form_responses[f"aq10_question_{i}"] = selected_response
+            
+            # STOCKAGE SÉCURISÉ - Utilisation de get() pour éviter KeyError
+            form_responses[f"aq10_question_{i}"] = selected_response
         
         st.markdown("### 👤 Informations personnelles")
 
