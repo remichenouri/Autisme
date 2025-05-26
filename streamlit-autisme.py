@@ -3303,6 +3303,355 @@ def show_aq10_and_prediction():
         margin-bottom: 22px;
         text-align: center;
     }
+    <style>
+    /* ================ Style Global du Questionnaire ================ */
+    .questionnaire-container {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
+        border-top: 4px solid #3498db;
+    }
+    
+    /* ================ En-tête du Questionnaire ================ */
+    .questionnaire-title {
+        text-align: center;
+        color: #3498db;
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .questionnaire-subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+    
+    /* ================ Questions et Réponses ================ */
+    .question-block {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        border-left: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    
+    .question-block:hover {
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .question-number {
+        background: #3498db;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    
+    /* ================ Boutons Radio Personnalisés ================ */
+    .stRadio > div {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stRadio > div > label {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 20px;
+        margin: 5px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .stRadio > div > label:hover {
+        background: #f8f9fa;
+        border-color: #3498db;
+        transform: translateX(5px);
+    }
+    
+    .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border-color: #3498db;
+        color: white;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+    
+    /* ================ Indicateur de Progression ================ */
+    .progress-container {
+        margin: 30px 0;
+        text-align: center;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #ecf0f1;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 15px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+    
+    /* ================ Boutons d'Action ================ */
+    .action-buttons {
+        text-align: center;
+        margin: 40px 0 20px 0;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .stButton > button {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        min-width: 150px !important;
+    }
+    
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #2980b9, #3498db) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4) !important;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(-1px) !important;
+    }
+    
+    /* ================ Résultats et KPI ================ */
+    .result-section {
+        margin-top: 40px;
+        padding: 30px;
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border-radius: 15px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    }
+    
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .kpi-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 10px 0;
+    }
+    
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+    
+    .kpi-comparison {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-top: 10px;
+        font-style: italic;
+    }
+    
+    /* ================ Cartes de Résultats Spécialisées ================ */
+    .result-card {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.1);
+        padding: 30px;
+        margin: 25px 0;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(52, 152, 219, 0.15);
+    }
+    
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(135deg, #eafaf1, #f8fff8);
+    }
+    
+    .result-card.warning {
+        border-left: 6px solid #f39c12;
+        background: linear-gradient(135deg, #fef9e7, #fff8f2);
+    }
+    
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(135deg, #ffeaea, #fff6f6);
+    }
+    
+    .result-score {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .result-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    
+    /* ================ Responsive Design ================ */
+    @media (max-width: 768px) {
+        .questionnaire-container {
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        .questionnaire-title {
+            font-size: 1.8rem;
+        }
+        
+        .question-block {
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .question-text {
+            font-size: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stButton > button {
+            width: 100% !important;
+            max-width: 300px !important;
+        }
+        
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* ================ Animations et Transitions ================ */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .question-block {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .result-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    /* ================ Améliorations Accessibilité ================ */
+    .stRadio > div > label:focus {
+        outline: 3px solid rgba(52, 152, 219, 0.3);
+        outline-offset: 2px;
+    }
+    
+    .stButton > button:focus {
+        outline: 3px solid rgba(52, 152, 219, 0.3) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* ================ Messages d'Information ================ */
+    .info-message {
+        background: linear-gradient(135deg, #e8f4fd, #d1ecf1);
+        border-left: 4px solid #3498db;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        color: #2c3e50;
+    }
+    
+    .warning-message {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border-left: 4px solid #f39c12;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        color: #856404;
+    }
+    </style>
+
     .result-card.success {
         border-left: 6px solid #2ecc71;
         background: linear-gradient(90deg, #eafaf1 80%, #f8fff8 100%);
