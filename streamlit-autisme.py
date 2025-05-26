@@ -3630,6 +3630,451 @@ def show_aq10_and_prediction():
             font-size: 0.85rem !important;
         }
     }
+    /* ================ CARTES DE RÉSULTATS PRINCIPALES ================ */
+    .result-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(52, 152, 219, 0.15);
+        padding: 40px 30px;
+        margin: 30px 0;
+        text-align: center;
+        transition: all 0.4s ease;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c);
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(52, 152, 219, 0.25);
+    }
+    
+    /* ================ VARIANTES DE COULEURS ================ */
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(135deg, #eafaf1 0%, #f8fff8 100%);
+    }
+    
+    .result-card.success::before {
+        background: linear-gradient(90deg, #2ecc71, #27ae60);
+    }
+    
+    .result-card.warning {
+        border-left: 6px solid #f39c12;
+        background: linear-gradient(135deg, #fef9e7 0%, #fff8f2 100%);
+    }
+    
+    .result-card.warning::before {
+        background: linear-gradient(90deg, #f39c12, #e67e22);
+    }
+    
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(135deg, #ffeaea 0%, #fff6f6 100%);
+    }
+    
+    .result-card.danger::before {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+    
+    /* ================ TITRES ET SCORES ================ */
+    .result-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+    }
+    
+    .result-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 1px;
+    }
+    
+    .result-score {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #3498db;
+        margin: 25px 0;
+        text-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+        position: relative;
+        display: inline-block;
+    }
+    
+    .result-score::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        border: 3px solid rgba(52, 152, 219, 0.1);
+        border-radius: 50%;
+        z-index: -1;
+    }
+    
+    /* ================ DESCRIPTIONS ET TEXTES ================ */
+    .result-card p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #34495e;
+        margin-bottom: 15px;
+    }
+    
+    .result-card p strong {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    /* ================ SECTION PRÉDICTION IA ================ */
+    .prediction-section {
+        margin-top: 50px;
+        padding: 40px 0;
+        background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+        border-radius: 20px;
+        position: relative;
+    }
+    
+    .prediction-section::before {
+        content: '🤖';
+        position: absolute;
+        top: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2.5rem;
+        background: white;
+        padding: 10px;
+        border-radius: 50%;
+        box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+    }
+    
+    .prediction-section h3 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        margin-top: 10px;
+    }
+    
+    /* ================ CARTES KPI AMÉLIORÉES ================ */
+    .kpi-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin: 40px 0;
+        padding: 0 20px;
+    }
+    
+    .kpi-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 16px;
+        padding: 30px 20px;
+        text-align: center;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #3498db;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+    
+    .kpi-card:hover::before {
+        left: 100%;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+        border-top-color: #2ecc71;
+    }
+    
+    .kpi-card h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #7f8c8d;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .kpi-value {
+        font-size: 2.8rem;
+        font-weight: 900;
+        margin: 15px 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+    
+    .kpi-card p {
+        color: #95a5a6;
+        font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.4;
+        font-style: italic;
+    }
+    
+    /* ================ COULEURS SPÉCIFIQUES POUR LES KPI ================ */
+    .kpi-card:nth-child(1) {
+        border-top-color: #e74c3c;
+    }
+    
+    .kpi-card:nth-child(1) .kpi-value {
+        color: #e74c3c;
+    }
+    
+    .kpi-card:nth-child(2) {
+        border-top-color: #f39c12;
+    }
+    
+    .kpi-card:nth-child(2) .kpi-value {
+        color: #f39c12;
+    }
+    
+    .kpi-card:nth-child(3) {
+        border-top-color: #2ecc71;
+    }
+    
+    .kpi-card:nth-child(3) .kpi-value {
+        color: #2ecc71;
+    }
+    
+    .kpi-card:nth-child(4) {
+        border-top-color: #9b59b6;
+    }
+    
+    .kpi-card:nth-child(4) .kpi-value {
+        color: #9b59b6;
+    }
+    
+    .kpi-card:nth-child(5) {
+        border-top-color: #34495e;
+    }
+    
+    .kpi-card:nth-child(5) .kpi-value {
+        color: #34495e;
+    }
+    
+    .kpi-card:nth-child(6) {
+        border-top-color: #16a085;
+    }
+    
+    .kpi-card:nth-child(6) .kpi-value {
+        color: #16a085;
+    }
+    
+    /* ================ SECTION PROFIL DÉTAILLÉ ================ */
+    .profile-section {
+        margin-top: 50px;
+        padding: 40px 30px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(52, 152, 219, 0.1);
+    }
+    
+    .profile-section h3 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .profile-section h3::before {
+        content: '📊';
+        margin-right: 10px;
+    }
+    
+    .profile-section h3::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 2px;
+    }
+    
+    /* ================ ANIMATIONS ================ */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes scoreAnimation {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .result-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .result-score {
+        animation: scoreAnimation 1.2s ease-out 0.3s both;
+    }
+    
+    .kpi-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+    .kpi-card:nth-child(4) { animation-delay: 0.4s; }
+    .kpi-card:nth-child(5) { animation-delay: 0.5s; }
+    .kpi-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    /* ================ RESPONSIVE DESIGN ================ */
+    @media (max-width: 768px) {
+        .result-card {
+            padding: 30px 20px;
+            margin: 20px 0;
+        }
+        
+        .result-score {
+            font-size: 3rem;
+        }
+        
+        .result-score::before {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .kpi-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 0 10px;
+        }
+        
+        .kpi-card {
+            padding: 25px 15px;
+        }
+        
+        .kpi-value {
+            font-size: 2.2rem;
+        }
+        
+        .profile-section {
+            padding: 30px 20px;
+        }
+        
+        .prediction-section {
+            padding: 30px 20px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .result-title {
+            font-size: 1.2rem;
+        }
+        
+        .result-score {
+            font-size: 2.5rem;
+        }
+        
+        .kpi-value {
+            font-size: 2rem;
+        }
+        
+        .profile-section h3,
+        .prediction-section h3 {
+            font-size: 1.6rem;
+        }
+    }
+    
+    /* ================ BOUTON DE SOUMISSION AMÉLIORÉ ================ */
+    .stButton > button {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 30px !important;
+        padding: 15px 40px !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .stButton > button::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+        transition: left 0.6s ease !important;
+    }
+    
+    .stButton > button:hover::before {
+        left: 100% !important;
+    }
+    
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #3498db 100%) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4) !important;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(-1px) !important;
+    }
     
     /* ================ ANIMATIONS SUPPLÉMENTAIRES ================ */
     @keyframes selectAnimation {
@@ -3880,23 +4325,34 @@ def show_aq10_and_prediction():
 
                 user_df = pd.DataFrame([user_data])
 
+                st.markdown("""
+                <div class="prediction-section">
+                    <h3>📊 Vos Résultats</h3>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Affichage du score AQ-10 avec nouveau style
                 if total_score >= 6:
-                    st.markdown(f"""
-                        <div class="result-card warning">
-                            <div class="result-title">Résultat du questionnaire AQ-10</div>
-                            <div class="result-score">{total_score}/10</div>
-                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
-                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
-                        </div>
-                    """, unsafe_allow_html=True)
+                    card_class = "danger"
+                    interpretation = "Score élevé - Consultation recommandée"
+                    icon = "⚠️"
+                elif total_score >= 4:
+                    card_class = "warning" 
+                    interpretation = "Score modéré - Suivi suggéré"
+                    icon = "⚡"
                 else:
-                    st.markdown(f"""
-                        <div class="result-card success">
-                            <div class="result-title">Résultat du questionnaire AQ-10</div>
-                            <div class="result-score">{total_score}/10</div>
-                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
-                        </div>
-                    """, unsafe_allow_html=True)
+                    card_class = "success"
+                    interpretation = "Score faible - Profil neurotypique"
+                    icon = "✅"
+                
+                st.markdown(f"""
+                <div class="result-card {card_class}">
+                    <div class="result-title">{icon} Résultat du questionnaire AQ-10</div>
+                    <div class="result-score">{total_score}<span style="font-size:2rem;color:#7f8c8d;">/10</span></div>
+                    <p>Votre score est de <strong>{total_score}/10</strong></p>
+                    <p>{interpretation}</p>
+                </div>
+                """, unsafe_allow_html=True)
 
                 st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
                 if rf_model is not None and preprocessor is not None:
@@ -3930,32 +4386,36 @@ def show_aq10_and_prediction():
 
                         user_df = user_df[required_columns]
 
-                        user_df = user_df[required_columns]
-
                         prediction_proba = rf_model.predict_proba(user_df)
 
                         tsa_probability = prediction_proba[0][1]
 
-                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
-
-                        probability_percentage = int(tsa_probability * 100)
-
-                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
-
+                        if tsa_probability >= 70:
+                            ia_card_class = "danger"
+                            ia_interpretation = "Forte probabilité TSA"
+                            ia_icon = "🔴"
+                        elif tsa_probability >= 30:
+                            ia_card_class = "warning"
+                            ia_interpretation = "Probabilité modérée TSA"
+                            ia_icon = "🟡"
+                        else:
+                            ia_card_class = "success"
+                            ia_interpretation = "Faible probabilité TSA"
+                            ia_icon = "🟢"
+                        
                         st.markdown(f"""
-                            <div class="result-card {color_class}">
-                                <div class="result-title">Prédiction IA</div>
-                                <div class="result-score">{probability_percentage}%</div>
-                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
-                                <p>Classification: <strong>{prediction_class}</strong></p>
-                            </div>
-
-                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
-                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
-                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
-                            </div>
+                        <div class="result-card {ia_card_class}">
+                            <div class="result-title">{ia_icon} Prédiction par Intelligence Artificielle</div>
+                            <div class="result-score">{tsa_probability:.0f}<span style="font-size:2rem;color:#7f8c8d;">%</span></div>
+                            <p>Probabilité estimée de traits autistiques: <strong>{tsa_probability:.0f}%</strong></p>
+                            <p>Classification: <strong>{ia_interpretation}</strong></p>
+                        </div>
                         """, unsafe_allow_html=True)
-
+                        
+                    except Exception as e:
+                        st.error(f"Erreur lors de la prédiction IA: {str(e)}")
+        
+        
                         st.markdown("### 📈 Profil détaillé des traits autistiques")
 
                         social_score = sum([scores_individuels[i-1] for i in [5, 6, 7, 9, 10]]) / 5 * 100
