@@ -3342,6 +3342,259 @@ def show_aq10_and_prediction():
         border-left: 4px solid #3498db;
         transition: all 0.3s ease;
     }
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarNav"],
+    [data-testid="stSidebarNavItems"],
+    [data-testid="stSidebarNavLink"] {
+        /* Préserver les styles par défaut de la navigation */
+    }
+    
+    /* ================ Style Global du Questionnaire SÉCURISÉ ================ */
+    .questionnaire-container {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
+        border-top: 4px solid #3498db;
+    }
+    
+    /* ================ En-tête du Questionnaire ================ */
+    .questionnaire-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+        border-radius: 15px;
+        border-left: 5px solid #3498db;
+    }
+    
+    .questionnaire-header h1 {
+        color: #3498db;
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .questionnaire-header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* ================ Questions avec Émojis ================ */
+    .question-block {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        border-left: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    
+    .question-block:hover {
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        text-align: center !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    
+    .question-number {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        margin: 0 auto 10px auto;
+        flex-shrink: 0;
+    }
+    
+    .question-emoji {
+        font-size: 1.8rem;
+        margin-right: 10px;
+        display: inline-block;
+    }
+    
+    /* ================ BOUTONS RADIO SÉCURISÉS - ÉVITER CONFLITS NAVIGATION ================ */
+    /* Cibler UNIQUEMENT les radio buttons dans les question-block */
+    .questionnaire-container .question-block .stRadio > div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0 !important;
+        justify-content: stretch !important;
+        align-items: center !important;
+        padding: 15px !important;
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        width: 100% !important;
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        padding: 15px 10px !important;
+        margin: 0 2px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        text-align: center !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        font-size: 0.9rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* ================ Responsive Design ================ */
+    @media (max-width: 768px) {
+        .questionnaire-container {
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        .questionnaire-container .question-block .stRadio > div {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .questionnaire-container .question-block .stRadio > div > label {
+            width: 100% !important;
+            flex: none !important;
+            margin: 0 0 5px 0 !important;
+            white-space: normal !important;
+        }
+        
+        .question-text {
+            font-size: 1rem;
+        }
+    }
+    
+    /* ================ Boutons d'Action ================ */
+    .stButton > button {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    }
+    
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #2980b9, #3498db) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4) !important;
+    }
+    
+    /* ================ Résultats et KPI ================ */
+    .result-card {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.1);
+        padding: 30px;
+        margin: 25px 0;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .result-card.success {
+        border-left: 6px solid #2ecc71;
+        background: linear-gradient(135deg, #eafaf1, #f8fff8);
+    }
+    
+    .result-card.warning {
+        border-left: 6px solid #f39c12;
+        background: linear-gradient(135deg, #fef9e7, #fff8f2);
+    }
+    
+    .result-card.danger {
+        border-left: 6px solid #e74c3c;
+        background: linear-gradient(135deg, #ffeaea, #fff6f6);
+    }
+    
+    .result-score {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 15px;
+    }
+    
+    .result-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    
+    .kpi-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #3498db;
+        margin: 10px 0;
+    }
+    
+    .kpi-title {
+        font-size: 1rem;
+        color: #7f8c8d;
+        font-weight: 500;
+    }
     
     .question-block:hover {
         box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
@@ -4221,8 +4474,7 @@ def show_aq10_and_prediction():
             "question": "❓ J'ai du mal à comprendre les intentions des gens.",
             "emoji": "❓",
             "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
-        }
-    ]
+        }]
     
     # Dans le formulaire, modifiez la génération des questions :
     for i, q in enumerate(questions):
@@ -4253,7 +4505,6 @@ def show_aq10_and_prediction():
         )
         
         form_responses[f"aq10_question_{i}"] = selected_response
-
         
         st.markdown("### 👤 Informations personnelles")
 
