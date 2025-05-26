@@ -4325,34 +4325,23 @@ def show_aq10_and_prediction():
 
                 user_df = pd.DataFrame([user_data])
 
-                st.markdown("""
-                <div class="prediction-section">
-                    <h3>📊 Vos Résultats</h3>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Affichage du score AQ-10 avec nouveau style
                 if total_score >= 6:
-                    card_class = "danger"
-                    interpretation = "Score élevé - Consultation recommandée"
-                    icon = "⚠️"
-                elif total_score >= 4:
-                    card_class = "warning" 
-                    interpretation = "Score modéré - Suivi suggéré"
-                    icon = "⚡"
+                    st.markdown(f"""
+                        <div class="result-card warning">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui suggère un dépistage positif.</p>
+                            <p><strong>Un suivi par un professionnel de santé est recommandé.</strong></p>
+                        </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    card_class = "success"
-                    interpretation = "Score faible - Profil neurotypique"
-                    icon = "✅"
-                
-                st.markdown(f"""
-                <div class="result-card {card_class}">
-                    <div class="result-title">{icon} Résultat du questionnaire AQ-10</div>
-                    <div class="result-score">{total_score}<span style="font-size:2rem;color:#7f8c8d;">/10</span></div>
-                    <p>Votre score est de <strong>{total_score}/10</strong></p>
-                    <p>{interpretation}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                    st.markdown(f"""
+                        <div class="result-card success">
+                            <div class="result-title">Résultat du questionnaire AQ-10</div>
+                            <div class="result-score">{total_score}/10</div>
+                            <p>Votre score est de {total_score}/10, ce qui est en dessous du seuil clinique de dépistage positif.</p>
+                        </div>
+                    """, unsafe_allow_html=True)
 
                 st.markdown("""<h3 style="text-align: center; margin-top: 2rem;">Prédiction par intelligence artificielle</h3>""", unsafe_allow_html=True)
                 if rf_model is not None and preprocessor is not None:
@@ -4386,34 +4375,32 @@ def show_aq10_and_prediction():
 
                         user_df = user_df[required_columns]
 
+                        user_df = user_df[required_columns]
+
                         prediction_proba = rf_model.predict_proba(user_df)
 
                         tsa_probability = prediction_proba[0][1]
 
-                        if tsa_probability >= 70:
-                            ia_card_class = "danger"
-                            ia_interpretation = "Forte probabilité TSA"
-                            ia_icon = "🔴"
-                        elif tsa_probability >= 30:
-                            ia_card_class = "warning"
-                            ia_interpretation = "Probabilité modérée TSA"
-                            ia_icon = "🟡"
-                        else:
-                            ia_card_class = "success"
-                            ia_interpretation = "Faible probabilité TSA"
-                            ia_icon = "🟢"
-                        
+                        prediction_class = "TSA probable" if tsa_probability > 0.5 else "TSA peu probable"
+
+                        probability_percentage = int(tsa_probability * 100)
+
+                        color_class = "danger" if probability_percentage > 75 else "warning" if probability_percentage > 50 else "success"
+
                         st.markdown(f"""
-                        <div class="result-card {ia_card_class}">
-                            <div class="result-title">{ia_icon} Prédiction par Intelligence Artificielle</div>
-                            <div class="result-score">{tsa_probability:.0f}<span style="font-size:2rem;color:#7f8c8d;">%</span></div>
-                            <p>Probabilité estimée de traits autistiques: <strong>{tsa_probability:.0f}%</strong></p>
-                            <p>Classification: <strong>{ia_interpretation}</strong></p>
-                        </div>
+                            <div class="result-card {color_class}">
+                                <div class="result-title">Prédiction IA</div>
+                                <div class="result-score">{probability_percentage}%</div>
+                                <p>Probabilité estimée de traits autistiques: <strong>{probability_percentage}%</strong></p>
+                                <p>Classification: <strong>{prediction_class}</strong></p>
+                            </div>
+
+                            <div class="diagnostic-box" style="background-color: #f8f9fa;">
+                                <p><strong>Important:</strong> Cette évaluation est uniquement un outil d'aide au dépistage et ne constitue pas un diagnostic médical.</p>
+                                <p>Si votre score ou la prédiction indiquent un risque élevé, nous vous recommandons de consulter un professionnel de santé spécialisé.</p>
+                            </div>
                         """, unsafe_allow_html=True)
-                        
-                    except Exception as e:
-                        st.error(f"Erreur lors de la prédiction IA: {str(e)}")
+
         
         
                         st.markdown("### 📈 Profil détaillé des traits autistiques")
