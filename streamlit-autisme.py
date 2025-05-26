@@ -3325,6 +3325,140 @@ def show_aq10_and_prediction():
         justify-content: center;
         flex-direction: column;
     }
+    .questionnaire-container .stRadio [role="radiogroup"] {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding: 15px !important;}
+
+    /* Alternative plus large si la première ne fonctionne pas */
+    .stRadio > div[role="radiogroup"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    
+    /* Centrage des labels individuels */
+    .questionnaire-container .stRadio > div > label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        margin: 0 5px !important;
+        padding: 12px 15px !important;
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        min-width: 140px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Effet hover */
+    .questionnaire-container .stRadio > div > label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    
+    /* Style pour le bouton sélectionné */
+    .questionnaire-container .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Responsive pour mobile */
+    @media (max-width: 768px) {
+        .questionnaire-container .stRadio [role="radiogroup"] {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .questionnaire-container .stRadio > div > label {
+            width: 100% !important;
+            min-width: auto !important;
+            margin: 0 0 5px 0 !important;
+        }
+    }.questionnaire-container .stRadio [role="radiogroup"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        padding: 15px !important;
+    }
+    
+    /* Alternative plus large si la première ne fonctionne pas */
+    .stRadio > div[role="radiogroup"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    
+    /* Centrage des labels individuels */
+    .questionnaire-container .stRadio > div > label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        margin: 0 5px !important;
+        padding: 12px 15px !important;
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        min-width: 140px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Effet hover */
+    .questionnaire-container .stRadio > div > label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    
+    /* Style pour le bouton sélectionné */
+    .questionnaire-container .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Responsive pour mobile */
+    @media (max-width: 768px) {
+        .questionnaire-container .stRadio [role="radiogroup"] {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .questionnaire-container .stRadio > div > label {
+            width: 100% !important;
+            min-width: auto !important;
+            margin: 0 0 5px 0 !important;
+        }
+    }
     
     .question-number {
         background: linear-gradient(135deg, #3498db, #2980b9);
