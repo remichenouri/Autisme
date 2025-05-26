@@ -4170,69 +4170,91 @@ def show_aq10_and_prediction():
     </style>
     """, unsafe_allow_html=True)
 
+    # Questions AQ-10 avec émojis optimisés
     questions = [
-        {"question": "👂 1. Je remarque souvent de petits bruits que les autres ne remarquent pas.",
-         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
-        {"question": "🔍 2. Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "🔄 3. Je trouve facile de faire plusieurs choses en même temps.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "⏯️ 4. S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "🗯️ 5. Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "😴 6. Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "📚 7. Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
-         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
-        {"question": "🗂️ 8. J'aime collecter des informations sur des catégories de choses (par exemple : types de voitures, d'oiseaux, de trains, de plantes, etc.).",
-         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}},
-        {"question": "😊 9. Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
-         "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}},
-        {"question": "❓ 10. J'ai du mal à comprendre les intentions des gens.",
-         "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}}
+        {
+            "question": "👂 Je remarque souvent de petits bruits que les autres ne remarquent pas.",
+            "emoji": "👂",
+            "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
+        },
+        {
+            "question": "🔍 Je me concentre généralement davantage sur l'ensemble que sur les petits détails.",
+            "emoji": "🔍", 
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "🔄 Je trouve facile de faire plusieurs choses en même temps.",
+            "emoji": "🔄",
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "⏯️ S'il y a une interruption, je peux rapidement reprendre ce que je faisais.",
+            "emoji": "⏯️",
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "💭 Je trouve facile de « lire entre les lignes » quand quelqu'un me parle.",
+            "emoji": "💭",
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "😴 Je sais comment savoir si la personne qui m'écoute commence à s'ennuyer.",
+            "emoji": "😴",
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "📚 Quand je lis une histoire, j'ai du mal à comprendre les intentions des personnages.",
+            "emoji": "📚",
+            "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
+        },
+        {
+            "question": "🗂️ J'aime collecter des informations sur des catégories de choses (types de voitures, d'oiseaux, de trains, etc.).",
+            "emoji": "🗂️",
+            "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
+        },
+        {
+            "question": "😊 Je trouve facile de comprendre ce que quelqu'un pense ou ressent rien qu'en regardant son visage.",
+            "emoji": "😊",
+            "scoring": {"Tout à fait d'accord": 0, "Plutôt d'accord": 0, "Plutôt pas d'accord": 1, "Pas du tout d'accord": 1}
+        },
+        {
+            "question": "❓ J'ai du mal à comprendre les intentions des gens.",
+            "emoji": "❓",
+            "scoring": {"Tout à fait d'accord": 1, "Plutôt d'accord": 1, "Plutôt pas d'accord": 0, "Pas du tout d'accord": 0}
+        }
     ]
-
-    with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
-        # Indicateur de progression
-        current_question = 0
-        total_questions = len(questions)
+    
+    # Dans le formulaire, modifiez la génération des questions :
+    for i, q in enumerate(questions):
+        # Structure de question avec émoji séparé et centré
+        question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
+        emoji = q["emoji"]
         
         st.markdown(f"""
-        <div class="progress-indicator">
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: {(current_question/total_questions)*100}%"></div>
+        <div class="question-block">
+            <div class="question-text">
+                <span class="question-number">{i+1}</span>
+                <div>
+                    <span class="question-emoji">{emoji}</span>
+                    {question_text}
+                </div>
             </div>
-            <p>Question {current_question + 1} sur {total_questions}</p>
         </div>
         """, unsafe_allow_html=True)
         
-        form_responses = {}
+        # Boutons radio avec le nouveau style sécurisé
+        selected_response = st.radio(
+            "",
+            ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
+            key=f"form_radio_{i}",
+            index=None,
+            label_visibility="collapsed",
+            horizontal=True
+        )
         
-        for i, q in enumerate(questions):
-            # Structure de question améliorée avec centrage
-            st.markdown(f"""
-            <div class="question-block">
-                <div class="question-text">
-                    <span class="question-number">{i+1}</span>
-                    <div>{q["question"].split('. ', 1)[1] if '. ' in q["question"] else q["question"]}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Boutons radio avec le nouveau style pleine largeur
-            selected_response = st.radio(
-                "",
-                ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
-                key=f"form_radio_{i}",
-                index=None,
-                label_visibility="collapsed",
-                horizontal=True
-            )
-    
-                
-            form_responses[f"aq10_question_{i}"] = selected_response
-            
+        form_responses[f"aq10_question_{i}"] = selected_response
+
+        
         st.markdown("### 👤 Informations personnelles")
 
         col1, col2 = st.columns(2)
