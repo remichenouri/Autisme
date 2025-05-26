@@ -3691,6 +3691,199 @@ def show_aq10_and_prediction():
         box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4) !important;
         background: linear-gradient(90deg, #2980b9, #27ae60) !important;
     }
+    /* ================ Style Global du Questionnaire ================ */
+    .questionnaire-container {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
+        border-top: 4px solid #3498db;
+    }
+    
+    /* ================ Header avec Image ================ */
+    .questionnaire-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
+        border-radius: 15px;
+        border-left: 5px solid #3498db;
+    }
+    
+    .questionnaire-header h1 {
+        color: #3498db;
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    .questionnaire-header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* ================ Questions avec Émojis ================ */
+    .question-block {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        border-left: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    
+    .question-block:hover {
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        text-align: left;
+    }
+    
+    /* ================ BOUTONS RADIO EN PILULES ================ */
+    /* Masquer les boutons radio natifs */
+    .stRadio > div[role="radiogroup"] input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    
+    /* Container des boutons radio */
+    .stRadio > div[role="radiogroup"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 15px !important;
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    /* Labels transformés en boutons pilules */
+    .stRadio > div[role="radiogroup"] label {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 25px !important;
+        padding: 12px 20px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        text-align: center !important;
+        min-width: 120px !important;
+        position: relative !important;
+        display: inline-block !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Effet hover sur les boutons pilules */
+    .stRadio > div[role="radiogroup"] label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    
+    /* Style pour le bouton sélectionné */
+    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div p {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Animation de focus pour l'accessibilité */
+    .stRadio > div[role="radiogroup"] label:focus-within {
+        outline: 3px solid rgba(52, 152, 219, 0.3) !important;
+        outline-offset: 2px !important;
+    }
+    
+    /* Masquer le premier div des labels (contient le bouton radio natif) */
+    .stRadio > div[role="radiogroup"] label > div:first-child {
+        display: none !important;
+    }
+    
+    /* Style responsive pour mobile */
+    @media (max-width: 768px) {
+        .stRadio > div[role="radiogroup"] {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .stRadio > div[role="radiogroup"] label {
+            width: 100% !important;
+            min-width: auto !important;
+            margin-bottom: 5px !important;
+        }
+    }
+    
+    /* ================ Style des Questions avec Numéros ================ */
+    .question-number {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    /* ================ Amélioration du Container Principal ================ */
+    .main-questionnaire {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* ================ Style pour la Progression ================ */
+    .progress-indicator {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #ecf0f1;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        transition: width 0.3s ease;
+        border-radius: 3px;
+    }
 
     .custom-submit-button:active {
         transform: translateY(0px) !important;
