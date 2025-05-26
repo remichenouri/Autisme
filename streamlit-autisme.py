@@ -3680,23 +3680,34 @@ def show_aq10_and_prediction():
 
         form_responses = {}
 
-        for i, q in enumerate(questions):
-            options = list(q["scoring"].keys())
-            question_key = f"aq10_question_{i}"
-
-            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
-
-            selected_response = st.radio(
-                "",
-                options,
-                key=f"form_radio_{i}",
-                index=None,
-                label_visibility="collapsed",
-                horizontal=True
-            )
-
-            form_responses[question_key] = selected_response
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(css_code, unsafe_allow_html=True)
+    
+    # Structure du questionnaire
+    st.markdown("""
+    <div class="questionnaire-container">
+        <h1 class="questionnaire-title">Questionnaire AQ-10</h1>
+        <p class="questionnaire-subtitle">Répondez aux 10 questions suivantes :</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Pour chaque question
+    for i, question in enumerate(questions, 1):
+        st.markdown(f"""
+        <div class="question-block">
+            <div class="question-text">
+                <span class="question-number">{i}</span>
+                {question}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Widget radio de Streamlit (sera stylisé par le CSS)
+        response = st.radio(
+            "",
+            ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
+            key=f"q{i}",
+            label_visibility="collapsed"
+        )
 
         st.markdown("### 👤 Informations personnelles")
 
