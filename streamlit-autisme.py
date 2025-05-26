@@ -4005,28 +4005,44 @@ def show_aq10_and_prediction():
     ]
 
     with st.form("questionnaire_aq10_prediction", clear_on_submit=False):
-        st.markdown('<p class="questionnaire-title" style="text-align: center;">Questionnaire AQ-10</p>', unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Répondez aux 10 questions suivantes :</p>", unsafe_allow_html=True)
-
+        # Indicateur de progression
+        current_question = 0
+        total_questions = len(questions)
+        
+        st.markdown(f"""
+        <div class="progress-indicator">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {(current_question/total_questions)*100}%"></div>
+            </div>
+            <p>Question {current_question + 1} sur {total_questions}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         form_responses = {}
-
+        
         for i, q in enumerate(questions):
-            options = list(q["scoring"].keys())
-            question_key = f"aq10_question_{i}"
-
-            st.markdown(f'<div class="question-container"><p class="question-text">{q["question"]}</p>', unsafe_allow_html=True)
-
+            # Structure de question améliorée
+            st.markdown(f"""
+            <div class="question-block">
+                <div class="question-text">
+                    <span class="question-number">{i+1}</span>
+                    {q["question"]}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Boutons radio avec le nouveau style
             selected_response = st.radio(
                 "",
-                options,
+                ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
                 key=f"form_radio_{i}",
                 index=None,
                 label_visibility="collapsed",
-                horizontal=True
+                horizontal=True  # Important pour l'affichage horizontal
             )
-
-            form_responses[question_key] = selected_response
-            st.markdown('</div>', unsafe_allow_html=True)
+            
+            form_responses[f"aq10_question_{i}"] = selected_response
+            
         st.markdown("### 👤 Informations personnelles")
 
         col1, col2 = st.columns(2)
