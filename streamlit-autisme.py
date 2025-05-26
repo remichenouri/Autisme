@@ -4210,27 +4210,27 @@ def show_aq10_and_prediction():
         form_responses = {}
         
         for i, q in enumerate(questions):
-        # Structure de question améliorée avec centrage
-        st.markdown(f"""
-        <div class="question-block">
-            <div class="question-text">
-                <span class="question-number">{i+1}</span>
-                <div>{q["question"].split('. ', 1)[1] if '. ' in q["question"] else q["question"]}</div>
+            # Structure de question améliorée avec centrage
+            st.markdown(f"""
+            <div class="question-block">
+                <div class="question-text">
+                    <span class="question-number">{i+1}</span>
+                    <div>{q["question"].split('. ', 1)[1] if '. ' in q["question"] else q["question"]}</div>
+                </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Boutons radio avec le nouveau style pleine largeur
-        selected_response = st.radio(
-            "",
-            ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
-            key=f"form_radio_{i}",
-            index=None,
-            label_visibility="collapsed",
-            horizontal=True
-        )
-
+            """, unsafe_allow_html=True)
             
+            # Boutons radio avec le nouveau style pleine largeur
+            selected_response = st.radio(
+                "",
+                ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
+                key=f"form_radio_{i}",
+                index=None,
+                label_visibility="collapsed",
+                horizontal=True
+            )
+    
+                
             form_responses[f"aq10_question_{i}"] = selected_response
             
         st.markdown("### 👤 Informations personnelles")
