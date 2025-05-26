@@ -3916,6 +3916,132 @@ def show_aq10_and_prediction():
         font-size: 1rem;
         box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
     }
+    /* ================ CENTRAGE DES QUESTIONS ================ */
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        text-align: center !important; /* Centrer le texte de la question */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Centrer tout le contenu */
+        flex-direction: column; /* Empiler numéro et texte verticalement */
+    }
+    
+    /* Alternative pour centrer question avec numéro horizontal */
+    .question-text-horizontal {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        text-align: center !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px; /* Espace entre numéro et texte */
+    }
+    
+    .question-number {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        flex-shrink: 0;
+        margin: 0 auto 10px auto; /* Centrer le numéro si vertical */
+    }
+    
+    /* ================ BOUTONS RADIO PLEINE LARGEUR ================ */
+    /* Container des boutons radio - pleine largeur */
+    .question-block .stRadio > div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important; /* Éviter le retour à la ligne */
+        gap: 0 !important; /* Pas d'espace entre les boutons */
+        justify-content: stretch !important; /* Étirer sur toute la largeur */
+        align-items: center !important;
+        padding: 15px !important;
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        width: 100% !important;
+    }
+    
+    /* Labels des boutons radio - distribution égale */
+    .question-block .stRadio > div > label {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important; /* Coins moins arrondis pour un look rectangulaire */
+        padding: 15px 10px !important; /* Padding vertical augmenté */
+        margin: 0 2px !important; /* Petite marge entre boutons */
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        text-align: center !important;
+        flex: 1 !important; /* Chaque bouton prend la même largeur */
+        min-width: 0 !important; /* Permet la contraction */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        font-size: 0.9rem !important; /* Taille de police ajustée */
+        line-height: 1.2 !important;
+        white-space: nowrap !important; /* Éviter le retour à la ligne dans les boutons */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* Points de suspension si texte trop long */
+    }
+    
+    /* Effet hover */
+    .question-block .stRadio > div > label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    
+    /* Style pour la sélection */
+    .question-block .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+
+/* ================ RESPONSIVE POUR MOBILE ================ */
+    @media (max-width: 768px) {
+    .question-block .stRadio > div {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    .question-block .stRadio > div > label {
+        width: 100% !important;
+        flex: none !important;
+        margin: 0 0 5px 0 !important;
+        white-space: normal !important; /* Permettre le retour à la ligne sur mobile */
+    }
+    
+    .question-text {
+        font-size: 1rem;
+        text-align: center !important;
+    }
+}
+
+/* ================ VERSION ALTERNATIVE POUR TRÈS PETITS ÉCRANS ================ */
+@media (max-width: 480px) {
+    .question-block .stRadio > div > label {
+        font-size: 0.8rem !important;
+        padding: 12px 8px !important;
+    }
+}
     
     /* ================ Amélioration du Container Principal ================ */
     .main-questionnaire {
