@@ -3650,7 +3650,6 @@ def show_aq10_and_prediction():
         margin: 20px 0;
         color: #856404;
     }
-    </style>
 
     .result-card.success {
         border-left: 6px solid #2ecc71;
