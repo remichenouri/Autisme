@@ -3481,6 +3481,172 @@ def show_aq10_and_prediction():
         margin-right: 10px;
         display: inline-block;
     }
+    /* ================ MASQUER LES BOUTONS RADIO NATIFS ================ */
+    .questionnaire-container .question-block .stRadio input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    
+    /* ================ CONTENEUR DES RÉPONSES ================ */
+    .questionnaire-container .question-block .stRadio > div {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 15px !important;
+        padding: 25px !important;
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border-radius: 15px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+        border: 2px solid #e9ecef !important;
+        margin-top: 15px !important;
+    }
+    
+    /* ================ BOUTONS RECTANGLE PERSONNALISÉS ================ */
+    .questionnaire-container .question-block .stRadio > div > label {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 18px 15px !important;
+        margin: 0 !important;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa) !important;
+        border: 2px solid #dee2e6 !important;
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        color: #495057 !important;
+        text-align: center !important;
+        min-height: 60px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+        text-transform: none !important;
+        line-height: 1.4 !important;
+    }
+    
+    /* ================ EFFET HOVER ================ */
+    .questionnaire-container .question-block .stRadio > div > label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f0f8ff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15) !important;
+        color: #2c3e50 !important;
+    }
+    
+    /* ================ ÉTAT SÉLECTIONNÉ ================ */
+    .questionnaire-container .question-block .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #2980b9 !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3) !important;
+        font-weight: 600 !important;
+    }
+    
+    /* ================ ICÔNE DE SÉLECTION ================ */
+    .questionnaire-container .question-block .stRadio > div > label::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 8px !important;
+        right: 8px !important;
+        width: 20px !important;
+        height: 20px !important;
+        border: 2px solid #dee2e6 !important;
+        border-radius: 4px !important;
+        background: white !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label:hover::before {
+        border-color: #3498db !important;
+        background: #f0f8ff !important;
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label[data-checked="true"]::before {
+        background: white !important;
+        border-color: white !important;
+        content: '✓' !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+        color: #3498db !important;
+    }
+    
+    /* ================ SÉPARATION QUESTION/RÉPONSE ================ */
+    .question-block {
+        background: #ffffff !important;
+        border-radius: 15px !important;
+        padding: 30px !important;
+        margin: 30px 0 !important;
+        border: 2px solid #e9ecef !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .question-block:hover {
+        border-color: #3498db !important;
+        box-shadow: 0 8px 30px rgba(52, 152, 219, 0.12) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* ================ SÉPARATEUR VISUEL ================ */
+    .question-text::after {
+        content: '' !important;
+        display: block !important;
+        width: 100% !important;
+        height: 2px !important;
+        background: linear-gradient(90deg, transparent, #3498db, transparent) !important;
+        margin: 20px 0 10px 0 !important;
+    }
+    
+    /* ================ RESPONSIVE DESIGN ================ */
+    @media (max-width: 768px) {
+        .questionnaire-container .question-block .stRadio > div {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+            padding: 20px !important;
+        }
+        
+        .questionnaire-container .question-block .stRadio > div > label {
+            padding: 16px 12px !important;
+            min-height: 50px !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .question-block {
+            padding: 20px !important;
+            margin: 20px 0 !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .questionnaire-container .question-block .stRadio > div > label {
+            padding: 14px 10px !important;
+            min-height: 45px !important;
+            font-size: 0.85rem !important;
+        }
+    }
+    
+    /* ================ ANIMATIONS SUPPLÉMENTAIRES ================ */
+    @keyframes selectAnimation {
+        0% { transform: scale(1) translateY(-2px); }
+        50% { transform: scale(1.02) translateY(-3px); }
+        100% { transform: scale(1) translateY(-2px); }
+    }
+    
+    .questionnaire-container .question-block .stRadio > div > label[data-checked="true"] {
+        animation: selectAnimation 0.4s ease-out !important;
+    }
+    
+    /* ================ FOCUS POUR ACCESSIBILITÉ ================ */
+    .questionnaire-container .question-block .stRadio > div > label:focus-within {
+        outline: 3px solid rgba(52, 152, 219, 0.3) !important;
+        outline-offset: 2px !important;
+    }
 
     /* CSS pour les boutons radio sécurisés */
     .questionnaire-container .question-block .stRadio > div {
@@ -3548,21 +3714,6 @@ def show_aq10_and_prediction():
         }
     }
     </style>
-    """, unsafe_allow_html=True)
-
-    # Description
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #f8fcff 0%, #e3f2fd 100%);
-                border-radius: 15px; padding: 25px; margin: 30px 0;
-                border-left: 5px solid #3498db;">
-        <h3 style="color: #2c3e50; text-align: center; margin-top: 0;">
-            🤖 À propos de cette évaluation
-        </h3>
-        <p style="color: #2c3e50; line-height: 1.6; text-align: center;">
-            Ce questionnaire validé scientifiquement combine l'auto-évaluation AQ-10 avec un modèle d'intelligence artificielle
-            entraîné sur plus de <strong>5 000 cas cliniques internationaux</strong>.
-        </p>
-    </div>
     """, unsafe_allow_html=True)
 
     # Questions AQ-10 avec émojis
@@ -3633,34 +3784,36 @@ def show_aq10_and_prediction():
         
         # Génération des questions
         for i, q in enumerate(questions):
-            # Structure de question avec émoji séparé et centré
-            question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
-            emoji = q["emoji"]
-            
-            st.markdown(f"""
-            <div class="question-block">
-                <div class="question-text">
-                    <span class="question-number">{i+1}</span>
-                    <div>
-                        <span class="question-emoji">{emoji}</span>
-                        {question_text}
-                    </div>
+        # Structure de question avec séparateur visuel
+        question_text = q["question"].split(' ', 1)[1] if ' ' in q["question"] else q["question"]
+        emoji = q["emoji"]
+        
+        st.markdown(f"""
+        <div class="question-block">
+            <div class="question-text">
+                <span class="question-number">{i+1}</span>
+                <div>
+                    <span class="question-emoji">{emoji}</span>
+                    <strong>Question {i+1}:</strong> {question_text}
                 </div>
             </div>
-            """, unsafe_allow_html=True)
-            
-            # Boutons radio avec le nouveau style sécurisé
-            selected_response = st.radio(
-                "",
-                ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
-                key=f"form_radio_{i}",
-                index=None,
-                label_visibility="collapsed",
-                horizontal=True
-            )
-            
-            # STOCKAGE SÉCURISÉ DE LA RÉPONSE
-            form_responses[f"aq10_question_{i}"] = selected_response
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Ajout d'un sous-titre pour les réponses
+        st.markdown("<p style='text-align: center; color: #7f8c8d; font-size: 0.9rem; margin: 10px 0;'>Choisissez votre réponse :</p>", unsafe_allow_html=True)
+        
+        # Boutons radio rectangulaires
+        selected_response = st.radio(
+            "",
+            ["Tout à fait d'accord", "Plutôt d'accord", "Plutôt pas d'accord", "Pas du tout d'accord"],
+            key=f"form_radio_{i}",
+            index=None,
+            label_visibility="collapsed",
+            horizontal=True
+        )
+        
+        form_responses[f"aq10_question_{i}"] = selected_response
         
         st.markdown("### 👤 Informations personnelles")
 
