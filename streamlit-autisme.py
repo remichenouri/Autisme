@@ -3298,6 +3298,8 @@ def show_aq10_and_prediction():
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown("""
 
     <style>
     /* ================ Style Global du Questionnaire ================ */
@@ -3646,7 +3648,7 @@ def show_aq10_and_prediction():
         margin: 20px 0;
         color: #856404;
     }
-    </style>
+    </style> """)
 
 
     questions = [
