@@ -385,6 +385,18 @@ def set_custom_theme():
             transition: all 0.3s ease !important;
             box-shadow: var(--shadow-light) !important;
         }
+        .question-container {
+            text-align: left;
+        }
+        
+        p {
+            text-align: center;
+        }
+        
+        .stButton > button {
+            display: block;
+            margin: 0 auto;
+        }
 
         .stButton > button:hover {
             transform: translateY(-2px) !important;
