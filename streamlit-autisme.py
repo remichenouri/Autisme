@@ -4033,15 +4033,15 @@ def show_aq10_and_prediction():
         font-size: 1rem;
         text-align: center !important;
     }
-}
+    }
 
-/* ================ VERSION ALTERNATIVE POUR TRÈS PETITS ÉCRANS ================ */
-@media (max-width: 480px) {
+    /* ================ VERSION ALTERNATIVE POUR TRÈS PETITS ÉCRANS ================ */
+    @media (max-width: 480px) {
     .question-block .stRadio > div > label {
         font-size: 0.8rem !important;
         padding: 12px 8px !important;
     }
-}
+    }
     
     /* ================ Amélioration du Container Principal ================ */
     .main-questionnaire {
