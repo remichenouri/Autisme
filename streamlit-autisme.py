@@ -3794,7 +3794,113 @@ def show_aq10_and_prediction():
         text-align: left;
     }
     
+    /* Container principal du questionnaire */
+    .questionnaire-container {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
+        border-top: 4px solid #3498db;
+    }
     
+    /* Bloc de chaque question */
+    .question-block {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        border-left: 4px solid #3498db;
+        transition: all 0.3s ease;
+    }
+    .question-block:hover {
+        box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    /* Numéro de la question */
+    .question-number {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    /* Texte de la question */
+    .question-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        text-align: left;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    /* Boutons radio en pilules */
+    .stRadio > div[role="radiogroup"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 15px !important;
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    }
+    .stRadio > div[role="radiogroup"] label {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff) !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 25px !important;
+        padding: 12px 20px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-weight: 500 !important;
+        color: #495057 !important;
+        text-align: center !important;
+        min-width: 120px !important;
+        position: relative !important;
+        display: inline-block !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    .stRadio > div[role="radiogroup"] label:hover {
+        background: linear-gradient(135deg, #e3f2fd, #f8fcff) !important;
+        border-color: #3498db !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2) !important;
+    }
+    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div {
+        background: linear-gradient(135deg, #3498db, #2980b9) !important;
+        border-color: #3498db !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+    .stRadio > div[role="radiogroup"] input[type="radio"]:checked + div p {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Responsive pour mobile */
+    @media (max-width: 768px) {
+        .questionnaire-container { padding: 20px; margin: 10px; }
+        .question-block { padding: 20px; margin: 15px 0; }
+        .question-text { font-size: 1rem; }
+        .stRadio > div[role="radiogroup"] { flex-direction: column !important; gap: 8px !important; }
+        .stRadio > div[role="radiogroup"] label { width: 100% !important; min-width: auto !important; margin-bottom: 5px !important; }
+    }
     /* ================ Style des Questions avec Numéros ================ */
     .question-number {
         background: linear-gradient(135deg, #3498db, #2980b9);
