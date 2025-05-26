@@ -3292,7 +3292,7 @@ def show_aq10_and_prediction():
     </div>
     """, unsafe_allow_html=True)
 
-        st.markdown("""
+    st.markdown("""
     <style>
     /* Votre CSS complet ici */
     .questionnaire-container {
