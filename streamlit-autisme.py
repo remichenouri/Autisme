@@ -464,31 +464,6 @@ class MedicalDeviceComplianceManager:
             print(f"INCIDENT CRITIQUE: {description}")
         return incident_log
 
-        
-    def report_incident(self, incident_type: str, description: str, severity: str):
-            """Système de signalement d'incidents pour matériovigilance"""
-        incident_log = {
-                "timestamp": datetime.datetime.now().isoformat(),
-                "device_id": self.device_id,
-                "incident_type": incident_type,
-                "description": description,
-                "severity": severity,
-                "software_version": REGULATORY_CONFIG["version"],
-                "report_id": uuid.uuid4().hex[:8]
-            }
-            
-        try:
-            with open(self.incident_log_path, 'a') as f:
-                f.write(json.dumps(incident_log) + '\n')
-        except Exception as e:
-            print(f"Erreur lors du signalement d'incident: {str(e)}")
-                
-            # Pour les incidents graves, notification supplémentaire
-        if severity == "high":
-            print(f"INCIDENT CRITIQUE: {description}")
-                
-        return incident_log
-
 # Initialisation des gestionnaires de conformité dans l'état de session
 if 'gdpr_manager' not in st.session_state:
     st.session_state.gdpr_manager = EnhancedGDPRManager()
