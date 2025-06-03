@@ -7556,7 +7556,7 @@ def show_compliance_page():
     """Page dédiée à la conformité réglementaire"""
     
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #3498db, #2ecc71);
+    <div style="background: linear-gradient(135deg, #667eea, #764ba2); 
                 padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
         <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
                    text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
@@ -7564,115 +7564,88 @@ def show_compliance_page():
         </h1>
         <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
                   max-width: 800px; margin: 0 auto; line-height: 1.6;">
-            Informations sur les réglementations applicables à cette application
+            Gestion complète RGPD, AI Act et normes médicales
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    compliance_tabs = st.tabs([
-        "RGPD", 
-        "AI Act", 
-        "Dispositif Médical", 
-        "Documentation",
-        "Certification"
+    # Onglets de conformité
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🔐 Consentement RGPD",
+        "🤖 Transparence IA",
+        "👤 Mes Droits",
+        "📊 Audit Trail"
     ])
     
-    with compliance_tabs[0]:
-        st.markdown("## 🔒 Conformité RGPD")
+    with tab1:
+        st.header("Gestion du Consentement RGPD")
         
-        st.markdown("""
-        <div style="background-color: #e8f4fd; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-            <h3 style="color: #3498db; margin-top: 0;">Règlement Général sur la Protection des Données</h3>
-            <p style="color: #2c3e50; margin-bottom: 0;">
-                Cette application traite des données de santé considérées comme sensibles au sens du RGPD.
-                Une analyse d'impact relative à la protection des données (AIPD) a été réalisée.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("### 📋 Mesures de conformité mises en œuvre")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("""
-            **🔐 Sécurité des données**
-            * Chiffrement des données sensibles
-            * Pseudonymisation des identifiants
-            * Journalisation des accès
-            * Minimisation des données collectées
-            * Conservation limitée à 24 mois
-            """)
+        # Vérifier si des consentements existent déjà
+        if st.session_state.get('consent_screening', False):
+            st.success("✅ Consentement au dépistage : Accordé")
             
-        with col2:
-            st.markdown("""
-            **✅ Droits des personnes**
-            * Consentement explicite
-            * Information transparente
-            * Droits d'accès, rectification, effacement
-            * Droit d'opposition au traitement
-            * Portabilité des données
-            """)
-        
-        # Formulaire de contact DPO
-        st.markdown("### 📧 Contacter notre DPO")
-        
-        with st.form("dpo_contact_form"):
-            st.write("Pour exercer vos droits ou pour toute question concernant vos données :")
-            
-            contact_reason = st.selectbox(
-                "Motif du contact",
-                ["Demande d'accès", "Demande de rectification", "Demande d'effacement", "Question", "Réclamation"]
-            )
-            
-            email = st.text_input("Votre email")
-            message = st.text_area("Votre message")
-            
-            submitted = st.form_submit_button("Envoyer au DPO")
-            
-            if submitted:
-                # Journalisation RGPD
-                st.session_state.gdpr_manager.log_data_processing(
-                    st.session_state.user_session,
-                    "dpo_contact_request",
-                    ["contact_details", "request_type"]
-                )
+            if st.session_state.get('consent_research', False):
+                st.info("📊 Consentement recherche : Accordé")
+            else:
+                st.warning("📊 Consentement recherche : Non accordé")
                 
-                st.success("✅ Votre demande a été transmise à notre DPO qui vous répondra dans les meilleurs délais.")
+            if st.button("Modifier mes consentements"):
+                # Réinitialiser les consentements pour permettre modification
+                for key in list(st.session_state.keys()):
+                    if key.startswith('consent_'):
+                        del st.session_state[key]
+                st.experimental_rerun()
+        else:
+            st.info("Aucun consentement enregistré. Veuillez donner votre consentement :")
+            show_enhanced_gdpr_consent()
     
-    with compliance_tabs[1]:
-        st.markdown("## 🤖 Conformité AI Act")
+    with tab2:
+        st.header("Transparence du Système IA")
+        show_ai_act_transparency()
         
-        st.markdown("""
-        <div style="background-color: #fff3cd; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
-            <h3 style="color: #856404; margin-top: 0;">Règlement Européen sur l'Intelligence Artificielle</h3>
-            <p style="color: #856404; margin-bottom: 0;">
-                Cette application intègre un système d'IA classé à "haut risque" selon l'AI Act 
-                car il intervient dans le domaine de la santé pour l'aide au dépistage.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Contenu de l'onglet AI Act
-        # Ajoutez ici le contenu pour cet onglet
+        # Interface surveillance humaine
+        if not st.session_state.get('human_oversight_acknowledged', False):
+            st.session_state.ai_manager.mandatory_human_oversight_interface()
+        else:
+            st.success("✅ Surveillance humaine validée")
     
-    with compliance_tabs[2]:
-        st.markdown("## 📋 Conformité Dispositif Médical")
-        
-        # Contenu de l'onglet Dispositif Médical
-        # Ajoutez ici le contenu pour cet onglet
+    with tab3:
+        st.header("Exercice de vos Droits RGPD")
+        user_rights_management_interface()
     
-    with compliance_tabs[3]:
-        st.markdown("## 📚 Documentation Réglementaire")
+    with tab4:
+        st.header("Journal d'Audit")
         
-        # Contenu de l'onglet Documentation
-        # Ajoutez ici le contenu pour cet onglet
-    
-    with compliance_tabs[4]:
-        st.markdown("## 🏅 Certifications et Conformité")
+        if st.button("Afficher mon historique d'activité"):
+            try:
+                # Simulation d'audit trail (remplacez par vraies données en production)
+                audit_data = {
+                    "session_id": st.session_state.user_session[:8] + "...",
+                    "dernière_connexion": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "actions_effectuées": [
+                        "Consentement RGPD accordé",
+                        "Accès page conformité",
+                        "Consultation transparence IA"
+                    ],
+                    "données_traitées": [
+                        "Identifiant de session (pseudonymisé)",
+                        "Consentements RGPD",
+                        "Logs de navigation"
+                    ]
+                }
+                
+                st.json(audit_data)
+                
+            except Exception as e:
+                st.error(f"Erreur lors de la récupération des données d'audit : {str(e)}")
         
-        # Contenu de l'onglet Certification
-        # Ajoutez ici le contenu pour cet onglet
+        st.info("""
+        **ℹ️ Information sur l'audit trail**
+        
+        Conformément au RGPD Article 30, nous tenons un registre de toutes les activités 
+        de traitement de données personnelles. Vous pouvez demander l'accès complet à 
+        votre historique en contactant notre DPO.
+        """)
 
 
 def main():
@@ -7717,6 +7690,38 @@ def main():
         "No": "#2ecc71",
         "Unknown": "#95a5a6"
     }
+    # Dans la fonction main(), après l'initialisation et avant les conditions de pages :
+
+    # Initialisation forcée des gestionnaires si nécessaire
+    if not hasattr(st.session_state, 'gdpr_manager'):
+        st.session_state.gdpr_manager = EnhancedGDPRManager()
+    if not hasattr(st.session_state, 'ai_manager'):
+        st.session_state.ai_manager = EnhancedAIActManager()
+    
+    # Navigation et affichage des pages
+    tool_choice = show_navigation_menu()
+    
+    if tool_choice == "🏠 Accueil":
+        show_home_page()
+    elif tool_choice == "🔍 Exploration":
+        show_data_exploration()
+    elif tool_choice == "🧠 Analyse ML":
+        show_ml_analysis()
+    elif tool_choice == "🤖 Prédiction par IA":
+        # Vérifier le consentement avant d'accéder à l'IA
+        if not st.session_state.get('consent_screening', False):
+            st.error("❌ Consentement RGPD requis pour utiliser l'IA de dépistage")
+            if show_enhanced_gdpr_consent():
+                st.experimental_rerun()
+        else:
+            show_ai_prediction()
+    elif tool_choice == "📚 Documentation":
+        show_documentation()
+    elif tool_choice == "ℹ️ À propos":
+        show_about()
+    elif tool_choice == "🔒 Conformité":  # Nouvelle page
+        show_compliance_page()
+
 
     if "🏠 Accueil" in selection:
         show_home_page()
