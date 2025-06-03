@@ -3787,6 +3787,7 @@ def show_aq10_and_prediction():
         box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
         border-top: 4px solid #3498db;
     }
+
     
     .question-block {
         background: #f8f9fa;
@@ -3796,7 +3797,60 @@ def show_aq10_and_prediction():
         border-left: 4px solid #3498db;
         transition: all 0.3s ease;
     }
-    
+
+    /* Styles pour les bannières réglementaires */
+        .regulatory-banner {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #721c24;
+        }
+        
+        .gdpr-banner {
+            background: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+        
+        .ai-act-banner {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        /* Style pour la conformité médicale */
+        .fda-banner {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #155724;
+        }
+        
+        /* Badge de dispositif médical */
+        .medical-device-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #e9ecef;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #495057;
+            margin-right: 8px;
+        }
+        
     .question-text {
         font-size: 1.1rem;
         font-weight: 500;
@@ -6553,6 +6607,132 @@ def show_about_page():
     """, unsafe_allow_html=True)
 
     pass
+
+
+# Ajouter cette fonction après les autres fonctions de page
+
+def show_compliance_page():
+    """Page dédiée à la conformité réglementaire"""
+    
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #3498db, #2ecc71);
+                padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
+        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
+                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+            🔒 Conformité Réglementaire
+        </h1>
+        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
+                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
+            Informations sur les réglementations applicables à cette application
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    compliance_tabs = st.tabs([
+        "RGPD", 
+        "AI Act", 
+        "Dispositif Médical", 
+        "Documentation",
+        "Certification"
+    ])
+    
+    with compliance_tabs[0]:
+        st.markdown("## 🔒 Conformité RGPD")
+        
+        st.markdown("""
+        <div style="background-color: #e8f4fd; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+            <h3 style="color: #3498db; margin-top: 0;">Règlement Général sur la Protection des Données</h3>
+            <p style="color: #2c3e50; margin-bottom: 0;">
+                Cette application traite des données de santé considérées comme sensibles au sens du RGPD.
+                Une analyse d'impact relative à la protection des données (AIPD) a été réalisée.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("### 📋 Mesures de conformité mises en œuvre")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            **🔐 Sécurité des données**
+            * Chiffrement des données sensibles
+            * Pseudonymisation des identifiants
+            * Journalisation des accès
+            * Minimisation des données collectées
+            * Conservation limitée à 24 mois
+            """)
+            
+        with col2:
+            st.markdown("""
+            **✅ Droits des personnes**
+            * Consentement explicite
+            * Information transparente
+            * Droits d'accès, rectification, effacement
+            * Droit d'opposition au traitement
+            * Portabilité des données
+            """)
+        
+        # Formulaire de contact DPO
+        st.markdown("### 📧 Contacter notre DPO")
+        
+        with st.form("dpo_contact_form"):
+            st.write("Pour exercer vos droits ou pour toute question concernant vos données :")
+            
+            contact_reason = st.selectbox(
+                "Motif du contact",
+                ["Demande d'accès", "Demande de rectification", "Demande d'effacement", "Question", "Réclamation"]
+            )
+            
+            email = st.text_input("Votre email")
+            message = st.text_area("Votre message")
+            
+            submitted = st.form_submit_button("Envoyer au DPO")
+            
+            if submitted:
+                # Journalisation RGPD
+                st.session_state.gdpr_manager.log_data_processing(
+                    st.session_state.user_session,
+                    "dpo_contact_request",
+                    ["contact_details", "request_type"]
+                )
+                
+                st.success("✅ Votre demande a été transmise à notre DPO qui vous répondra dans les meilleurs délais.")
+    
+    with compliance_tabs[1]:
+        st.markdown("## 🤖 Conformité AI Act")
+        
+        st.markdown("""
+        <div style="background-color: #fff3cd; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+            <h3 style="color: #856404; margin-top: 0;">Règlement Européen sur l'Intelligence Artificielle</h3>
+            <p style="color: #856404; margin-bottom: 0;">
+                Cette application intègre un système d'IA classé à "haut risque" selon l'AI Act 
+                car il intervient dans le domaine de la santé pour l'aide au dépistage.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Contenu de l'onglet AI Act
+        # Ajoutez ici le contenu pour cet onglet
+    
+    with compliance_tabs[2]:
+        st.markdown("## 📋 Conformité Dispositif Médical")
+        
+        # Contenu de l'onglet Dispositif Médical
+        # Ajoutez ici le contenu pour cet onglet
+    
+    with compliance_tabs[3]:
+        st.markdown("## 📚 Documentation Réglementaire")
+        
+        # Contenu de l'onglet Documentation
+        # Ajoutez ici le contenu pour cet onglet
+    
+    with compliance_tabs[4]:
+        st.markdown("## 🏅 Certifications et Conformité")
+        
+        # Contenu de l'onglet Certification
+        # Ajoutez ici le contenu pour cet onglet
+
 
 def main():
     if "initialized" not in st.session_state:
