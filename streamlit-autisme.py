@@ -140,16 +140,15 @@ def handle_data_rights(request_type, user_id):
     elif request_type == 'export':
         if 'generate_export_package' in globals():
             return generate_export_package(user_id)
-
-# ===== SURVEILLANCE CONTINUE =====
+            
 def performance_monitor():
     while True:
-        # Vérification des métriques de performance
         if 'log_performance_metrics' in globals():
             log_performance_metrics()
         threading.Event().wait(3600)  # Toutes les heures
 
-threading.Thread(target=performance_monitor, daemon=True).start()
+monitoring_thread = threading.Thread(target=performance_monitor, daemon=True)
+monitoring_thread.start()
 
 try:
     st.sidebar.download_button(
