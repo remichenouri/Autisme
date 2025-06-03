@@ -183,60 +183,21 @@ if "aq10_responses" not in st.session_state:
     st.session_state.aq10_responses = []
 
 def initialize_session_state():
-    """Initialise l'état de session pour conserver les configurations entre les recharges"""
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = True
-        
-        # ===== INTÉGRATION CONFORMITÉ =====
-        # Génération d'un ID utilisateur unique pour le suivi RGPD
-        if 'user_id' not in st.session_state:
-            st.session_state.user_id = hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:16]
-        
-        # Journalisation de l'initialisation de session
-        log_activity(st.session_state.user_id, 'SESSION_INIT', 'USER_SESSION')
+    """Initialise correctement l'état de session"""
+    required_keys = {
+        'aq10_total': 0,
+        'aq10_responses': [],
+        'tool_choice': "🏠 Accueil",
+        'data_exploration_expanded': True,
+        'user_id': hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:16]
+    }
 
-        # Par défaut, commencer sur la page d'accueil
-        default_tool = "🏠 Accueil"
+    for key, default_value in required_keys.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
 
-        # Récupérer le paramètre de sélection de l'URL s'il existe
-        try:
-            # Pour les versions récentes de Streamlit (1.30.0+)
-            if "selection" in st.query_params:
-                selection = st.query_params["selection"]
-                # Mapping entre les valeurs des liens et les options du menu
-                selection_mapping = {
-                    "📝 Test AQ-10": "🤖 Prédiction par IA",
-                    "🤖 Prédiction par IA": "🤖 Prédiction par IA",
-                    "🔍 Exploration des Données": "🔍 Exploration des Données"
-                }
-
-                if selection in selection_mapping:
-                    st.session_state.tool_choice = selection_mapping[selection]
-                else:
-                    st.session_state.tool_choice = default_tool
-            else:
-                st.session_state.tool_choice = default_tool
-        except:
-            try:
-                query_params = st.experimental_get_query_params()
-                if "selection" in query_params:
-                    selection = query_params["selection"][0]  # experimental_get_query_params retourne une liste
-                    selection_mapping = {
-                        "📝 Test AQ-10": "🤖 Prédiction par IA",
-                        "🤖 Prédiction par IA": "🤖 Prédiction par IA",
-                        "🔍 Exploration des Données": "🔍 Exploration des Données"
-                    }
-
-                    if selection in selection_mapping:
-                        st.session_state.tool_choice = selection_mapping[selection]
-                    else:
-                        st.session_state.tool_choice = default_tool
-                else:
-                    st.session_state.tool_choice = default_tool
-            except:
-                st.session_state.tool_choice = default_tool
-
-        st.session_state.data_exploration_expanded = True
+    # Journalisation de l'initialisation
+    log_activity(st.session_state.user_id, 'SESSION_INIT', 'USER_SESSION')
 
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
