@@ -86,6 +86,7 @@ def log_activity(user_id, action, data_type):
 REGISTRY_KEY = Fernet.generate_key()
 fernet_registry = Fernet(REGISTRY_KEY)
 
+
 try:
     registry = pd.read_csv('processing_registry.enc', 
                          converters={'data_hash': fernet_registry.decrypt})
@@ -95,6 +96,7 @@ except FileNotFoundError:
         'data_categories', 'legal_basis', 'retention_days',
         'security_measures', 'data_hash', 'deletion_date'
     ])
+
 
 def hash_data(data):
     return hashlib.blake2b(data.encode(), key=REGISTRY_KEY).hexdigest()
