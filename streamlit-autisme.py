@@ -8,7 +8,7 @@ Original file is located at
 """
 
 import streamlit as st
-from datetime import datetime 
+import datetime as dt 
 import joblib
 import prince
 
