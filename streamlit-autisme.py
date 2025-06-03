@@ -287,7 +287,7 @@ for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
         st.session_state.medical_manager = MedicalDeviceComplianceManager()
         st.session_state.user_session = str(uuid.uuid4())
         st.session_state.authenticated = False
-        st.session_state.session_start_time = datetime.datetime.now()
+        st.session_state.session_start_time = dt.datetime.now()
 
     os.makedirs(folder, exist_ok=True)
 
