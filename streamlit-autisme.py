@@ -151,11 +151,10 @@ def performance_monitor():
 
 threading.Thread(target=performance_monitor, daemon=True).start()
 
-# ===== DOCUMENTATION TECHNIQUE =====
 try:
     st.sidebar.download_button(
         label="📄 Documentation technique",
-        data=open('technical_docs.pdf', 'rb').read() if os.path.exists('technical_docs.pdf') else b"Documentation en cours de génération",
+        data=open('technical_docs.pdf', 'rb').read() if os.path.exists('technical_docs.pdf') else "Documentation en cours de génération",
         file_name="documentation_conformite.pdf",
         mime="application/pdf"
     )
