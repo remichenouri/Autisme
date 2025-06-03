@@ -1088,33 +1088,8 @@ def show_enhanced_gdpr_consent():
 def user_rights_management_interface():
     """Interface complète de gestion des droits RGPD"""
     
-    st.subheader("🔒 Gestion de vos Données Personnelles")
-    
-    rights_tab1, rights_tab2, rights_tab3 = st.tabs([
-        "👁️ Accès à mes données", 
-        "🗑️ Suppression", 
-        "📧 Contact DPO"
-    ])
-    
-    with rights_tab1:
-        if st.button("📋 Voir mes données"):
-            gdpr_manager = st.session_state.gdpr_manager
-            user_data = gdpr_manager.exercise_user_rights(
-                st.session_state.user_session, 
-                "access"
-            )
-            
-            if user_data:
-                st.json({
-                    "consentements": user_data,
-                    "dernière_activité": datetime.datetime.now().isoformat(),
-                    "statut": "données_actives"
-                })
-            else:
-                st.info("Aucune donnée trouvée pour cette session")
-    
-    with rights_tab2:
-        st.warning("⚠️ La suppression est irréversible")
+    with st.sidebar:
+        st.subheader("🔒 Gestion de vos Données Personnelles")
         
         if st.button("🗑️ Supprimer définitivement mes données"):
             gdpr_manager = st.session_state.gdpr_manager
@@ -1128,9 +1103,10 @@ def user_rights_management_interface():
                 # Réinitialisation de la session
                 for key in list(st.session_state.keys()):
                     del st.session_state[key]
-                st.experimental_rerun()
+                st.rerun()  # CORRECTION ICI
             else:
                 st.error("❌ Erreur lors de la suppression")
+
     
     with rights_tab3:
         st.markdown("""
