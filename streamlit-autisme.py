@@ -83,7 +83,7 @@ for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
         def log_data_processing(self, user_id: str, processing_type: str, data_categories: list):
             """Journalisation conforme RGPD Article 30"""
             log_entry = {
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": dt.datetime.now().isoformat(),
                 "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
                 "processing_type": processing_type,
                 "data_categories": data_categories,
@@ -103,7 +103,7 @@ for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
         def record_consent(self, user_id: str, consent_type: str, granted: bool):
             """Enregistrement du consentement conforme RGPD Article 7"""
             consent_entry = {
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": dt.datetime.now().isoformat(),
                 "user_id": hashlib.sha256(user_id.encode()).hexdigest()[:16],
                 "consent_type": consent_type,
                 "granted": granted,
@@ -119,9 +119,9 @@ for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
                 
             return consent_entry
     
-        def check_data_retention(self, timestamp: datetime.datetime) -> bool:
+        def check_data_retention(self, timestamp: dt.datetime) -> bool:
             """Vérification de la durée de conservation des données"""
-            return (datetime.datetime.now() - timestamp).days < self.data_retention_days
+            return (dt.datetime.now() - timestamp).days < self.data_retention_days
         
         def anonymize_data(self, data: dict) -> dict:
             """Anonymisation des données pour conformité RGPD"""
