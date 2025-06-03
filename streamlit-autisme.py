@@ -565,6 +565,92 @@ def initialize_session_state():
 
         st.session_state.data_exploration_expanded = True
 
+def show_unified_sidebar_navigation():
+    """Navigation unifiée dans la sidebar avec consentement intégré"""
+    
+    with st.sidebar:
+        # Logo/titre de l'application
+        st.markdown("""
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #1f77b4; font-size: 1.8rem;">🧩 Dépistage TSA</h1>
+            <p style="color: #666; font-size: 0.9rem;">Conforme RGPD & AI Act</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Vérification du consentement OBLIGATOIRE
+        if not st.session_state.get('consent_screening', False):
+            st.error("⚠️ Consentement RGPD requis")
+            
+            with st.expander("📋 Donner mon consentement", expanded=True):
+                consent_minimal = st.checkbox(
+                    "J'accepte le traitement de mes données pour le dépistage TSA",
+                    key="consent_screening_minimal"
+                )
+                
+                if consent_minimal:
+                    # Enregistrement du consentement
+                    st.session_state['consent_screening'] = True
+                    st.success("✅ Consentement accordé")
+                    st.rerun()
+                else:
+                    st.stop()  # Arrête l'exécution si pas de consentement
+        
+        # Navigation principale (seulement si consentement accordé)
+        st.markdown("---")
+        st.markdown("### 📍 Navigation")
+        
+        options = [
+            "🏠 Accueil",
+            "🔍 Exploration", 
+            "🧠 Analyse ML",
+            "🤖 Prédiction par IA",
+            "📚 Documentation",
+            "ℹ️ À propos",
+            "🔒 Conformité"
+        ]
+
+        if 'tool_choice' not in st.session_state:
+            st.session_state.tool_choice = "🏠 Accueil"
+
+        current_index = options.index(st.session_state.tool_choice) if st.session_state.tool_choice in options else 0
+
+        tool_choice = st.radio(
+            "",
+            options,
+            index=current_index,
+            key="main_navigation",
+            label_visibility="collapsed"
+        )
+
+        if tool_choice != st.session_state.tool_choice:
+            st.session_state.tool_choice = tool_choice
+        
+        # Statuts de conformité
+        st.markdown("---")
+        st.markdown("### 🔐 Statut Conformité")
+        st.markdown("""
+        <div style="font-size: 11px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px;">✅ CE Classe IIa</span>
+                <span style="background: #007bff; color: white; padding: 2px 6px; border-radius: 3px;">✅ RGPD</span>
+                <span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 3px;">✅ AI Act</span>
+            </div>
+            <div style="margin-top: 10px; color: #6c757d;">
+                Version: 2.1.0<br>
+                MAJ: 03/06/2025
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Accès rapide aux droits RGPD
+        st.markdown("---")
+        if st.button("👤 Mes droits RGPD", use_container_width=True):
+            st.session_state.tool_choice = "🔒 Conformité"
+            st.rerun()
+
+    return tool_choice
+
+
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
     os.makedirs(os.path.dirname(css_path), exist_ok=True)
