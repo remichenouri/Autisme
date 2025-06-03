@@ -7541,62 +7541,50 @@ def show_about_page():
 def show_compliance_page():
     """Page dédiée à la conformité réglementaire"""
     
+    # Contenu principal (pas dans la sidebar)
     st.markdown("""
     <div style="background: linear-gradient(135deg, #667eea, #764ba2); 
                 padding: 40px 25px; border-radius: 20px; margin-bottom: 35px; text-align: center;">
-        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;
-                   text-shadow: 0 2px 4px rgba(0,0,0,0.3); font-weight: 600;">
+        <h1 style="color: white; font-size: 2.8rem; margin-bottom: 15px;">
             🔒 Conformité Réglementaire
         </h1>
-        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;
-                  max-width: 800px; margin: 0 auto; line-height: 1.6;">
+        <p style="color: rgba(255,255,255,0.95); font-size: 1.3rem;">
             Gestion complète RGPD, AI Act et normes médicales
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Onglets de conformité
+    # Onglets de conformité dans la page principale
     tab1, tab2, tab3, tab4 = st.tabs([
         "🔐 Consentement RGPD",
-        "🤖 Transparence IA",
+        "🤖 Transparence IA", 
         "👤 Mes Droits",
         "📊 Audit Trail"
     ])
     
     with tab1:
-        st.header("Gestion du Consentement RGPD")
+        st.header("État du Consentement RGPD")
         
-        # Vérifier si des consentements existent déjà
         if st.session_state.get('consent_screening', False):
             st.success("✅ Consentement au dépistage : Accordé")
             
-            if st.session_state.get('consent_research', False):
-                st.info("📊 Consentement recherche : Accordé")
-            else:
-                st.warning("📊 Consentement recherche : Non accordé")
-                
-            if st.button("Modifier mes consentements"):
-                # Réinitialiser les consentements pour permettre modification
-                for key in list(st.session_state.keys()):
-                    if key.startswith('consent_'):
-                        del st.session_state[key]
-                st.experimental_rerun()
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📝 Modifier mes consentements"):
+                    # Réinitialiser pour permettre modification
+                    st.session_state['consent_screening'] = False
+                    st.rerun()
+            
+            with col2:
+                if st.button("📋 Consentement détaillé"):
+                    show_enhanced_gdpr_consent()
         else:
-            st.info("Aucun consentement enregistré. Veuillez donner votre consentement :")
-            show_enhanced_gdpr_consent()
+            st.warning("⚠️ Consentement requis - redirigé vers la sidebar")
     
     with tab2:
-        st.header("Transparence du Système IA")
         show_ai_act_transparency()
-        
-        # Interface surveillance humaine
-        if not st.session_state.get('human_oversight_acknowledged', False):
-            st.session_state.ai_manager.mandatory_human_oversight_interface()
-        else:
-            st.success("✅ Surveillance humaine validée")
     
     with tab3:
-        st.header("Exercice de vos Droits RGPD")
         user_rights_management_interface()
     
     with tab4:
@@ -7635,58 +7623,33 @@ def show_compliance_page():
 
 
 def main():
-    if "initialized" not in st.session_state:
-        set_custom_theme()
-        st.session_state.initialized = True
-
-        if "aq10_total" not in st.session_state:
-            st.session_state.aq10_total = 0
-
-        if "expanders_initialized" not in st.session_state:
-            st.session_state.expanders_initialized = {
-                'structure': True,
-                'valeurs_manquantes': False,
-                'pipeline': False,
-                'variables_cles': True,
-                'questionnaire': False,
-                'composite': False,
-                'statistiques': False,
-                'correlation': False,
-                'famd': False
-            }
-
-    if 'df' not in st.session_state:
-        with st.spinner("Chargement des données..."):
-            st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
-
-    with st.sidebar:
-        st.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
-        pages = [
-            "🏠 Accueil",
-            "🔍 Exploration",
-            "🧠 Analyse ML",
-            "🤖 Prédiction par IA",
-            "📚 Documentation",
-            "ℹ️ À propos"
-        ]
-        selection = st.sidebar.radio("Choisissez un outil :", pages)
-
-    palette = {
-        "Yes": "#3498db",
-        "No": "#2ecc71",
-        "Unknown": "#95a5a6"
-    }
-    # Dans la fonction main(), après l'initialisation et avant les conditions de pages :
-
-    # Initialisation forcée des gestionnaires si nécessaire
-    if not hasattr(st.session_state, 'gdpr_manager'):
+    """Fonction principale de l'application"""
+    
+    # Configuration de la page (DOIT être en premier)
+    st.set_page_config(
+        page_title="Dépistage TSA - Conforme RGPD/AI Act",
+        page_icon="🧩",
+        layout="wide",
+    )
+    
+    # Initialisation des gestionnaires
+    if 'gdpr_manager' not in st.session_state:
         st.session_state.gdpr_manager = EnhancedGDPRManager()
-    if not hasattr(st.session_state, 'ai_manager'):
         st.session_state.ai_manager = EnhancedAIActManager()
+        st.session_state.medical_manager = MedicalDeviceComplianceManager()
+        st.session_state.user_session = str(uuid.uuid4())
+        st.session_state.session_start_time = dt.datetime.now()
     
-    # Navigation et affichage des pages
-    tool_choice = show_navigation_menu()
+    # Nettoyage automatique
+    if st.session_state.get('last_cleanup') is None or \
+       (datetime.datetime.now() - st.session_state.get('last_cleanup', datetime.datetime.now())).days > 7:
+        automated_data_cleanup()
+        st.session_state['last_cleanup'] = datetime.datetime.now()
     
+    # Navigation unifiée (sidebar + consentement)
+    tool_choice = show_unified_sidebar_navigation()
+    
+    # Affichage des pages selon le choix
     if tool_choice == "🏠 Accueil":
         show_home_page()
     elif tool_choice == "🔍 Exploration":
@@ -7694,33 +7657,30 @@ def main():
     elif tool_choice == "🧠 Analyse ML":
         show_ml_analysis()
     elif tool_choice == "🤖 Prédiction par IA":
-        # Vérifier le consentement avant d'accéder à l'IA
-        if not st.session_state.get('consent_screening', False):
-            st.error("❌ Consentement RGPD requis pour utiliser l'IA de dépistage")
-            if show_enhanced_gdpr_consent():
-                st.experimental_rerun()
+        # Validation supplémentaire pour l'IA
+        if not st.session_state.ai_manager.validate_human_oversight():
+            if st.session_state.ai_manager.mandatory_human_oversight_interface():
+                show_ai_prediction()
+            else:
+                st.warning("⚠️ Validation de surveillance humaine requise pour l'IA")
         else:
             show_ai_prediction()
     elif tool_choice == "📚 Documentation":
         show_documentation()
     elif tool_choice == "ℹ️ À propos":
         show_about()
-    elif tool_choice == "🔒 Conformité":  # Nouvelle page
+    elif tool_choice == "🔒 Conformité":
         show_compliance_page()
-
-
-    if "🏠 Accueil" in selection:
-        show_home_page()
-    elif "🔍 Exploration" in selection:
-        show_data_exploration()
-    elif "🧠 Analyse ML" in selection:
-        show_ml_analysis()
-    elif "🤖 Prédiction par IA" in selection:
-        show_aq10_and_prediction()
-    elif "📚 Documentation" in selection:
-        show_documentation()
-    elif "ℹ️ À propos" in selection:
-        show_about_page()
+    
+    # Footer de conformité dans la page principale
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; font-size: 0.8rem; color: #666; padding: 20px;">
+        🔒 Application conforme RGPD, AI Act et MDR | 
+        📧 DPO: dpo@depistage-tsa.fr | 
+        🏥 Dispositif médical CE Classe IIa
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
