@@ -11,6 +11,7 @@ import streamlit as st
 import datetime as dt 
 import joblib
 import prince
+import uuid
 
 st.set_page_config(
     page_title="Dépistage Autisme",
