@@ -7630,6 +7630,7 @@ def main():
         page_title="Dépistage TSA - Conforme RGPD/AI Act",
         page_icon="🧩",
         layout="wide",
+        initial_sidebar_state="expanded"  # Sidebar ouverte par défaut
     )
     
     # Initialisation des gestionnaires
