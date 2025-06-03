@@ -29,3 +29,4 @@ uuid>=1.30
 # Monitoring et observabilité (nouveau)
 prometheus-client>=0.17.0
 
+
