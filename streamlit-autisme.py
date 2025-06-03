@@ -6,23 +6,26 @@ Fichier original situé à :
     https://colab.research.google.com/drive/1tYyBZXlbNHUGJELlLOMJWGZVmxY346Yd
 """
 
+# IMPORTANT : st.set_page_config() DOIT être la première commande Streamlit
 import streamlit as st
-import datetime as dt 
-import datetime  # Ajout pour les nouvelles classes de conformité
-import joblib
-import prince
-import uuid
-import json  # Ajout pour la journalisation JSON
-import sqlite3  # Ajout pour la base de données sécurisée
-import hashlib  # Déjà présent mais nécessaire pour les nouvelles fonctions
 
+# Configuration de la page - DOIT être en premier
 st.set_page_config(
-    page_title="Dépistage Autisme",
+    page_title="Dépistage TSA - Conforme RGPD/AI Act",
     page_icon="🧩",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Tous les autres imports APRÈS st.set_page_config()
+import datetime as dt 
+import datetime
+import joblib
+import prince
+import uuid
+import json
+import sqlite3
+import hashlib
 import base64
 import os
 import pickle
@@ -34,11 +37,12 @@ from io import BytesIO
 from PIL import Image
 import streamlit.components.v1 as components
 import plotly.express as px
-from cryptography.fernet import Fernet  # Nouveau : chiffrement sécurisé
+from cryptography.fernet import Fernet
 
-# Création des dossiers nécessaires (conservé)
-for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache', 'logs']:  # Ajout du dossier logs
+# Création des dossiers nécessaires
+for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache', 'logs']:
     os.makedirs(folder, exist_ok=True)
+
 
 class SecureDataManager:
     """Gestionnaire sécurisé pour données RGPD avec chiffrement"""
