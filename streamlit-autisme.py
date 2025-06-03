@@ -931,19 +931,23 @@ def show_ai_act_transparency():
     )
 
 
+# Modifier la fonction show_navigation_menu() pour ajouter l'option Conformité
+# Lignes ~300-330
+
 def show_navigation_menu():
     """Menu de navigation optimisé et professionnel"""
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options optimisées avec icônes cohérentes
+    # Options optimisées avec icônes cohérentes et nouvelle option de conformité
     options = [
         "🏠 Accueil",
         "🔍 Exploration", 
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
-        "ℹ️ À propos"
+        "ℹ️ À propos",
+        "🔒 Conformité"  # Nouvelle option
     ]
 
     if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
@@ -961,6 +965,23 @@ def show_navigation_menu():
 
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
+        
+        # Log de navigation pour conformité
+        st.session_state.medical_manager.record_usage("Utilisateur", f"Navigation vers {tool_choice}")
+
+    # Affichage du statut de conformité
+    st.markdown("""
+    <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <span class="medical-device-badge">CE Classe IIa</span>
+            <span class="medical-device-badge">RGPD</span>
+            <span class="medical-device-badge">AI Act</span>
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: #6c757d;">
+            Version: 2.0.0 | Mise à jour: 03/06/2025
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     return tool_choice
 
