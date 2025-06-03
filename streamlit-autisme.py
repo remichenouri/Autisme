@@ -416,8 +416,8 @@ class EnhancedAIActManager:
     
     # Classe pour la gestion des exigences FDA/Santé
 class MedicalDeviceComplianceManager:
-        """Gestionnaire de conformité aux normes des dispositifs médicaux"""
-        
+    """Gestionnaire de conformité aux normes des dispositifs médicaux"""
+
     def __init__(self):
         self.device_id = f"TSA-SCREENING-{REGULATORY_CONFIG['version']}"
         self.classification = "Class IIa (EU MDR) / CDS (FDA)"
@@ -426,24 +426,44 @@ class MedicalDeviceComplianceManager:
         self.audit_log_path = "logs/medical_device_audit.jsonl"
         os.makedirs(os.path.dirname(self.incident_log_path), exist_ok=True)
         os.makedirs(os.path.dirname(self.audit_log_path), exist_ok=True)
-        
+
     def record_usage(self, user_type: str, action: str):
-            """Enregistrement de l'utilisation pour traçabilité médicale"""
+        """Enregistrement de l'utilisation pour traçabilité médicale"""
         usage_log = {
-                "timestamp": datetime.datetime.now().isoformat(),
-                "device_id": self.device_id,
-                "user_type": user_type,
-                "action": action,
-                "software_version": REGULATORY_CONFIG["version"]
-            }
-            
+            "timestamp": datetime.datetime.now().isoformat(),
+            "device_id": self.device_id,
+            "user_type": user_type,
+            "action": action,
+            "software_version": REGULATORY_CONFIG["version"]
+        }
         try:
             with open(self.audit_log_path, 'a') as f:
                 f.write(json.dumps(usage_log) + '\n')
         except Exception as e:
             print(f"Erreur lors de l'enregistrement d'utilisation: {str(e)}")
-                
         return usage_log
+
+    def report_incident(self, incident_type: str, description: str, severity: str):
+        """Système de signalement d'incidents pour matériovigilance"""
+        incident_log = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "device_id": self.device_id,
+            "incident_type": incident_type,
+            "description": description,
+            "severity": severity,
+            "software_version": REGULATORY_CONFIG["version"],
+            "report_id": uuid.uuid4().hex[:8]
+        }
+        try:
+            with open(self.incident_log_path, 'a') as f:
+                f.write(json.dumps(incident_log) + '\n')
+        except Exception as e:
+            print(f"Erreur lors du signalement d'incident: {str(e)}")
+        # Notification supplémentaire pour incidents graves
+        if severity == "high":
+            print(f"INCIDENT CRITIQUE: {description}")
+        return incident_log
+
         
     def report_incident(self, incident_type: str, description: str, severity: str):
             """Système de signalement d'incidents pour matériovigilance"""
