@@ -250,7 +250,6 @@ def set_custom_theme():
     else:
         custom_theme = """
         <style>
-        /* ================ Variables Globales Optimisées ================ */
         :root {
             --primary: #2c3e50 !important;
             --secondary: #3498db !important;
@@ -267,12 +266,12 @@ def set_custom_theme():
             --shadow-medium: 0 4px 16px rgba(0,0,0,0.12) !important;
         }
 
-        /* ================ Structure Principale ================ */
+   
         [data-testid="stAppViewContainer"] {
             background-color: var(--background) !important;
         }
 
-        /* ================ Sidebar Compacte et Professionnelle ================ */
+
         [data-testid="stSidebar"] {
             /* Dimensions optimisées */
             width: var(--sidebar-width-collapsed) !important;
@@ -321,7 +320,6 @@ def set_custom_theme():
             padding: 16px 12px !important;
         }
 
-        /* ================ Masquage des Barres de Défilement ================ */
         [data-testid="stSidebar"]::-webkit-scrollbar,
         [data-testid="stSidebar"] > div::-webkit-scrollbar {
             width: 0px !important;
@@ -333,7 +331,6 @@ def set_custom_theme():
             scrollbar-width: none !important;
         }
 
-        /* ================ En-tête Professionnel ================ */
         [data-testid="stSidebar"] h2 {
             font-size: 0 !important;
             margin: 0 0 20px 0 !important;
@@ -368,7 +365,6 @@ def set_custom_theme():
             margin-right: 8px !important;
         }
 
-        /* ================ Options de Navigation Modernisées ================ */
         [data-testid="stSidebar"] .stRadio {
             padding: 0 !important;
             margin: 0 !important;
@@ -424,7 +420,7 @@ def set_custom_theme():
         [data-testid="stSidebar"] .stRadio label:nth-child(5) span::before { content: "📚" !important; }
         [data-testid="stSidebar"] .stRadio label:nth-child(6) span::before { content: "ℹ️" !important; }
 
-        /* Mode étendu - affichage du texte */
+
         [data-testid="stSidebar"]:hover .stRadio label span {
             font-size: 14px !important;
             font-weight: 500 !important;
@@ -441,14 +437,12 @@ def set_custom_theme():
             width: auto !important;
         }
 
-        /* Effets de survol */
         [data-testid="stSidebar"] .stRadio label:hover {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
             transform: translateX(3px) !important;
             box-shadow: var(--shadow-light) !important;
         }
 
-        /* Option sélectionnée */
         [data-testid="stSidebar"] .stRadio label[data-checked="true"] {
             background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
             color: white !important;
@@ -460,7 +454,6 @@ def set_custom_theme():
             transform: translateX(5px) !important;
         }
 
-        /* ================ Contenu Principal Adaptatif ================ */
         .main .block-container {
             margin-left: calc(var(--sidebar-width-collapsed) + 16px) !important;
             padding: 1.5rem !important;
@@ -468,7 +461,6 @@ def set_custom_theme():
             transition: var(--sidebar-transition) !important;
         }
 
-        /* ================ Indicateur Visuel Subtil ================ */
         [data-testid="stSidebar"]::after {
             content: "›" !important;
             position: absolute !important;
@@ -487,7 +479,6 @@ def set_custom_theme():
             transform: translateY(-50%) translateX(10px) !important;
         }
 
-        /* ================ Zone de Trigger Invisible ================ */
         .sidebar-trigger-zone {
             position: fixed !important;
             left: 0 !important;
@@ -498,7 +489,6 @@ def set_custom_theme():
             background: transparent !important;
         }
 
-        /* ================ Responsive Design ================ */
         @media (max-width: 768px) {
             [data-testid="stSidebar"] {
                 transform: translateX(-100%) !important;
@@ -522,7 +512,7 @@ def set_custom_theme():
             }
         }
 
-        /* ================ Améliorations Générales ================ */
+  
         .stButton > button {
             background: linear-gradient(135deg, var(--secondary), #2980b9) !important;
             color: white !important;
@@ -636,7 +626,7 @@ def set_custom_theme():
                 });
             }
             
-            // ===== INTÉGRATIONS CONFORMITÉ =====
+
             // Gestion des cookies RGPD
             window.addEventListener('message', function(event) {
                 if (event.data === 'accept_cookies') {
