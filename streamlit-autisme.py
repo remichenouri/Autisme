@@ -1867,57 +1867,48 @@ def show_ai_act_transparency():
     )
 
 
-# Modifier la fonction show_navigation_menu() pour ajouter l'option Conformité
-# Lignes ~300-330
 def show_navigation_menu():
-    """Menu de navigation optimisé et professionnel"""
-    st.markdown("## 🧩 Autisme - Navigation")
-    st.markdown("Choisissez un outil :")
+    """Menu de navigation dans la sidebar"""
+    with st.sidebar:
+        st.markdown("## 🧩 Autisme - Navigation")
+        st.markdown("Choisissez un outil :")
 
-    # Options optimisées avec icônes cohérentes et nouvelle option de conformité
-    options = [
-        "🏠 Accueil",
-        "🔍 Exploration", 
-        "🧠 Analyse ML",
-        "🤖 Prédiction par IA",
-        "📚 Documentation",
-        "ℹ️ À propos",
-        "🔒 Conformité"  # Nouvelle option
-    ]
+        options = [
+            "🏠 Accueil",
+            "🔍 Exploration", 
+            "🧠 Analyse ML",
+            "🤖 Prédiction par IA",
+            "📚 Documentation",
+            "ℹ️ À propos",
+            "🔒 Conformité"
+        ]
 
-    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
-        st.session_state.tool_choice = "🏠 Accueil"
+        if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+            st.session_state.tool_choice = "🏠 Accueil"
 
-    current_index = options.index(st.session_state.tool_choice)
+        current_index = options.index(st.session_state.tool_choice)
 
-    tool_choice = st.radio(
-        "",
-        options,
-        label_visibility="collapsed",
-        index=current_index,
-        key="main_navigation"
-    )
+        tool_choice = st.radio(
+            "",
+            options,
+            label_visibility="collapsed",
+            index=current_index,
+            key="main_navigation"
+        )
 
-    if tool_choice != st.session_state.tool_choice:
-        st.session_state.tool_choice = tool_choice
-        
-        # Log de navigation pour conformité
-        if hasattr(st.session_state, 'medical_manager'):
-            st.session_state.medical_manager.record_usage("Utilisateur", f"Navigation vers {tool_choice}")
-
-    # Affichage du statut de conformité
-    st.markdown("""
-    <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px;">
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">CE Classe IIa</span>
-            <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">RGPD</span>
-            <span style="background: #ffc107; color: black; padding: 3px 8px; border-radius: 4px; font-size: 10px;">AI Act</span>
+        # Affichage du statut de conformité
+        st.markdown("""
+        <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">CE Classe IIa</span>
+                <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">RGPD</span>
+                <span style="background: #ffc107; color: black; padding: 3px 8px; border-radius: 4px; font-size: 10px;">AI Act</span>
+            </div>
+            <div style="margin-top: 10px; font-size: 11px; color: #6c757d;">
+                Version: 2.1.0 | Mise à jour: 03/06/2025
+            </div>
         </div>
-        <div style="margin-top: 10px; font-size: 11px; color: #6c757d;">
-            Version: 2.1.0 | Mise à jour: 03/06/2025
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
     return tool_choice
 
