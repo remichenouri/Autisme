@@ -1874,7 +1874,6 @@ def show_ai_act_transparency():
 
 # Modifier la fonction show_navigation_menu() pour ajouter l'option Conformité
 # Lignes ~300-330
-
 def show_navigation_menu():
     """Menu de navigation optimisé et professionnel"""
     st.markdown("## 🧩 Autisme - Navigation")
@@ -1908,18 +1907,19 @@ def show_navigation_menu():
         st.session_state.tool_choice = tool_choice
         
         # Log de navigation pour conformité
-        st.session_state.medical_manager.record_usage("Utilisateur", f"Navigation vers {tool_choice}")
+        if hasattr(st.session_state, 'medical_manager'):
+            st.session_state.medical_manager.record_usage("Utilisateur", f"Navigation vers {tool_choice}")
 
     # Affichage du statut de conformité
     st.markdown("""
     <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px;">
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <span class="medical-device-badge">CE Classe IIa</span>
-            <span class="medical-device-badge">RGPD</span>
-            <span class="medical-device-badge">AI Act</span>
+            <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">CE Classe IIa</span>
+            <span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">RGPD</span>
+            <span style="background: #ffc107; color: black; padding: 3px 8px; border-radius: 4px; font-size: 10px;">AI Act</span>
         </div>
         <div style="margin-top: 10px; font-size: 11px; color: #6c757d;">
-            Version: 2.0.0 | Mise à jour: 03/06/2025
+            Version: 2.1.0 | Mise à jour: 03/06/2025
         </div>
     </div>
     """, unsafe_allow_html=True)
