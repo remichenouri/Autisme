@@ -647,7 +647,6 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
             return None
 
 
-# Nettoyage automatique des données expirées
 def automated_data_cleanup():
     """Suppression automatique des données expirées (RGPD Article 5.1.e)"""
     
@@ -673,6 +672,14 @@ def automated_data_cleanup():
         st.info(f"🗑️ Nettoyage automatique effectué - Données > {retention_days} jours supprimées")
     except Exception as e:
         st.warning(f"Erreur lors du nettoyage automatique : {str(e)}")
+        logging.error(f"Erreur nettoyage automatique: {e}")
+
+# Mise à jour de l'appel de fonction
+if st.session_state.get('last_cleanup') is None or \
+   (datetime.datetime.now() - st.session_state.get('last_cleanup', datetime.datetime.now())).days > 7:
+    automated_data_cleanup()
+    st.session_state['last_cleanup'] = datetime.datetime.now()
+
 
 # Appeler cette fonction périodiquement
 if st.session_state.get('last_cleanup') is None or \
