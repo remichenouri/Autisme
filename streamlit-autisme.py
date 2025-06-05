@@ -99,7 +99,6 @@ class SecureDataManager:
             raise
     
     def _get_or_create_key(self):
-    """Récupère ou crée une clé de chiffrement sécurisée"""
         try:
             key_env = os.getenv('ENCRYPTION_KEY')
             if key_env:
