@@ -19,7 +19,6 @@ st.set_page_config(
 
 # Tous les autres imports APRÈS st.set_page_config()
 import datetime as dt 
-import datetime
 import joblib
 import prince
 import uuid
@@ -39,6 +38,22 @@ import streamlit.components.v1 as components
 import plotly.express as px
 from cryptography.fernet import Fernet
 import logging
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+    st.warning("Matplotlib non disponible - certaines visualisations seront limitées")
+
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    st.warning("Plotly non disponible - certaines visualisations seront limitées")
+
 
 def safe_execution(func):
     """Décorateur pour l'exécution sécurisée des fonctions avec gestion d'erreurs"""
