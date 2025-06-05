@@ -89,24 +89,45 @@ class SecureDataManager:
     """Gestionnaire sécurisé pour données RGPD avec chiffrement"""
     
     def __init__(self):
-        self.db_path = "secure_compliance.db"
-        self.encryption_key = self._get_or_create_key()
-        self.cipher = Fernet(self.encryption_key)
-        self._init_database()
+        try:
+            self.db_path = "secure_compliance.db"
+            self.encryption_key = self._get_or_create_key()
+            self.cipher = Fernet(self.encryption_key)
+            self._init_database()
+        except Exception as e:
+            logging.error(f"Erreur initialisation SecureDataManager: {e}")
+            raise
     
     def _get_or_create_key(self):
         """Récupère ou crée une clé de chiffrement sécurisée"""
-        key_env = os.getenv('ENCRYPTION_KEY')
-        if key_env:
-            return key_env.encode()
-        else:
-            # En production, cette clé doit venir d'un service sécurisé
+        try:
+            key_env = os.getenv('ENCRYPTION_KEY')
+            if key_env:
+                return key_env.encode()
+            else:
+                # En production, cette clé doit venir d'un service sécurisé
+                return Fernet.generate_key()
+        except Exception as e:
+            logging.error(f"Erreur génération clé de chiffrement: {e}")
             return Fernet.generate_key()
     
-    def _init_database(self):
-        """Initialise la base de données SQLite sécurisée"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
+    def encrypt_data(self, data: str) -> str:
+        """Chiffre les données sensibles avec gestion d'erreur"""
+        try:
+            if not isinstance(data, str):
+                data = str(data)
+            return self.cipher.encrypt(data.encode()).decode()
+        except Exception as e:
+            logging.error(f"Erreur chiffrement: {e}")
+            return ""
+    
+    def decrypt_data(self, encrypted_data: str) -> str:
+        """Déchiffre les données avec gestion d'erreur"""
+        try:
+            return self.cipher.decrypt(encrypted_data.encode()).decode()
+        except Exception as e:
+            logging.error(f"Erreur déchiffrement: {e}")
+            return ""
         
         # Table des consentements RGPD
         cursor.execute('''
@@ -160,7 +181,7 @@ class SecureDataManager:
         return self.cipher.decrypt(encrypted_data.encode()).decode()
 
 
-REGULATORY_CONFIG = {
+    REGULATORY_CONFIG = {
         "app_name": "Dépistage TSA",
         "version": "2.0.0",
         "regulatory_status": {
