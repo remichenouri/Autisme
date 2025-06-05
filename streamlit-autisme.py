@@ -8112,30 +8112,52 @@ def main():
     
     # Navigation principale avec gestion d'erreurs
     try:
-        tool_choice = show_unified_sidebar_navigation()
-    except Exception as e:
-        st.error(f"Erreur dans la navigation: {str(e)}")
-        tool_choice = "🏠 Accueil"
+    # Vérification des imports critiques
+    if not all([st, pd, np, dt, uuid, logging]):
+        raise ImportError("Imports critiques manquants")
+        
+    # Appel sécurisé du thème
+    set_custom_theme()
     
-    # Affichage du contenu basé sur le choix
-    try:
-        if tool_choice == "🏠 Accueil":
-            show_home_page()
-        elif tool_choice == "🔍 Exploration":
-            show_data_exploration()
-        elif tool_choice == "🧠 Analyse ML":
-            show_ml_analysis()
-        elif tool_choice == "🤖 Prédiction par IA":
-            show_ai_prediction()
-        elif tool_choice == "📚 Documentation":
-            show_documentation()
-        elif tool_choice == "ℹ️ À propos":
-            show_about()
-        elif tool_choice == "🔒 Conformité":
-            show_compliance_interface()
-    except Exception as e:
-        st.error(f"Erreur dans l'affichage du contenu: {str(e)}")
-        st.info("Retour à la page d'accueil recommandé")
+    # Navigation principale
+    selected_tool = show_unified_sidebar_navigation()
+    
+    # Routage sécurisé
+    if selected_tool == "🏠 Accueil":
+        show_home_page()
+    elif selected_tool == "🔍 Exploration":
+        show_data_exploration()
+    elif selected_tool == "🤖 Prédiction par IA":
+        # Vérifier la surveillance humaine avant l'IA
+        if st.session_state.get('ai_manager') and \
+           hasattr(st.session_state.ai_manager, 'mandatory_human_oversight_interface'):
+            if st.session_state.ai_manager.mandatory_human_oversight_interface():
+                # Procéder à l'analyse IA
+                result = show_compliant_questionnaire()
+                if result:
+                    user_data, aq10_score = result
+                    perform_compliant_ai_analysis(user_data, aq10_score)
+        else:
+            st.error("Gestionnaire IA non disponible - Fonctionnalité limitée")
+    elif selected_tool == "📚 Documentation":
+        show_documentation()
+    elif selected_tool == "ℹ️ À propos":
+        show_about_page()
+    elif selected_tool == "🔒 Conformité":
+        show_compliance_page()
+    
+except Exception as e:
+    st.error(f"""
+    ### ⚠️ Erreur Application
+    Une erreur critique s'est produite: {str(e)}
+    
+    **Actions recommandées:**
+    - Rafraîchissez la page (F5)
+    - Videz le cache du navigateur
+    - Contactez le support technique
+    """)
+    logging.error(f"Erreur critique application: {e}", exc_info=True)
+
 
 def show_compliance_interface():
     """Interface de conformité RGPD/AI Act"""
