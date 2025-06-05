@@ -657,14 +657,17 @@ def show_unified_sidebar_navigation():
         </div>
         """, unsafe_allow_html=True)
         
-        # Vérification du consentement OBLIGATOIRE
+        # Vérification du consentement OBLIGATOIRE avec clé unique
         if not st.session_state.get('consent_screening', False):
             st.error("⚠️ Consentement RGPD requis")
             
             with st.expander("📋 Donner mon consentement", expanded=True):
+                # Utilisation d'une clé unique basée sur l'ID de session
+                unique_key = f"consent_screening_{st.session_state.get('user_session', 'default')}"
+                
                 consent_minimal = st.checkbox(
                     "J'accepte le traitement de mes données pour le dépistage TSA",
-                    key="consent_screening_minimal"
+                    key=unique_key
                 )
                 
                 if consent_minimal:
@@ -694,11 +697,14 @@ def show_unified_sidebar_navigation():
 
         current_index = options.index(st.session_state.tool_choice) if st.session_state.tool_choice in options else 0
 
+        # Clé unique pour la navigation
+        nav_key = f"main_navigation_{st.session_state.get('user_session', 'default')}"
+        
         tool_choice = st.radio(
             "",
             options,
             index=current_index,
-            key="main_navigation",
+            key=nav_key,
             label_visibility="collapsed"
         )
 
@@ -722,9 +728,11 @@ def show_unified_sidebar_navigation():
         </div>
         """, unsafe_allow_html=True)
         
-        # Accès rapide aux droits RGPD
+        # Accès rapide aux droits RGPD avec clé unique
         st.markdown("---")
-        if st.button("👤 Mes droits RGPD", use_container_width=True):
+        rights_button_key = f"rights_button_{st.session_state.get('user_session', 'default')}"
+        
+        if st.button("👤 Mes droits RGPD", use_container_width=True, key=rights_button_key):
             st.session_state.tool_choice = "🔒 Conformité"
             st.rerun()
 
