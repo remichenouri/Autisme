@@ -40,6 +40,18 @@ import plotly.express as px
 from cryptography.fernet import Fernet
 import logging
 
+def safe_execution(func):
+    """Décorateur pour l'exécution sécurisée des fonctions avec gestion d'erreurs"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            st.error(f"Erreur lors de l'exécution de {func.__name__}: {str(e)}")
+            logger.error(f"Erreur dans {func.__name__}: {str(e)}", exc_info=True)
+            return None
+    return wrapper
+
+
 # Création des dossiers nécessaires
 for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache', 'logs']:
     os.makedirs(folder, exist_ok=True)
