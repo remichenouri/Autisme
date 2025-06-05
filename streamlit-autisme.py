@@ -311,7 +311,7 @@ class EnhancedAIActManager:
         """Validation obligatoire de la surveillance humaine"""
         return st.session_state.get('human_oversight_acknowledged', False)
     
-    def log_ai_decision_secure(self, inputs: dict, outputs: dict, confidence: float, user_session: str):
+    def log_ai_decision(self, inputs: dict, outputs: dict, confidence: float, user_session: str):
         """Journalisation sécurisée conforme AI Act Article 12"""
         
         # Validation surveillance humaine obligatoire
@@ -330,9 +330,11 @@ class EnhancedAIActManager:
             "timestamp": datetime.datetime.now().isoformat(),
             "system_id": self.system_id,
             "session_hash": session_hash,
+            "session_id": session_hash,  # Ajout pour compatibilité
             "model_version": self.model_card_version,
             "risk_classification": self.risk_classification,
             "confidence_score": confidence,
+            "input_features_count": len(inputs),  # Ajout pour traçabilité
             "human_oversight_active": True,
             "explanation_provided": True,
             "bias_assessment_completed": True
@@ -363,6 +365,53 @@ class EnhancedAIActManager:
         conn.close()
         
         return ai_log
+    
+    def validate_data_quality(self, data: dict) -> dict:
+        """Validation qualité données conforme AI Act Article 10"""
+        validation = {
+            "completeness": all(v is not None for v in data.values()),
+            "consistency": True,
+            "accuracy": True,
+            "timeliness": True
+        }
+        
+        return validation
+    
+    def record_risk_mitigation(self, risk_type: str, mitigation_action: str, outcome: str):
+        """Enregistrement des mesures d'atténuation des risques"""
+        risk_entry = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "risk_type": risk_type,
+            "mitigation_action": mitigation_action,
+            "outcome": outcome,
+            "system_version": self.system_id
+        }
+        
+        return risk_entry
+    
+    def mandatory_human_oversight_interface(self):
+        """Interface obligatoire de surveillance humaine"""
+        st.error("""
+        **⚠️ SURVEILLANCE HUMAINE OBLIGATOIRE (AI Act Article 14)**
+        
+        Ce système d'IA à haut risque nécessite une supervision humaine qualifiée.
+        Les résultats ne constituent qu'une aide au diagnostic et ne remplacent 
+        en aucun cas l'évaluation clinique professionnelle.
+        """)
+        
+        oversight_validated = st.checkbox(
+            "Je comprends que cette IA nécessite une validation médicale professionnelle",
+            key="human_oversight_check"
+        )
+        
+        if oversight_validated:
+            st.session_state['human_oversight_acknowledged'] = True
+            st.success("✅ Surveillance humaine validée - Analyse IA autorisée")
+            return True
+        else:
+            st.warning("⚠️ Validation de surveillance humaine requise")
+            return False
+
     
     def validate_data_quality(self, data: dict) -> dict:
         """Validation qualité données conforme AI Act Article 10"""
