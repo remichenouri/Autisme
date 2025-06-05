@@ -2148,7 +2148,7 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-        options = [
+    options = [
             "🏠 Accueil",
             "🔍 Exploration", 
             "🧠 Analyse ML",
