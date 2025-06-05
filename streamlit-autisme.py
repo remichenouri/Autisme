@@ -311,21 +311,6 @@ class EnhancedGDPRManager:
         return anonymized
 
 
-def safe_execution(func):
-    """Décorateur pour l'exécution sécurisée des fonctions"""
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            st.error(f"Erreur dans {func.__name__}: {str(e)}")
-            st.error("Veuillez recharger la page ou contacter le support technique.")
-            return None
-    return wrapper
-
-# Appliquer le décorateur aux fonctions principales
-show_home_page = safe_execution(show_home_page)
-show_data_exploration = safe_execution(show_data_exploration)
-show_ai_prediction = safe_execution(show_ai_prediction)
 
 
     # Classe de gestion de la conformité AI Act
@@ -7797,6 +7782,21 @@ def show_compliance_page():
         votre historique en contactant notre DPO.
         """)
 
+def safe_execution(func):
+    """Décorateur pour l'exécution sécurisée des fonctions"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            st.error(f"Erreur dans {func.__name__}: {str(e)}")
+            st.error("Veuillez recharger la page ou contacter le support technique.")
+            return None
+    return wrapper
+
+# Appliquer le décorateur aux fonctions principales
+show_home_page = safe_execution(show_home_page)
+show_data_exploration = safe_execution(show_data_exploration)
+show_ai_prediction = safe_execution(show_ai_prediction)
 
 def main():
     """Fonction principale de l'application"""
