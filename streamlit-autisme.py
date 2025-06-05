@@ -2185,7 +2185,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-return tool_choice
+    return tool_choice
 
 set_custom_theme()
 
