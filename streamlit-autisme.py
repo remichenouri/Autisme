@@ -675,15 +675,36 @@ if 'gdpr_manager' not in st.session_state:
 
 @st.cache_data(ttl=3600, max_entries=100)
 def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histogram', title=None):
-    """Crée une visualisation Plotly avec gestion d'erreur"""
+    """Crée une visualisation Plotly avec gestion d'erreur robuste"""
     try:
         import plotly.express as px
         import plotly.graph_objects as go
+        
+        # Vérification de sécurité pour éviter les erreurs
+        if df is None or df.empty:
+            fig = go.Figure()
+            fig.add_annotation(
+                text="Aucune donnée disponible",
+                xref="paper", yref="paper",
+                x=0.5, y=0.5, showarrow=False
+            )
+            return fig
         
         # Échantillonnage si dataset trop grand
         sample_threshold = 10000
         if len(df) > sample_threshold:
             df = df.sample(sample_threshold, random_state=42)
+
+        # Vérification des colonnes
+        if color and color not in df.columns:
+            color = None
+            
+        if x and x not in df.columns:
+            # Fallback en cas de colonne manquante
+            x = df.columns[0] if len(df.columns) > 0 else None
+            
+        if y and y not in df.columns:
+            y = None
 
         # Palette de couleurs
         palette = {"Yes": "#3498db", "No": "#2ecc71", "Unknown": "#95a5a6"}
@@ -721,13 +742,16 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         return fig
         
     except Exception as e:
-        logging.error(f"Erreur création graphique Plotly: {e}")
+        logging.error(f"Erreur création graphique Plotly: {e}", exc_info=True)
         # Graphique de fallback
-        try:
-            fig = px.bar(x=[1], y=[1], title="Erreur de visualisation")
-            return fig
-        except:
-            return None
+        fig = go.Figure()
+        fig.add_annotation(
+            text=f"Erreur de visualisation: {str(e)}",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False
+        )
+        return fig
+
 
 
 def automated_data_cleanup():
