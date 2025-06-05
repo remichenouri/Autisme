@@ -99,17 +99,30 @@ class SecureDataManager:
             raise
     
     def _get_or_create_key(self):
-        """Récupère ou crée une clé de chiffrement sécurisée"""
+    """Récupère ou crée une clé de chiffrement sécurisée"""
         try:
             key_env = os.getenv('ENCRYPTION_KEY')
             if key_env:
                 return key_env.encode()
             else:
-                # En production, cette clé doit venir d'un service sécurisé
-                return Fernet.generate_key()
+                # Vérifier si un fichier de clé existe déjà
+                key_file = "encryption.key"
+                if os.path.exists(key_file):
+                    with open(key_file, "rb") as f:
+                        return f.read()
+                else:
+                    # Générer une nouvelle clé
+                    new_key = Fernet.generate_key()
+                    # Sauvegarder la clé pour une utilisation future
+                    os.makedirs(os.path.dirname(key_file) or '.', exist_ok=True)
+                    with open(key_file, "wb") as f:
+                        f.write(new_key)
+                    return new_key
         except Exception as e:
             logging.error(f"Erreur génération clé de chiffrement: {e}")
+            # Fallback sécurisé en cas d'erreur
             return Fernet.generate_key()
+
     
     def encrypt_data(self, data: str) -> str:
         """Chiffre les données sensibles avec gestion d'erreur"""
