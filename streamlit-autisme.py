@@ -579,7 +579,7 @@ class EnhancedAIActManager:
         return risk_entry
     
     def mandatory_human_oversight_interface(self):
-    """Interface obligatoire de surveillance humaine"""
+        """Interface obligatoire de surveillance humaine"""
         st.error("""
         **⚠️ SURVEILLANCE HUMAINE OBLIGATOIRE (AI Act Article 14)**
         
@@ -605,6 +605,7 @@ class EnhancedAIActManager:
             st.session_state['human_oversight_acknowledged'] = False
             st.warning("⚠️ Validation de surveillance humaine requise")
             return False
+
 
     
     def validate_data_quality(self, data: dict) -> dict:
