@@ -1150,17 +1150,6 @@ def show_enhanced_gdpr_consent():
         - **Recherche** : Art. 6.1.a (consentement) + 9.2.j (recherche en santé publique)
         - **Amélioration algorithme** : Art. 6.1.f + 9.2.j
         
-        ### Données Traitées (Minimisation RGPD)
-        - **Strictement nécessaires** : Réponses AQ-10, âge approximatif, diagnostic
-        - **Optionnelles** : Genre, origine ethnique (pour recherche uniquement)
-        - **Techniques** : Identifiant de session pseudonymisé, logs d'utilisation
-        
-        ### Sécurité et Conservation
-        - **Chiffrement** : AES-256 de toutes les données sensibles
-        - **Pseudonymisation** : Hachage SHA-256 des identifiants
-        - **Conservation** : 24 mois maximum, suppression automatique
-        - **Accès** : Limité aux chercheurs autorisés avec double authentification
-        
         ### Vos Droits Effectifs
         - ✅ **Accès** : Visualisation de toutes vos données via interface dédiée
         - ✅ **Rectification** : Correction possible via formulaire sécurisé
@@ -1168,33 +1157,30 @@ def show_enhanced_gdpr_consent():
         - ✅ **Opposition** : Refus du traitement à tout moment
         - ✅ **Portabilité** : Export JSON chiffré de vos données
         - 📧 **Contact DPO** : dpo@depistage-tsa.fr (réponse sous 72h)
-        
-        ### Transferts et Sous-traitants
-        - **Hébergement** : Streamlit Cloud (conforme RGPD, servers EU)
-        - **Aucun transfert** vers pays tiers non-adéquats
-        - **Contrats DPA** avec tous les sous-traitants
-        
-        ### Réclamations
-        - **CNIL** : www.cnil.fr ou 3, Place de Fontenoy, 75007 Paris
-        - **Droit de recours** effectif garanti
         """)
     
-    # Consentements granulaires avec validation juridique
+    # Consentements granulaires avec validation juridique et clés uniques
     st.markdown("### ✅ Consentements Spécifiques et Granulaires")
     
-    with st.form("enhanced_consent_form"):
+    # Générer un identifiant unique pour le formulaire
+    session_id = st.session_state.get('user_session', 'default')
+    form_key = f"enhanced_consent_form_{session_id}"
+    
+    with st.form(form_key):
         col1, col2 = st.columns(2)
         
         with col1:
             consent_screening = st.checkbox(
                 "🔬 **OBLIGATOIRE** : Traitement pour dépistage TSA",
                 value=False,
+                key=f"consent_screening_form_{session_id}",
                 help="Base légale : Intérêt légitime + finalité médicale (Art. 6.1.f + 9.2.h RGPD)"
             )
             
             consent_research = st.checkbox(
                 "📊 **OPTIONNEL** : Utilisation pour recherche anonymisée",
                 value=False,
+                key=f"consent_research_form_{session_id}",
                 help="Base légale : Consentement explicite (Art. 6.1.a + 9.2.a RGPD)"
             )
             
@@ -1202,12 +1188,14 @@ def show_enhanced_gdpr_consent():
             consent_demographics = st.checkbox(
                 "👥 **OPTIONNEL** : Collecte données démographiques élargies",
                 value=False,
+                key=f"consent_demographics_form_{session_id}",
                 help="Genre, origine pour études épidémiologiques"
             )
             
             consent_followup = st.checkbox(
                 "📧 **OPTIONNEL** : Contact pour suivi longitudinal",
                 value=False,
+                key=f"consent_followup_form_{session_id}",
                 help="Possibilité de recontact pour études de suivi (email requis)"
             )
         
@@ -1215,12 +1203,14 @@ def show_enhanced_gdpr_consent():
         st.markdown("### 📝 Validation de Compréhension")
         understanding_check = st.checkbox(
             "Je confirme avoir lu et compris les informations sur le traitement de mes données",
-            value=False
+            value=False,
+            key=f"understanding_check_form_{session_id}"
         )
         
         age_verification = st.checkbox(
             "Je confirme être majeur(e) ou avoir l'autorisation parentale pour ce test",
-            value=False
+            value=False,
+            key=f"age_verification_form_{session_id}"
         )
         
         submitted = st.form_submit_button("✅ Valider mes Choix de Consentement")
