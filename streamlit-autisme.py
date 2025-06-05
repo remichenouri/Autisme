@@ -2158,12 +2158,12 @@ def show_home_page():
             "🔒 Conformité"
         ]
 
-        if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
+    if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
             st.session_state.tool_choice = "🏠 Accueil"
 
-        current_index = options.index(st.session_state.tool_choice)
+    current_index = options.index(st.session_state.tool_choice)
 
-        tool_choice = st.radio(
+    tool_choice = st.radio(
             "",
             options,
             label_visibility="collapsed",
@@ -2172,7 +2172,7 @@ def show_home_page():
         )
 
         # Affichage du statut de conformité
-        st.markdown("""
+    st.markdown("""
         <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px;">
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px;">CE Classe IIa</span>
@@ -2185,7 +2185,7 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
 
-    return tool_choice
+return tool_choice
 
 set_custom_theme()
 
