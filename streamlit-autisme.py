@@ -128,49 +128,70 @@ class SecureDataManager:
         except Exception as e:
             logging.error(f"Erreur déchiffrement: {e}")
             return ""
-        
-        # Table des consentements RGPD
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS consent_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_session_hash TEXT NOT NULL,
-                consent_type TEXT NOT NULL,
-                granted BOOLEAN NOT NULL,
-                consent_version TEXT NOT NULL,
-                timestamp DATETIME NOT NULL,
-                ip_hash TEXT,
-                encrypted_details TEXT
-            )
-        ''')
-        
-        # Table des logs de traitement RGPD
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS processing_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_session_hash TEXT NOT NULL,
-                processing_type TEXT NOT NULL,
-                data_categories TEXT NOT NULL,
-                legal_basis TEXT NOT NULL,
-                timestamp DATETIME NOT NULL,
-                encrypted_metadata TEXT
-            )
-        ''')
-        
-        # Table des décisions IA
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS ai_decisions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_hash TEXT NOT NULL,
-                model_version TEXT NOT NULL,
-                confidence_score REAL NOT NULL,
-                timestamp DATETIME NOT NULL,
-                encrypted_input_hash TEXT,
-                encrypted_output TEXT
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
+    def _init_database(self):
+    """Initialise la base de données sécurisée avec schéma de tables"""
+        try:
+            # S'assurer que le répertoire existe
+            os.makedirs(os.path.dirname(self.db_path) or '.', exist_ok=True)
+            
+            # Connexion avec gestion d'erreur
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            try:
+                # Table des consentements RGPD
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS consent_records (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_session_hash TEXT NOT NULL,
+                        consent_type TEXT NOT NULL,
+                        granted BOOLEAN NOT NULL,
+                        consent_version TEXT NOT NULL,
+                        timestamp DATETIME NOT NULL,
+                        ip_hash TEXT,
+                        encrypted_details TEXT
+                    )
+                ''')
+                
+                # Table des logs de traitement RGPD
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS processing_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_session_hash TEXT NOT NULL,
+                        processing_type TEXT NOT NULL,
+                        data_categories TEXT NOT NULL,
+                        legal_basis TEXT NOT NULL,
+                        timestamp DATETIME NOT NULL,
+                        encrypted_metadata TEXT
+                    )
+                ''')
+                
+                # Table des décisions IA
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS ai_decisions (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        session_hash TEXT NOT NULL,
+                        model_version TEXT NOT NULL,
+                        confidence_score REAL NOT NULL,
+                        timestamp DATETIME NOT NULL,
+                        encrypted_input_hash TEXT,
+                        encrypted_output TEXT
+                    )
+                ''')
+                
+                conn.commit()
+            except sqlite3.Error as e:
+                logging.error(f"Erreur SQL lors de la création des tables: {e}")
+                conn.rollback()
+                raise
+            finally:
+                # Fermeture propre de la connexion
+                conn.close()
+                
+        except Exception as e:
+            logging.error(f"Erreur critique dans _init_database: {e}", exc_info=True)
+            raise
+
     
     def encrypt_data(self, data: str) -> str:
         """Chiffre les données sensibles"""
