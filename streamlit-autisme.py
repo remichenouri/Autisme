@@ -865,7 +865,7 @@ def initialize_session_state():
     """Initialise l'état de session de manière robuste"""
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
-
+        
         # Génération d'un ID de session unique
         if 'user_session' not in st.session_state:
             st.session_state.user_session = str(uuid.uuid4())
@@ -875,22 +875,32 @@ def initialize_session_state():
             initialize_compliance_managers()
         except Exception as e:
             logging.error(f"Erreur lors de l'initialisation des gestionnaires: {e}")
-            st.error("Erreur d'initialisation. L'application fonctionnera en mode limité.")
+            # Continuer en mode dégradé
 
-        # Autres initialisations...
-        if 'tool_choice' not in st.session_state:
-            st.session_state.tool_choice = "🏠 Accueil"
-            
-        if 'aq10_total' not in st.session_state:
-            st.session_state.aq10_total = 0
-            
-        if 'aq10_responses' not in st.session_state:
-            st.session_state.aq10_responses = []
-            
-        st.session_state.data_exploration_expanded = True
+        # Autres initialisations avec valeurs par défaut sécurisées
+        session_defaults = {
+            'tool_choice': "🏠 Accueil",
+            'aq10_total': 0,
+            'aq10_responses': [],
+            'data_exploration_expanded': True,
+            'consent_screening': False,
+            'human_oversight_acknowledged': False,
+            'authenticated': False,
+            'session_start_time': dt.datetime.now(),
+            'last_cleanup': None
+        }
         
-# Appel en début d'application
-initialize_session_state()
+        for key, default_value in session_defaults.items():
+            if key not in st.session_state:
+                st.session_state[key] = default_value
+
+# Appel sécurisé en début d'application
+try:
+    initialize_session_state()
+except Exception as e:
+    logging.error(f"Erreur critique d'initialisation: {e}")
+    st.error("Erreur d'initialisation - L'application fonctionnera en mode limité")
+
 
 def show_unified_sidebar_navigation():
     """Navigation unifiée dans la sidebar avec consentement intégré"""
