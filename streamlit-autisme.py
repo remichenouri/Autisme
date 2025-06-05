@@ -404,7 +404,11 @@ class EnhancedAIActManager:
         conn.close()
         
         return ai_log
-    
+
+    def validate_human_oversight(self) -> bool:
+        """Validation obligatoire de la surveillance humaine"""
+        return st.session_state.get('human_oversight_acknowledged', False)
+
     def validate_data_quality(self, data: dict) -> dict:
         """Validation qualité données conforme AI Act Article 10"""
         validation = {
@@ -564,6 +568,63 @@ if 'gdpr_manager' not in st.session_state:
     st.session_state.user_session = str(uuid.uuid4())
     st.session_state.authenticated = False
     st.session_state.session_start_time = dt.datetime.now()
+
+@st.cache_data(ttl=3600, max_entries=100)
+def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histogram', title=None):
+    """Crée une visualisation Plotly avec gestion d'erreur"""
+    try:
+        import plotly.express as px
+        import plotly.graph_objects as go
+        
+        # Échantillonnage si dataset trop grand
+        sample_threshold = 10000
+        if len(df) > sample_threshold:
+            df = df.sample(sample_threshold, random_state=42)
+
+        # Palette de couleurs
+        palette = {"Yes": "#3498db", "No": "#2ecc71", "Unknown": "#95a5a6"}
+        
+        # Configuration de base
+        base_layout = dict(
+            height=500,
+            margin=dict(l=20, r=20, t=40, b=20),
+            template="simple_white"
+        )
+
+        # Création du graphique selon le type
+        if kind == 'histogram':
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette)
+        elif kind == 'box':
+            fig = px.box(df, x=x, y=y, color=color, color_discrete_map=palette)
+        elif kind == 'bar':
+            fig = px.bar(df, x=x, y=y, color=color, color_discrete_map=palette)
+        elif kind == 'scatter':
+            fig = px.scatter(df, x=x, y=y, color=color, color_discrete_map=palette)
+        elif kind == 'pie':
+            fig = px.pie(df, names=names, color=color, color_discrete_map=palette)
+        elif kind == 'count':
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette)
+        else:
+            # Type par défaut
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette)
+
+        # Application du layout
+        fig.update_layout(**base_layout)
+        
+        if title:
+            fig.update_layout(title=title)
+
+        return fig
+        
+    except Exception as e:
+        logging.error(f"Erreur création graphique Plotly: {e}")
+        # Graphique de fallback
+        try:
+            fig = px.bar(x=[1], y=[1], title="Erreur de visualisation")
+            return fig
+        except:
+            return None
+
 
 # Nettoyage automatique des données expirées
 def automated_data_cleanup():
