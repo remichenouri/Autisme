@@ -123,42 +123,44 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class SecureDataManager:
-    """Gestionnaire sécurisé pour données RGPD avec chiffrement"""
+    """Version allégée du gestionnaire sécurisé"""
     
     def __init__(self):
         try:
+            from cryptography.fernet import Fernet
             self.db_path = "secure_compliance.db"
             self.encryption_key = self._get_or_create_key()
             self.cipher = Fernet(self.encryption_key)
-            self._init_database()
+            self.encryption_available = True
+        except ImportError:
+            logging.warning("Cryptography non disponible - mode sécurisé dégradé")
+            self.db_path = "compliance.db"
+            self.cipher = None
+            self.encryption_available = False
         except Exception as e:
-            logging.error(f"Erreur initialisation SecureDataManager: {e}")
-            raise
+            logging.error(f"Erreur initialisation chiffrement: {e}")
+            self.encryption_available = False
+        
+        self._init_database()
     
-    def _get_or_create_key(self):
-        """Récupère ou crée une clé de chiffrement sécurisée"""
-        try:
-            key_env = os.getenv('ENCRYPTION_KEY')
-            if key_env:
-                return key_env.encode()
-            else:
-                # Vérifier si un fichier de clé existe déjà
-                key_file = "encryption.key"
-                if os.path.exists(key_file):
-                    with open(key_file, "rb") as f:
-                        return f.read()
-                else:
-                    # Générer une nouvelle clé
-                    new_key = Fernet.generate_key()
-                    # Sauvegarder la clé pour une utilisation future
-                    os.makedirs(os.path.dirname(key_file) or '.', exist_ok=True)
-                    with open(key_file, "wb") as f:
-                        f.write(new_key)
-                    return new_key
-        except Exception as e:
-            logging.error(f"Erreur génération clé de chiffrement: {e}")
-            # Fallback sécurisé en cas d'erreur
-            return Fernet.generate_key()
+    def encrypt_data(self, data: str) -> str:
+        """Chiffre les données si possible, sinon stockage en base64"""
+        if self.encryption_available and self.cipher:
+            return self.cipher.encrypt(data.encode()).decode()
+        else:
+            # Fallback : encodage base64 simple (moins sécurisé)
+            import base64
+            return base64.b64encode(data.encode()).decode()
+    
+    def decrypt_data(self, encrypted_data: str) -> str:
+        """Déchiffre les données avec fallback"""
+        if self.encryption_available and self.cipher:
+            return self.cipher.decrypt(encrypted_data.encode()).decode()
+        else:
+            # Fallback : décodage base64
+            import base64
+            return base64.b64decode(encrypted_data.encode()).decode()
+
     
     def _init_database(self):
         """Initialise la base de données sécurisée avec schéma de tables"""
