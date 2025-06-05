@@ -322,10 +322,6 @@ class EnhancedAIActManager:
         self.risk_classification = "HIGH_RISK_MEDICAL_AI"
         self.model_card_version = "2.1.0"
         self.secure_manager = SecureDataManager()
-        
-    def validate_human_oversight(self) -> bool:
-        """Validation obligatoire de la surveillance humaine"""
-        return st.session_state.get('human_oversight_acknowledged', False)
     
     def log_ai_decision(self, inputs: dict, outputs: dict, confidence: float, user_session: str):
         """Journalisation sécurisée conforme AI Act Article 12"""
