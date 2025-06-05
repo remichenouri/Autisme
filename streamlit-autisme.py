@@ -393,20 +393,39 @@ class EnhancedGDPRManager:
         return anonymized
 
 
+# Initialisation sécurisée des gestionnaires de conformité
 def initialize_compliance_managers():
     """Initialisation sécurisée des gestionnaires de conformité"""
     try:
+        # Créer un manager de sécurité partagé pour tous les gestionnaires
+        if 'secure_manager' not in st.session_state:
+            st.session_state.secure_manager = SecureDataManager()
+            
+        # Utiliser le même manager de sécurité pour tous les gestionnaires
+        secure_manager = st.session_state.secure_manager
+        
         if 'gdpr_manager' not in st.session_state:
             st.session_state.gdpr_manager = EnhancedGDPRManager()
+            # Modifier pour utiliser le gestionnaire de sécurité existant
+            st.session_state.gdpr_manager.secure_manager = secure_manager
+            
         if 'ai_manager' not in st.session_state:
             st.session_state.ai_manager = EnhancedAIActManager()
+            # Modifier pour utiliser le gestionnaire de sécurité existant
+            st.session_state.ai_manager.secure_manager = secure_manager
+            
         if 'medical_manager' not in st.session_state:
             st.session_state.medical_manager = MedicalDeviceComplianceManager()
+            
         return True
     except Exception as e:
         st.error(f"Erreur d'initialisation des gestionnaires: {str(e)}")
+        logging.error(f"Erreur d'initialisation des gestionnaires: {e}", exc_info=True)
         return False
 
+# Appeler cette fonction en début d'application
+if not initialize_compliance_managers():
+    st.warning("L'application fonctionne en mode dégradé. Certaines fonctionnalités peuvent être limitées.")
 
     # Classe de gestion de la conformité AI Act
 class EnhancedAIActManager:
