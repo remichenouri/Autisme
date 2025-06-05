@@ -646,7 +646,7 @@ def show_unified_sidebar_navigation():
     """Navigation unifiée dans la sidebar avec consentement intégré"""
     
     with st.sidebar:
-        # Logo/titre de l'application
+        # Logo/titre (inchangé)
         st.markdown("""
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #1f77b4; font-size: 1.8rem;">🧩 Dépistage TSA</h1>
@@ -654,12 +654,15 @@ def show_unified_sidebar_navigation():
         </div>
         """, unsafe_allow_html=True)
         
-        # Vérification du consentement OBLIGATOIRE avec clé unique
+        # Section RGPD avec cadenas visible
+        st.markdown("---")
+        st.markdown("### 🔒 Statut RGPD")
+        
         if not st.session_state.get('consent_screening', False):
-            st.error("⚠️ Consentement RGPD requis")
+            st.error("🔒 Consentement RGPD requis")
             
             with st.expander("📋 Donner mon consentement", expanded=True):
-                # Utilisation d'une clé unique basée sur l'ID de session
+                # CORRECTION : Clé unique basée sur l'ID de session
                 unique_key = f"consent_screening_{st.session_state.get('user_session', 'default')}"
                 
                 consent_minimal = st.checkbox(
@@ -668,33 +671,35 @@ def show_unified_sidebar_navigation():
                 )
                 
                 if consent_minimal:
-                    # Enregistrement du consentement
                     st.session_state['consent_screening'] = True
+                    st.session_state.gdpr_manager.record_consent_secure(
+                        st.session_state.user_session,
+                        "screening",
+                        True
+                    )
                     st.success("✅ Consentement accordé")
                     st.rerun()
                 else:
-                    st.stop()  # Arrête l'exécution si pas de consentement
+                    st.stop()
+        else:
+            st.success("✅ Consentement RGPD accordé")
         
-        # Navigation principale (seulement si consentement accordé)
+        # Navigation principale
         st.markdown("---")
         st.markdown("### 📍 Navigation")
         
         options = [
             "🏠 Accueil",
             "🔍 Exploration", 
-            "🧠 Analyse ML",
             "🤖 Prédiction par IA",
             "📚 Documentation",
             "ℹ️ À propos",
             "🔒 Conformité"
         ]
 
-        if 'tool_choice' not in st.session_state:
-            st.session_state.tool_choice = "🏠 Accueil"
-
         current_index = options.index(st.session_state.tool_choice) if st.session_state.tool_choice in options else 0
-
-        # Clé unique pour la navigation
+        
+        # CORRECTION : Clé unique pour la navigation
         nav_key = f"main_navigation_{st.session_state.get('user_session', 'default')}"
         
         tool_choice = st.radio(
@@ -707,7 +712,6 @@ def show_unified_sidebar_navigation():
 
         if tool_choice != st.session_state.tool_choice:
             st.session_state.tool_choice = tool_choice
-        
         # Statuts de conformité
         st.markdown("---")
         st.markdown("### 🔐 Statut Conformité")
