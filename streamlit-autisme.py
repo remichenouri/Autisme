@@ -2350,75 +2350,108 @@ def get_img_with_href(img_url, target_url, as_banner=False):
 
 @st.cache_data(ttl=86400)
 def load_dataset():
+    """Chargement sécurisé des datasets avec gestion d'erreur complète"""
     try:
-        ds1_id = '1ai1QlLzn0uo-enw4IzC53jJ8qoPc845G'
-        ds2_id = '1MOEhPxMNZH8LvXahvYAKiVFb9t8vAxaE'
-        ds3_id = '12B-scaR0TF7TuJzelIqmlxXDjnew67-K'
-        ds4_id = '1U9buLTKR_XuLWu9l3SOgvF6d9cS_YTFO'
-        ds5_id = '1NdXYppnmiheLFtvrdRHDk-W-zHKO0wYp'
-        final_id = '1mm6sRacDmoL941POmydQgzdVAi9lFPit'
+        # IDs des datasets
+        datasets_config = {
+            'ds1': '1ai1QlLzn0uo-enw4IzC53jJ8qoPc845G',
+            'ds2': '1MOEhPxMNZH8LvXahvYAKiVFb9t8vAxaE',
+            'ds3': '12B-scaR0TF7TuJzelIqmlxXDjnew67-K',
+            'ds4': '1U9buLTKR_XuLWu9l3SOgvF6d9cS_YTFO',
+            'ds5': '1NdXYppnmiheLFtvrdRHDk0wYkO0wYp',
+            'final': '1mm6sRacDmoL941POmydQgzdVAi9lFPit'
+        }
 
         cache_dir = "data_cache"
         os.makedirs(cache_dir, exist_ok=True)
-        final_path = os.path.join(cache_dir, "final_dataset.csv")
+        
+        # Chargement ou téléchargement des datasets
+        datasets = {}
+        for name, file_id in datasets_config.items():
+            cache_path = os.path.join(cache_dir, f"{name}.csv")
+            
+            try:
+                if os.path.exists(cache_path):
+                    datasets[name] = pd.read_csv(cache_path)
+                else:
+                    url = f'https://drive.google.com/uc?export=download&id={file_id}'
+                    datasets[name] = pd.read_csv(url)
+                    datasets[name].to_csv(cache_path, index=False)
+            except Exception as e:
+                logging.warning(f"Erreur chargement {name}: {e}")
+                datasets[name] = pd.DataFrame()
 
-        if os.path.exists(final_path):
-            df = pd.read_csv(final_path)
-            df_ds1 = pd.read_csv(os.path.join(cache_dir, "ds1.csv"))
-            df_ds2 = pd.read_csv(os.path.join(cache_dir, "ds2.csv"))
-            df_ds3 = pd.read_csv(os.path.join(cache_dir, "ds3.csv"))
-            df_ds4 = pd.read_csv(os.path.join(cache_dir, "ds4.csv"))
-            df_ds5 = pd.read_csv(os.path.join(cache_dir, "ds5.csv"))
-        else:
-            url_final = f'https://drive.google.com/uc?export=download&id={final_id}'
-            df = pd.read_csv(url_final)
-            df.to_csv(final_path, index=False)
+        # Dataset principal
+        df = datasets.get('final', pd.DataFrame())
+        
+        # Nettoyage et préparation
+        if not df.empty:
+            df = clean_dataset(df)
+        
+        # Calcul des statistiques
+        df_stats = calculate_dataset_stats(df) if not df.empty else {}
+        
+        return (
+            df,
+            datasets.get('ds1', pd.DataFrame()),
+            datasets.get('ds2', pd.DataFrame()),
+            datasets.get('ds3', pd.DataFrame()),
+            datasets.get('ds4', pd.DataFrame()),
+            datasets.get('ds5', pd.DataFrame()),
+            df_stats
+        )
+        
+    except Exception as e:
+        logging.error(f"Erreur critique dans load_dataset: {e}")
+        empty_df = pd.DataFrame()
+        return empty_df, empty_df, empty_df, empty_df, empty_df, empty_df, {}
 
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                futures = []
-                urls = [
-                    (f'https://drive.google.com/uc?export=download&id={ds1_id}', "ds1.csv"),
-                    (f'https://drive.google.com/uc?export=download&id={ds2_id}', "ds2.csv"),
-                    (f'https://drive.google.com/uc?export=download&id={ds3_id}', "ds3.csv"),
-                    (f'https://drive.google.com/uc?export=download&id={ds4_id}', "ds4.csv"),
-                    (f'https://drive.google.com/uc?export=download&id={ds5_id}', "ds5.csv")
-                ]
-
-                for url, filename in urls:
-                    futures.append(executor.submit(download_and_save_dataset, url, os.path.join(cache_dir, filename)))
-
-                df_ds1, df_ds2, df_ds3, df_ds4, df_ds5 = [future.result() for future in futures]
-
-        rename_dict = {'tsa': 'TSA', 'gender': 'Genre'}
-        df = df.rename(columns={k: v for k, v in rename_dict.items() if k in df.columns})
-
+def clean_dataset(df):
+    """Fonction de nettoyage du dataset"""
+    try:
+        # Suppression des colonnes inutiles
         if 'Unnamed: 0' in df.columns:
             df = df.drop(columns=['Unnamed: 0'])
-
-        if 'TSA' in df.columns: df['TSA'] = df['TSA'].str.title()
-        if 'Genre' in df.columns: df['Genre'] = df['Genre'].str.capitalize()
-
+        
+        # Renommage des colonnes
+        rename_dict = {'tsa': 'TSA', 'gender': 'Genre'}
+        df = df.rename(columns={k: v for k, v in rename_dict.items() if k in df.columns})
+        
+        # Standardisation des valeurs
+        if 'TSA' in df.columns:
+            df['TSA'] = df['TSA'].str.title()
+        if 'Genre' in df.columns:
+            df['Genre'] = df['Genre'].str.capitalize()
+        
+        # Calcul du score AQ-10
         aq_columns = [col for col in df.columns if col.startswith('A') and col[1:].isdigit()]
         if aq_columns:
             df['Score_A10'] = df[aq_columns].sum(axis=1)
-
+        
+        # Gestion des valeurs par défaut
         if 'Statut_testeur' not in df.columns:
             df['Statut_testeur'] = 'Famille'
         else:
             df['Statut_testeur'].fillna('Famille', inplace=True)
+            
+        return df
+        
+    except Exception as e:
+        logging.error(f"Erreur nettoyage dataset: {e}")
+        return df
 
-        df_stats = {
+def calculate_dataset_stats(df):
+    """Calcul des statistiques du dataset"""
+    try:
+        return {
             'mean_by_tsa': df.groupby('TSA').mean(numeric_only=True) if 'TSA' in df.columns else pd.DataFrame(),
             'count_by_tsa': df.groupby('TSA').count() if 'TSA' in df.columns else pd.DataFrame(),
             'categorical_cols': df.select_dtypes(include=['object']).columns.tolist(),
             'numeric_cols': df.select_dtypes(exclude=['object']).columns.tolist()
         }
-
-        return df, df_ds1, df_ds2, df_ds3, df_ds4, df_ds5, df_stats
     except Exception as e:
-        st.error(f"Erreur lors du chargement: {str(e)}")
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), {}
-        pass
+        logging.error(f"Erreur calcul statistiques: {e}")
+        return {}
 
 def download_and_save_dataset(url, filepath):
     """Fonction auxiliaire pour télécharger et sauvegarder un dataset"""
