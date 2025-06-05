@@ -2550,10 +2550,6 @@ def show_home_page():
     # Configuration dynamique du thème
     set_custom_theme()
 
-    # Application des décorateurs APRÈS définition
-    show_home_page = safe_execution(show_home_page)
-
-    
     # CSS spécifique corrigé - SUPPRIMER les règles conflictuelles
     st.markdown("""
     <style>
