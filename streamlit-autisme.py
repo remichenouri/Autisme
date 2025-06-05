@@ -2525,8 +2525,26 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         st.error(f"Erreur lors de la création du graphique: {str(e)}")
         return None
 
+# Définition des fonctions FIRST
 def show_home_page():
-    """Page d'accueil améliorée avec design moderne et responsive"""
+    """Page d'accueil avec sélecteur de langue"""
+    st.markdown("""
+    <div style="text-align: center; margin: 50px 0">
+        <h1 style="color: #1f77b4; font-size: 2.5rem">🧩 Dépistage TSA</h1>
+        <p style="color: #666; font-size: 1.1rem">Outil conforme RGPD & AI Act</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Sélecteur de langue
+    lang = st.selectbox("🌍 Choisir la langue", ["Français", "English"], key="lang_selector")
+    st.session_state['lang'] = lang.lower()
+
+    # Configuration dynamique du thème
+    set_custom_theme()
+
+    # Application des décorateurs APRÈS définition
+    show_home_page = safe_execution(show_home_page)
+
     
     # CSS spécifique corrigé - SUPPRIMER les règles conflictuelles
     st.markdown("""
