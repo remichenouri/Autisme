@@ -99,6 +99,7 @@ class SecureDataManager:
             raise
     
     def _get_or_create_key(self):
+        """Récupère ou crée une clé de chiffrement sécurisée"""
         try:
             key_env = os.getenv('ENCRYPTION_KEY')
             if key_env:
@@ -121,27 +122,9 @@ class SecureDataManager:
             logging.error(f"Erreur génération clé de chiffrement: {e}")
             # Fallback sécurisé en cas d'erreur
             return Fernet.generate_key()
-
     
-    def encrypt_data(self, data: str) -> str:
-        """Chiffre les données sensibles avec gestion d'erreur"""
-        try:
-            if not isinstance(data, str):
-                data = str(data)
-            return self.cipher.encrypt(data.encode()).decode()
-        except Exception as e:
-            logging.error(f"Erreur chiffrement: {e}")
-            return ""
-    
-    def decrypt_data(self, encrypted_data: str) -> str:
-        """Déchiffre les données avec gestion d'erreur"""
-        try:
-            return self.cipher.decrypt(encrypted_data.encode()).decode()
-        except Exception as e:
-            logging.error(f"Erreur déchiffrement: {e}")
-            return ""
     def _init_database(self):
-    """Initialise la base de données sécurisée avec schéma de tables"""
+        """Initialise la base de données sécurisée avec schéma de tables"""
         try:
             # S'assurer que le répertoire existe
             db_dir = os.path.dirname(self.db_path)
@@ -201,6 +184,11 @@ class SecureDataManager:
             finally:
                 conn.close()
                 
+        except Exception as e:
+            logging.error(f"Erreur critique dans _init_database: {e}", exc_info=True)
+            # Ne pas lever l'exception, utiliser un mode dégradé
+            logging.warning("Base de données non disponible - mode dégradé activé")
+
         except Exception as e:
             logging.error(f"Erreur critique dans _init_database: {e}", exc_info=True)
             # Ne pas lever l'exception, utiliser un mode dégradé
