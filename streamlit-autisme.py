@@ -592,7 +592,7 @@ class EnhancedAIActManager:
         return risk_entry
     
     def mandatory_human_oversight_interface(self):
-        """Interface obligatoire de surveillance humaine"""
+    """Interface obligatoire de surveillance humaine"""
         st.error("""
         **⚠️ SURVEILLANCE HUMAINE OBLIGATOIRE (AI Act Article 14)**
         
@@ -601,9 +601,13 @@ class EnhancedAIActManager:
         en aucun cas l'évaluation clinique professionnelle.
         """)
         
+        # Utiliser une clé unique pour éviter les conflits
+        unique_key = f"human_oversight_check_{st.session_state.get('user_session', 'default')}"
+        
         oversight_validated = st.checkbox(
             "Je comprends que cette IA nécessite une validation médicale professionnelle",
-            key="human_oversight_check"
+            key=unique_key,
+            value=st.session_state.get('human_oversight_acknowledged', False)
         )
         
         if oversight_validated:
@@ -611,6 +615,7 @@ class EnhancedAIActManager:
             st.success("✅ Surveillance humaine validée - Analyse IA autorisée")
             return True
         else:
+            st.session_state['human_oversight_acknowledged'] = False
             st.warning("⚠️ Validation de surveillance humaine requise")
             return False
 
