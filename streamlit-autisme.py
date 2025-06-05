@@ -401,6 +401,35 @@ class EnhancedGDPRManager:
         # Conservation des données cliniques nécessaires à la finalité
         return anonymized
 
+def handle_exception(e):
+    """Gestion unifiée des exceptions avec niveau de détail approprié"""
+    error_id = uuid.uuid4().hex[:8]
+    
+    # Log détaillé pour le débogage
+    logging.error(f"Erreur {error_id}: {str(e)}", exc_info=True)
+    
+    # Message utilisateur sans détails techniques sensibles
+    st.error(f"""
+    ### ⚠️ Une erreur s'est produite (ID: {error_id})
+    
+    L'application a rencontré un problème. Nos équipes techniques ont été notifiées.
+    
+    **Actions possibles:**
+    - Rafraîchissez la page
+    - Effacez votre cache navigateur
+    - Contactez le support avec l'ID d'erreur ci-dessus
+    """)
+    
+    return error_id
+
+# Utilisation:
+try:
+    # Code qui peut échouer
+    pass
+except Exception as e:
+    error_id = handle_exception(e)
+    st.session_state.error_id = error_id
+
 
 # Initialisation sécurisée des gestionnaires de conformité
 def initialize_compliance_managers():
