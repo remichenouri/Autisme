@@ -7794,32 +7794,46 @@ def show_compliance_page():
 def main():
     """Fonction principale de l'application"""
     
-    # Initialisation
+    # Initialisation sécurisée
+    if 'user_session' not in st.session_state:
+        st.session_state.user_session = str(uuid.uuid4())
+    
     initialize_session_state()
     set_custom_theme()
     
-    # Navigation principale
-    tool_choice = show_unified_sidebar_navigation()
+    # Navigation principale avec gestion d'erreurs
+    try:
+        tool_choice = show_unified_sidebar_navigation()
+    except Exception as e:
+        st.error(f"Erreur dans la navigation: {str(e)}")
+        tool_choice = "🏠 Accueil"
     
     # Affichage du contenu basé sur le choix
-    if tool_choice == "🏠 Accueil":
-        show_home_page()
-    elif tool_choice == "🔍 Exploration":
-        show_data_exploration()
-    elif tool_choice == "🧠 Analyse ML":
-        show_ml_analysis()
-    elif tool_choice == "🤖 Prédiction par IA":
-        show_ai_prediction()
-    elif tool_choice == "📚 Documentation":
-        show_documentation()
-    elif tool_choice == "ℹ️ À propos":
-        show_about()
-    elif tool_choice == "🔒 Conformité":
-        show_compliance_interface()
+    try:
+        if tool_choice == "🏠 Accueil":
+            show_home_page()
+        elif tool_choice == "🔍 Exploration":
+            show_data_exploration()
+        elif tool_choice == "🧠 Analyse ML":
+            show_ml_analysis()
+        elif tool_choice == "🤖 Prédiction par IA":
+            show_ai_prediction()
+        elif tool_choice == "📚 Documentation":
+            show_documentation()
+        elif tool_choice == "ℹ️ À propos":
+            show_about()
+        elif tool_choice == "🔒 Conformité":
+            show_compliance_interface()
+    except Exception as e:
+        st.error(f"Erreur dans l'affichage du contenu: {str(e)}")
+        st.info("Retour à la page d'accueil recommandé")
 
 def show_compliance_interface():
     """Interface de conformité RGPD/AI Act"""
     st.header("🔒 Gestion de la Conformité")
+    
+    # Générer des clés uniques pour les onglets
+    session_id = st.session_state.get('user_session', 'default')
     
     compliance_tab1, compliance_tab2, compliance_tab3 = st.tabs([
         "📋 RGPD", 
@@ -7836,43 +7850,9 @@ def show_compliance_interface():
     with compliance_tab3:
         user_rights_management_interface()
 
-def show_ai_prediction():
-    """Interface de prédiction IA avec conformité"""
-    st.header("🤖 Prédiction par Intelligence Artificielle")
-    
-    # Vérification du consentement
-    if not st.session_state.get('consent_screening', False):
-        if show_enhanced_gdpr_consent():
-            st.rerun()
-        return
-    
-    # Interface de surveillance humaine AI Act
-    if not st.session_state.ai_manager.mandatory_human_oversight_interface():
-        return
-    
-    # Questionnaire AQ-10
-    questionnaire_result = show_compliant_questionnaire()
-    
-    if questionnaire_result:
-        user_data, aq10_score = questionnaire_result
-        
-        # Analyse IA
-        probability, confidence = perform_compliant_ai_analysis(user_data, aq10_score)
-        
-        st.success("✅ Analyse terminée avec succès")
-
-# Fonctions placeholder pour les sections manquantes
-def show_ml_analysis():
-    st.header("🧠 Analyse Machine Learning")
-    st.info("Section en développement")
-
-def show_documentation():
-    st.header("📚 Documentation")
-    st.info("Section en développement")
-
-def show_about():
-    st.header("ℹ️ À propos")
-    st.info("Section en développement")
+# Point d'entrée principal
+if __name__ == "__main__":
+    main()
 
 # Appel de la fonction principale
 if __name__ == "__main__":
