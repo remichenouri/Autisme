@@ -2139,11 +2139,14 @@ def show_ai_act_transparency():
     )
 
 
-def show_navigation_menu():
-    """Menu de navigation dans la sidebar"""
-    with st.sidebar:
-        st.markdown("## 🧩 Autisme - Navigation")
-        st.markdown("Choisissez un outil :")
+def show_home_page():
+    """Page d'accueil en français uniquement"""
+    st.markdown("""
+    <div style="text-align: center; margin: 50px 0">
+        <h1 style="color: #1f77b4; font-size: 2.5rem">🧩 Dépistage TSA</h1>
+        <p style="color: #666; font-size: 1.1rem">Outil conforme RGPD & AI Act</p>
+    </div>
+    """, unsafe_allow_html=True)
 
         options = [
             "🏠 Accueil",
@@ -8010,14 +8013,6 @@ def show_compliance_interface():
     
     with compliance_tab3:
         user_rights_management_interface()
-
-# Point d'entrée principal
-if __name__ == "__main__":
-    main()
-
-# Appel de la fonction principale
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
