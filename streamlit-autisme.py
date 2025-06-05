@@ -389,6 +389,28 @@ if os.environ.get("STREAMLIT_DEBUG") == "true":
             
         conn.close()
         return False
+
+            
+        elif right_type == "erasure":
+            # Droit à l'effacement
+            cursor.execute('''
+                DELETE FROM consent_records WHERE user_session_hash = ?
+            ''', (user_hash,))
+            
+            cursor.execute('''
+                DELETE FROM processing_logs WHERE user_session_hash = ?
+            ''', (user_hash,))
+            
+            cursor.execute('''
+                DELETE FROM ai_decisions WHERE session_hash = ?
+            ''', (user_hash,))
+            
+            conn.commit()
+            conn.close()
+            return True
+            
+        conn.close()
+        return False
     
     def check_data_retention(self, timestamp: dt.datetime) -> bool:
         """Vérification de la durée de conservation des données"""
