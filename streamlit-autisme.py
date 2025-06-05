@@ -38,11 +38,25 @@ from PIL import Image
 import streamlit.components.v1 as components
 import plotly.express as px
 from cryptography.fernet import Fernet
+import logging
 
 # Création des dossiers nécessaires
 for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache', 'logs']:
     os.makedirs(folder, exist_ok=True)
 
+
+
+# Configuration des logs
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 class SecureDataManager:
     """Gestionnaire sécurisé pour données RGPD avec chiffrement"""
