@@ -602,19 +602,23 @@ def initialize_session_state():
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
 
+        # Génération d'un ID de session unique si pas déjà présent
+        if 'user_session' not in st.session_state:
+            st.session_state.user_session = str(uuid.uuid4())
+
         # Par défaut, commencer sur la page d'accueil
         default_tool = "🏠 Accueil"
 
         # Récupérer le paramètre de sélection de l'URL s'il existe
         try:
-            # Pour les versions récentes de Streamlit (1.30.0+)
-            if "selection" in st.query_params:
+            # Pour les versions récentes de Streamlit
+            if hasattr(st, 'query_params') and "selection" in st.query_params:
                 selection = st.query_params["selection"]
                 # Mapping entre les valeurs des liens et les options du menu
                 selection_mapping = {
                     "📝 Test AQ-10": "🤖 Prédiction par IA",
                     "🤖 Prédiction par IA": "🤖 Prédiction par IA",
-                    "🔍 Exploration des Données": "🔍 Exploration des Données"
+                    "🔍 Exploration des Données": "🔍 Exploration"
                 }
 
                 if selection in selection_mapping:
@@ -623,25 +627,10 @@ def initialize_session_state():
                     st.session_state.tool_choice = default_tool
             else:
                 st.session_state.tool_choice = default_tool
-        except:
-            try:
-                query_params = st.experimental_get_query_params()
-                if "selection" in query_params:
-                    selection = query_params["selection"][0]  # experimental_get_query_params retourne une liste
-                    selection_mapping = {
-                        "📝 Test AQ-10": "🤖 Prédiction par IA",
-                        "🤖 Prédiction par IA": "🤖 Prédiction par IA",
-                        "🔍 Exploration des Données": "🔍 Exploration des Données"
-                    }
-
-                    if selection in selection_mapping:
-                        st.session_state.tool_choice = selection_mapping[selection]
-                    else:
-                        st.session_state.tool_choice = default_tool
-                else:
-                    st.session_state.tool_choice = default_tool
-            except:
-                st.session_state.tool_choice = default_tool
+        except Exception as e:
+            # Fallback en cas d'erreur
+            st.session_state.tool_choice = default_tool
+            print(f"Erreur lors de la récupération des paramètres: {e}")
 
         st.session_state.data_exploration_expanded = True
 
