@@ -444,7 +444,15 @@ class EnhancedAIActManager:
         self.system_id = "TSA-SCREENING-AI-v2.1"
         self.risk_classification = "HIGH_RISK_MEDICAL_AI"
         self.model_card_version = "2.1.0"
-        self.secure_manager = SecureDataManager()
+        
+        # Initialisation sécurisée avec gestion d'erreur
+        try:
+            self.secure_manager = SecureDataManager()
+        except Exception as e:
+            logging.error(f"Erreur initialisation SecureDataManager dans AI Act Manager: {e}")
+            self.secure_manager = None
+            st.warning("Fonctionnalités AI Act limitées - erreur d'initialisation")
+
     
     def log_ai_decision(self, inputs: dict, outputs: dict, confidence: float, user_session: str):
         """Journalisation sécurisée conforme AI Act Article 12"""
