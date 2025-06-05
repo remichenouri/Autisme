@@ -54,6 +54,43 @@ except ImportError:
     PLOTLY_AVAILABLE = False
     st.warning("Plotly non disponible - certaines visualisations seront limitées")
 
+# Import sécurisé des bibliothèques optionnelles
+def safe_import_optional_libraries():
+    """Import sécurisé des bibliothèques optionnelles avec fallbacks"""
+    global prince, XGBClassifier, LGBMClassifier
+    
+    # Import prince avec fallback
+    try:
+        import prince
+        PRINCE_AVAILABLE = True
+    except ImportError:
+        prince = None
+        PRINCE_AVAILABLE = False
+        st.warning("Prince non disponible - utilisation de sklearn pour l'analyse factorielle")
+    
+    # Import XGBoost avec fallback
+    try:
+        from xgboost import XGBClassifier
+        XGBOOST_AVAILABLE = True
+    except ImportError:
+        XGBClassifier = None
+        XGBOOST_AVAILABLE = False
+        st.info("XGBoost non disponible - utilisation de RandomForest uniquement")
+    
+    # Import LightGBM avec fallback
+    try:
+        from lightgbm import LGBMClassifier
+        LIGHTGBM_AVAILABLE = True
+    except ImportError:
+        LGBMClassifier = None
+        LIGHTGBM_AVAILABLE = False
+        st.info("LightGBM non disponible - utilisation de RandomForest uniquement")
+    
+    return PRINCE_AVAILABLE, XGBOOST_AVAILABLE, LIGHTGBM_AVAILABLE
+
+# Appel sécurisé au début de l'application
+PRINCE_AVAILABLE, XGBOOST_AVAILABLE, LIGHTGBM_AVAILABLE = safe_import_optional_libraries()
+
 
 def safe_execution(func):
     """Décorateur pour l'exécution sécurisée des fonctions avec gestion d'erreurs"""
