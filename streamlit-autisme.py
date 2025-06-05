@@ -252,7 +252,16 @@ class EnhancedGDPRManager:
         self.consent_version = "2.1"
         self.privacy_policy_version = "2.1"
         self.data_retention_days = 730
-        self.secure_manager = SecureDataManager()
+        
+        # Initialisation sécurisée avec gestion d'erreur
+        try:
+            self.secure_manager = SecureDataManager()
+        except Exception as e:
+            logging.error(f"Erreur initialisation SecureDataManager dans GDPR Manager: {e}")
+            # Gestion d'erreur: utiliser un manager null ou par défaut
+            self.secure_manager = None
+            st.warning("Fonctionnalités RGPD limitées - erreur d'initialisation")
+
         
     def record_consent_secure(self, user_session: str, consent_type: str, granted: bool, metadata: dict = None):
         """Enregistrement sécurisé du consentement avec audit trail"""
