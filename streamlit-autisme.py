@@ -338,7 +338,28 @@ class EnhancedGDPRManager:
         conn.close()
         
         return log_entry
+
+def system_health_check():
+    """Vérifie l'état du système et fournit des diagnostics"""
+    health = {
+        "DB": os.path.exists("secure_compliance.db"),
+        "Key": os.path.exists("encryption.key"),
+        "GDPR Manager": 'gdpr_manager' in st.session_state,
+        "AI Manager": 'ai_manager' in st.session_state,
+        "Session": 'user_session' in st.session_state
+    }
     
+    if os.environ.get("STREAMLIT_DEBUG") == "true":
+        with st.sidebar.expander("Diagnostic Système", expanded=False):
+            for component, status in health.items():
+                st.write(f"{component}: {'✅' if status else '❌'}")
+    
+    return all(health.values())
+
+# Appel en mode développement
+if os.environ.get("STREAMLIT_DEBUG") == "true":
+    system_health_check()
+
     def exercise_user_rights(self, user_session: str, right_type: str):
         """Implémentation des droits RGPD (accès, rectification, effacement)"""
         user_hash = hashlib.sha256(user_session.encode()).hexdigest()[:16]
