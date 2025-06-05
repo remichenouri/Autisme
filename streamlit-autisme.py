@@ -7801,10 +7801,6 @@ def safe_execution(func):
             return None
     return wrapper
 
-# Appliquer le décorateur aux fonctions principales
-show_home_page = safe_execution(show_home_page)
-show_data_exploration = safe_execution(show_data_exploration)
-show_ai_prediction = safe_execution(show_ai_prediction)
 
 def main():
     """Fonction principale de l'application"""
