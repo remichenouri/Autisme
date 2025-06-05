@@ -1827,6 +1827,36 @@ def show_regulatory_compliance_banners():
         <span style="float:right;"><a href="#" onclick="showPrivacyPolicy()">Politique de confidentialité</a></span>
     </div>
     """, unsafe_allow_html=True)
+def perform_factorial_analysis_alternative(df):
+    """Alternative à prince utilisant sklearn"""
+    try:
+        if PRINCE_AVAILABLE and prince:
+            # Utilisation de prince si disponible
+            mca = prince.MCA(n_components=2)
+            return mca.fit_transform(df)
+        else:
+            # Fallback avec sklearn
+            from sklearn.decomposition import PCA
+            from sklearn.preprocessing import StandardScaler
+            
+            # Encodage des variables catégorielles
+            df_encoded = pd.get_dummies(df, drop_first=True)
+            
+            # Normalisation
+            scaler = StandardScaler()
+            df_scaled = scaler.fit_transform(df_encoded)
+            
+            # ACP
+            pca = PCA(n_components=2)
+            result = pca.fit_transform(df_scaled)
+            
+            st.info("Analyse factorielle réalisée avec PCA (sklearn) en remplacement de prince")
+            return result
+            
+    except Exception as e:
+        logging.error(f"Erreur analyse factorielle: {e}")
+        return None
+
 
 def show_gdpr_consent_interface():
     """Interface de consentement conforme RGPD pour données de santé"""
