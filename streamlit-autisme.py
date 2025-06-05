@@ -1318,7 +1318,7 @@ def user_rights_management_interface():
                 # Réinitialisation de la session
                 for key in list(st.session_state.keys()):
                     del st.session_state[key]
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("❌ Erreur lors de la suppression")
     
@@ -1544,7 +1544,7 @@ def show_compliant_questionnaire():
     if not st.session_state.get('consent_screening', False):
         st.error("❌ Consentement RGPD requis avant de procéder au questionnaire")
         if show_gdpr_consent_interface():
-            st.experimental_rerun()
+            st.rerun()
         return None
         
     # Interface utilisateur avec transparence AI Act
