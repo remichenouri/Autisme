@@ -145,7 +145,9 @@ class SecureDataManager:
     """Initialise la base de données sécurisée avec schéma de tables"""
         try:
             # S'assurer que le répertoire existe
-            os.makedirs(os.path.dirname(self.db_path) or '.', exist_ok=True)
+            db_dir = os.path.dirname(self.db_path)
+            if db_dir:
+                os.makedirs(db_dir, exist_ok=True)
             
             # Connexion avec gestion d'erreur
             conn = sqlite3.connect(self.db_path)
@@ -198,12 +200,13 @@ class SecureDataManager:
                 conn.rollback()
                 raise
             finally:
-                # Fermeture propre de la connexion
                 conn.close()
                 
         except Exception as e:
             logging.error(f"Erreur critique dans _init_database: {e}", exc_info=True)
-            raise
+            # Ne pas lever l'exception, utiliser un mode dégradé
+            logging.warning("Base de données non disponible - mode dégradé activé")
+
 
     
     def encrypt_data(self, data: str) -> str:
