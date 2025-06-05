@@ -778,41 +778,35 @@ if "aq10_responses" not in st.session_state:
     st.session_state.aq10_responses = []
 
 def initialize_session_state():
-    """Initialise l'état de session pour conserver les configurations entre les recharges"""
+    """Initialise l'état de session de manière robuste"""
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
 
-        # Génération d'un ID de session unique si pas déjà présent
+        # Génération d'un ID de session unique
         if 'user_session' not in st.session_state:
             st.session_state.user_session = str(uuid.uuid4())
 
-        # Par défaut, commencer sur la page d'accueil
-        default_tool = "🏠 Accueil"
-
-        # Récupérer le paramètre de sélection de l'URL s'il existe
+        # Initialiser les gestionnaires de manière sécurisée
         try:
-            # Pour les versions récentes de Streamlit
-            if hasattr(st, 'query_params') and "selection" in st.query_params:
-                selection = st.query_params["selection"]
-                # Mapping entre les valeurs des liens et les options du menu
-                selection_mapping = {
-                    "📝 Test AQ-10": "🤖 Prédiction par IA",
-                    "🤖 Prédiction par IA": "🤖 Prédiction par IA",
-                    "🔍 Exploration des Données": "🔍 Exploration"
-                }
-
-                if selection in selection_mapping:
-                    st.session_state.tool_choice = selection_mapping[selection]
-                else:
-                    st.session_state.tool_choice = default_tool
-            else:
-                st.session_state.tool_choice = default_tool
+            initialize_compliance_managers()
         except Exception as e:
-            # Fallback en cas d'erreur
-            st.session_state.tool_choice = default_tool
-            print(f"Erreur lors de la récupération des paramètres: {e}")
+            logging.error(f"Erreur lors de l'initialisation des gestionnaires: {e}")
+            st.error("Erreur d'initialisation. L'application fonctionnera en mode limité.")
 
+        # Autres initialisations...
+        if 'tool_choice' not in st.session_state:
+            st.session_state.tool_choice = "🏠 Accueil"
+            
+        if 'aq10_total' not in st.session_state:
+            st.session_state.aq10_total = 0
+            
+        if 'aq10_responses' not in st.session_state:
+            st.session_state.aq10_responses = []
+            
         st.session_state.data_exploration_expanded = True
+        
+# Appel en début d'application
+initialize_session_state()
 
 def show_unified_sidebar_navigation():
     """Navigation unifiée dans la sidebar avec consentement intégré"""
