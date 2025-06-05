@@ -459,29 +459,31 @@ except Exception as e:
 def initialize_compliance_managers():
     """Initialisation sécurisée des gestionnaires de conformité"""
     try:
-        # Créer un manager de sécurité partagé pour tous les gestionnaires
-        if 'secure_manager' not in st.session_state:
-            st.session_state.secure_manager = SecureDataManager()
-            
-        # Utiliser le même manager de sécurité pour tous les gestionnaires
-        secure_manager = st.session_state.secure_manager
-        
+        # Initialiser les gestionnaires seulement s'ils n'existent pas
         if 'gdpr_manager' not in st.session_state:
-            st.session_state.gdpr_manager = EnhancedGDPRManager()
-            # Modifier pour utiliser le gestionnaire de sécurité existant
-            st.session_state.gdpr_manager.secure_manager = secure_manager
-            
+            try:
+                st.session_state.gdpr_manager = EnhancedGDPRManager()
+            except Exception as e:
+                logging.error(f"Erreur GDPR Manager: {e}")
+                st.session_state.gdpr_manager = None
+                
         if 'ai_manager' not in st.session_state:
-            st.session_state.ai_manager = EnhancedAIActManager()
-            # Modifier pour utiliser le gestionnaire de sécurité existant
-            st.session_state.ai_manager.secure_manager = secure_manager
-            
+            try:
+                st.session_state.ai_manager = EnhancedAIActManager()
+            except Exception as e:
+                logging.error(f"Erreur AI Manager: {e}")
+                st.session_state.ai_manager = None
+                
         if 'medical_manager' not in st.session_state:
-            st.session_state.medical_manager = MedicalDeviceComplianceManager()
-            
+            try:
+                st.session_state.medical_manager = MedicalDeviceComplianceManager()
+            except Exception as e:
+                logging.error(f"Erreur Medical Manager: {e}")
+                st.session_state.medical_manager = None
+                
         return True
     except Exception as e:
-        st.error(f"Erreur d'initialisation des gestionnaires: {str(e)}")
+        st.warning(f"Gestionnaires en mode limité: {str(e)}")
         logging.error(f"Erreur d'initialisation des gestionnaires: {e}", exc_info=True)
         return False
 
