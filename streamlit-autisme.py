@@ -906,7 +906,7 @@ def show_unified_sidebar_navigation():
     """Navigation unifiée dans la sidebar avec consentement intégré"""
     
     with st.sidebar:
-        # Logo/titre (inchangé)
+        # Logo/titre
         st.markdown("""
         <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #1f77b4; font-size: 1.8rem;">🧩 Dépistage TSA</h1>
@@ -914,29 +914,38 @@ def show_unified_sidebar_navigation():
         </div>
         """, unsafe_allow_html=True)
         
-        # Section RGPD avec cadenas visible
+        # Section RGPD avec vérification sécurisée
         st.markdown("---")
         st.markdown("### 🔒 Statut RGPD")
         
-        if not st.session_state.get('consent_screening', False):
+        consent_status = st.session_state.get('consent_screening', False)
+        
+        if not consent_status:
             st.error("🔒 Consentement RGPD requis")
             
             with st.expander("📋 Donner mon consentement", expanded=True):
-                # CORRECTION : Clé unique basée sur l'ID de session
-                unique_key = f"consent_screening_{st.session_state.get('user_session', 'default')}"
+                # Clé vraiment unique pour éviter les conflits
+                session_id = st.session_state.get('user_session', str(uuid.uuid4()))
+                unique_key = f"consent_screening_sidebar_{session_id}_{hash(session_id) % 10000}"
                 
                 consent_minimal = st.checkbox(
                     "J'accepte le traitement de mes données pour le dépistage TSA",
-                    key=unique_key
+                    key=unique_key,
+                    value=False
                 )
                 
                 if consent_minimal:
                     st.session_state['consent_screening'] = True
-                    st.session_state.gdpr_manager.record_consent_secure(
-                        st.session_state.user_session,
-                        "screening",
-                        True
-                    )
+                    # Enregistrement sécurisé du consentement
+                    if st.session_state.get('gdpr_manager'):
+                        try:
+                            st.session_state.gdpr_manager.record_consent_secure(
+                                st.session_state.user_session,
+                                "screening",
+                                True
+                            )
+                        except Exception as e:
+                            logging.error(f"Erreur enregistrement consentement: {e}")
                     st.success("✅ Consentement accordé")
                     st.rerun()
                 else:
@@ -957,10 +966,14 @@ def show_unified_sidebar_navigation():
             "🔒 Conformité"
         ]
 
-        current_index = options.index(st.session_state.tool_choice) if st.session_state.tool_choice in options else 0
+        current_choice = st.session_state.get('tool_choice', options[0])
+        if current_choice not in options:
+            current_choice = options[0]
+            
+        current_index = options.index(current_choice)
         
-        # CORRECTION : Clé unique pour la navigation
-        nav_key = f"main_navigation_{st.session_state.get('user_session', 'default')}"
+        # Navigation avec clé unique
+        nav_key = f"main_navigation_sidebar_{session_id}"
         
         tool_choice = st.radio(
             "",
@@ -970,35 +983,10 @@ def show_unified_sidebar_navigation():
             label_visibility="collapsed"
         )
 
-        if tool_choice != st.session_state.tool_choice:
+        if tool_choice != current_choice:
             st.session_state.tool_choice = tool_choice
-        # Statuts de conformité
-        st.markdown("---")
-        st.markdown("### 🔐 Statut Conformité")
-        st.markdown("""
-        <div style="font-size: 11px;">
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px;">✅ CE Classe IIa</span>
-                <span style="background: #007bff; color: white; padding: 2px 6px; border-radius: 3px;">✅ RGPD</span>
-                <span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 3px;">✅ AI Act</span>
-            </div>
-            <div style="margin-top: 10px; color: #6c757d;">
-                Version: 2.1.0<br>
-                MAJ: 03/06/2025
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Accès rapide aux droits RGPD avec clé unique
-        st.markdown("---")
-        rights_button_key = f"rights_button_{st.session_state.get('user_session', 'default')}"
-        
-        if st.button("👤 Mes droits RGPD", use_container_width=True, key=rights_button_key):
-            st.session_state.tool_choice = "🔒 Conformité"
-            st.rerun()
-
-    return tool_choice
-
+            
+        return tool_choice
 
 def set_custom_theme():
     css_path = "theme_cache/custom_theme.css"
