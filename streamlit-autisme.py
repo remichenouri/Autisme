@@ -359,6 +359,19 @@ class EnhancedGDPRManager:
         return anonymized
 
 
+def initialize_compliance_managers():
+    """Initialisation sécurisée des gestionnaires de conformité"""
+    try:
+        if 'gdpr_manager' not in st.session_state:
+            st.session_state.gdpr_manager = EnhancedGDPRManager()
+        if 'ai_manager' not in st.session_state:
+            st.session_state.ai_manager = EnhancedAIActManager()
+        if 'medical_manager' not in st.session_state:
+            st.session_state.medical_manager = MedicalDeviceComplianceManager()
+        return True
+    except Exception as e:
+        st.error(f"Erreur d'initialisation des gestionnaires: {str(e)}")
+        return False
 
 
     # Classe de gestion de la conformité AI Act
