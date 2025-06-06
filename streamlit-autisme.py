@@ -857,17 +857,18 @@ def set_custom_theme():
     st.markdown(custom_theme, unsafe_allow_html=True)
 
 def show_navigation_menu():
-    """Menu de navigation optimisé et professionnel"""
+    """Menu de navigation optimisé et professionnel avec conformité"""
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options optimisées avec icônes cohérentes
+    # Options optimisées avec conformité
     options = [
         "🏠 Accueil",
         "🔍 Exploration",
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
+        "🔒 RGPD & Droits",  
         "ℹ️ À propos"
     ]
 
