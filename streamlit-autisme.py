@@ -6634,7 +6634,7 @@ def main():
         show_aq10_and_prediction()
     elif "📚 Documentation" in selection:
         show_documentation()
-    elif "🔒 RGPD & Droits":
+    elif "🔒 RGPD & Droits" in selection:
         show_gdpr_admin_panel()
     elif "ℹ️ À propos" in selection:
         show_about_page()
