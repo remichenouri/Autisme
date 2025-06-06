@@ -401,38 +401,54 @@ if 'audit_manager' not in st.session_state:
 
 def show_gdpr_admin_panel():
     """Panneau d'administration RGPD pour exercice des droits"""
-    st.markdown("## 🔒 Panneau RGPD - Exercice de vos Droits")
+    st.markdown("## 🔒 Panneau RGPD & Conformité IA")
     
-    tabs = st.tabs(["📋 Mes Données", "🗑️ Droit à l'Effacement", "📤 Portabilité", "📊 Audit Trail"])
+    tabs = st.tabs([
+        "📋 Consentement", 
+        "🤖 Transparence IA", 
+        "🗑️ Droit à l'Effacement", 
+        "📤 Portabilité", 
+        "📊 Audit Trail"
+    ])
     
     with tabs[0]:
-        st.subheader("Vos données enregistrées")
-        user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
-            st.session_state.get('user_session_id')
-        )
-        st.info(f"Identifiant pseudonymisé : {user_pseudonym}")
+        st.subheader("Formulaire de Consentement RGPD")
+        # Appel direct sans titre supplémentaire
+        GDPRConsentManager.show_consent_form()
         
+        # Affichage des données actuelles
         if st.session_state.get('gdpr_consent'):
-            consent_data = st.session_state.gdpr_consent.copy()
-            # Masquer les données sensibles
-            consent_data['user_id'] = consent_data['user_id'][:8] + "..."
-            st.json(consent_data)
+            with st.expander("📊 Vos données enregistrées", expanded=False):
+                user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
+                    st.session_state.get('user_session_id')
+                )
+                st.info(f"Identifiant pseudonymisé : {user_pseudonym}")
+                
+                consent_data = st.session_state.gdpr_consent.copy()
+                consent_data['user_id'] = consent_data['user_id'][:8] + "..."
+                st.json(consent_data)
     
     with tabs[1]:
+        st.subheader("Transparence du Système IA")
+        # Intégration complète de la transparence IA
+        st.session_state.ai_compliance_manager.show_ai_transparency_info()
+    
+    with tabs[2]:
         st.subheader("Droit à l'effacement (Article 17 RGPD)")
         if st.button("🗑️ Supprimer toutes mes données", type="secondary"):
-            # Effacement des données de session
             keys_to_clear = ['gdpr_consent', 'aq10_responses', 'aq10_total', 'audit_trail', 'ai_decisions_log']
             for key in keys_to_clear:
                 if key in st.session_state:
                     del st.session_state[key]
-            
             st.success("✅ Vos données ont été supprimées de cette session")
             st.rerun()
     
-    with tabs[2]:
+    with tabs[3]:
         st.subheader("Portabilité des données (Article 20 RGPD)")
         if st.button("📤 Exporter mes données"):
+            user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
+                st.session_state.get('user_session_id')
+            )
             export_data = {
                 'user_pseudonym': user_pseudonym,
                 'export_date': datetime.now().isoformat(),
@@ -447,7 +463,7 @@ def show_gdpr_admin_panel():
                 mime="application/json"
             )
     
-    with tabs[3]:
+    with tabs[4]:
         st.subheader("Piste d'audit de vos actions")
         audit_stats = st.session_state.audit_manager.generate_audit_report()
         if isinstance(audit_stats, dict):
