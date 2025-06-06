@@ -369,9 +369,18 @@ class AuditTrailManager:
         )
     
     def generate_audit_report(self):
-        """Génère un rapport d'audit complet"""
-        if not st.session_state.audit_trail:
-            return "Aucune activité enregistrée"
+        """Génère un rapport d'audit complet avec gestion d'erreurs"""
+        # Vérification sécurisée de l'existence d'audit_trail
+        if not hasattr(st.session_state, 'audit_trail') or not st.session_state.audit_trail:
+            return {
+                'message': 'Aucune activité enregistrée',
+                'total_actions': 0,
+                'session_start': st.session_state.get('session_start', datetime.now()).isoformat(),
+                'data_processing_events': 0,
+                'ml_predictions': 0,
+                'gdpr_compliance': True,
+                'ai_act_compliance': True
+            }
         
         # Déchiffrer les entrées pour le rapport
         decrypted_entries = []
@@ -395,9 +404,12 @@ class AuditTrailManager:
         
         return audit_stats
 
-# Initialisation du gestionnaire d'audit
 if 'audit_manager' not in st.session_state:
     st.session_state.audit_manager = AuditTrailManager()
+
+if 'audit_trail' not in st.session_state:
+    st.session_state.audit_trail = []
+
 
 def show_gdpr_admin_panel():
     """Panneau d'administration RGPD pour exercice des droits"""
