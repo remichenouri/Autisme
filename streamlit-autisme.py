@@ -2440,24 +2440,27 @@ def show_data_exploration():
                     # Graphique de projection
                     fig, ax = plt.subplots(figsize=(10, 8))
                     
+                    # Correction de la coloration
                     if 'TSA' in df_famd.columns:
-                        # Coloration par diagnostic TSA
+                        # Coloration par diagnostic TSA avec palette corrigée
                         tsa_values = df_famd['TSA'].values
-                        colors = ['#e74c3c' if val == 'Yes' else '#3498db' for val in tsa_values]
-                        labels = ['TSA' if val == 'Yes' else 'Non-TSA' for val in tsa_values]
+                        # Rouge pour les cas négatifs (No), bleu pour les cas positifs (Yes)
+                        colors = ['#3498db' if val == 'Yes' else '#e74c3c' for val in tsa_values]
+                        labels = ['TSA-Positif' if val == 'Yes' else 'TSA-Négatif' for val in tsa_values]
                         
-                        # Création du scatter plot
-                        for label, color in [('TSA', '#e74c3c'), ('Non-TSA', '#3498db')]:
+                        # Création du scatter plot avec couleurs corrigées
+                        for label, color in [('TSA-Positif', '#3498db'), ('TSA-Négatif', '#e74c3c')]:
                             mask = [l == label for l in labels]
                             if any(mask):
                                 coords_subset = coordinates.iloc[[i for i, m in enumerate(mask)]]
                                 ax.scatter(
                                     coords_subset.iloc[:, 0],
                                     coords_subset.iloc[:, 1],
-                                    c=color, label=label, alpha=0.7, s=50
+                                    c=color, label=label, alpha=0.7, s=60, edgecolors='white', linewidth=0.5
                                 )
                         
-                        ax.legend(title="Diagnostic")
+                        ax.legend(title="Diagnostic TSA", frameon=True, fancybox=True, shadow=True)
+
                     else:
                         # Projection simple sans coloration
                         ax.scatter(coordinates.iloc[:, 0], coordinates.iloc[:, 1], 
