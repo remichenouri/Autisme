@@ -6557,7 +6557,7 @@ def main():
         elif tool_choice == "🧠 Analyse ML":
             show_ml_analysis()
         elif tool_choice == "🤖 Prédiction par IA":
-            show_prediction_tool()
+            show_aq10_and_prediction()
         elif tool_choice == "📚 Documentation":
             show_documentation()
         else:
