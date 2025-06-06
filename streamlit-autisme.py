@@ -2441,32 +2441,63 @@ def show_data_exploration():
                     # Graphique de projection
                     fig, ax = plt.subplots(figsize=(10, 8))
                     
-                    # Correction de la coloration
+                    # Correction de la coloration - Version simplifiée et efficace
                     if 'TSA' in df_famd.columns:
-                        # Coloration par diagnostic TSA avec palette corrigée
-                        tsa_values = df_famd['TSA'].values
-                        # Rouge pour les cas négatifs (No), bleu pour les cas positifs (Yes)
-                        colors = ['#3498db' if val == 'Yes' else '#e74c3c' for val in tsa_values]
-                        labels = ['TSA-Positif' if val == 'Yes' else 'TSA-Négatif' for val in tsa_values]
+                        # Séparation directe des données par groupe TSA
+                        tsa_positive = df_famd['TSA'] == 'Yes'
+                        tsa_negative = df_famd['TSA'] == 'No'
                         
-                        # Création du scatter plot avec couleurs corrigées
-                        for label, color in [('TSA-Positif', '#3498db'), ('TSA-Négatif', '#e74c3c')]:
-                            mask = [l == label for l in labels]
-                            if any(mask):
-                                coords_subset = coordinates.iloc[[i for i, m in enumerate(mask)]]
-                                ax.scatter(
-                                    coords_subset.iloc[:, 0],
-                                    coords_subset.iloc[:, 1],
-                                    c=color, label=label, alpha=0.7, s=60, edgecolors='white', linewidth=0.5
-                                )
+                        # Coordonnées pour chaque groupe
+                        coords_positive = coordinates[tsa_positive]
+                        coords_negative = coordinates[tsa_negative]
                         
-                        ax.legend(title="Diagnostic TSA", frameon=True, fancybox=True, shadow=True)
-
+                        # Affichage des points TSA-Positif en bleu
+                        if len(coords_positive) > 0:
+                            ax.scatter(
+                                coords_positive.iloc[:, 0],
+                                coords_positive.iloc[:, 1],
+                                c='#3498db',  # Bleu pour TSA-Positif
+                                label='TSA-Positif',
+                                alpha=0.7,
+                                s=60,
+                                edgecolors='white',
+                                linewidth=0.5
+                            )
+                        
+                        # Affichage des points TSA-Négatif en rouge
+                        if len(coords_negative) > 0:
+                            ax.scatter(
+                                coords_negative.iloc[:, 0],
+                                coords_negative.iloc[:, 1],
+                                c='#e74c3c',  # Rouge pour TSA-Négatif
+                                label='TSA-Négatif',
+                                alpha=0.7,
+                                s=60,
+                                edgecolors='white',
+                                linewidth=0.5
+                            )
+                        
+                        # Légende avec style amélioré
+                        ax.legend(
+                            title="Diagnostic TSA",
+                            frameon=True,
+                            fancybox=True,
+                            shadow=True,
+                            loc='best'
+                        )
                     else:
-                        # Projection simple sans coloration
-                        ax.scatter(coordinates.iloc[:, 0], coordinates.iloc[:, 1], 
-                                  alpha=0.7, s=50, c='#3498db')
+                        # Projection simple sans coloration si pas de colonne TSA
+                        ax.scatter(
+                            coordinates.iloc[:, 0], 
+                            coordinates.iloc[:, 1], 
+                            alpha=0.7,
+                            s=50,
+                            c='#3498db',
+                            edgecolors='white',
+                            linewidth=0.5
+                        )
                     
+                    # Configuration des axes
                     ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.1%})')
                     ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.1%})')
                     ax.set_title('Projection des individus dans l\'espace factoriel')
@@ -2484,7 +2515,9 @@ def show_data_exploration():
                     if 'TSA' in df_famd.columns:
                         tsa_counts = df_famd['TSA'].value_counts()
                         for category, count in tsa_counts.items():
-                            st.metric(f"Cas {category}", count)
+                            color_indicator = "🔵" if category == "Yes" else "🔴"
+                            st.metric(f"{color_indicator} Cas {category}", count)
+
     
             with famd_tabs[1]:
                 st.subheader("Analyse de la variance expliquée")
