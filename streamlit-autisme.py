@@ -78,7 +78,7 @@ class GDPRConsentManager:
     
     @staticmethod
     def show_consent_form():
-        """Affiche le formulaire de consentement RGPD"""
+        """Affiche le formulaire de consentement RGPD et retourne le statut"""
         # SUPPRIMER le titre markdown - il sera géré par le parent
         
         st.markdown("""
@@ -125,6 +125,11 @@ class GDPRConsentManager:
             
             st.session_state.gdpr_consent = consent_data
             st.session_state.gdpr_compliant = True
+            
+            st.success("✅ Consentement enregistré. Redirection...")
+            time.sleep(1.5)
+            st.session_state.tool_choice = "🏠 Accueil"
+            st.rerun()
             
             return True
         else:
