@@ -79,9 +79,9 @@ class GDPRConsentManager:
     @staticmethod
     def show_consent_form():
         """Affiche le formulaire de consentement RGPD"""
-        st.markdown("""
-        ## 🔒 Consentement RGPD
+        # SUPPRIMER le titre markdown - il sera géré par le parent
         
+        st.markdown("""
         **Protection des Données Personnelles**
         
         ### Vos droits :
@@ -97,7 +97,7 @@ class GDPRConsentManager:
         - ⏰ **Conservation limitée** : 24 mois maximum
         - 🌍 **Pas de transfert** hors Union Européenne
         """)
-        
+            
         consent_options = st.columns(2)
         
         with consent_options[0]:
