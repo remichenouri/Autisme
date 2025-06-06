@@ -2512,7 +2512,22 @@ def show_data_exploration():
     
             with famd_tabs[2]:
                 st.subheader("Analyse détaillée des composantes")
-                
+                st.markdown("""
+    ### Interprétation du Graphique FAMD
+    
+    **Principe de l'Analyse Factorielle :** L'FAMD projette les données multidimensionnelles sur un plan 
+    bidimensionnel, permettant de visualiser les patterns cachés dans les données de dépistage TSA.
+    
+    **Lecture du Graphique :**
+    - **Points bleus** : Cas avec diagnostic TSA positif
+    - **Points rouges** : Cas sans diagnostic TSA
+    - **Regroupements** : Proximité des points indique des profils similaires
+    - **Dispersion** : Distance entre groupes révèle la capacité discriminante
+    
+    **Implications Cliniques :**
+    Une séparation claire entre les groupes suggère que les variables mesurées 
+    capturent efficacement les différences associées au TSA.
+    """)
                 # Sélection de composante
                 comp_choice = st.selectbox(
                     "Choisir une composante à analyser :",
