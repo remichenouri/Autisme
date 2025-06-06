@@ -1346,142 +1346,88 @@ def create_chi_squared_visualization(data, variable):
 
 @st.cache_data(ttl=3600, max_entries=100)
 def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histogram', title=None):
-    """Crée une visualisation Plotly avec gestion d'erreurs renforcée"""
-    
-    try:
-        # Vérification des données d'entrée
-        if df is None or df.empty:
-            st.warning("Données vides pour la visualisation")
-            return None
-        
-        # Nettoyage des données
-        if x and x in df.columns:
-            df = df.dropna(subset=[x])
-        if y and y in df.columns:
-            df = df.dropna(subset=[y])
-        
-        # Échantillonnage pour de meilleures performances
-        sample_threshold = 2000
-        if len(df) > sample_threshold:
-            df = df.sample(sample_threshold, random_state=42)
-        
-        # Palettes de couleurs fixe
-        palette = {"Yes": "#e74c3c", "No": "#3498db", "Unknown": "#95a5a6"}
-        
-        # Configuration de base pour tous les graphiques
-        base_layout = dict(
-            height=400,
-            margin=dict(l=40, r=40, t=60, b=40),
-            template="plotly_white",
-            font=dict(size=12),
-            showlegend=True
-        )
-        
-        # Création des graphiques selon le type
-        if kind == 'histogram':
-            fig = px.histogram(
-                df, 
-                x=x, 
-                color=color, 
-                color_discrete_map=palette,
-                title=title or f"Distribution de {x}",
-                nbins=20
-            )
-            
-        elif kind == 'box':
-            fig = px.box(
-                df, 
-                x=x, 
-                y=y, 
-                color=color, 
-                color_discrete_map=palette,
-                title=title or f"Box plot de {y} par {x}"
-            )
-            
-        elif kind == 'violin':
-            fig = px.violin(
-                df, 
-                x=x, 
-                y=y, 
-                color=color, 
-                color_discrete_map=palette,
-                title=title or f"Violin plot de {y} par {x}",
-                box=True
-            )
-            
-        elif kind == 'scatter':
-            fig = px.scatter(
-                df, 
-                x=x, 
-                y=y, 
-                color=color, 
-                color_discrete_map=palette,
-                title=title or f"Scatter plot {x} vs {y}",
-                opacity=0.7
-            )
-            
-        elif kind == 'pie':
-            if names and names in df.columns:
-                # Agrégation pour le pie chart
-                pie_data = df[names].value_counts().reset_index()
-                pie_data.columns = [names, 'count']
-                
-                fig = px.pie(
-                    pie_data, 
-                    names=names, 
-                    values='count',
-                    color=names,
-                    color_discrete_map=palette,
-                    title=title or f"Répartition {names}"
-                )
-            else:
-                st.error(f"Colonne '{names}' non trouvée pour le graphique en secteurs")
-                return None
-                
-        elif kind == 'bar':
-            # Vérifier si c'est un groupby ou des données brutes
-            if y and y in df.columns:
-                fig = px.bar(
-                    df, 
-                    x=x, 
-                    y=y, 
-                    color=color, 
-                    color_discrete_map=palette,
-                    title=title or f"Graphique en barres"
-                )
-            else:
-                # Comptage automatique si pas de y spécifié
-                bar_data = df[x].value_counts().reset_index()
-                bar_data.columns = [x, 'count']
-                
-                fig = px.bar(
-                    bar_data, 
-                    x=x, 
-                    y='count',
-                    title=title or f"Distribution de {x}"
-                )
-                
-        else:
-            st.warning(f"Type de graphique '{kind}' non supporté")
-            return None
-        
-        # Application du layout de base
-        fig.update_layout(**base_layout)
-        
-        # Configuration pour la compatibilité Streamlit
-        fig.update_layout(
-            autosize=True,
-            dragmode=False,
-            scrollZoom=False
-        )
-        
-        return fig
-        
-    except Exception as e:
-        st.error(f"Erreur lors de la création du graphique {kind}: {str(e)}")
-        st.write("Données disponibles:", df.columns.tolist() if df is not None else "Aucune")
-        return None
+    """Crée une visualisation Plotly avec mise en cache et optimisations de performance"""
 
+    sample_threshold = 10000
+    if len(df) > sample_threshold:
+        df = df.sample(sample_threshold, random_state=42)
+
+    if color and color not in df.columns:
+        color = None
+
+    categorical_palette = {0: "#3498db", 1: "#2ecc71"}
+    palette = {"Yes": "#3498db", "No": "#2ecc71", "Unknown": "#95a5a6"}
+    base_layout = dict(
+        height=500,
+        margin=dict(l=20, r=20, t=40, b=20),
+        template="simple_white",
+        modebar_remove=['sendDataToCloud', 'select2d', 'lasso2d', 'autoScale2d'],
+        hovermode='closest'
+    )
+
+    try:
+        is_categorical_aq = x and isinstance(x, str) and x.startswith('A') and x[1:].isdigit() and len(x) <= 3
+
+        if is_categorical_aq and kind in ['histogram', 'bar']:
+            counts = df[x].value_counts().reset_index()
+            counts.columns = [x, 'count']
+            fig = px.bar(counts, x=x, y='count',
+                        color=x,
+                        color_discrete_map=categorical_palette,
+                        title=f"Distribution de {x} (catégorielle)")
+            fig.update_layout(xaxis_title=f"Valeur de {x}", yaxis_title="Nombre d'occurrences", **base_layout)
+
+        elif kind == 'histogram':
+            nbins = 20 if len(df) < 5000 else 10
+            marginal = "box" if len(df) < 3000 else None
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette,
+                              marginal=marginal, nbins=nbins)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'box':
+            points = "all" if len(df) < 1000 else False
+            fig = px.box(df, x=x, y=y, color=color, color_discrete_map=palette,
+                        points=points, notched=len(df) > 200)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'bar':
+            fig = px.bar(df, x=x, y=y, color=color, color_discrete_map=palette)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'scatter':
+            opacity = 1.0 if len(df) < 500 else 0.7 if len(df) < 2000 else 0.5
+            fig = px.scatter(df, x=x, y=y, color=color, color_discrete_map=palette, opacity=opacity)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'pie':
+            if names and isinstance(names, str) and names.startswith('A') and names[1:].isdigit() and len(names) <= 3:
+                values_counts = df[names].value_counts().reset_index()
+                values_counts.columns = [names, 'count']
+                fig = px.pie(values_counts, values='count', names=names,
+                          color=names,
+                          color_discrete_map=categorical_palette,
+                          title=f"Répartition {names}")
+            else:
+                fig = px.pie(df, names=names, color=color, color_discrete_map=palette)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'violin':
+            box = len(df) < 2000
+            fig = px.violin(df, x=x, y=y, color=color, color_discrete_map=palette, box=box)
+            fig.update_layout(**base_layout)
+
+        elif kind == 'count':
+            fig = px.histogram(df, x=x, color=color, color_discrete_map=palette,
+                            title=f"Comptage de {x}")
+            fig.update_layout(yaxis_title="Nombre d'occurrences", **base_layout)
+
+        if title:
+            fig.update_layout(title=title)
+
+        return fig
+    except Exception as e:
+        st.error(f"Erreur lors de la création du graphique: {str(e)}")
+        return None
 
 def show_home_page():
     """Page d'accueil améliorée avec design moderne et responsive"""
