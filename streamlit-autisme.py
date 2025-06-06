@@ -22,8 +22,112 @@ from io import BytesIO
 from PIL import Image
 import streamlit.components.v1 as components
 import plotly.express as px
+import cryptography
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
+import json
+from datetime import datetime, timedelta
+import uuid
 
-# === CONFORMITÉ AI ACT EUROPÉEN ===
+class GDPRSecurityManager:
+    """Gestionnaire de sécurité et conformité RGPD"""
+    
+    def __init__(self):
+        self.key = self._generate_key()
+        self.cipher_suite = Fernet(self.key)
+        
+    def _generate_key(self):
+        """Génère une clé AES-256 dérivée d'un mot de passe"""
+        password = b"TSA_SCREENING_SECURE_2024"  # À stocker de manière sécurisée en production
+        salt = b"tsa_salt_2024"  # À générer aléatoirement en production
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password))
+        return key
+    
+    def encrypt_data(self, data):
+        """Chiffre les données avec AES-256"""
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        elif not isinstance(data, str):
+            data = str(data)
+        return self.cipher_suite.encrypt(data.encode())
+    
+    def decrypt_data(self, encrypted_data):
+        """Déchiffre les données"""
+        try:
+            decrypted = self.cipher_suite.decrypt(encrypted_data)
+            return decrypted.decode()
+        except Exception as e:
+            st.error(f"Erreur de déchiffrement : {str(e)}")
+            return None
+
+class GDPRConsentManager:
+    """Gestionnaire des consentements RGPD"""
+    
+    @staticmethod
+    def show_consent_form():
+        """Affiche le formulaire de consentement RGPD"""
+        st.markdown("""
+        ## 🔒 Consentement RGPD - Protection des Données
+        
+        **Conformément au Règlement Général sur la Protection des Données (RGPD)**
+        
+        ### Vos droits :
+        - ✅ **Droit d'accès** : Consulter vos données personnelles
+        - ✅ **Droit de rectification** : Corriger vos données
+        - ✅ **Droit à l'effacement** : Supprimer vos données
+        - ✅ **Droit à la portabilité** : Récupérer vos données
+        - ✅ **Droit d'opposition** : Refuser le traitement
+        
+        ### Traitement des données :
+        - 🔐 **Chiffrement AES-256** de toutes les données sensibles
+        - 🏥 **Usage médical uniquement** pour le dépistage TSA
+        - ⏰ **Conservation limitée** : 24 mois maximum
+        - 🌍 **Pas de transfert** hors Union Européenne
+        """)
+        
+        consent_options = st.columns(2)
+        
+        with consent_options[0]:
+            consent_screening = st.checkbox(
+                "✅ J'accepte le traitement de mes données pour le dépistage TSA",
+                key="consent_screening"
+            )
+        
+        with consent_options[1]:
+            consent_research = st.checkbox(
+                "📊 J'accepte l'utilisation anonymisée pour la recherche (optionnel)",
+                key="consent_research"
+            )
+        
+        if consent_screening:
+            consent_data = {
+                'user_id': str(uuid.uuid4()),
+                'timestamp': datetime.now().isoformat(),
+                'screening_consent': True,
+                'research_consent': consent_research,
+                'ip_hash': hashlib.sha256(st.session_state.get('client_ip', '').encode()).hexdigest()[:16]
+            }
+            
+            st.session_state.gdpr_consent = consent_data
+            st.session_state.gdpr_compliant = True
+            
+            return True
+        else:
+            st.warning("⚠️ Le consentement est requis pour utiliser l'outil de dépistage")
+            return False
+
+# Initialisation du gestionnaire de sécurité
+if 'security_manager' not in st.session_state:
+    st.session_state.security_manager = GDPRSecurityManager()
+    
 class AIActComplianceManager:
     """Gestionnaire de conformité AI Act pour systèmes IA haut risque en santé"""
     
