@@ -887,6 +887,9 @@ def show_navigation_menu():
 
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
+    if tool_choice == "🔒 RGPD & Droits":
+        show_gdpr_admin_panel()
+        return tool_choice
 
     return tool_choice
 
