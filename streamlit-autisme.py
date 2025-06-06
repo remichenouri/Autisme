@@ -922,15 +922,15 @@ def show_navigation_menu():
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options séparées avec RGPD et À propos distincts
+    # Options simplifiées sans "Info Système IA"
     options = [
         "🏠 Accueil",
-        "🔍 Exploration",
+        "🔍 Exploration", 
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
-        "🔒 RGPD & Droits",     # RGPD séparé
-        "ℹ️ À propos"           # À propos séparé
+        "🔒 RGPD & Droits",
+        "ℹ️ À propos"
     ]
 
     if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
@@ -945,6 +945,12 @@ def show_navigation_menu():
         index=current_index,
         key="main_navigation"
     )
+
+    if tool_choice != st.session_state.tool_choice:
+        st.session_state.tool_choice = tool_choice
+
+    return tool_choice
+
 
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
