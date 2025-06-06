@@ -6530,6 +6530,7 @@ def main():
             "🧠 Analyse ML",
             "🤖 Prédiction par IA",
             "📚 Documentation",
+            "🔒 RGPD & Droits"
             "ℹ️ À propos"
         ]
         selection = st.sidebar.radio("Choisissez un outil :", pages)
@@ -6550,6 +6551,8 @@ def main():
         show_aq10_and_prediction()
     elif "📚 Documentation" in selection:
         show_documentation()
+    elif "🔒 RGPD & Droits":
+        show_gdpr_admin_panel()
     elif "ℹ️ À propos" in selection:
         show_about_page()
 
