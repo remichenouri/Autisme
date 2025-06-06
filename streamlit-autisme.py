@@ -189,54 +189,54 @@ class AIActComplianceManager:
         return decision_log['timestamp']
     
     def show_ai_transparency_info(self):
-    """Affiche les informations de transparence requises par l'AI Act"""
-    
-    # Créer un expander dans la sidebar pour une meilleure gestion
-    with st.sidebar.expander("🤖 Transparence du Système IA", expanded=False):
-        st.markdown("""
-        ### Classification du Système
-        - 🏥 **Catégorie** : Système IA à haut risque
-        - 📋 **Usage** : Aide à la décision médicale
-        - ⚠️ **Supervision** : Humaine obligatoire
-        """)
+        """Affiche les informations de transparence requises par l'AI Act"""
         
-        st.markdown("""
-        ### Caractéristiques
-        - 🧠 **Algorithme** : Random Forest
-        - 📊 **Données** : 5000+ cas validés
-        - 🎯 **Performance** : >95% sensibilité
-        """)
-        
-        if st.button("📋 Voir Rapport Complet", key="full_ai_report"):
-            st.session_state.show_full_ai_report = True
-    
-    # Affichage du rapport complet dans la zone principale si demandé
-    if st.session_state.get('show_full_ai_report', False):
-        with st.expander("📋 Rapport de Conformité AI Act Complet", expanded=True):
+        # Créer un expander dans la sidebar pour une meilleure gestion
+        with st.sidebar.expander("🤖 Transparence du Système IA", expanded=False):
             st.markdown("""
-            ## 🤖 Transparence du Système IA - Conformité AI Act UE
-            
             ### Classification du Système
-            - 🏥 **Catégorie** : Système IA à haut risque dans le domaine de la santé
-            - 📋 **Usage** : Aide à la décision médicale pour le dépistage TSA
-            - ⚠️ **Supervision humaine** : Obligatoire - décision finale par professionnel qualifié
-            
-            ### Caractéristiques Techniques
-            - 🧠 **Algorithme** : Random Forest optimisé pour le dépistage médical
-            - 📊 **Données d'entraînement** : 5000+ cas multi-origines, validés cliniquement
-            - 🎯 **Performance** : Sensibilité >95%, Spécificité >90%
-            - 🔄 **Mise à jour** : Réévaluation trimestrielle des performances
-            
-            ### Limitations et Risques
-            - ⚕️ **Ne remplace pas** un diagnostic médical professionnel
-            - 👥 **Biais potentiels** : Données principalement occidentales
-            - 🎂 **Âge ciblé** : Optimisé pour 3-65 ans
-            - 🌍 **Validation continue** sur populations diverses requise
+            - 🏥 **Catégorie** : Système IA à haut risque
+            - 📋 **Usage** : Aide à la décision médicale
+            - ⚠️ **Supervision** : Humaine obligatoire
             """)
             
-            if st.button("❌ Fermer le rapport", key="close_ai_report"):
-                st.session_state.show_full_ai_report = False
-                st.rerun()
+            st.markdown("""
+            ### Caractéristiques
+            - 🧠 **Algorithme** : Random Forest
+            - 📊 **Données** : 5000+ cas validés
+            - 🎯 **Performance** : >95% sensibilité
+            """)
+            
+            if st.button("📋 Voir Rapport Complet", key="full_ai_report"):
+                st.session_state.show_full_ai_report = True
+        
+        # Affichage du rapport complet dans la zone principale si demandé
+        if st.session_state.get('show_full_ai_report', False):
+            with st.expander("📋 Rapport de Conformité AI Act Complet", expanded=True):
+                st.markdown("""
+                ## 🤖 Transparence du Système IA - Conformité AI Act UE
+                
+                ### Classification du Système
+                - 🏥 **Catégorie** : Système IA à haut risque dans le domaine de la santé
+                - 📋 **Usage** : Aide à la décision médicale pour le dépistage TSA
+                - ⚠️ **Supervision humaine** : Obligatoire - décision finale par professionnel qualifié
+                
+                ### Caractéristiques Techniques
+                - 🧠 **Algorithme** : Random Forest optimisé pour le dépistage médical
+                - 📊 **Données d'entraînement** : 5000+ cas multi-origines, validés cliniquement
+                - 🎯 **Performance** : Sensibilité >95%, Spécificité >90%
+                - 🔄 **Mise à jour** : Réévaluation trimestrielle des performances
+                
+                ### Limitations et Risques
+                - ⚕️ **Ne remplace pas** un diagnostic médical professionnel
+                - 👥 **Biais potentiels** : Données principalement occidentales
+                - 🎂 **Âge ciblé** : Optimisé pour 3-65 ans
+                - 🌍 **Validation continue** sur populations diverses requise
+                """)
+                
+                if st.button("❌ Fermer le rapport", key="close_ai_report"):
+                    st.session_state.show_full_ai_report = False
+                    st.rerun()
 
 
 # Initialisation du gestionnaire AI Act
