@@ -1346,23 +1346,29 @@ def create_chi_squared_visualization(data, variable):
 
 @st.cache_data(ttl=3600, max_entries=100)
 def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histogram', title=None):
-    """Crée une visualisation Plotly avec compatibilité Streamlit 1.28.0"""
-    
-    # Vérification des données d'entrée
-    if df is None or df.empty:
-        st.warning("Données vides pour la visualisation")
-        return None
-    
-    # Échantillonnage pour de meilleures performances
-    sample_threshold = 5000
-    if len(df) > sample_threshold:
-        df = df.sample(sample_threshold, random_state=42)
-    
-    # Palettes de couleurs compatible
-    palette = {"Yes": "#e74c3c", "No": "#3498db", "Unknown": "#95a5a6"}
+    """Crée une visualisation Plotly avec gestion d'erreurs renforcée"""
     
     try:
-        # Configuration de base optimisée pour Streamlit 1.28.0
+        # Vérification des données d'entrée
+        if df is None or df.empty:
+            st.warning("Données vides pour la visualisation")
+            return None
+        
+        # Nettoyage des données
+        if x and x in df.columns:
+            df = df.dropna(subset=[x])
+        if y and y in df.columns:
+            df = df.dropna(subset=[y])
+        
+        # Échantillonnage pour de meilleures performances
+        sample_threshold = 2000
+        if len(df) > sample_threshold:
+            df = df.sample(sample_threshold, random_state=42)
+        
+        # Palettes de couleurs fixe
+        palette = {"Yes": "#e74c3c", "No": "#3498db", "Unknown": "#95a5a6"}
+        
+        # Configuration de base pour tous les graphiques
         base_layout = dict(
             height=400,
             margin=dict(l=40, r=40, t=60, b=40),
@@ -1371,13 +1377,15 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
             showlegend=True
         )
         
+        # Création des graphiques selon le type
         if kind == 'histogram':
             fig = px.histogram(
                 df, 
                 x=x, 
                 color=color, 
                 color_discrete_map=palette,
-                title=title or f"Distribution de {x}"
+                title=title or f"Distribution de {x}",
+                nbins=20
             )
             
         elif kind == 'box':
@@ -1388,6 +1396,17 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
                 color=color, 
                 color_discrete_map=palette,
                 title=title or f"Box plot de {y} par {x}"
+            )
+            
+        elif kind == 'violin':
+            fig = px.violin(
+                df, 
+                x=x, 
+                y=y, 
+                color=color, 
+                color_discrete_map=palette,
+                title=title or f"Violin plot de {y} par {x}",
+                box=True
             )
             
         elif kind == 'scatter':
@@ -1402,27 +1421,46 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
             )
             
         elif kind == 'pie':
-            if names in df.columns:
+            if names and names in df.columns:
+                # Agrégation pour le pie chart
+                pie_data = df[names].value_counts().reset_index()
+                pie_data.columns = [names, 'count']
+                
                 fig = px.pie(
-                    df, 
+                    pie_data, 
                     names=names, 
-                    color=color, 
+                    values='count',
+                    color=names,
                     color_discrete_map=palette,
                     title=title or f"Répartition {names}"
                 )
             else:
+                st.error(f"Colonne '{names}' non trouvée pour le graphique en secteurs")
                 return None
                 
         elif kind == 'bar':
-            fig = px.bar(
-                df, 
-                x=x, 
-                y=y, 
-                color=color, 
-                color_discrete_map=palette,
-                title=title or f"Graphique en barres"
-            )
-            
+            # Vérifier si c'est un groupby ou des données brutes
+            if y and y in df.columns:
+                fig = px.bar(
+                    df, 
+                    x=x, 
+                    y=y, 
+                    color=color, 
+                    color_discrete_map=palette,
+                    title=title or f"Graphique en barres"
+                )
+            else:
+                # Comptage automatique si pas de y spécifié
+                bar_data = df[x].value_counts().reset_index()
+                bar_data.columns = [x, 'count']
+                
+                fig = px.bar(
+                    bar_data, 
+                    x=x, 
+                    y='count',
+                    title=title or f"Distribution de {x}"
+                )
+                
         else:
             st.warning(f"Type de graphique '{kind}' non supporté")
             return None
@@ -1430,7 +1468,7 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         # Application du layout de base
         fig.update_layout(**base_layout)
         
-        # Configuration additionnelle pour la compatibilité
+        # Configuration pour la compatibilité Streamlit
         fig.update_layout(
             autosize=True,
             dragmode=False,
@@ -1441,6 +1479,7 @@ def create_plotly_figure(df, x=None, y=None, color=None, names=None, kind='histo
         
     except Exception as e:
         st.error(f"Erreur lors de la création du graphique {kind}: {str(e)}")
+        st.write("Données disponibles:", df.columns.tolist() if df is not None else "Aucune")
         return None
 
 
