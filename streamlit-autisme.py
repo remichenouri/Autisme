@@ -6547,86 +6547,41 @@ def show_about_page():
     """, unsafe_allow_html=True)
 
     pass
-
 def main():
-    set_custom_theme()
-    if not st.session_state.get('gdpr_compliant', False):
-        st.markdown("# 🔒 Conformité RGPD Requise")
-        consent_manager = GDPRConsentManager()
+    """Fonction principale avec gestion des erreurs améliorée"""
+    try:
+        # Initialisation sécurisée
+        initialize_session_state()
+        set_custom_theme()
         
-        if not consent_manager.show_consent_form():
-            st.stop()  # Arrête l'exécution si pas de consentement
-        
-        # Log du consentement
-        st.session_state.audit_manager.log_action(
-            action_type="GDPR_CONSENT",
-            details={
-                'consent_given': True,
-                'consent_type': 'screening_medical_data',
-                'data_controller': 'TSA_Screening_Platform'
-            }
-        )
-    
-    if st.session_state.get('gdpr_compliant', False):
+        # Menu de navigation dans la sidebar
         with st.sidebar:
-            if st.button("🤖 Info Système IA"):
-                st.session_state.ai_compliance_manager.show_ai_transparency_info()
-        st.session_state.initialized = True
+            tool_choice = show_navigation_menu()
 
-        if "aq10_total" not in st.session_state:
-            st.session_state.aq10_total = 0
-
-        if "expanders_initialized" not in st.session_state:
-            st.session_state.expanders_initialized = {
-                'structure': True,
-                'valeurs_manquantes': False,
-                'pipeline': False,
-                'variables_cles': True,
-                'questionnaire': False,
-                'composite': False,
-                'statistiques': False,
-                'correlation': False,
-                'famd': False
-            }
-
-    if 'df' not in st.session_state:
-        with st.spinner("Chargement des données..."):
-            st.session_state.df, st.session_state.df_ds1, st.session_state.df_ds2, st.session_state.df_ds3, st.session_state.df_ds4, st.session_state.df_ds5, st.session_state.df_stats = load_dataset()
-
-    with st.sidebar:
-        st.markdown('<p class="sidebar-title">🧩 Autisme - Navigation</p>', unsafe_allow_html=True)
-        pages = [
-            "🏠 Accueil",
-            "🔍 Exploration",
-            "🧠 Analyse ML",
-            "🤖 Prédiction par IA",
-            "📚 Documentation",
-            "🔒 RGPD & Droits"
-            "ℹ️ À propos"
-        ]
-        selection = st.sidebar.radio("Choisissez un outil :", pages)
-
-    palette = {
-        "Yes": "#3498db",
-        "No": "#2ecc71",
-        "Unknown": "#95a5a6"
-    }
-
-    if "🏠 Accueil" in selection:
-        show_home_page()
-    elif "🔍 Exploration" in selection:
-        show_data_exploration()
-    elif "🧠 Analyse ML" in selection:
-        show_ml_analysis()
-    elif "🤖 Prédiction par IA" in selection:
-        show_aq10_and_prediction()
-    elif "📚 Documentation" in selection:
-        show_documentation()
-    elif "🔒 RGPD & Droits" in selection:
-        show_gdpr_admin_panel()
-    elif "ℹ️ À propos" in selection:
-        show_about_page()
+        # Gestion de toutes les pages selon le choix
+        if tool_choice == "🏠 Accueil":
+            show_home_page()
+        elif tool_choice == "🔍 Exploration":
+            show_data_exploration()
+        elif tool_choice == "🧠 Analyse ML":
+            show_ml_analysis()
+        elif tool_choice == "🤖 Prédiction par IA":
+            show_prediction_tool()
+        elif tool_choice == "📚 Documentation":
+            show_documentation()
+        elif tool_choice == "🔒 RGPD & Droits":
+            show_gdpr_admin_panel()
+        elif tool_choice == "ℹ️ À propos":
+            show_about_page()
+        else:
+            # Fallback sur la page d'accueil
+            show_home_page()
+            
+    except Exception as e:
+        st.error(f"Erreur dans l'application : {str(e)}")
+        st.info("Veuillez recharger la page ou contacter le support.")
 
 if __name__ == "__main__":
     main()
+
 
