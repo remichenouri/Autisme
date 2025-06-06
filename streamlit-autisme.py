@@ -2550,21 +2550,40 @@ def show_data_exploration():
             with famd_tabs[2]:
                 st.subheader("Analyse détaillée des composantes")
                 st.markdown("""
-    ### Interprétation du Graphique FAMD
-    
-    **Principe de l'Analyse Factorielle :** L'FAMD projette les données multidimensionnelles sur un plan 
-    bidimensionnel, permettant de visualiser les patterns cachés dans les données de dépistage TSA.
-    
-    **Lecture du Graphique :**
-    - **Points bleus** : Cas avec diagnostic TSA positif
-    - **Points rouges** : Cas sans diagnostic TSA
-    - **Regroupements** : Proximité des points indique des profils similaires
-    - **Dispersion** : Distance entre groupes révèle la capacité discriminante
-    
-    **Implications Cliniques :**
-    Une séparation claire entre les groupes suggère que les variables mesurées 
-    capturent efficacement les différences associées au TSA.
-    """)
+        ### Interprétation du Graphique
+            
+        **Objectif de l'analyse** :  
+        Cette visualisation permet d'identifier des patterns dans les données de dépistage TSA en réduisant la dimensionnalité des variables.
+
+        **Axes principaux** :  
+        - Axe X (Composante 1) : Capture {variance_composante1}% de l'information  
+        - Axe Y (Composante 2) : Explique {variance_composante2}% de la variance
+
+        **Codage couleur** :  
+        - 🔵 Points bleus : Cas avec diagnostic TSA confirmé  
+        - 🔴 Points rouges : Cas sans diagnostic TSA
+
+        **Clés de lecture** :  
+        1. Les regroupements de points similaires indiquent des profils communs  
+        2. La distance entre groupes reflète leur dissemblance  
+        3. La dispersion montre la variabilité intra-groupe
+
+        **Implications cliniques** :  
+        Une séparation nette entre groupes suggère que les variables utilisées permettent de discriminer efficacement les cas TSA.
+        """.format(
+            variance_composante1=round(explained_variance[0]*100, 1),
+            variance_composante2=round(explained_variance[1]*100, 1)
+        ))
+
+        # Métriques existantes conservées
+        st.markdown("### Métriques")
+        st.metric("Échantillons", len(df_famd))
+        st.metric("Variables", len(df_famd.columns))
+        
+        if 'TSA' in df_famd.columns:
+            tsa_counts = df_famd['TSA'].value_counts()
+            for category, count in tsa_counts.items():
+                st.metric(f"Cas {category}", count)
                 # Sélection de composante
                 comp_choice = st.selectbox(
                     "Choisir une composante à analyser :",
