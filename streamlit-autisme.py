@@ -415,9 +415,12 @@ if 'audit_manager' not in st.session_state:
 if 'audit_trail' not in st.session_state:
     st.session_state.audit_trail = []
 
-
 def show_gdpr_admin_panel():
     """Panneau d'administration RGPD pour exercice des droits"""
+    # Empêcher la sortie tant que le consentement n'est pas donné
+    if not st.session_state.get('gdpr_compliant'):
+        st.session_state.tool_choice = "🔒 RGPD & Droits"
+    
     st.markdown("## 🔒 Panneau RGPD & Conformité IA")
     
     tabs = st.tabs([
@@ -431,7 +434,8 @@ def show_gdpr_admin_panel():
     with tabs[0]:
         st.subheader("Formulaire de Consentement RGPD")
         # Appel direct sans titre supplémentaire
-        GDPRConsentManager.show_consent_form()
+        if GDPRConsentManager.show_consent_form():
+            return  # Sortir après validation
         
         # Affichage des données actuelles
         if st.session_state.get('gdpr_consent'):
