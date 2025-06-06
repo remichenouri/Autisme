@@ -223,7 +223,11 @@ def initialize_session_state():
     """Initialise l'état de session pour conserver les configurations entre les recharges"""
     if 'initialized' not in st.session_state:
         st.session_state.initialized = True
-
+        st.session_state.gdpr_compliant = False
+        st.session_state.gdpr_consent = None
+        st.session_state.user_session_id = str(uuid.uuid4())
+        st.session_state.session_start = datetime.now()
+        
         # Par défaut, commencer sur la page d'accueil
         default_tool = "🏠 Accueil"
 
