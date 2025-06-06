@@ -897,14 +897,14 @@ def show_navigation_menu():
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options optimisées avec conformité
+    # Options avec l'onglet RGPD bien visible
     options = [
         "🏠 Accueil",
         "🔍 Exploration",
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
-        "🔒 RGPD & Droits",  
+        "🔒 RGPD & Droits",  # S'assurer que cette option est présente
         "ℹ️ À propos"
     ]
 
@@ -923,12 +923,14 @@ def show_navigation_menu():
 
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
+
+    # Gérer spécifiquement l'affichage RGPD
     if tool_choice == "🔒 RGPD & Droits":
         show_gdpr_admin_panel()
         return tool_choice
 
     return tool_choice
-
+    
 set_custom_theme()
 
 def load_visualization_libraries():
