@@ -32,6 +32,7 @@ from datetime import datetime, timedelta
 import uuid
 import hashlib
 import secrets
+import time
 
 def hash_user_data(data: str) -> str:
     return hashlib.sha256(data.encode()).hexdigest()
