@@ -13,3 +13,5 @@ Pillow>=9.0.0
 xgboost>=1.7.0
 lightgbm>=3.3.0
 cryptography>=41.0.0
+python-jose>=3.3.0
+hashlib2>=1.1.1
