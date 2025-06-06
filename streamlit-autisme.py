@@ -354,6 +354,61 @@ class AuditTrailManager:
 if 'audit_manager' not in st.session_state:
     st.session_state.audit_manager = AuditTrailManager()
 
+def show_gdpr_admin_panel():
+    """Panneau d'administration RGPD pour exercice des droits"""
+    st.markdown("## 🔒 Panneau RGPD - Exercice de vos Droits")
+    
+    tabs = st.tabs(["📋 Mes Données", "🗑️ Droit à l'Effacement", "📤 Portabilité", "📊 Audit Trail"])
+    
+    with tabs[0]:
+        st.subheader("Vos données enregistrées")
+        user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
+            st.session_state.get('user_session_id')
+        )
+        st.info(f"Identifiant pseudonymisé : {user_pseudonym}")
+        
+        if st.session_state.get('gdpr_consent'):
+            consent_data = st.session_state.gdpr_consent.copy()
+            # Masquer les données sensibles
+            consent_data['user_id'] = consent_data['user_id'][:8] + "..."
+            st.json(consent_data)
+    
+    with tabs[1]:
+        st.subheader("Droit à l'effacement (Article 17 RGPD)")
+        if st.button("🗑️ Supprimer toutes mes données", type="secondary"):
+            # Effacement des données de session
+            keys_to_clear = ['gdpr_consent', 'aq10_responses', 'aq10_total', 'audit_trail', 'ai_decisions_log']
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            
+            st.success("✅ Vos données ont été supprimées de cette session")
+            st.rerun()
+    
+    with tabs[2]:
+        st.subheader("Portabilité des données (Article 20 RGPD)")
+        if st.button("📤 Exporter mes données"):
+            export_data = {
+                'user_pseudonym': user_pseudonym,
+                'export_date': datetime.now().isoformat(),
+                'consent_data': st.session_state.get('gdpr_consent', {}),
+                'session_duration': str(datetime.now() - st.session_state.get('session_start', datetime.now()))
+            }
+            
+            st.download_button(
+                label="💾 Télécharger mes données (JSON)",
+                data=json.dumps(export_data, indent=2),
+                file_name=f"tsa_data_export_{user_pseudonym}.json",
+                mime="application/json"
+            )
+    
+    with tabs[3]:
+        st.subheader("Piste d'audit de vos actions")
+        audit_stats = st.session_state.audit_manager.generate_audit_report()
+        if isinstance(audit_stats, dict):
+            st.json(audit_stats)
+        else:
+            st.info(audit_stats)
 
 
 for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
