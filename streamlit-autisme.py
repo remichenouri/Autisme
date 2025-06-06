@@ -33,6 +33,9 @@ import uuid
 import hashlib
 import secrets
 
+def hash_user_data(data: str) -> str:
+    return hashlib.sha256(data.encode()).hexdigest()
+    
 class GDPRSecurityManager:
     """Gestionnaire de sécurité et conformité RGPD"""
     
