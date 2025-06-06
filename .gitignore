@@ -1,0 +1,14 @@
+# Variables d'environnement sensibles
+.env
+.env.local
+.env.production
+
+# Caches de conformité
+/security_cache/
+/audit_logs/
+/gdpr_data/
+
+# Clés temporaires
+*.key
+*.pem
+/certificates/
