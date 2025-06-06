@@ -6492,18 +6492,33 @@ def show_about_page():
     """, unsafe_allow_html=True)
 
     pass
+    
 def main():
     """Fonction principale avec gestion des erreurs améliorée"""
     try:
         # Initialisation sécurisée
         initialize_session_state()
         set_custom_theme()
-        
+
+        # Vérification conformité RGPD avant toute chose
+        if not st.session_state.get('gdpr_compliant'):
+            st.session_state.tool_choice = "🔒 RGPD & Droits"
+            show_gdpr_admin_panel()
+            return  # Bloque l'accès au reste de l'application
+
         # Menu de navigation dans la sidebar
         with st.sidebar:
             tool_choice = show_navigation_menu()
 
-        # Gestion de toutes les pages selon le choix
+        # Gestion des pages spéciales en premier
+        if tool_choice == "🔒 RGPD & Droits":
+            show_gdpr_admin_panel()
+            return
+        elif tool_choice == "ℹ️ À propos":
+            show_about_page()
+            return
+
+        # Gestion des autres pages
         if tool_choice == "🏠 Accueil":
             show_home_page()
         elif tool_choice == "🔍 Exploration":
@@ -6514,12 +6529,7 @@ def main():
             show_prediction_tool()
         elif tool_choice == "📚 Documentation":
             show_documentation()
-        elif tool_choice == "🔒 RGPD & Droits":
-            show_gdpr_admin_panel()
-        elif tool_choice == "ℹ️ À propos":
-            show_about_page()
         else:
-            # Fallback sur la page d'accueil
             show_home_page()
             
     except Exception as e:
