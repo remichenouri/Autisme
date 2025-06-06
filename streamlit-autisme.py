@@ -2550,87 +2550,84 @@ def show_data_exploration():
             with famd_tabs[2]:
                 st.subheader("Analyse détaillée des composantes")
                 st.markdown("""
-        ### Interprétation du Graphique
-            
-        **Objectif de l'analyse** :  
-        Cette visualisation permet d'identifier des patterns dans les données de dépistage TSA en réduisant la dimensionnalité des variables.
-
-        **Axes principaux** :  
-        - Axe X (Composante 1) : Capture {variance_composante1}% de l'information  
-        - Axe Y (Composante 2) : Explique {variance_composante2}% de la variance
-
-        **Codage couleur** :  
-        - 🔵 Points bleus : Cas avec diagnostic TSA confirmé  
-        - 🔴 Points rouges : Cas sans diagnostic TSA
-
-        **Clés de lecture** :  
-        1. Les regroupements de points similaires indiquent des profils communs  
-        2. La distance entre groupes reflète leur dissemblance  
-        3. La dispersion montre la variabilité intra-groupe
-
-        **Implications cliniques** :  
-        Une séparation nette entre groupes suggère que les variables utilisées permettent de discriminer efficacement les cas TSA.
-        """.format(
-            variance_composante1=round(explained_variance[0]*100, 1),
-            variance_composante2=round(explained_variance[1]*100, 1)
-        ))
-
-        # Métriques existantes conservées
-        st.markdown("### Métriques")
-        st.metric("Échantillons", len(df_famd))
-        st.metric("Variables", len(df_famd.columns))
-        
-        if 'TSA' in df_famd.columns:
-            tsa_counts = df_famd['TSA'].value_counts()
-            for category, count in tsa_counts.items():
-                st.metric(f"Cas {category}", count)
-                # Sélection de composante
-                comp_choice = st.selectbox(
-                    "Choisir une composante à analyser :",
-                    [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
-                    key="famd_component_choice"
-                )
-                
-                comp_idx = int(comp_choice.split()[1]) - 1
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.markdown(f"### {comp_choice}")
-                    st.metric("Variance expliquée", f"{explained_variance[comp_idx]:.2%}")
-                    st.metric("Valeur propre", f"{eigenvalues[comp_idx]:.3f}")
+                ### Interprétation du Graphique
                     
-                    # Distribution des coordonnées pour cette composante
-                    fig_hist = px.histogram(
-                        x=coordinates.iloc[:, comp_idx],
-                        nbins=20,
-                        labels={'x': f'{comp_choice}', 'y': 'Fréquence'},
-                        title=f'Distribution des coordonnées - {comp_choice}'
-                    )
-                    st.plotly_chart(fig_hist, use_container_width=True)
+                **Objectif de l'analyse** :  
+                Cette visualisation permet d'identifier des patterns dans les données de dépistage TSA en réduisant la dimensionnalité des variables.
+        
+                **Axes principaux** :  
+                - Axe X (Composante 1) : Capture {variance_composante1}% de l'information  
+                - Axe Y (Composante 2) : Explique {variance_composante2}% de la variance
+        
+                **Codage couleur** :  
+                - 🔵 Points bleus : Cas avec diagnostic TSA confirmé  
+                - 🔴 Points rouges : Cas sans diagnostic TSA
+        
+                **Clés de lecture** :  
+                1. Les regroupements de points similaires indiquent des profils communs  
+                2. La distance entre groupes reflète leur dissemblance  
+                3. La dispersion montre la variabilité intra-groupe
+        
+                **Implications cliniques** :  
+                Une séparation nette entre groupes suggère que les variables utilisées permettent de discriminer efficacement les cas TSA.
+                """.format(
+                    variance_composante1=round(explained_variance[0]*100, 1),
+                    variance_composante2=round(explained_variance[1]*100, 1)
+                ))
+        
+                # Métriques existantes conservées
                 
-                with col2:
-                    st.markdown("### Contribution des variables")
-                    if famd_success and hasattr(famd_model, 'column_coordinates'):
-                        try:
-                            # Tentative d'obtenir les contributions
-                            column_coords = famd_model.column_coordinates(df_famd)
-                            if comp_idx < len(column_coords.columns):
-                                contrib_data = column_coords.iloc[:, comp_idx].abs().sort_values(ascending=False)
-                                
-                                # Graphique des contributions
-                                fig_contrib = px.bar(
-                                    x=contrib_data.values[:10],  # Top 10
-                                    y=contrib_data.index[:10],
-                                    orientation='h',
-                                    labels={'x': 'Contribution absolue', 'y': 'Variables'},
-                                    title='Top 10 des contributions'
-                                )
-                                st.plotly_chart(fig_contrib, use_container_width=True)
-                        except Exception as e:
-                            st.info("Analyse des contributions non disponible avec cette méthode")
-                    else:
-                        st.info("Analyse des contributions non disponible en mode PCA")
+                if 'TSA' in df_famd.columns:
+                    tsa_counts = df_famd['TSA'].value_counts()
+                    for category, count in tsa_counts.items():
+                        st.metric(f"Cas {category}", count)
+                        # Sélection de composante
+                        comp_choice = st.selectbox(
+                            "Choisir une composante à analyser :",
+                            [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
+                            key="famd_component_choice"
+                        )
+                        
+                        comp_idx = int(comp_choice.split()[1]) - 1
+                        
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown(f"### {comp_choice}")
+                            st.metric("Variance expliquée", f"{explained_variance[comp_idx]:.2%}")
+                            st.metric("Valeur propre", f"{eigenvalues[comp_idx]:.3f}")
+                            
+                            # Distribution des coordonnées pour cette composante
+                            fig_hist = px.histogram(
+                                x=coordinates.iloc[:, comp_idx],
+                                nbins=20,
+                                labels={'x': f'{comp_choice}', 'y': 'Fréquence'},
+                                title=f'Distribution des coordonnées - {comp_choice}'
+                            )
+                            st.plotly_chart(fig_hist, use_container_width=True)
+                        
+                        with col2:
+                            st.markdown("### Contribution des variables")
+                            if famd_success and hasattr(famd_model, 'column_coordinates'):
+                                try:
+                                    # Tentative d'obtenir les contributions
+                                    column_coords = famd_model.column_coordinates(df_famd)
+                                    if comp_idx < len(column_coords.columns):
+                                        contrib_data = column_coords.iloc[:, comp_idx].abs().sort_values(ascending=False)
+                                        
+                                        # Graphique des contributions
+                                        fig_contrib = px.bar(
+                                            x=contrib_data.values[:10],  # Top 10
+                                            y=contrib_data.index[:10],
+                                            orientation='h',
+                                            labels={'x': 'Contribution absolue', 'y': 'Variables'},
+                                            title='Top 10 des contributions'
+                                        )
+                                        st.plotly_chart(fig_contrib, use_container_width=True)
+                                except Exception as e:
+                                    st.info("Analyse des contributions non disponible avec cette méthode")
+                            else:
+                                st.info("Analyse des contributions non disponible en mode PCA")
     
             with famd_tabs[3]:
                 st.subheader("Résumé de l'analyse")
