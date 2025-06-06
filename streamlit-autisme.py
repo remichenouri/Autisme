@@ -922,15 +922,15 @@ def show_navigation_menu():
     st.markdown("## 🧩 Autisme - Navigation")
     st.markdown("Choisissez un outil :")
 
-    # Options avec l'onglet RGPD bien visible
+    # Options séparées avec RGPD et À propos distincts
     options = [
         "🏠 Accueil",
         "🔍 Exploration",
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
-        "🔒 RGPD & Droits",  # S'assurer que cette option est présente
-        "ℹ️ À propos"
+        "🔒 RGPD & Droits",     # RGPD séparé
+        "ℹ️ À propos"           # À propos séparé
     ]
 
     if 'tool_choice' not in st.session_state or st.session_state.tool_choice not in options:
@@ -949,9 +949,12 @@ def show_navigation_menu():
     if tool_choice != st.session_state.tool_choice:
         st.session_state.tool_choice = tool_choice
 
-    # Gérer spécifiquement l'affichage RGPD
+    # Gérer spécifiquement chaque option
     if tool_choice == "🔒 RGPD & Droits":
         show_gdpr_admin_panel()
+        return tool_choice
+    elif tool_choice == "ℹ️ À propos":
+        show_about_page()  # Nouvelle fonction à créer
         return tool_choice
 
     return tool_choice
