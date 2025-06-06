@@ -30,6 +30,8 @@ import base64
 import json
 from datetime import datetime, timedelta
 import uuid
+import hashlib
+import secrets
 
 class GDPRSecurityManager:
     """Gestionnaire de sécurité et conformité RGPD"""
@@ -208,6 +210,59 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+class PseudonymizationManager:
+    """Gestionnaire de pseudonymisation avancée SHA-256"""
+    
+    def __init__(self):
+        self.salt = self._get_or_create_salt()
+    
+    def _get_or_create_salt(self):
+        """Génère ou récupère le sel pour le hachage"""
+        if 'pseudonym_salt' not in st.session_state:
+            st.session_state.pseudonym_salt = secrets.token_hex(32)
+        return st.session_state.pseudonym_salt
+    
+    def create_pseudonym(self, user_identifier):
+        """Crée un pseudonyme SHA-256 à partir d'un identifiant"""
+        if not user_identifier:
+            user_identifier = st.session_state.get('user_session_id', str(uuid.uuid4()))
+        
+        # Concaténation identifiant + sel + timestamp du jour
+        today = datetime.now().strftime("%Y-%m-%d")
+        data_to_hash = f"{user_identifier}{self.salt}{today}"
+        
+        # Hachage SHA-256
+        hash_object = hashlib.sha256(data_to_hash.encode())
+        pseudonym = hash_object.hexdigest()[:16]  # Truncature à 16 caractères
+        
+        return f"TSA_{pseudonym}"
+    
+    def pseudonymize_session_data(self, session_data):
+        """Pseudonymise les données de session"""
+        pseudonymized_data = session_data.copy()
+        
+        # Créer un pseudonyme pour cette session
+        user_pseudonym = self.create_pseudonym(st.session_state.get('user_session_id'))
+        
+        # Remplacer les identifiants par des pseudonymes
+        pseudonymized_data.update({
+            'user_pseudonym': user_pseudonym,
+            'session_hash': hashlib.sha256(str(st.session_state.get('user_session_id')).encode()).hexdigest()[:12],
+            'timestamp_hash': hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:8]
+        })
+        
+        # Supprimer les données directement identifiantes
+        keys_to_remove = ['user_session_id', 'client_ip']
+        for key in keys_to_remove:
+            pseudonymized_data.pop(key, None)
+        
+        return pseudonymized_data
+
+# Initialisation du gestionnaire de pseudonymisation
+if 'pseudonym_manager' not in st.session_state:
+    st.session_state.pseudonym_manager = PseudonymizationManager()
+
 
 for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
     os.makedirs(folder, exist_ok=True)
