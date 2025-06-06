@@ -2723,7 +2723,6 @@ def show_data_exploration():
         except Exception as e:
             st.error(f"Erreur globale lors de l'analyse FAMD: {str(e)}")
 
-
 def show_ml_analysis():
     import plotly.express as px
     import plotly.graph_objects as go
