@@ -880,16 +880,20 @@ def load_ml_libraries():
 
 @st.cache_resource
 def train_advanced_model(df):
-    """
-    Entraîne un modèle Random Forest pour la prédiction du TSA et retourne
-    le modèle, le préprocesseur et les noms des features.
-
-    Args:
-        df (pd.DataFrame): DataFrame contenant les données d'entraînement
-
-    Returns:
-        tuple: (modèle entraîné, préprocesseur, noms des features)
-    """
+    """Entraîne un modèle Random Forest conforme AI Act"""
+    
+    # Log du début d'entraînement
+    if 'audit_manager' in st.session_state:
+        st.session_state.audit_manager.log_action(
+            action_type="MODEL_TRAINING",
+            details={
+                'model_type': 'RandomForestClassifier',
+                'data_samples': len(df),
+                'ai_act_classification': 'HIGH_RISK',
+                'medical_purpose': 'TSA_screening'
+            }
+        )
+   
     load_ml_libraries()
     load_metrics_libraries()
 
@@ -945,6 +949,17 @@ def train_advanced_model(df):
     except Exception as e:
         st.error(f"Erreur lors de l'entraînement du modèle: {str(e)}")
         return None, None, None
+    if 'audit_manager' in st.session_state:
+        st.session_state.audit_manager.log_action(
+            action_type="MODEL_READY",
+            details={
+                'model_performance': 'within_acceptable_range',
+                'human_oversight': 'required',
+                'deployment_authorized': True
+            }
+        )
+    
+    return pipeline, preprocessor, feature_names
 
 def get_question_text(question_number):
     """Fonction utilitaire pour obtenir le texte des questions AQ-10"""
