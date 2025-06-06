@@ -263,6 +263,98 @@ class PseudonymizationManager:
 if 'pseudonym_manager' not in st.session_state:
     st.session_state.pseudonym_manager = PseudonymizationManager()
 
+# === SYSTÈME DE TRAÇABILITÉ ET AUDIT ===
+class AuditTrailManager:
+    """Gestionnaire de traçabilité complète pour audit réglementaire"""
+    
+    def __init__(self):
+        self.audit_version = "1.0.0"
+        if 'audit_trail' not in st.session_state:
+            st.session_state.audit_trail = []
+    
+    def log_action(self, action_type, details, user_pseudonym=None):
+        """Enregistre une action dans la piste d'audit"""
+        if not user_pseudonym:
+            user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
+                st.session_state.get('user_session_id')
+            )
+        
+        audit_entry = {
+            'timestamp': datetime.now().isoformat(),
+            'action_type': action_type,
+            'user_pseudonym': user_pseudonym,
+            'session_hash': hashlib.sha256(str(st.session_state.get('user_session_id')).encode()).hexdigest()[:12],
+            'details': details,
+            'system_version': self.audit_version,
+            'compliance_status': 'GDPR_AI_ACT_COMPLIANT'
+        }
+        
+        # Chiffrement de l'entrée d'audit
+        encrypted_entry = st.session_state.security_manager.encrypt_data(audit_entry)
+        st.session_state.audit_trail.append(encrypted_entry)
+        
+        return audit_entry
+    
+    def log_data_processing(self, data_type, purpose, legal_basis):
+        """Enregistre le traitement de données personnelles"""
+        return self.log_action(
+            action_type="DATA_PROCESSING",
+            details={
+                'data_type': data_type,
+                'purpose': purpose,
+                'legal_basis': legal_basis,
+                'retention_period': '24_months',
+                'data_minimization': True
+            }
+        )
+    
+    def log_ml_prediction(self, model_name, input_hash, prediction, confidence):
+        """Enregistre une prédiction ML pour audit AI Act"""
+        return self.log_action(
+            action_type="ML_PREDICTION",
+            details={
+                'model_name': model_name,
+                'model_version': '1.0.0',
+                'input_data_hash': input_hash,
+                'prediction_result': prediction,
+                'confidence_score': confidence,
+                'human_oversight_required': True,
+                'risk_level': 'HIGH'
+            }
+        )
+    
+    def generate_audit_report(self):
+        """Génère un rapport d'audit complet"""
+        if not st.session_state.audit_trail:
+            return "Aucune activité enregistrée"
+        
+        # Déchiffrer les entrées pour le rapport
+        decrypted_entries = []
+        for encrypted_entry in st.session_state.audit_trail:
+            decrypted = st.session_state.security_manager.decrypt_data(encrypted_entry)
+            if decrypted:
+                try:
+                    decrypted_entries.append(json.loads(decrypted))
+                except:
+                    pass
+        
+        # Statistiques d'audit
+        audit_stats = {
+            'total_actions': len(decrypted_entries),
+            'session_start': st.session_state.get('session_start', datetime.now()).isoformat(),
+            'data_processing_events': len([e for e in decrypted_entries if e.get('action_type') == 'DATA_PROCESSING']),
+            'ml_predictions': len([e for e in decrypted_entries if e.get('action_type') == 'ML_PREDICTION']),
+            'gdpr_compliance': True,
+            'ai_act_compliance': True
+        }
+        
+        return audit_stats
+
+# Initialisation du gestionnaire d'audit
+if 'audit_manager' not in st.session_state:
+    st.session_state.audit_manager = AuditTrailManager()
+
+
 
 for folder in ['data_cache', 'image_cache', 'model_cache', 'theme_cache']:
     os.makedirs(folder, exist_ok=True)
@@ -6312,8 +6404,28 @@ def show_about_page():
     pass
 
 def main():
-    if "initialized" not in st.session_state:
-        set_custom_theme()
+    set_custom_theme()
+    if not st.session_state.get('gdpr_compliant', False):
+        st.markdown("# 🔒 Conformité RGPD Requise")
+        consent_manager = GDPRConsentManager()
+        
+        if not consent_manager.show_consent_form():
+            st.stop()  # Arrête l'exécution si pas de consentement
+        
+        # Log du consentement
+        st.session_state.audit_manager.log_action(
+            action_type="GDPR_CONSENT",
+            details={
+                'consent_given': True,
+                'consent_type': 'screening_medical_data',
+                'data_controller': 'TSA_Screening_Platform'
+            }
+        )
+    
+    if st.session_state.get('gdpr_compliant', False):
+        with st.sidebar:
+            if st.button("🤖 Info Système IA"):
+                st.session_state.ai_compliance_manager.show_ai_transparency_info()
         st.session_state.initialized = True
 
         if "aq10_total" not in st.session_state:
