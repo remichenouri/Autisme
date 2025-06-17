@@ -2312,7 +2312,7 @@ def show_data_exploration():
             st.session_state.session_id = str(uuid.uuid4())
 
         def gen_key(base: str) -> str:
-        """Retourne une clé unique pour Streamlit widgets."""
+            """Retourne une clé unique pour Streamlit widgets."""
             return f"{base}-{st.session_state.session_id}-{int(datetime.now().timestamp()*1e3)}"
 
 # Conteneur principal FAMD
