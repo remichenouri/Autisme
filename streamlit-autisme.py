@@ -36,14 +36,14 @@ import time
 
 def hash_user_data(data: str) -> str:
     return hashlib.sha256(data.encode()).hexdigest()
-    
+
 class GDPRSecurityManager:
     """Gestionnaire de sécurité et conformité RGPD"""
-    
+
     def __init__(self):
         self.key = self._generate_key()
         self.cipher_suite = Fernet(self.key)
-        
+
     def _generate_key(self):
         """Génère une clé AES-256 dérivée d'un mot de passe"""
         password = b"TSA_SCREENING_SECURE_2024"  # À stocker de manière sécurisée en production
@@ -56,7 +56,7 @@ class GDPRSecurityManager:
         )
         key = base64.urlsafe_b64encode(kdf.derive(password))
         return key
-    
+
     def encrypt_data(self, data):
         """Chiffre les données avec AES-256"""
         if isinstance(data, dict):
@@ -64,7 +64,7 @@ class GDPRSecurityManager:
         elif not isinstance(data, str):
             data = str(data)
         return self.cipher_suite.encrypt(data.encode())
-    
+
     def decrypt_data(self, encrypted_data):
         """Déchiffre les données"""
         try:
@@ -76,37 +76,37 @@ class GDPRSecurityManager:
 
 class GDPRConsentManager:
     """Gestionnaire des consentements RGPD"""
-    
+
     @staticmethod
     def show_consent_form():
         """Affiche le formulaire de consentement RGPD et retourne le statut"""
         # SUPPRIMER le titre markdown - il sera géré par le parent
-        
+
         st.markdown("""
         **Protection des Données Personnelles**
-        
+
         ### Vos droits :
         - ✅ **Droit d'accès** : Consulter vos données personnelles
         - ✅ **Droit de rectification** : Corriger vos données
         - ✅ **Droit à l'effacement** : Supprimer vos données
         - ✅ **Droit à la portabilité** : Récupérer vos données
         - ✅ **Droit d'opposition** : Refuser le traitement
-        
+
         ### Traitement des données :
         - 🔐 **Chiffrement AES-256** de toutes les données sensibles
         - 🏥 **Usage médical uniquement** pour le dépistage TSA
         - ⏰ **Conservation limitée** : 24 mois maximum
         - 🌍 **Pas de transfert** hors Union Européenne
         """)
-            
+
         consent_options = st.columns(2)
-        
+
         with consent_options[0]:
             consent_screening = st.checkbox(
                 "✅ J'accepte le traitement de mes données pour le dépistage TSA",
                 key="consent_screening"
             )
-        
+
         with consent_options[1]:
             consent_research = st.radio(
                 "📊 J'accepte l'utilisation anonymisée pour la recherche",
@@ -114,7 +114,7 @@ class GDPRConsentManager:
                 key="consent_research_radio",
                 horizontal=True
             )
-        
+
         if consent_screening:
             consent_data = {
                 'user_id': str(uuid.uuid4()),
@@ -123,21 +123,21 @@ class GDPRConsentManager:
                 'research_consent': consent_research == "Oui",
                 'ip_hash': hashlib.sha256(st.session_state.get('client_ip', '').encode()).hexdigest()[:16]
             }
-            
+
             st.session_state.gdpr_consent = consent_data
             st.session_state.gdpr_compliant = True
-            
+
             st.success("✅ Consentement enregistré. Redirection...")
             time.sleep(1.5)
             st.session_state.tool_choice = "🏠 Accueil"
             st.rerun()
-            
+
             return True
         else:
             st.warning("⚠️ Le consentement est requis pour utiliser l'outil de dépistage")
             return False
 
-        
+
         if consent_screening:
             consent_data = {
                 'user_id': str(uuid.uuid4()),
@@ -146,10 +146,10 @@ class GDPRConsentManager:
                 'research_consent': consent_research,
                 'ip_hash': hashlib.sha256(st.session_state.get('client_ip', '').encode()).hexdigest()[:16]
             }
-            
+
             st.session_state.gdpr_consent = consent_data
             st.session_state.gdpr_compliant = True
-            
+
             return True
         else:
             st.warning("⚠️ Le consentement est requis pour utiliser l'outil de dépistage")
@@ -158,10 +158,10 @@ class GDPRConsentManager:
 # Initialisation du gestionnaire de sécurité
 if 'security_manager' not in st.session_state:
     st.session_state.security_manager = GDPRSecurityManager()
-    
+
 class AIActComplianceManager:
     """Gestionnaire de conformité AI Act pour systèmes IA haut risque en santé"""
-    
+
     def __init__(self):
         self.system_classification = "HIGH_RISK_HEALTHCARE"
         self.ai_system_info = {
@@ -172,7 +172,7 @@ class AIActComplianceManager:
             'medical_device_class': 'IIa',
             'conformity_assessment': 'Required'
         }
-        
+
     def log_ai_decision(self, input_data, prediction, confidence, model_version):
         """Enregistre chaque décision IA pour traçabilité (Art. 12 AI Act)"""
         decision_log = {
@@ -184,57 +184,57 @@ class AIActComplianceManager:
             'input_features_hash': hashlib.sha256(str(input_data).encode()).hexdigest(),
             'system_status': 'OPERATIONAL'
         }
-        
+
         # Stockage sécurisé du log (chiffré)
         if 'ai_decisions_log' not in st.session_state:
             st.session_state.ai_decisions_log = []
-        
+
         encrypted_log = st.session_state.security_manager.encrypt_data(decision_log)
         st.session_state.ai_decisions_log.append(encrypted_log)
-        
+
         return decision_log['timestamp']
-    
+
     def show_ai_transparency_info(self):
         """Affiche les informations de transparence requises par l'AI Act"""
-        
+
         st.markdown("""
         ## 🤖 Transparence du Système IA - Conformité AI Act
-        
+
         ### Classification du Système
         - 🏥 **Catégorie** : Système IA à haut risque dans le domaine de la santé
         - 📋 **Usage** : Aide à la décision médicale pour le dépistage TSA
         - ⚠️ **Supervision humaine** : Obligatoire - décision finale par professionnel qualifié
-        
+
         ### Caractéristiques Techniques
         - 🧠 **Algorithme** : Random Forest optimisé pour le dépistage médical
         - 📊 **Données d'entraînement** : 5000+ cas multi-origines, validés cliniquement
         - 🎯 **Performance** : Sensibilité >95%, Spécificité >90%
         - 🔄 **Mise à jour** : Réévaluation trimestrielle des performances
-        
+
         ### Limitations et Risques
         - ⚕️ **Ne remplace pas** un diagnostic médical professionnel
         - 👥 **Biais potentiels** : Données principalement occidentales
         - 🎂 **Âge ciblé** : Optimisé pour 3-65 ans
         - 🌍 **Validation continue** sur populations diverses requise
         """)
-        
+
         # Documentation technique détaillée
         with st.expander("📋 Documentation Technique Détaillée", expanded=False):
             st.markdown("""
             ### Conformité Réglementaire
-            
+
             **AI Act Européen - Article 13**
             - ✅ Documentation technique complète
             - ✅ Système de gestion de la qualité
             - ✅ Enregistrement automatique des opérations
             - ✅ Transparence et information des utilisateurs
-            
+
             **RGPD - Protection des Données**
             - ✅ Minimisation des données collectées
             - ✅ Chiffrement AES-256 de bout en bout
             - ✅ Pseudonymisation automatique
             - ✅ Audit trail complet
-            
+
             ### Métriques de Performance
             | Métrique | Valeur | Seuil Réglementaire |
             |----------|--------|-------------------|
@@ -242,14 +242,14 @@ class AIActComplianceManager:
             | Spécificité | 92.8% | >85% |
             | Précision | 94.1% | >90% |
             | Aire sous ROC | 0.97 | >0.85 |
-            
+
             ### Gestion des Biais
             - **Diversité géographique** : 12 pays représentés
             - **Équilibre genre** : 52% masculin, 48% féminin
             - **Validation croisée** : K-fold stratifiée (k=10)
             - **Tests d'équité** : Disparate Impact Ratio = 0.89
             """)
-    
+
 
 # Initialisation du gestionnaire AI Act
 if 'ai_compliance_manager' not in st.session_state:
@@ -264,50 +264,50 @@ st.set_page_config(
 
 class PseudonymizationManager:
     """Gestionnaire de pseudonymisation avancée SHA-256"""
-    
+
     def __init__(self):
         self.salt = self._get_or_create_salt()
-    
+
     def _get_or_create_salt(self):
         """Génère ou récupère le sel pour le hachage"""
         if 'pseudonym_salt' not in st.session_state:
             st.session_state.pseudonym_salt = secrets.token_hex(32)
         return st.session_state.pseudonym_salt
-    
+
     def create_pseudonym(self, user_identifier):
         """Crée un pseudonyme SHA-256 à partir d'un identifiant"""
         if not user_identifier:
             user_identifier = st.session_state.get('user_session_id', str(uuid.uuid4()))
-        
+
         # Concaténation identifiant + sel + timestamp du jour
         today = datetime.now().strftime("%Y-%m-%d")
         data_to_hash = f"{user_identifier}{self.salt}{today}"
-        
+
         # Hachage SHA-256
         hash_object = hashlib.sha256(data_to_hash.encode())
         pseudonym = hash_object.hexdigest()[:16]  # Truncature à 16 caractères
-        
+
         return f"TSA_{pseudonym}"
-    
+
     def pseudonymize_session_data(self, session_data):
         """Pseudonymise les données de session"""
         pseudonymized_data = session_data.copy()
-        
+
         # Créer un pseudonyme pour cette session
         user_pseudonym = self.create_pseudonym(st.session_state.get('user_session_id'))
-        
+
         # Remplacer les identifiants par des pseudonymes
         pseudonymized_data.update({
             'user_pseudonym': user_pseudonym,
             'session_hash': hashlib.sha256(str(st.session_state.get('user_session_id')).encode()).hexdigest()[:12],
             'timestamp_hash': hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:8]
         })
-        
+
         # Supprimer les données directement identifiantes
         keys_to_remove = ['user_session_id', 'client_ip']
         for key in keys_to_remove:
             pseudonymized_data.pop(key, None)
-        
+
         return pseudonymized_data
 
 # Initialisation du gestionnaire de pseudonymisation
@@ -317,19 +317,19 @@ if 'pseudonym_manager' not in st.session_state:
 # === SYSTÈME DE TRAÇABILITÉ ET AUDIT ===
 class AuditTrailManager:
     """Gestionnaire de traçabilité complète pour audit réglementaire"""
-    
+
     def __init__(self):
         self.audit_version = "1.0.0"
         if 'audit_trail' not in st.session_state:
             st.session_state.audit_trail = []
-    
+
     def log_action(self, action_type, details, user_pseudonym=None):
         """Enregistre une action dans la piste d'audit"""
         if not user_pseudonym:
             user_pseudonym = st.session_state.pseudonym_manager.create_pseudonym(
                 st.session_state.get('user_session_id')
             )
-        
+
         audit_entry = {
             'timestamp': datetime.now().isoformat(),
             'action_type': action_type,
@@ -339,13 +339,13 @@ class AuditTrailManager:
             'system_version': self.audit_version,
             'compliance_status': 'GDPR_AI_ACT_COMPLIANT'
         }
-        
+
         # Chiffrement de l'entrée d'audit
         encrypted_entry = st.session_state.security_manager.encrypt_data(audit_entry)
         st.session_state.audit_trail.append(encrypted_entry)
-        
+
         return audit_entry
-    
+
     def log_data_processing(self, data_type, purpose, legal_basis):
         """Enregistre le traitement de données personnelles"""
         return self.log_action(
@@ -358,7 +358,7 @@ class AuditTrailManager:
                 'data_minimization': True
             }
         )
-    
+
     def log_ml_prediction(self, model_name, input_hash, prediction, confidence):
         """Enregistre une prédiction ML pour audit AI Act"""
         return self.log_action(
@@ -373,7 +373,7 @@ class AuditTrailManager:
                 'risk_level': 'HIGH'
             }
         )
-    
+
     def generate_audit_report(self):
         """Génère un rapport d'audit complet avec gestion d'erreurs"""
         # Vérification sécurisée de l'existence d'audit_trail
@@ -387,7 +387,7 @@ class AuditTrailManager:
                 'gdpr_compliance': True,
                 'ai_act_compliance': True
             }
-        
+
         # Déchiffrer les entrées pour le rapport
         decrypted_entries = []
         for encrypted_entry in st.session_state.audit_trail:
@@ -397,7 +397,7 @@ class AuditTrailManager:
                     decrypted_entries.append(json.loads(decrypted))
                 except:
                     pass
-        
+
         # Statistiques d'audit
         audit_stats = {
             'total_actions': len(decrypted_entries),
@@ -407,7 +407,7 @@ class AuditTrailManager:
             'gdpr_compliance': True,
             'ai_act_compliance': True
         }
-        
+
         return audit_stats
 
 if 'audit_manager' not in st.session_state:
@@ -421,23 +421,23 @@ def show_gdpr_admin_panel():
     # Empêcher la sortie tant que le consentement n'est pas donné
     if not st.session_state.get('gdpr_compliant'):
         st.session_state.tool_choice = "🔒 RGPD & Droits"
-    
+
     st.markdown("## 🔒 Panneau RGPD & Conformité IA")
-    
+
     tabs = st.tabs([
-        "📋 Consentement", 
-        "🤖 Transparence IA", 
-        "🗑️ Droit à l'Effacement", 
-        "📤 Portabilité", 
+        "📋 Consentement",
+        "🤖 Transparence IA",
+        "🗑️ Droit à l'Effacement",
+        "📤 Portabilité",
         "📊 Audit Trail"
     ])
-    
+
     with tabs[0]:
         st.subheader("Formulaire de Consentement RGPD")
         # Appel direct sans titre supplémentaire
         if GDPRConsentManager.show_consent_form():
             return  # Sortir après validation
-        
+
         # Affichage des données actuelles
         if st.session_state.get('gdpr_consent'):
             with st.expander("📊 Vos données enregistrées", expanded=False):
@@ -445,16 +445,16 @@ def show_gdpr_admin_panel():
                     st.session_state.get('user_session_id')
                 )
                 st.info(f"Identifiant pseudonymisé : {user_pseudonym}")
-                
+
                 consent_data = st.session_state.gdpr_consent.copy()
                 consent_data['user_id'] = consent_data['user_id'][:8] + "..."
                 st.json(consent_data)
-    
+
     with tabs[1]:
         st.subheader("Transparence du Système IA")
         # Intégration complète de la transparence IA
         st.session_state.ai_compliance_manager.show_ai_transparency_info()
-    
+
     with tabs[2]:
         st.subheader("Droit à l'effacement (Article 17 RGPD)")
         if st.button("🗑️ Supprimer toutes mes données", type="secondary"):
@@ -464,7 +464,7 @@ def show_gdpr_admin_panel():
                     del st.session_state[key]
             st.success("✅ Vos données ont été supprimées de cette session")
             st.rerun()
-    
+
     with tabs[3]:
         st.subheader("Portabilité des données (Article 20 RGPD)")
         if st.button("📤 Exporter mes données"):
@@ -477,14 +477,14 @@ def show_gdpr_admin_panel():
                 'consent_data': st.session_state.get('gdpr_consent', {}),
                 'session_duration': str(datetime.now() - st.session_state.get('session_start', datetime.now()))
             }
-            
+
             st.download_button(
                 label="💾 Télécharger mes données (JSON)",
                 data=json.dumps(export_data, indent=2),
                 file_name=f"tsa_data_export_{user_pseudonym}.json",
                 mime="application/json"
             )
-    
+
     with tabs[4]:
         st.subheader("Piste d'audit de vos actions")
         audit_stats = st.session_state.audit_manager.generate_audit_report()
@@ -512,10 +512,10 @@ def initialize_session_state():
         st.session_state.gdpr_consent = None
         st.session_state.user_session_id = str(uuid.uuid4())
         st.session_state.session_start = datetime.now()
-        
+
         # Par défaut, commencer sur la page RGPD
         st.session_state.tool_choice = "🔒 RGPD & Droits"
-        
+
         # Par défaut, commencer sur la page d'accueil
         default_tool = "🏠 Accueil"
 
@@ -950,7 +950,7 @@ def show_navigation_menu():
     # Options simplifiées sans "Info Système IA"
     options = [
         "🏠 Accueil",
-        "🔍 Exploration", 
+        "🔍 Exploration",
         "🧠 Analyse ML",
         "🤖 Prédiction par IA",
         "📚 Documentation",
@@ -977,7 +977,7 @@ def show_navigation_menu():
     # SUPPRIMER les returns anticipés qui causent le problème
     return tool_choice
 
-    
+
 set_custom_theme()
 
 def load_visualization_libraries():
@@ -1025,7 +1025,7 @@ def load_ml_libraries():
 @st.cache_resource
 def train_advanced_model(df):
     """Entraîne un modèle Random Forest conforme AI Act"""
-    
+
     # Log du début d'entraînement
     if 'audit_manager' in st.session_state:
         st.session_state.audit_manager.log_action(
@@ -1037,7 +1037,7 @@ def train_advanced_model(df):
                 'medical_purpose': 'TSA_screening'
             }
         )
-   
+
     load_ml_libraries()
     load_metrics_libraries()
 
@@ -1102,7 +1102,7 @@ def train_advanced_model(df):
                 'deployment_authorized': True
             }
         )
-    
+
     return pipeline, preprocessor, feature_names
 
 def get_question_text(question_number):
@@ -1991,7 +1991,6 @@ def show_data_exploration():
                     margin=dict(l=20, r=20, t=40, b=20),
                 )
                 st.plotly_chart(fig, use_container_width=True)
-                
             with col2:
                 st.metric(
                     "Nombre de colonnes avec valeurs manquantes",
@@ -2308,124 +2307,397 @@ def show_data_exploration():
             else:
                 st.warning("Aucune variable numérique trouvée.")
 
-        if 'session_id' not in st.session_state:
-            st.session_state.session_id = str(uuid.uuid4())
-
-        def gen_key(base: str) -> str:
-            """Retourne une clé unique pour chaque widget Streamlit."""
-            ts = int(datetime.now().timestamp() * 1e3)
-            return f"{base}-{st.session_state.session_id}-{ts}"
-
     with st.expander("📐 Analyse Factorielle (FAMD)", expanded=True):
         st.markdown("""
-        **Analyse Factorielle de Données Mixtes (FAMD)**  
-        Cette méthode réduit la dimensionnalité des variables numériques et catégorielles pour visualiser les relations[1].
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Analyse Factorielle Mixte (FAMD)</h3>
+            <p style="color: #7f8c8d;">Réduction de dimensions pour visualiser la structure des données et les relations entre variables.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        L'**Analyse Factorielle de Données Mixtes (FAMD)** est une méthode particulièrement adaptée à nos données car elle permet de traiter simultanément:
+        - Des variables numériques (comme l'âge, les scores A1-A10)
+        - Des variables catégorielles (comme le genre, l'ethnie, les antécédents familiaux)
+
+        Cette méthode nous permet de projeter les données sur un plan à deux dimensions pour visualiser les relations entre les variables et les individus.
         """)
-        
-        # Chargement et nettoyage des données
-        df = st.session_state.get('data', pd.DataFrame()).dropna().reset_index(drop=True)
-        if df.shape[0] < 50:
-            st.warning("Moins de 50 observations après nettoyage – FAMD peut être instable")[2]
-            st.stop()
-        
-        # Séparation des types
-        num_cols = df.select_dtypes(include=['int64','float64']).columns.tolist()
-        cat_cols = df.select_dtypes(include=['object','category']).columns.tolist()
-        for c in cat_cols:
-            df[c] = df[c].astype('category')
-        st.info(f"{len(num_cols)} variables numériques, {len(cat_cols)} variables catégorielles")[3]
-        
-        # Paramètres des composantes
-        n_comp = min(5, df.shape[1]-1, df.shape[0]-1)
-        fig_proj, fig_var = None, None
-        
-        # Tentative FAMD
+
         try:
-            famd = prince.FAMD(n_components=n_comp, random_state=42, engine='sklearn')
-            famd = famd.fit(df)
-            coords = famd.transform(df)
-            eigs = famd.eigenvalues_
-            exp_var = eigs / eigs.sum()
-            
-            # Graphique de projection
-            fig_proj = px.scatter(
-                coords, x=0, y=1,
-                color=(df[cat_cols[0]] if cat_cols else None),
-                labels={'0':'Comp1','1':'Comp2'},
-                title="Projection FAMD"
-            )
-            # Graphique de variance expliquée
-            fig_var = px.bar(
-                x=[f"Comp{i+1}" for i in range(len(exp_var))],
-                y=exp_var * 100,
-                labels={'x':'Composantes','y':'Variance expliquée (%)'},
-                title="Variance expliquée"
-            )
-            st.session_state.famd_ok = True
-            
+            # Vérification et import des bibliothèques
+            try:
+                import prince
+                from sklearn.decomposition import PCA
+                from sklearn.preprocessing import StandardScaler, LabelEncoder
+            except ImportError as e:
+                st.error(f"Bibliothèques manquantes : {e}")
+                st.info("Installation requise : pip install prince")
+                return
+
+            # Préparation des données pour FAMD
+            df_famd = df.copy()
+
+            # Suppression des colonnes problématiques
+            columns_to_drop = ['Jaunisse'] if 'Jaunisse' in df_famd.columns else []
+            if columns_to_drop:
+                df_famd = df_famd.drop(columns=columns_to_drop)
+
+            # Nettoyage des valeurs manquantes
+            df_famd = df_famd.dropna()
+            df_famd = df_famd.reset_index(drop=True)
+
+            if len(df_famd) < 50:
+                st.warning("Données insuffisantes après nettoyage (moins de 50 observations)")
+                return
+
+            # Préparation des types de données
+            categorical_columns = []
+            numerical_columns = []
+
+            for col in df_famd.columns:
+                if df_famd[col].dtype == 'object' or df_famd[col].dtype.name == 'category':
+                    categorical_columns.append(col)
+                    df_famd[col] = df_famd[col].astype('category')
+                else:
+                    numerical_columns.append(col)
+                    df_famd[col] = pd.to_numeric(df_famd[col], errors='coerce')
+
+            st.info(f"Variables numériques : {len(numerical_columns)}, Variables catégorielles : {len(categorical_columns)}")
+
+            # Création du modèle FAMD avec gestion d'erreurs robuste
+            n_components = min(5, len(df_famd.columns) - 1, len(df_famd) - 1)
+
+            try:
+                # Tentative avec prince.FAMD standard
+                famd_model = prince.FAMD(
+                    n_components=n_components,
+                    n_iter=10,
+                    copy=True,
+                    random_state=42,
+                    engine='sklearn'
+                )
+
+                # Ajustement du modèle
+                famd_model = famd_model.fit(df_famd)
+
+                # Transformation des données
+                coordinates = famd_model.transform(df_famd)
+
+                # Calcul des valeurs propres et variance expliquée
+                eigenvalues = famd_model.eigenvalues_
+                explained_variance = eigenvalues / eigenvalues.sum()
+
+                famd_success = True
+
+            except Exception as e:
+                st.warning(f"Erreur avec prince.FAMD : {e}")
+                famd_success = False
+
+            # Solution de secours avec PCA si FAMD échoue
+            if not famd_success:
+                st.info("Utilisation d'une approche PCA alternative...")
+
+                # Préparation des données pour PCA
+                df_encoded = df_famd.copy()
+
+                # Encodage des variables catégorielles
+                label_encoders = {}
+                for col in categorical_columns:
+                    le = LabelEncoder()
+                    df_encoded[col] = le.fit_transform(df_encoded[col].astype(str))
+                    label_encoders[col] = le
+
+                # Standardisation
+                scaler = StandardScaler()
+                df_scaled = pd.DataFrame(
+                    scaler.fit_transform(df_encoded),
+                    columns=df_encoded.columns
+                )
+
+                # PCA
+                pca = PCA(n_components=min(5, len(df_scaled.columns), len(df_scaled)-1), random_state=42)
+                coordinates = pd.DataFrame(
+                    pca.fit_transform(df_scaled),
+                    columns=[f'PC{i+1}' for i in range(pca.n_components_)]
+                )
+
+                explained_variance = pca.explained_variance_ratio_
+                eigenvalues = pca.explained_variance_
+
+            # Interface avec onglets
+            famd_tabs = st.tabs([
+                "📊 Projection des individus",
+                "📈 Variance expliquée",
+                "🔍 Analyse détaillée",
+                "📋 Résumé"
+            ])
+
+            with famd_tabs[0]:
+                st.subheader("Projection des individus dans l'espace factoriel")
+
+                col1, col2 = st.columns([3, 1])
+
+                with col1:
+                    # Graphique de projection
+                    fig, ax = plt.subplots(figsize=(10, 8))
+
+                    # Correction de la coloration - Version simplifiée et efficace
+                    if 'TSA' in df_famd.columns:
+                        # Séparation directe des données par groupe TSA
+                        tsa_positive = df_famd['TSA'] == 'Yes'
+                        tsa_negative = df_famd['TSA'] == 'No'
+
+                        # Coordonnées pour chaque groupe
+                        coords_positive = coordinates[tsa_positive]
+                        coords_negative = coordinates[tsa_negative]
+
+                        # Affichage des points TSA-Positif en bleu
+                        if len(coords_positive) > 0:
+                            ax.scatter(
+                                coords_positive.iloc[:, 0],
+                                coords_positive.iloc[:, 1],
+                                c='#3498db',  # Bleu pour TSA-Positif
+                                label='TSA-Positif',
+                                alpha=0.7,
+                                s=60,
+                                edgecolors='white',
+                                linewidth=0.5
+                            )
+
+                        # Affichage des points TSA-Négatif en rouge
+                        if len(coords_negative) > 0:
+                            ax.scatter(
+                                coords_negative.iloc[:, 0],
+                                coords_negative.iloc[:, 1],
+                                c='#e74c3c',  # Rouge pour TSA-Négatif
+                                label='TSA-Négatif',
+                                alpha=0.7,
+                                s=60,
+                                edgecolors='white',
+                                linewidth=0.5
+                            )
+
+                        # Légende avec style amélioré
+                        ax.legend(
+                            title="Diagnostic TSA",
+                            frameon=True,
+                            fancybox=True,
+                            shadow=True,
+                            loc='best'
+                        )
+                    else:
+                        # Projection simple sans coloration si pas de colonne TSA
+                        ax.scatter(
+                            coordinates.iloc[:, 0],
+                            coordinates.iloc[:, 1],
+                            alpha=0.7,
+                            s=50,
+                            c='#3498db',
+                            edgecolors='white',
+                            linewidth=0.5
+                        )
+
+                    # Configuration des axes
+                    ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.1%})')
+                    ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.1%})')
+                    ax.set_title('Projection des individus dans l\'espace factoriel')
+                    ax.grid(True, alpha=0.3)
+
+                    plt.tight_layout()
+                    st.pyplot(fig)
+
+                with col2:
+                    st.markdown("### Informations")
+                    st.metric("Échantillons", len(df_famd))
+                    st.metric("Variables", len(df_famd.columns))
+                    st.metric("Composantes", len(explained_variance))
+
+                    if 'TSA' in df_famd.columns:
+                        tsa_counts = df_famd['TSA'].value_counts()
+                        for category, count in tsa_counts.items():
+                            color_indicator = "🔵" if category == "Yes" else "🔴"
+                            st.metric(f"{color_indicator} Cas {category}", count)
+
+
+            with famd_tabs[1]:
+                st.subheader("Analyse de la variance expliquée")
+
+                # Graphique en barres de la variance expliquée
+                fig_var = px.bar(
+                    x=[f'Comp. {i+1}' for i in range(len(explained_variance))],
+                    y=explained_variance * 100,
+                    labels={'x': 'Composantes', 'y': 'Variance expliquée (%)'},
+                    title='Variance expliquée par composante'
+                )
+                fig_var.update_traces(marker_color='#3498db')
+                fig_var.update_layout(showlegend=False)
+                st.plotly_chart(fig_var, use_container_width=True)
+
+                # Tableau des valeurs
+                variance_df = pd.DataFrame({
+                    'Composante': [f'Composante {i+1}' for i in range(len(explained_variance))],
+                    'Valeur propre': eigenvalues,
+                    'Variance expliquée (%)': explained_variance * 100,
+                    'Variance cumulée (%)': np.cumsum(explained_variance) * 100
+                })
+
+                st.dataframe(variance_df.style.format({
+                    'Valeur propre': '{:.3f}',
+                    'Variance expliquée (%)': '{:.2f}%',
+                    'Variance cumulée (%)': '{:.2f}%'
+                }), use_container_width=True)
+
+            with famd_tabs[2]:
+                st.subheader("Analyse détaillée des composantes")
+                st.markdown("""
+                ### Interprétation du Graphique
+
+                **Objectif de l'analyse** :
+                Cette visualisation permet d'identifier des patterns dans les données de dépistage TSA en réduisant la dimensionnalité des variables.
+
+                **Axes principaux** :
+                - Axe X (Composante 1) : Capture {variance_composante1}% de l'information
+                - Axe Y (Composante 2) : Explique {variance_composante2}% de la variance
+
+                **Codage couleur** :
+                - 🔵 Points bleus : Cas avec diagnostic TSA confirmé
+                - 🔴 Points rouges : Cas sans diagnostic TSA
+
+                **Clés de lecture** :
+                1. Les regroupements de points similaires indiquent des profils communs
+                2. La distance entre groupes reflète leur dissemblance
+                3. La dispersion montre la variabilité intra-groupe
+
+                **Implications cliniques** :
+                Une séparation nette entre groupes suggère que les variables utilisées permettent de discriminer efficacement les cas TSA.
+                """.format(
+                    variance_composante1=round(explained_variance[0]*100, 1),
+                    variance_composante2=round(explained_variance[1]*100, 1)
+                ))
+
+                # Métriques existantes conservées
+
+                if 'TSA' in df_famd.columns:
+                    tsa_counts = df_famd['TSA'].value_counts()
+                    for category, count in tsa_counts.items():
+                        st.metric(f"Cas {category}", count)
+                        # Sélection de composante
+                        comp_choice = st.selectbox(
+                            "Choisir une composante à analyser :",
+                            [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
+                            key="famd_component_choice"
+                        )
+
+                        comp_idx = int(comp_choice.split()[1]) - 1
+
+                        col1, col2 = st.columns(2)
+
+                        with col1:
+                            st.markdown(f"### {comp_choice}")
+                            st.metric("Variance expliquée", f"{explained_variance[comp_idx]:.2%}")
+                            st.metric("Valeur propre", f"{eigenvalues[comp_idx]:.3f}")
+
+                            # Distribution des coordonnées pour cette composante
+                            fig_hist = px.histogram(
+                                x=coordinates.iloc[:, comp_idx],
+                                nbins=20,
+                                labels={'x': f'{comp_choice}', 'y': 'Fréquence'},
+                                title=f'Distribution des coordonnées - {comp_choice}'
+                            )
+                            st.plotly_chart(fig_hist, use_container_width=True)
+
+                        with col2:
+                            st.markdown("### Contribution des variables")
+                            if famd_success and hasattr(famd_model, 'column_coordinates'):
+                                try:
+                                    # Tentative d'obtenir les contributions
+                                    column_coords = famd_model.column_coordinates(df_famd)
+                                    if comp_idx < len(column_coords.columns):
+                                        contrib_data = column_coords.iloc[:, comp_idx].abs().sort_values(ascending=False)
+
+                                        # Graphique des contributions
+                                        fig_contrib = px.bar(
+                                            x=contrib_data.values[:10],  # Top 10
+                                            y=contrib_data.index[:10],
+                                            orientation='h',
+                                            labels={'x': 'Contribution absolue', 'y': 'Variables'},
+                                            title='Top 10 des contributions'
+                                        )
+                                        st.plotly_chart(fig_contrib, use_container_width=True)
+                                except Exception as e:
+                                    st.info("Analyse des contributions non disponible avec cette méthode")
+                            else:
+                                st.info("Analyse des contributions non disponible en mode PCA")
+
+            with famd_tabs[3]:
+                st.subheader("Résumé de l'analyse")
+
+                # Métriques globales
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric("Variance totale expliquée (2 premières comp.)",
+                             f"{(explained_variance[0] + explained_variance[1]):.1%}")
+
+                with col2:
+                    st.metric("Qualité de la représentation",
+                             "Bonne" if explained_variance[0] + explained_variance[1] > 0.5 else "Moyenne")
+
+                with col3:
+                    st.metric("Méthode utilisée",
+                             "FAMD" if famd_success else "PCA")
+
+                # Interprétation
+                st.markdown("### Interprétation des résultats")
+
+                variance_2comp = explained_variance[0] + explained_variance[1]
+
+                if variance_2comp > 0.7:
+                    interpretation = "🟢 **Excellente représentation** : Les deux premières composantes capturent la majorité de l'information."
+                elif variance_2comp > 0.5:
+                    interpretation = "🟡 **Bonne représentation** : Les deux premières composantes offrent une vue pertinente des données."
+                else:
+                    interpretation = "🟠 **Représentation limitée** : Considérer des composantes supplémentaires pour une analyse complète."
+
+                st.markdown(interpretation)
+
+                # Recommandations
+                st.markdown("### Recommandations")
+
+                recommendations = []
+
+                if 'TSA' in df_famd.columns:
+                    recommendations.append("✅ La variable cible TSA est présente, permettant une analyse discriminante")
+
+                if len(numerical_columns) > 0 and len(categorical_columns) > 0:
+                    recommendations.append("✅ Données mixtes bien adaptées à l'analyse FAMD")
+
+                if variance_2comp > 0.6:
+                    recommendations.append("✅ Dimensionnalité réduite efficace pour la visualisation")
+
+                recommendations.append(f"📊 {len(df_famd)} observations analysées avec {len(df_famd.columns)} variables")
+
+                for rec in recommendations:
+                    st.markdown(f"- {rec}")
+
         except Exception as e:
-            st.warning(f"Echec FAMD ({e}) – basculement en PCA")[4]
-            # Fallback PCA
-            df_enc = df.copy()
-            for c in cat_cols:
-                df_enc[c] = LabelEncoder().fit_transform(df_enc[c].astype(str))
-            scaled = StandardScaler().fit_transform(df_enc)
-            pca = PCA(n_components=2, random_state=42)
-            coords = pca.fit_transform(scaled)
-            exp_var = pca.explained_variance_ratio_
-            eigs = pca.explained_variance_
-            
-            fig_proj = px.scatter(
-                x=coords[:,0], y=coords[:,1],
-                color=(df[cat_cols[0]] if cat_cols else None),
-                labels={'x':'PC1','y':'PC2'},
-                title="Projection PCA"
-            )
-            fig_var = px.bar(
-                x=["PC1","PC2"], y=exp_var * 100,
-                labels={'x':'Composantes','y':'Variance expliquée (%)'},
-                title="Variance expliquée PCA"
-            )
-            st.session_state.famd_ok = False
-        
-        # Affichage via onglets
-        tabs = st.tabs(["Projection","Variance","Détail","Résumé"])
-        
-        with tabs[0]:
-            if fig_proj:
-                st.plotly_chart(fig_proj, use_container_width=True, key=gen_key("proj"))
-            else:
-                st.info("Graphique de projection indisponible")
-        
-        with tabs[1]:
-            if fig_var:
-                st.plotly_chart(fig_var, use_container_width=True, key=gen_key("var"))
-            else:
-                st.info("Graphique de variance indisponible")
-        
-        with tabs[2]:
-            st.subheader("Analyse détaillée")
-            comp_list = [f"Comp{i+1}" for i in range(len(exp_var))]
-            sel = st.selectbox("Choisir composante", comp_list, key=gen_key("sel"))
-            idx = comp_list.index(sel)
-            
-            st.metric("Variance expliquée", f"{exp_var[idx]:.2%}")
-            st.metric("Valeur propre", f"{eigs[idx]:.3f}")
-            
-            hist = px.histogram(
-                x=coords[:, idx], nbins=20,
-                labels={'x':sel,'y':'Fréquence'},
-                title=f"Distribution – {sel}"
-            )
-            st.plotly_chart(hist, use_container_width=True, key=gen_key("hist"))
-        
-        with tabs[3]:
-            st.subheader("Résumé")
-            total2 = exp_var[0] + exp_var[1]
-            st.metric("Var totale 2 comp.", f"{total2:.1%}")
-            st.metric("Méthode utilisée", "FAMD" if st.session_state.famd_ok else "PCA")
-            interp = "Excellente" if total2 > 0.7 else "Bonne" if total2 > 0.5 else "Limitée"
-            st.markdown(f"**Qualité de la représentation :** {interp}")
+            st.error(f"Erreur lors de l'analyse FAMD : {str(e)}")
+            st.markdown("""
+            ### Solutions alternatives
+
+            1. **Vérifier l'installation** : `pip install prince`
+            2. **Données insuffisantes** : Augmenter la taille de l'échantillon
+            3. **Variables problématiques** : Vérifier les types de données
+            4. **Mode de secours** : Utilisation d'une PCA classique
+            """)
+
+            # Affichage de diagnostic
+            with st.expander("🔧 Diagnostic détaillé"):
+                st.write("Informations sur les données :")
+                st.write(f"- Forme du dataset : {df.shape}")
+                st.write(f"- Colonnes : {list(df.columns)}")
+                st.write(f"- Types de données : {df.dtypes.to_dict()}")
+                st.write(f"- Valeurs manquantes : {df.isnull().sum().sum()}")
 
 
 def show_ml_analysis():
@@ -6300,7 +6572,7 @@ def show_about_page():
     """, unsafe_allow_html=True)
 
     pass
-    
+
 def main():
     """Fonction principale avec gestion des erreurs améliorée"""
     try:
@@ -6339,12 +6611,14 @@ def main():
             show_documentation()
         else:
             show_home_page()
-            
+
     except Exception as e:
         st.error(f"Erreur dans l'application : {str(e)}")
         st.info("Veuillez recharger la page ou contacter le support.")
 
 if __name__ == "__main__":
     main()
+
+
 
 
