@@ -2583,11 +2583,11 @@ def show_data_exploration():
                         st.metric(f"Cas {category}", count)
                         # Sélection de composante
                         comp_choice = st.selectbox(
-                            "Choisir une composante à analyser :",
-                            [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
-                            key="famd_component_choice"
-                        )
-                        
+                        "Choisir une composante à analyser :",
+                        [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
+                        key="famd_component_choice_detailed_tab"  # Clé unique avec un suffixe
+                    )
+                                            
                         comp_idx = int(comp_choice.split()[1]) - 1
                         
                         col1, col2 = st.columns(2)
