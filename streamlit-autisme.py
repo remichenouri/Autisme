@@ -2312,60 +2312,60 @@ def show_data_exploration():
             st.session_state.session_id = str(uuid.uuid4())
 
         def gen_key(base: str) -> str:
-            """Retourne une clé unique pour Streamlit widgets."""
-            return f"{base}-{st.session_state.session_id}-{int(datetime.now().timestamp()*1e3)}"
+            """Retourne une clé unique pour chaque widget Streamlit."""
+            ts = int(datetime.now().timestamp() * 1e3)
+            return f"{base}-{st.session_state.session_id}-{ts}"
 
-# Conteneur principal FAMD
     with st.expander("📐 Analyse Factorielle (FAMD)", expanded=True):
-    
         st.markdown("""
         **Analyse Factorielle de Données Mixtes (FAMD)**  
-        Cette méthode réduit la dimensionnalité des variables numériques et catégorielles pour visualiser les relations[2].
+        Cette méthode réduit la dimensionnalité des variables numériques et catégorielles pour visualiser les relations[1].
         """)
-    
+        
         # Chargement et nettoyage des données
-        df = st.session_state.get('data', pd.DataFrame())  # Charger ou remplacer selon contexte
-        df = df.dropna().reset_index(drop=True)
+        df = st.session_state.get('data', pd.DataFrame()).dropna().reset_index(drop=True)
         if df.shape[0] < 50:
-            st.warning("Moins de 50 observations après nettoyage – FAMD peut être instable")[3]
+            st.warning("Moins de 50 observations après nettoyage – FAMD peut être instable")[2]
             st.stop()
-    
+        
         # Séparation des types
         num_cols = df.select_dtypes(include=['int64','float64']).columns.tolist()
         cat_cols = df.select_dtypes(include=['object','category']).columns.tolist()
         for c in cat_cols:
             df[c] = df[c].astype('category')
-    
-        st.info(f"{len(num_cols)} variables numériques, {len(cat_cols)} variables catégorielles")[4]
-    
-        # Application FAMD avec fallback PCA
+        st.info(f"{len(num_cols)} variables numériques, {len(cat_cols)} variables catégorielles")[3]
+        
+        # Paramètres des composantes
         n_comp = min(5, df.shape[1]-1, df.shape[0]-1)
         fig_proj, fig_var = None, None
+        
+        # Tentative FAMD
         try:
             famd = prince.FAMD(n_components=n_comp, random_state=42, engine='sklearn')
             famd = famd.fit(df)
             coords = famd.transform(df)
             eigs = famd.eigenvalues_
             exp_var = eigs / eigs.sum()
-            # Figure projection
+            
+            # Graphique de projection
             fig_proj = px.scatter(
                 coords, x=0, y=1,
-                color=df[cat_cols[0]] if cat_cols else None,
+                color=(df[cat_cols[0]] if cat_cols else None),
                 labels={'0':'Comp1','1':'Comp2'},
                 title="Projection FAMD"
             )
-            # Figure variance expliquée
+            # Graphique de variance expliquée
             fig_var = px.bar(
                 x=[f"Comp{i+1}" for i in range(len(exp_var))],
-                y=exp_var*100,
-                labels={'y':'Variance expliquée (%)','x':'Composantes'},
+                y=exp_var * 100,
+                labels={'x':'Composantes','y':'Variance expliquée (%)'},
                 title="Variance expliquée"
             )
             st.session_state.famd_ok = True
-    
+            
         except Exception as e:
-            st.warning(f"Echec FAMD ({e}) – basculement en PCA")[5]
-            # Encode + standardise + PCA
+            st.warning(f"Echec FAMD ({e}) – basculement en PCA")[4]
+            # Fallback PCA
             df_enc = df.copy()
             for c in cat_cols:
                 df_enc[c] = LabelEncoder().fit_transform(df_enc[c].astype(str))
@@ -2374,57 +2374,58 @@ def show_data_exploration():
             coords = pca.fit_transform(scaled)
             exp_var = pca.explained_variance_ratio_
             eigs = pca.explained_variance_
-            # Projection PCA
+            
             fig_proj = px.scatter(
                 x=coords[:,0], y=coords[:,1],
-                color=df[cat_cols[0]] if cat_cols else None,
+                color=(df[cat_cols[0]] if cat_cols else None),
                 labels={'x':'PC1','y':'PC2'},
                 title="Projection PCA"
             )
-            # Variance PCA
             fig_var = px.bar(
-                x=["PC1","PC2"], y=exp_var*100,
-                labels={'y':'Variance expliquée (%)','x':'Composantes'},
+                x=["PC1","PC2"], y=exp_var * 100,
+                labels={'x':'Composantes','y':'Variance expliquée (%)'},
                 title="Variance expliquée PCA"
             )
             st.session_state.famd_ok = False
-    
-        # Affichage via onglets pour éviter l'imbrication d'expander
+        
+        # Affichage via onglets
         tabs = st.tabs(["Projection","Variance","Détail","Résumé"])
-    
+        
         with tabs[0]:
             if fig_proj:
-                st.plotly_chart(fig_proj, use_container_width=True, key=gen_key("proj"))  
+                st.plotly_chart(fig_proj, use_container_width=True, key=gen_key("proj"))
             else:
                 st.info("Graphique de projection indisponible")
-    
+        
         with tabs[1]:
             if fig_var:
-                st.plotly_chart(fig_var, use_container_width=True, key=gen_key("var"))  
+                st.plotly_chart(fig_var, use_container_width=True, key=gen_key("var"))
             else:
                 st.info("Graphique de variance indisponible")
-    
+        
         with tabs[2]:
             st.subheader("Analyse détaillée")
             comp_list = [f"Comp{i+1}" for i in range(len(exp_var))]
             sel = st.selectbox("Choisir composante", comp_list, key=gen_key("sel"))
             idx = comp_list.index(sel)
+            
             st.metric("Variance expliquée", f"{exp_var[idx]:.2%}")
             st.metric("Valeur propre", f"{eigs[idx]:.3f}")
-            # Histogramme des coordonnées
-            hist = px.histogram(x=coords[:,idx], nbins=20,
-                                labels={'x':sel,'y':'Fréquence'},
-                                title=f"Distribution – {sel}")
+            
+            hist = px.histogram(
+                x=coords[:, idx], nbins=20,
+                labels={'x':sel,'y':'Fréquence'},
+                title=f"Distribution – {sel}"
+            )
             st.plotly_chart(hist, use_container_width=True, key=gen_key("hist"))
-    
+        
         with tabs[3]:
             st.subheader("Résumé")
             total2 = exp_var[0] + exp_var[1]
             st.metric("Var totale 2 comp.", f"{total2:.1%}")
-            st.metric("Méthode", "FAMD" if st.session_state.famd_ok else "PCA")
-            interp = ("Excellente" if total2>0.7 else 
-                      "Bonne" if total2>0.5 else "Limitée")
-            st.markdown(f"**Qualité représentation :** {interp}")
+            st.metric("Méthode utilisée", "FAMD" if st.session_state.famd_ok else "PCA")
+            interp = "Excellente" if total2 > 0.7 else "Bonne" if total2 > 0.5 else "Limitée"
+            st.markdown(f"**Qualité de la représentation :** {interp}")
 
 
 def show_ml_analysis():
