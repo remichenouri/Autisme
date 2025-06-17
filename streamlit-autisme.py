@@ -1990,7 +1990,8 @@ def show_data_exploration():
                     coloraxis_showscale=False,
                     margin=dict(l=20, r=20, t=40, b=20),
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="famd_projection_plot")
+                st.plotly_chart(fig_var, use_container_width=True, key="famd_variance_plot")
             with col2:
                 st.metric(
                     "Nombre de colonnes avec valeurs manquantes",
