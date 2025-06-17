@@ -2308,12 +2308,12 @@ def show_data_exploration():
             else:
                 st.warning("Aucune variable numérique trouvée.")
 
-   if 'session_id' not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
+        if 'session_id' not in st.session_state:
+            st.session_state.session_id = str(uuid.uuid4())
 
-    def gen_key(base: str) -> str:
-    """Retourne une clé unique pour Streamlit widgets."""
-        return f"{base}-{st.session_state.session_id}-{int(datetime.now().timestamp()*1e3)}"
+        def gen_key(base: str) -> str:
+        """Retourne une clé unique pour Streamlit widgets."""
+            return f"{base}-{st.session_state.session_id}-{int(datetime.now().timestamp()*1e3)}"
 
 # Conteneur principal FAMD
     with st.expander("📐 Analyse Factorielle (FAMD)", expanded=True):
