@@ -2308,406 +2308,123 @@ def show_data_exploration():
             else:
                 st.warning("Aucune variable numérique trouvée.")
 
+   if 'session_id' not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+    def gen_key(base: str) -> str:
+    """Retourne une clé unique pour Streamlit widgets."""
+        return f"{base}-{st.session_state.session_id}-{int(datetime.now().timestamp()*1e3)}"
+
+# Conteneur principal FAMD
     with st.expander("📐 Analyse Factorielle (FAMD)", expanded=True):
-        st.markdown("""
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Analyse Factorielle Mixte (FAMD)</h3>
-            <p style="color: #7f8c8d;">Réduction de dimensions pour visualiser la structure des données et les relations entre variables.</p>
-        </div>
-        """, unsafe_allow_html=True)
     
         st.markdown("""
-        L'**Analyse Factorielle de Données Mixtes (FAMD)** est une méthode particulièrement adaptée à nos données car elle permet de traiter simultanément:
-        - Des variables numériques (comme l'âge, les scores A1-A10)
-        - Des variables catégorielles (comme le genre, l'ethnie, les antécédents familiaux)
-    
-        Cette méthode nous permet de projeter les données sur un plan à deux dimensions pour visualiser les relations entre les variables et les individus.
+        **Analyse Factorielle de Données Mixtes (FAMD)**  
+        Cette méthode réduit la dimensionnalité des variables numériques et catégorielles pour visualiser les relations[2].
         """)
     
+        # Chargement et nettoyage des données
+        df = st.session_state.get('data', pd.DataFrame())  # Charger ou remplacer selon contexte
+        df = df.dropna().reset_index(drop=True)
+        if df.shape[0] < 50:
+            st.warning("Moins de 50 observations après nettoyage – FAMD peut être instable")[3]
+            st.stop()
+    
+        # Séparation des types
+        num_cols = df.select_dtypes(include=['int64','float64']).columns.tolist()
+        cat_cols = df.select_dtypes(include=['object','category']).columns.tolist()
+        for c in cat_cols:
+            df[c] = df[c].astype('category')
+    
+        st.info(f"{len(num_cols)} variables numériques, {len(cat_cols)} variables catégorielles")[4]
+    
+        # Application FAMD avec fallback PCA
+        n_comp = min(5, df.shape[1]-1, df.shape[0]-1)
+        fig_proj, fig_var = None, None
         try:
-            # Vérification et import des bibliothèques
-            try:
-                import prince
-                from sklearn.decomposition import PCA
-                from sklearn.preprocessing import StandardScaler, LabelEncoder
-            except ImportError as e:
-                st.error(f"Bibliothèques manquantes : {e}")
-                st.info("Installation requise : pip install prince")
-                return
-
-            st.plotly_chart(fig_proj, use_container_width=True, key="famd_proj")
-            # Variance expliquée
-            var_df = famd.explained_inertia_
-            fig_var = px.bar(
-                x=[1,2], y=[var_df[0]*100, var_df[1]*100],
-                labels={'x':'Composante','y':'% Variance'}, title="Variance expliquée"
+            famd = prince.FAMD(n_components=n_comp, random_state=42, engine='sklearn')
+            famd = famd.fit(df)
+            coords = famd.transform(df)
+            eigs = famd.eigenvalues_
+            exp_var = eigs / eigs.sum()
+            # Figure projection
+            fig_proj = px.scatter(
+                coords, x=0, y=1,
+                color=df[cat_cols[0]] if cat_cols else None,
+                labels={'0':'Comp1','1':'Comp2'},
+                title="Projection FAMD"
             )
-            st.plotly_chart(fig_var, use_container_width=True, key="famd_var")
-    
-            # Préparation des données pour FAMD
-            df_famd = df.copy()
-            
-            # Suppression des colonnes problématiques
-            columns_to_drop = ['Jaunisse'] if 'Jaunisse' in df_famd.columns else []
-            if columns_to_drop:
-                df_famd = df_famd.drop(columns=columns_to_drop)
-            
-            # Nettoyage des valeurs manquantes
-            df_famd = df_famd.dropna()
-            df_famd = df_famd.reset_index(drop=True)
-            
-            if len(df_famd) < 50:
-                st.warning("Données insuffisantes après nettoyage (moins de 50 observations)")
-                return
-    
-            # Préparation des types de données
-            categorical_columns = []
-            numerical_columns = []
-            
-            for col in df_famd.columns:
-                if df_famd[col].dtype == 'object' or df_famd[col].dtype.name == 'category':
-                    categorical_columns.append(col)
-                    df_famd[col] = df_famd[col].astype('category')
-                else:
-                    numerical_columns.append(col)
-                    df_famd[col] = pd.to_numeric(df_famd[col], errors='coerce')
-    
-            st.info(f"Variables numériques : {len(numerical_columns)}, Variables catégorielles : {len(categorical_columns)}")
-    
-            # Création du modèle FAMD avec gestion d'erreurs robuste
-            n_components = min(5, len(df_famd.columns) - 1, len(df_famd) - 1)
-            
-            try:
-                # Tentative avec prince.FAMD standard
-                famd_model = prince.FAMD(
-                    n_components=n_components,
-                    n_iter=10,
-                    copy=True,
-                    random_state=42,
-                    engine='sklearn'
-                )
-                
-                # Ajustement du modèle
-                famd_model = famd_model.fit(df_famd)
-                
-                # Transformation des données
-                coordinates = famd_model.transform(df_famd)
-                
-                # Calcul des valeurs propres et variance expliquée
-                eigenvalues = famd_model.eigenvalues_
-                explained_variance = eigenvalues / eigenvalues.sum()
-                
-                famd_success = True
-                
-            except Exception as e:
-                st.warning(f"Erreur avec prince.FAMD : {e}")
-                famd_success = False
-    
-            # Solution de secours avec PCA si FAMD échoue
-            if not famd_success:
-                st.info("Utilisation d'une approche PCA alternative...")
-                
-                # Préparation des données pour PCA
-                df_encoded = df_famd.copy()
-                
-                # Encodage des variables catégorielles
-                label_encoders = {}
-                for col in categorical_columns:
-                    le = LabelEncoder()
-                    df_encoded[col] = le.fit_transform(df_encoded[col].astype(str))
-                    label_encoders[col] = le
-                
-                # Standardisation
-                scaler = StandardScaler()
-                df_scaled = pd.DataFrame(
-                    scaler.fit_transform(df_encoded),
-                    columns=df_encoded.columns
-                )
-                
-                # PCA
-                pca = PCA(n_components=min(5, len(df_scaled.columns), len(df_scaled)-1), random_state=42)
-                coordinates = pd.DataFrame(
-                    pca.fit_transform(df_scaled),
-                    columns=[f'PC{i+1}' for i in range(pca.n_components_)]
-                )
-                
-                explained_variance = pca.explained_variance_ratio_
-                eigenvalues = pca.explained_variance_
-    
-            # Interface avec onglets
-            famd_tabs = st.tabs([
-                "📊 Projection des individus",
-                "📈 Variance expliquée",
-                "🔍 Analyse détaillée",
-                "📋 Résumé"
-            ])
-    
-            with famd_tabs[0]:
-                st.subheader("Projection des individus dans l'espace factoriel")
-                
-                col1, col2 = st.columns([3, 1])
-                
-                with col1:
-                    # Graphique de projection
-                    fig, ax = plt.subplots(figsize=(10, 8))
-                    
-                    # Correction de la coloration - Version simplifiée et efficace
-                    if 'TSA' in df_famd.columns:
-                        # Séparation directe des données par groupe TSA
-                        tsa_positive = df_famd['TSA'] == 'Yes'
-                        tsa_negative = df_famd['TSA'] == 'No'
-                        
-                        # Coordonnées pour chaque groupe
-                        coords_positive = coordinates[tsa_positive]
-                        coords_negative = coordinates[tsa_negative]
-                        
-                        # Affichage des points TSA-Positif en bleu
-                        if len(coords_positive) > 0:
-                            ax.scatter(
-                                coords_positive.iloc[:, 0],
-                                coords_positive.iloc[:, 1],
-                                c='#3498db',  # Bleu pour TSA-Positif
-                                label='TSA-Positif',
-                                alpha=0.7,
-                                s=60,
-                                edgecolors='white',
-                                linewidth=0.5
-                            )
-                        
-                        # Affichage des points TSA-Négatif en rouge
-                        if len(coords_negative) > 0:
-                            ax.scatter(
-                                coords_negative.iloc[:, 0],
-                                coords_negative.iloc[:, 1],
-                                c='#e74c3c',  # Rouge pour TSA-Négatif
-                                label='TSA-Négatif',
-                                alpha=0.7,
-                                s=60,
-                                edgecolors='white',
-                                linewidth=0.5
-                            )
-                        
-                        # Légende avec style amélioré
-                        ax.legend(
-                            title="Diagnostic TSA",
-                            frameon=True,
-                            fancybox=True,
-                            shadow=True,
-                            loc='best'
-                        )
-                    else:
-                        # Projection simple sans coloration si pas de colonne TSA
-                        ax.scatter(
-                            coordinates.iloc[:, 0], 
-                            coordinates.iloc[:, 1], 
-                            alpha=0.7,
-                            s=50,
-                            c='#3498db',
-                            edgecolors='white',
-                            linewidth=0.5
-                        )
-                    
-                    # Configuration des axes
-                    ax.set_xlabel(f'Composante 1 ({explained_variance[0]:.1%})')
-                    ax.set_ylabel(f'Composante 2 ({explained_variance[1]:.1%})')
-                    ax.set_title('Projection des individus dans l\'espace factoriel')
-                    ax.grid(True, alpha=0.3)
-                    
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                
-                with col2:
-                    st.markdown("### Informations")
-                    st.metric("Échantillons", len(df_famd))
-                    st.metric("Variables", len(df_famd.columns))
-                    st.metric("Composantes", len(explained_variance))
-                    
-                    if 'TSA' in df_famd.columns:
-                        tsa_counts = df_famd['TSA'].value_counts()
-                        for category, count in tsa_counts.items():
-                            color_indicator = "🔵" if category == "Yes" else "🔴"
-                            st.metric(f"{color_indicator} Cas {category}", count)
-
-    
-            with famd_tabs[1]:
-                st.subheader("Analyse de la variance expliquée")
-                
-                # Graphique en barres de la variance expliquée
-                fig_var = px.bar(
-                    x=[f'Comp. {i+1}' for i in range(len(explained_variance))],
-                    y=explained_variance * 100,
-                    labels={'x': 'Composantes', 'y': 'Variance expliquée (%)'},
-                    title='Variance expliquée par composante'
-                )
-                fig_var.update_traces(marker_color='#3498db')
-                fig_var.update_layout(showlegend=False)
-                st.plotly_chart(fig_var, use_container_width=True)
-                
-                # Tableau des valeurs
-                variance_df = pd.DataFrame({
-                    'Composante': [f'Composante {i+1}' for i in range(len(explained_variance))],
-                    'Valeur propre': eigenvalues,
-                    'Variance expliquée (%)': explained_variance * 100,
-                    'Variance cumulée (%)': np.cumsum(explained_variance) * 100
-                })
-                
-                st.dataframe(variance_df.style.format({
-                    'Valeur propre': '{:.3f}',
-                    'Variance expliquée (%)': '{:.2f}%',
-                    'Variance cumulée (%)': '{:.2f}%'
-                }), use_container_width=True)
-    
-            with famd_tabs[2]:
-                st.subheader("Analyse détaillée des composantes")
-                st.markdown("""
-                ### Interprétation du Graphique
-                    
-                **Objectif de l'analyse** :  
-                Cette visualisation permet d'identifier des patterns dans les données de dépistage TSA en réduisant la dimensionnalité des variables.
-        
-                **Axes principaux** :  
-                - Axe X (Composante 1) : Capture {variance_composante1}% de l'information  
-                - Axe Y (Composante 2) : Explique {variance_composante2}% de la variance
-        
-                **Codage couleur** :  
-                - 🔵 Points bleus : Cas avec diagnostic TSA confirmé  
-                - 🔴 Points rouges : Cas sans diagnostic TSA
-        
-                **Clés de lecture** :  
-                1. Les regroupements de points similaires indiquent des profils communs  
-                2. La distance entre groupes reflète leur dissemblance  
-                3. La dispersion montre la variabilité intra-groupe
-        
-                **Implications cliniques** :  
-                Une séparation nette entre groupes suggère que les variables utilisées permettent de discriminer efficacement les cas TSA.
-                """.format(
-                    variance_composante1=round(explained_variance[0]*100, 1),
-                    variance_composante2=round(explained_variance[1]*100, 1)
-                ))
-        
-                # Métriques existantes conservées
-                
-                if 'TSA' in df_famd.columns:
-                    tsa_counts = df_famd['TSA'].value_counts()
-                    for category, count in tsa_counts.items():
-                        st.metric(f"Cas {category}", count)
-                        # Sélection de composante
-                        comp_choice = st.selectbox(
-                        "Choisir une composante à analyser :",
-                        [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
-                        key=f"famd_component_choice_detailed_tab_{datetime.now().timestamp()}"  # Clé unique avec timestamp
-                    )
-                                            
-                        comp_idx = int(comp_choice.split()[1]) - 1
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            st.markdown(f"### {comp_choice}")
-                            st.metric("Variance expliquée", f"{explained_variance[comp_idx]:.2%}")
-                            st.metric("Valeur propre", f"{eigenvalues[comp_idx]:.3f}")
-                            
-                            # Distribution des coordonnées pour cette composante
-                            fig_hist = px.histogram(
-                                x=coordinates.iloc[:, comp_idx],
-                                nbins=20,
-                                labels={'x': f'{comp_choice}', 'y': 'Fréquence'},
-                                title=f'Distribution des coordonnées - {comp_choice}'
-                            )
-                            st.plotly_chart(fig_hist, use_container_width=True)
-                        
-                        with col2:
-                            st.markdown("### Contribution des variables")
-                            if famd_success and hasattr(famd_model, 'column_coordinates'):
-                                try:
-                                    # Tentative d'obtenir les contributions
-                                    column_coords = famd_model.column_coordinates(df_famd)
-                                    if comp_idx < len(column_coords.columns):
-                                        contrib_data = column_coords.iloc[:, comp_idx].abs().sort_values(ascending=False)
-                                        
-                                        # Graphique des contributions
-                                        fig_contrib = px.bar(
-                                            x=contrib_data.values[:10],  # Top 10
-                                            y=contrib_data.index[:10],
-                                            orientation='h',
-                                            labels={'x': 'Contribution absolue', 'y': 'Variables'},
-                                            title='Top 10 des contributions'
-                                        )
-                                        st.plotly_chart(fig_contrib, use_container_width=True)
-                                except Exception as e:
-                                    st.info("Analyse des contributions non disponible avec cette méthode")
-                            else:
-                                st.info("Analyse des contributions non disponible en mode PCA")
-    
-            with famd_tabs[3]:
-                st.subheader("Résumé de l'analyse")
-                
-                # Métriques globales
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric("Variance totale expliquée (2 premières comp.)", 
-                             f"{(explained_variance[0] + explained_variance[1]):.1%}")
-                
-                with col2:
-                    st.metric("Qualité de la représentation", 
-                             "Bonne" if explained_variance[0] + explained_variance[1] > 0.5 else "Moyenne")
-                
-                with col3:
-                    st.metric("Méthode utilisée", 
-                             "FAMD" if famd_success else "PCA")
-                
-                # Interprétation
-                st.markdown("### Interprétation des résultats")
-                
-                variance_2comp = explained_variance[0] + explained_variance[1]
-                
-                if variance_2comp > 0.7:
-                    interpretation = "🟢 **Excellente représentation** : Les deux premières composantes capturent la majorité de l'information."
-                elif variance_2comp > 0.5:
-                    interpretation = "🟡 **Bonne représentation** : Les deux premières composantes offrent une vue pertinente des données."
-                else:
-                    interpretation = "🟠 **Représentation limitée** : Considérer des composantes supplémentaires pour une analyse complète."
-                
-                st.markdown(interpretation)
-                
-                # Recommandations
-                st.markdown("### Recommandations")
-                
-                recommendations = []
-                
-                if 'TSA' in df_famd.columns:
-                    recommendations.append("✅ La variable cible TSA est présente, permettant une analyse discriminante")
-                
-                if len(numerical_columns) > 0 and len(categorical_columns) > 0:
-                    recommendations.append("✅ Données mixtes bien adaptées à l'analyse FAMD")
-                
-                if variance_2comp > 0.6:
-                    recommendations.append("✅ Dimensionnalité réduite efficace pour la visualisation")
-                
-                recommendations.append(f"📊 {len(df_famd)} observations analysées avec {len(df_famd.columns)} variables")
-                
-                for rec in recommendations:
-                    st.markdown(f"- {rec}")
+            # Figure variance expliquée
+            fig_var = px.bar(
+                x=[f"Comp{i+1}" for i in range(len(exp_var))],
+                y=exp_var*100,
+                labels={'y':'Variance expliquée (%)','x':'Composantes'},
+                title="Variance expliquée"
+            )
+            st.session_state.famd_ok = True
     
         except Exception as e:
-            st.error(f"Erreur lors de l'analyse FAMD : {str(e)}")
-            st.markdown("""
-            ### Solutions alternatives
-            
-            1. **Vérifier l'installation** : `pip install prince`
-            2. **Données insuffisantes** : Augmenter la taille de l'échantillon
-            3. **Variables problématiques** : Vérifier les types de données
-            4. **Mode de secours** : Utilisation d'une PCA classique
-            """)
-            
-            # Affichage de diagnostic
-            with st.expander("🔧 Diagnostic détaillé"):
-                st.write("Informations sur les données :")
-                st.write(f"- Forme du dataset : {df.shape}")
-                st.write(f"- Colonnes : {list(df.columns)}")
-                st.write(f"- Types de données : {df.dtypes.to_dict()}")
-                st.write(f"- Valeurs manquantes : {df.isnull().sum().sum()}")
+            st.warning(f"Echec FAMD ({e}) – basculement en PCA")[5]
+            # Encode + standardise + PCA
+            df_enc = df.copy()
+            for c in cat_cols:
+                df_enc[c] = LabelEncoder().fit_transform(df_enc[c].astype(str))
+            scaled = StandardScaler().fit_transform(df_enc)
+            pca = PCA(n_components=2, random_state=42)
+            coords = pca.fit_transform(scaled)
+            exp_var = pca.explained_variance_ratio_
+            eigs = pca.explained_variance_
+            # Projection PCA
+            fig_proj = px.scatter(
+                x=coords[:,0], y=coords[:,1],
+                color=df[cat_cols[0]] if cat_cols else None,
+                labels={'x':'PC1','y':'PC2'},
+                title="Projection PCA"
+            )
+            # Variance PCA
+            fig_var = px.bar(
+                x=["PC1","PC2"], y=exp_var*100,
+                labels={'y':'Variance expliquée (%)','x':'Composantes'},
+                title="Variance expliquée PCA"
+            )
+            st.session_state.famd_ok = False
+    
+        # Affichage via onglets pour éviter l'imbrication d'expander
+        tabs = st.tabs(["Projection","Variance","Détail","Résumé"])
+    
+        with tabs[0]:
+            if fig_proj:
+                st.plotly_chart(fig_proj, use_container_width=True, key=gen_key("proj"))  
+            else:
+                st.info("Graphique de projection indisponible")
+    
+        with tabs[1]:
+            if fig_var:
+                st.plotly_chart(fig_var, use_container_width=True, key=gen_key("var"))  
+            else:
+                st.info("Graphique de variance indisponible")
+    
+        with tabs[2]:
+            st.subheader("Analyse détaillée")
+            comp_list = [f"Comp{i+1}" for i in range(len(exp_var))]
+            sel = st.selectbox("Choisir composante", comp_list, key=gen_key("sel"))
+            idx = comp_list.index(sel)
+            st.metric("Variance expliquée", f"{exp_var[idx]:.2%}")
+            st.metric("Valeur propre", f"{eigs[idx]:.3f}")
+            # Histogramme des coordonnées
+            hist = px.histogram(x=coords[:,idx], nbins=20,
+                                labels={'x':sel,'y':'Fréquence'},
+                                title=f"Distribution – {sel}")
+            st.plotly_chart(hist, use_container_width=True, key=gen_key("hist"))
+    
+        with tabs[3]:
+            st.subheader("Résumé")
+            total2 = exp_var[0] + exp_var[1]
+            st.metric("Var totale 2 comp.", f"{total2:.1%}")
+            st.metric("Méthode", "FAMD" if st.session_state.famd_ok else "PCA")
+            interp = ("Excellente" if total2>0.7 else 
+                      "Bonne" if total2>0.5 else "Limitée")
+            st.markdown(f"**Qualité représentation :** {interp}")
 
 
 def show_ml_analysis():
