@@ -1990,8 +1990,8 @@ def show_data_exploration():
                     coloraxis_showscale=False,
                     margin=dict(l=20, r=20, t=40, b=20),
                 )
-                st.plotly_chart(fig, use_container_width=True, key="famd_projection_plot")
-                st.plotly_chart(fig_var, use_container_width=True, key="famd_variance_plot")
+                st.plotly_chart(fig, use_container_width=True)
+                
             with col2:
                 st.metric(
                     "Nombre de colonnes avec valeurs manquantes",
@@ -2334,6 +2334,15 @@ def show_data_exploration():
                 st.error(f"Bibliothèques manquantes : {e}")
                 st.info("Installation requise : pip install prince")
                 return
+
+            st.plotly_chart(fig_proj, use_container_width=True, key="famd_proj")
+            # Variance expliquée
+            var_df = famd.explained_inertia_
+            fig_var = px.bar(
+                x=[1,2], y=[var_df[0]*100, var_df[1]*100],
+                labels={'x':'Composante','y':'% Variance'}, title="Variance expliquée"
+            )
+            st.plotly_chart(fig_var, use_container_width=True, key="famd_var")
     
             # Préparation des données pour FAMD
             df_famd = df.copy()
