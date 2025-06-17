@@ -2585,7 +2585,7 @@ def show_data_exploration():
                         comp_choice = st.selectbox(
                         "Choisir une composante à analyser :",
                         [f'Composante {i+1}' for i in range(min(3, len(explained_variance)))],
-                        key="famd_component_choice_detailed_tab"  # Clé unique avec un suffixe
+                        key=f"famd_component_choice_detailed_tab_{datetime.now().timestamp()}"  # Clé unique avec timestamp
                     )
                                             
                         comp_idx = int(comp_choice.split()[1]) - 1
